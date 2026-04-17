@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Person } from "@/lib/org-tree/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface ReparentModalProps {
   personName: string;
@@ -69,10 +70,16 @@ export default function ReparentModal({
                   key={p.id}
                   type="button"
                   onClick={() => onReassignReports(p.id)}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-2"
                 >
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{p.fullName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.title}</p>
+                  <Avatar size="sm">
+                    <AvatarImage src={p.avatarUrl} alt={p.fullName} />
+                    <AvatarFallback>{p.fullName.split(" ").map(w => w[0]).join("").slice(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{p.fullName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{p.title}</p>
+                  </div>
                 </button>
               ))
             )}

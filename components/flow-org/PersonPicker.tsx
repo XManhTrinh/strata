@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Person } from "@/lib/org-tree/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface PersonPickerProps {
   label: string;
@@ -50,13 +51,19 @@ export default function PersonPicker({
 
       {selected ? (
         <div className="flex items-center justify-between border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {selected.fullName}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {selected.title}
-            </p>
+          <div className="flex items-center gap-2 min-w-0">
+            <Avatar size="sm">
+              <AvatarImage src={selected.avatarUrl} alt={selected.fullName} />
+              <AvatarFallback>{selected.fullName.split(" ").map(w => w[0]).join("").slice(0, 2)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {selected.fullName}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {selected.title}
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -106,14 +113,20 @@ export default function PersonPicker({
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => select(p.id)}
-                    className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                    className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-2"
                   >
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {p.fullName}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {p.title}
-                    </p>
+                    <Avatar size="sm">
+                      <AvatarImage src={p.avatarUrl} alt={p.fullName} />
+                      <AvatarFallback>{p.fullName.split(" ").map(w => w[0]).join("").slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {p.fullName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {p.title}
+                      </p>
+                    </div>
                   </button>
                 ))
               )}

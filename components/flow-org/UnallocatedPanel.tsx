@@ -1,6 +1,7 @@
 "use client";
 
 import { Person } from "@/lib/org-tree/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface UnallocatedPanelProps {
   persons: Person[];
@@ -31,7 +32,7 @@ export default function UnallocatedPanel({
   return (
     <div
       className={[
-        "rounded-2xl border-2 border-dashed p-4 min-h-[200px] transition-all duration-150",
+        "rounded-2xl border-2 border-dashed p-4 min-h-50 transition-all duration-150",
         isDropTarget
           ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 scale-[1.02] shadow-md"
           : "border-gray-200 dark:border-gray-700 bg-transparent",
@@ -67,23 +68,29 @@ export default function UnallocatedPanel({
                     : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
                 ].join(" ")}
               >
-                <div className="min-w-0">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
-                    {person.fullName}
-                  </p>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs truncate">{person.title}</p>
-                  {person.squads.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {person.squads.map((squad) => (
-                        <span
-                          key={squad}
-                          className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-                        >
-                          {squad}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar>
+                    <AvatarImage src={person.avatarUrl} alt={person.fullName} />
+                    <AvatarFallback>{person.fullName.split(" ").map(w => w[0]).join("").slice(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                      {person.fullName}
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">{person.title}</p>
+                    {person.squads.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {person.squads.map((squad) => (
+                          <span
+                            key={squad}
+                            className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                          >
+                            {squad}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <button
                   type="button"

@@ -91,7 +91,10 @@ function TypingIndicator() {
 export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const { messages, loading, error, sendMessage } = useAIChat(provider, persons);
+  const { messages, loading, error, sendMessage } = useAIChat(
+    provider,
+    persons,
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on new messages
@@ -154,7 +157,7 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
         {isOpen && (
           <motion.div
             key="panel"
-            className="fixed bottom-24 right-6 z-50 w-96 max-h-[500px] rounded-2xl shadow-2xl bg-white border border-gray-200 flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-96 max-h-125 rounded-2xl shadow-2xl bg-white border border-gray-200 flex flex-col overflow-hidden"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
