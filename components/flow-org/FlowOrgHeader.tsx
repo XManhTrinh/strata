@@ -1,5 +1,7 @@
 "use client";
 
+import { Tribe } from "@/lib/org-tree/squads";
+
 interface FlowOrgHeaderProps {
   search: string;
   onSearchChange: (value: string) => void;
@@ -9,7 +11,7 @@ interface FlowOrgHeaderProps {
   onClearSquads: () => void;
   squadCounts: Record<string, number>;
   totalCount: number;
-  allSquadNames: string[];
+  tribes: Tribe[];
 }
 
 export default function FlowOrgHeader({
@@ -21,7 +23,7 @@ export default function FlowOrgHeader({
   onClearSquads,
   squadCounts,
   totalCount,
-  allSquadNames,
+  tribes,
 }: FlowOrgHeaderProps) {
   const isAllView = selectedSquads.size === 0;
 
@@ -74,29 +76,33 @@ export default function FlowOrgHeader({
           </span>
         </button>
 
-        <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1 shrink-0" />
-
-        {allSquadNames.map((squad) => {
-          const active = selectedSquads.has(squad);
-          return (
-            <button
-              key={squad}
-              type="button"
-              onClick={() => onToggleSquad(squad)}
-              className={[
-                "shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
-                active
-                  ? "border-indigo-600 text-indigo-500"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600",
-              ].join(" ")}
-            >
-              {squad}
-              <span className={["ml-1.5 text-xs px-1.5 py-0.5 rounded-full", active ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"].join(" ")}>
-                {squadCounts[squad]}
-              </span>
-            </button>
-          );
-        })}
+        {tribes.map((tribe) => (
+          <div key={tribe.name} className="flex items-center gap-1 shrink-0">
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
+            <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">{tribe.name}</span>
+            {tribe.squads.map((squad) => {
+              const active = selectedSquads.has(squad);
+              return (
+                <button
+                  key={squad}
+                  type="button"
+                  onClick={() => onToggleSquad(squad)}
+                  className={[
+                    "shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                    active
+                      ? "border-indigo-600 text-indigo-500"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600",
+                  ].join(" ")}
+                >
+                  {squad}
+                  <span className={["ml-1.5 text-xs px-1.5 py-0.5 rounded-full", active ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"].join(" ")}>
+                    {squadCounts[squad] ?? 0}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </header>
   );

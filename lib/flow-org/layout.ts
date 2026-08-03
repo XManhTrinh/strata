@@ -28,19 +28,29 @@ interface SubtreeResult {
   edges: Edge[];
 }
 
+function countAllDescendants(node: TreeNode): number {
+  let count = 0;
+  for (const child of node.children) {
+    count += 1 + countAllDescendants(child);
+  }
+  return count;
+}
+
 function makeData(
-  p: Person,
-  childCount: number,
+  node: TreeNode,
   collapsed: boolean,
   opts: LayoutOptions,
 ): PersonNodeData {
   const hasMatch = opts.matchedIds.size > 0;
+  const childCount = node.children.length;
+  const totalDescendants = countAllDescendants(node);
   return {
-    person: p,
-    matched: hasMatch && opts.matchedIds.has(p.id),
-    dimmed: hasMatch && !opts.matchedIds.has(p.id),
+    person: node.person,
+    matched: hasMatch && opts.matchedIds.has(node.person.id),
+    dimmed: hasMatch && !opts.matchedIds.has(node.person.id),
     onEdit: opts.onEdit,
     childCount,
+    indirectCount: totalDescendants - childCount,
     collapsed,
     onToggleCollapse: opts.onToggleCollapse,
   };
@@ -70,7 +80,7 @@ function layoutSubtree(
     return {
       width: NODE_W,
       height: NODE_H,
-      nodes: [{ id: node.person.id, type: "person", position: { x, y }, data: makeData(node.person, childCount, isCollapsed, opts) }],
+      nodes: [{ id: node.person.id, type: "person", position: { x, y }, data: makeData(node, isCollapsed, opts) }],
       edges: [],
     };
   }
@@ -101,7 +111,7 @@ function layoutMixed(
       segments.push({
         width: NODE_W,
         height: NODE_H,
-        nodes: [{ id: leaf.person.id, type: "person", position: { x: 0, y: childY }, data: makeData(leaf.person, leaf.children.length, opts.collapsedIds.has(leaf.person.id), opts) }],
+        nodes: [{ id: leaf.person.id, type: "person", position: { x: 0, y: childY }, data: makeData(leaf, opts.collapsedIds.has(leaf.person.id), opts) }],
         edges: [],
       });
     }
@@ -117,7 +127,7 @@ function layoutMixed(
   const parentX = x + (subtreeWidth - NODE_W) / 2;
 
   const allNodes: Node[] = [
-    { id: node.person.id, type: "person", position: { x: parentX, y }, data: makeData(node.person, node.children.length, false, opts) },
+    { id: node.person.id, type: "person", position: { x: parentX, y }, data: makeData(node, false, opts) },
   ];
   const allEdges: Edge[] = [];
 
@@ -160,6 +170,11 @@ function buildGroupSegment(
   const { w, h } = estimateGroupSize(persons.length);
   const groupId = `group-${parentId}`;
 
+  const childCounts: Record<string, number> = {};
+  for (const l of leaves) {
+    childCounts[l.person.id] = l.children.length;
+  }
+
   const nodes: Node[] = [
     {
       id: groupId,
@@ -170,6 +185,9 @@ function buildGroupSegment(
         persons,
         matchedIds: opts.matchedIds,
         onEdit: opts.onEdit,
+        childCounts,
+        collapsedIds: opts.collapsedIds,
+        onToggleCollapse: opts.onToggleCollapse,
       } satisfies GroupNodeData,
       style: { width: w },
       draggable: true,

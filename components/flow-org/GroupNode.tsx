@@ -11,6 +11,9 @@ export interface GroupNodeData {
   persons: Person[];
   matchedIds: Set<string>;
   onEdit: (person: Person) => void;
+  childCounts: Record<string, number>;
+  collapsedIds: Set<string>;
+  onToggleCollapse: (id: string) => void;
 }
 
 function PencilIcon() {
@@ -23,7 +26,7 @@ function PencilIcon() {
 }
 
 function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
-  const { label, persons, matchedIds, onEdit } = data;
+  const { label, persons, matchedIds, onEdit, childCounts, collapsedIds, onToggleCollapse } = data;
   const hasMatch = matchedIds.size > 0;
 
   return (
@@ -84,6 +87,18 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
                     </span>
                   ))}
                 </div>
+              )}
+              {(childCounts[person.id] ?? 0) > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onToggleCollapse(person.id); }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className="mt-2 text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                >
+                  {collapsedIds.has(person.id)
+                    ? `▶ Show ${childCounts[person.id]} reports`
+                    : `▼ Hide ${childCounts[person.id]} reports`}
+                </button>
               )}
             </div>
           );

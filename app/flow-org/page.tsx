@@ -6,6 +6,7 @@ import { MockAIProvider } from "@/lib/org-tree/MockAIProvider";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person } from "@/lib/org-tree/types";
 import { buildSquadTree } from "@/lib/org-tree/tree";
+import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import EditPersonModal from "@/components/flow-org/EditPersonModal";
@@ -14,10 +15,6 @@ import ReparentModal from "@/components/flow-org/ReparentModal";
 import GroupMoveModal from "@/components/flow-org/GroupMoveModal";
 import AIChatPanel from "@/components/flow-org/AIChatPanel";
 
-const ALL_SQUADS = [
-  "PLP", "PDP", "Order Management", "Checkout",
-  "Basket", "Search", "Navigation", "Learn", "Cross-sell", "L2",
-];
 
 interface PendingDrop {
   draggedId: string;
@@ -35,7 +32,7 @@ interface PendingGroupMove {
 export default function FlowOrgPage() {
   const repository = useMemo(() => new MockPersonRepository(), []);
   const aiProvider = useMemo(() => new MockAIProvider(), []);
-  const { tree, unallocated, persons, loading, error, reparent, editPerson, createPerson } =
+  const { unallocated, persons, loading, error, reparent, editPerson, createPerson } =
     useOrgTree(repository);
 
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
@@ -61,9 +58,9 @@ export default function FlowOrgPage() {
   const isAllView = selectedSquads.size === 0;
 
   const activeTree = useMemo(() => {
-    if (isAllView) return tree;
+    if (isAllView) return [];
     return buildSquadTree(persons, Array.from(selectedSquads));
-  }, [isAllView, selectedSquads, tree, persons]);
+  }, [isAllView, selectedSquads, persons]);
 
   const selectedMemberCount = useMemo(() => {
     if (isAllView) return persons.length;
@@ -136,7 +133,7 @@ export default function FlowOrgPage() {
         onClearSquads={clearSquads}
         squadCounts={squadCounts}
         totalCount={persons.length}
-        allSquadNames={ALL_SQUADS}
+        tribes={TRIBES}
       />
 
       {/* Status bar */}
@@ -166,6 +163,11 @@ export default function FlowOrgPage() {
         ) : error ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+          </div>
+        ) : isAllView ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <p className="text-gray-400 dark:text-gray-500 text-sm">Select a squad or tribe to view the org chart</p>
+            <p className="text-gray-300 dark:text-gray-600 text-xs">{persons.length.toLocaleString()} people across {ALL_SQUADS.length} squads</p>
           </div>
         ) : (
           <OrgFlow

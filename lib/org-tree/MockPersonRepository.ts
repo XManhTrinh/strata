@@ -1,12 +1,19 @@
 import { Person, PersonRepository } from './types';
-import { seedPersons } from './mock-data';
 
-// Module-level state so mutations persist within a session
-let persons: Person[] = seedPersons.map(p => ({ ...p }));
+let persons: Person[] | null = null;
+
+function getPersons(): Person[] {
+  if (!persons) {
+    // Lazy import to avoid blocking module load
+    const { seedPersons } = require('./mock-data');
+    persons = seedPersons;
+  }
+  return persons!;
+}
 
 export class MockPersonRepository implements PersonRepository {
   fetchAll(): Promise<Person[]> {
-    return Promise.resolve([...persons]);
+    return Promise.resolve(getPersons());
   }
 
   create(data: {
@@ -24,7 +31,7 @@ export class MockPersonRepository implements PersonRepository {
       salary: data.salary ?? 0,
       parentId: data.parentId ?? null,
     };
-    persons.push(newPerson);
+    getPersons().push(newPerson);
     return Promise.resolve({ ...newPerson });
   }
 
@@ -32,25 +39,26 @@ export class MockPersonRepository implements PersonRepository {
     id: string,
     data: Partial<Pick<Person, 'fullName' | 'title' | 'squads' | 'salary' | 'parentId'>>
   ): Promise<Person> {
-    const index = persons.findIndex(p => p.id === id);
+    const all = getPersons();
+    const index = all.findIndex(p => p.id === id);
     if (index === -1) {
       return Promise.reject(new Error(`Person with id "${id}" not found`));
     }
-    persons[index] = { ...persons[index], ...data };
-    return Promise.resolve({ ...persons[index] });
+    all[index] = { ...all[index], ...data };
+    return Promise.resolve({ ...all[index] });
   }
 
   delete(id: string): Promise<void> {
-    const index = persons.findIndex(p => p.id === id);
+    const all = getPersons();
+    const index = all.findIndex(p => p.id === id);
     if (index === -1) {
       return Promise.reject(new Error(`Person with id "${id}" not found`));
     }
-    persons.splice(index, 1);
+    all.splice(index, 1);
     return Promise.resolve();
   }
 }
 
-/** Reset the in-memory store to seed data (useful for tests) */
 export function resetMockData(): void {
-  persons = seedPersons.map(p => ({ ...p }));
+  persons = null;
 }

@@ -157,15 +157,15 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
         {isOpen && (
           <motion.div
             key="panel"
-            className="fixed bottom-24 right-6 z-50 w-96 max-h-125 rounded-2xl shadow-2xl bg-white border border-gray-200 flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-96 max-h-125 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
-              <span className="font-semibold text-gray-900 text-sm">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                 Org Assistant
               </span>
               <button
@@ -196,7 +196,7 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
                       "max-w-[80%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap wrap-break-word",
                       msg.role === "user"
                         ? "bg-blue-600 text-white rounded-br-sm"
-                        : "bg-gray-100 text-gray-800 rounded-bl-sm",
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-sm",
                     ].join(" ")}
                   >
                     {msg.content}
@@ -206,7 +206,7 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
 
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 rounded-2xl rounded-bl-sm">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-sm">
                     <TypingIndicator />
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
             </div>
 
             {/* Input area */}
-            <div className="border-t border-gray-100 px-3 py-3 flex gap-2">
+            <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-3 flex gap-2">
               <input
                 type="text"
                 value={input}
@@ -232,7 +232,7 @@ export default function AIChatPanel({ provider, persons }: AIChatPanelProps) {
                 onKeyDown={handleKeyDown}
                 disabled={loading}
                 placeholder="Ask about your org..."
-                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 bg-white"
+                className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
               <button
                 type="button"

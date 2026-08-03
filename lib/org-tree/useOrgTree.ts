@@ -1,37 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Person, PersonRepository, TreeNode } from './types';
-import { buildTree } from './tree';
+import { Person, PersonRepository } from './types';
 
 interface UseOrgTreeReturn {
-  tree: TreeNode[];
+  persons: Person[];
   unallocated: Person[];
   loading: boolean;
   error: string | null;
-  persons: Person[];
   reparent(draggedId: string, newParentId: string | null, moveWithChildren?: boolean, childrenNewParentId?: string): Promise<void>;
   editPerson(id: string, data: Partial<Pick<Person, 'fullName' | 'title' | 'squads' | 'salary'>>): Promise<void>;
   createPerson(data: { fullName: string; title: string; squads?: string[]; salary?: number; parentId?: string | null }): Promise<void>;
   deletePerson(id: string): Promise<void>;
-}
-
-function deriveTreeAndUnallocated(persons: Person[]): { tree: TreeNode[]; unallocated: Person[] } {
-  const allNodes = buildTree(persons);
-
-  // Roots with children → tree; roots without children → unallocated
-  const tree: TreeNode[] = [];
-  const unallocated: Person[] = [];
-
-  for (const node of allNodes) {
-    if (node.children.length > 0) {
-      tree.push(node);
-    } else {
-      unallocated.push(node.person);
-    }
-  }
-
-  return { tree, unallocated };
 }
 
 export function useOrgTree(repository: PersonRepository): UseOrgTreeReturn {
@@ -60,15 +40,20 @@ export function useOrgTree(repository: PersonRepository): UseOrgTreeReturn {
     return () => { cancelled = true; };
   }, [repository]);
 
-  const { tree, unallocated } = useMemo(() => deriveTreeAndUnallocated(persons), [persons]);
+  // Only compute unallocated (persons with no parent and no children) — cheap O(n) scan
+  const unallocated = useMemo(() => {
+    const hasChildren = new Set<string>();
+    for (const p of persons) {
+      if (p.parentId) hasChildren.add(p.parentId);
+    }
+    return persons.filter(p => p.parentId === null && !hasChildren.has(p.id));
+  }, [persons]);
 
   const reparent = useCallback(async (draggedId: string, newParentId: string | null, moveWithChildren = true, childrenNewParentId?: string) => {
     const previous = persons;
     const dragged = persons.find(p => p.id === draggedId);
     if (!dragged) return;
 
-    // When not moving children along, re-parent direct children
-    // If childrenNewParentId is provided, use that; otherwise fall back to dragged person's original parent
     const childUpdates = !moveWithChildren
       ? persons.filter(p => p.parentId === draggedId).map(p => ({ id: p.id, parentId: childrenNewParentId ?? dragged.parentId }))
       : [];
@@ -133,5 +118,5 @@ export function useOrgTree(repository: PersonRepository): UseOrgTreeReturn {
     }
   }, [repository]);
 
-  return { tree, unallocated, loading, error, persons, reparent, editPerson, createPerson, deletePerson };
+  return { persons, unallocated, loading, error, reparent, editPerson, createPerson, deletePerson };
 }

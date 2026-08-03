@@ -12,6 +12,7 @@ export interface PersonNodeData {
   dimmed: boolean;
   onEdit: (person: Person) => void;
   childCount: number;
+  indirectCount: number;
   collapsed: boolean;
   onToggleCollapse: (id: string) => void;
   inGroup?: boolean;
@@ -30,7 +31,7 @@ function getInitials(name: string) {
 }
 
 function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
-  const { person, matched, dimmed, onEdit, childCount, collapsed, onToggleCollapse, inGroup } = data;
+  const { person, matched, dimmed, onEdit, childCount, indirectCount, collapsed, onToggleCollapse, inGroup } = data;
 
   return (
     <div
@@ -78,6 +79,13 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
               {squad}
             </span>
           ))}
+        </div>
+      )}
+
+      {(childCount > 0 || indirectCount > 0) && !inGroup && (
+        <div className="flex gap-3 mt-2 text-[10px] text-gray-400 dark:text-gray-500">
+          {childCount > 0 && <span>{childCount} direct</span>}
+          {indirectCount > 0 && <span>{indirectCount} indirect</span>}
         </div>
       )}
 

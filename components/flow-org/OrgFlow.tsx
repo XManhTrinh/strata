@@ -223,7 +223,36 @@ function OrgFlowInner({
   const { zoom } = useViewport();
   const [ghost, setGhost] = useState<OverlayInfo | null>(null);
   const [isOverUnallocated, setIsOverUnallocated] = useState(false);
+  // Start with all parent nodes collapsed
+  const defaultCollapsed = useMemo(() => {
+    const ids = new Set<string>();
+    function walk(nodes: TreeNode[]) {
+      for (const n of nodes) {
+        if (n.children.length > 0) {
+          ids.add(n.person.id);
+          walk(n.children);
+        }
+      }
+    }
+    walk(tree);
+    return ids;
+  }, [tree]);
+
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
+
+  // Reset collapsed state when tree changes (e.g. squad filter change)
+  const prevTreeRef = useRef(tree);
+  if (prevTreeRef.current !== tree) {
+    prevTreeRef.current = tree;
+    setCollapsedIds(defaultCollapsed);
+  }
+
+  // Initialize on first render
+  const initializedRef = useRef(false);
+  if (!initializedRef.current && defaultCollapsed.size > 0) {
+    initializedRef.current = true;
+    setCollapsedIds(defaultCollapsed);
+  }
 
   const [autoPanEnabled, setAutoPanEnabled] = useState(true);
 

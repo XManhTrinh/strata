@@ -1,33 +1,59 @@
 import { Person } from './types';
+import { ALL_SQUADS } from './squads';
 
 let _id = 0;
 function id() { return `p${++_id}`; }
 function avatar(pid: string) { return `https://i.pravatar.cc/150?u=${pid}`; }
 
-const ALL_SQUADS = ['PLP', 'PDP', 'Order Management', 'Checkout', 'Basket', 'Search', 'Navigation', 'Learn', 'Cross-sell', 'L2'];
+let _seed = 12345;
+function rand() { _seed = (_seed * 16807 + 0) % 2147483647; return (_seed - 1) / 2147483646; }
+function pick<T>(arr: T[]): T { return arr[Math.floor(rand() * arr.length)]; }
+function randInt(min: number, max: number) { return Math.floor(rand() * (max - min + 1)) + min; }
+function randSalary(base: number) { return Math.round(base * (1 + (rand() - 0.5) * 0.3)); }
 
-// ── Leadership ─────────────────────────────────────────────────────────────
-const ceo    = id();
-const cto    = id();
-const cpo    = id();
-const vpDes  = id();
-const headBA = id();
-const headDM = id();
-const senEM  = id();
-const senQA  = id();
-
-const leadership: Person[] = [
-  { id: ceo,    fullName: 'Sarah Chen',       title: 'CEO',                       squads: [],  salary: 380000, parentId: null,  avatarUrl: avatar(ceo) },
-  { id: cto,    fullName: 'Marcus Williams',   title: 'CTO',                       squads: [],  salary: 310000, parentId: ceo,   avatarUrl: avatar(cto) },
-  { id: cpo,    fullName: 'Priya Patel',       title: 'Chief Product Officer',     squads: [],  salary: 300000, parentId: ceo,   avatarUrl: avatar(cpo) },
-  { id: vpDes,  fullName: 'James Okafor',      title: 'VP of Design',              squads: [],  salary: 260000, parentId: ceo,   avatarUrl: avatar(vpDes) },
-  { id: headBA, fullName: 'Lena Hoffmann',     title: 'Head of Business Analysis', squads: [],  salary: 240000, parentId: ceo,   avatarUrl: avatar(headBA) },
-  { id: headDM, fullName: 'Sofia Andersen',    title: 'Head of Delivery',          squads: [],  salary: 245000, parentId: ceo,   avatarUrl: avatar(headDM) },
-  { id: senEM,  fullName: 'Carlos Mendez',     title: 'Senior Engineering Manager',squads: [],  salary: 230000, parentId: cto,   avatarUrl: avatar(senEM) },
-  { id: senQA,  fullName: 'Aisha Nwosu',       title: 'Senior QA Manager',         squads: [],  salary: 225000, parentId: cto,   avatarUrl: avatar(senQA) },
+const FIRST = [
+  'James','Mary','Robert','Patricia','John','Jennifer','Michael','Linda','David','Elizabeth',
+  'William','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Christopher','Karen',
+  'Charles','Lisa','Daniel','Nancy','Matthew','Betty','Anthony','Margaret','Mark','Sandra',
+  'Donald','Ashley','Steven','Kimberly','Paul','Emily','Andrew','Donna','Joshua','Michelle',
+  'Kenneth','Carol','Kevin','Amanda','Brian','Dorothy','George','Melissa','Timothy','Deborah',
+  'Amir','Priya','Wei','Yuki','Omar','Fatima','Raj','Mei','Carlos','Sofia',
+  'Liam','Ava','Kai','Luna','Ravi','Aisha','Sven','Ingrid','Marco','Elena',
+  'Noah','Emma','Ethan','Olivia','Lucas','Sophia','Mason','Isabella','Logan','Mia',
 ];
+const LAST = [
+  'Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez',
+  'Hernandez','Lopez','Gonzalez','Wilson','Anderson','Thomas','Taylor','Moore','Jackson','Martin',
+  'Lee','Perez','Thompson','White','Harris','Sanchez','Clark','Ramirez','Lewis','Robinson',
+  'Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores',
+  'Chen','Wang','Li','Zhang','Kumar','Singh','Sharma','Gupta','Muller','Schmidt',
+  'Tanaka','Suzuki','Johansson','Eriksson','Larsson','Patel','Kim','Park','Nakamura','Watanabe',
+];
+function nextName() { return `${pick(FIRST)} ${pick(LAST)}`; }
 
-// ── Squad groupings (shared by EMs and QA Managers) ────────────────────────
+const persons: Person[] = [];
+
+function add(title: string, squads: string[], salary: number, parentId: string | null): string {
+  const pid = id();
+  persons.push({ id: pid, fullName: nextName(), title, squads, salary: randSalary(salary), parentId, avatarUrl: avatar(pid) });
+  return pid;
+}
+
+// ── Level 0: CEO ───────────────────────────────────────────────────────────
+const ceo = add('CEO', [], 400000, null);
+
+// ── Level 1: C-suite ───────────────────────────────────────────────────────
+const cto = add('CTO', [], 320000, ceo);
+const cpo = add('Chief Product Officer', [], 300000, ceo);
+const cdo = add('Chief Design Officer', [], 290000, ceo);
+const headBA = add('Head of Business Analysis', [], 260000, ceo);
+const headDM = add('Head of Delivery', [], 265000, ceo);
+
+// ── Level 2: Senior EMs + Senior QA Manager ────────────────────────────────
+const senEM = add('Senior Engineering Manager', [], 240000, cto);
+const senQA = add('Senior QA Manager', [], 230000, cto);
+
+// ── Squad groupings ────────────────────────────────────────────────────────
 const squadGroups: string[][] = [
   ['Search', 'PLP'],
   ['Order Management', 'L2'],
@@ -36,154 +62,79 @@ const squadGroups: string[][] = [
   ['Basket', 'Checkout'],
 ];
 
-// ── Name pool ──────────────────────────────────────────────────────────────
-const names = [
-  'Oliver Smith','Emma Johnson','Liam Brown','Sophia Taylor','Noah Anderson',
-  'Ava Thomas','Ethan Jackson','Mia White','Lucas Harris','Isabella Martin',
-  'Mason Thompson','Charlotte Garcia','Logan Martinez','Amelia Robinson','Alexander Clark',
-  'Harper Rodriguez','Daniel Lewis','Evelyn Lee','Henry Walker','Abigail Hall',
-  'Sebastian Allen','Emily Young','Jack Hernandez','Ella King','Owen Wright',
-  'Scarlett Lopez','Samuel Hill','Grace Scott','Ryan Green','Lily Adams',
-  'Nathan Baker','Chloe Gonzalez','Leo Nelson','Zoey Carter','Adrian Mitchell',
-  'Nora Perez','Caleb Roberts','Riley Turner','Isaac Phillips','Layla Campbell',
-  'Dylan Parker','Penelope Evans','Luke Edwards','Aria Collins','Gabriel Stewart',
-  'Ellie Sanchez','Julian Morris','Hannah Rogers','Mateo Reed','Stella Cook',
-  'Anthony Morgan','Aurora Bell','Jaxon Murphy','Savannah Bailey','Lincoln Rivera',
-  'Brooklyn Cooper','Joshua Richardson','Leah Cox','Christopher Howard','Zoe Ward',
-  'Andrew Torres','Audrey Peterson','Theodore Gray','Claire Ramirez','Kai James',
-  'Skylar Watson','Ezra Brooks','Violet Kelly','Thomas Sanders','Lucy Price',
-  'Finn Bennett','Anna Wood','Axel Barnes','Samantha Ross','Ryder Henderson',
-  'Caroline Coleman','Miles Jenkins','Genesis Perry','Declan Powell','Aaliyah Long',
-  'Elijah Patterson','Naomi Hughes','Grayson Flores','Elena Washington','Levi Butler',
-  'Maya Simmons','Cameron Foster','Willow Gonzales','Rowan Bryant','Paisley Alexander',
-  'Asher Russell','Madelyn Griffin','Dominic Diaz','Piper Hayes','Hunter Myers',
-  'Ruby Ford','Colton Hamilton','Eva Graham','Ian Sullivan','Serenity Wallace',
-  'Jasper West','Autumn Cole','Nolan Gibson','Adeline Murray','Connor Freeman',
-  'Hailey Wells','Everett Webb','Gianna Simpson','Parker Stevens','Valentina Tucker',
-  'Sawyer Porter','Kennedy Hunter','Bentley Hicks','Kinsley Crawford','Damian Henry',
-  'Allison Vasquez','Xavier Burns','Natalie Gordon','Silas Shaw','Peyton Watkins',
-  'Bennett Dixon','Brianna Romero','Brooks Reyes','Sadie Garrett','Jace Morales',
-  'Quinn Holland','Weston Floyd','Ivy Hale','Micah Cross','Emery Dunn',
-];
-let nameIdx = 0;
-function nextName() { return names[nameIdx++ % names.length]; }
-
-const members: Person[] = [];
-
-// ── 5 EMs — each covers their squad group, reports to Senior EM ────────────
+// ── Level 3: EMs, QA Managers, POs, BAs, SMs, Designers ───────────────────
 const emIds: Record<string, string> = {};
-for (const group of squadGroups) {
-  const eid = id();
-  members.push({ id: eid, fullName: nextName(), title: 'Engineering Manager', squads: group, salary: 190000, parentId: senEM, avatarUrl: avatar(eid) });
-  for (const s of group) emIds[s] = eid;
-}
-
-// ── 5 QA Managers — same groupings, reports to Senior QA Manager ───────────
 const qaIds: Record<string, string> = {};
+
 for (const group of squadGroups) {
-  const qid = id();
-  members.push({ id: qid, fullName: nextName(), title: 'QA Manager', squads: group, salary: 185000, parentId: senQA, avatarUrl: avatar(qid) });
+  const eid = add('Engineering Manager', group, 190000, senEM);
+  for (const s of group) emIds[s] = eid;
+
+  const qid = add('QA Manager', group, 185000, senQA);
   for (const s of group) qaIds[s] = qid;
 }
 
-// ── 5 POs — each covers 2 squads, reports to CPO ──────────────────────────
-const poDefs: string[][] = [
-  ['PLP', 'Search'],
-  ['PDP', 'Navigation'],
-  ['Order Management', 'Learn'],
-  ['Checkout', 'Cross-sell'],
-  ['Basket', 'L2'],
-];
-for (const sq of poDefs) {
-  const pid = id();
-  members.push({ id: pid, fullName: nextName(), title: 'Product Owner', squads: sq, salary: 160000, parentId: cpo, avatarUrl: avatar(pid) });
-}
+// 5 POs
+const poDefs: string[][] = [['PLP','Search'],['PDP','Navigation'],['Order Management','Learn'],['Checkout','Cross-sell'],['Basket','L2']];
+for (const sq of poDefs) add('Product Owner', sq, 160000, cpo);
 
-// ── 5 BAs — each covers 2 squads, reports to Head of BA ───────────────────
-const baDefs: string[][] = [
-  ['PLP', 'Checkout'],
-  ['PDP', 'Basket'],
-  ['Order Management', 'Cross-sell'],
-  ['Search', 'L2'],
-  ['Navigation', 'Learn'],
-];
-for (const sq of baDefs) {
-  const bid = id();
-  members.push({ id: bid, fullName: nextName(), title: 'Business Analyst', squads: sq, salary: 130000, parentId: headBA, avatarUrl: avatar(bid) });
-}
+// 5 BAs
+const baDefs: string[][] = [['PLP','Checkout'],['PDP','Basket'],['Order Management','Cross-sell'],['Search','L2'],['Navigation','Learn']];
+for (const sq of baDefs) add('Business Analyst', sq, 130000, headBA);
 
-// ── 4 SMs — each covers 2-3 squads, reports to Head of Delivery ───────────
-const smDefs: string[][] = [
-  ['PLP', 'PDP', 'Search'],
-  ['Order Management', 'Checkout'],
-  ['Basket', 'Navigation', 'Learn'],
-  ['Cross-sell', 'L2'],
-];
-for (const sq of smDefs) {
-  const sid = id();
-  members.push({ id: sid, fullName: nextName(), title: 'Scrum Master', squads: sq, salary: 125000, parentId: headDM, avatarUrl: avatar(sid) });
-}
+// 4 SMs
+const smDefs: string[][] = [['PLP','PDP','Search'],['Order Management','Checkout'],['Basket','Navigation','Learn'],['Cross-sell','L2']];
+for (const sq of smDefs) add('Scrum Master', sq, 125000, headDM);
 
-// ── 3 Designers — each covers 3-4 squads, reports to VP Design ─────────────
-const desDefs: string[][] = [
-  ['PLP', 'PDP', 'Checkout', 'Basket'],
-  ['Order Management', 'Search', 'Navigation'],
-  ['Learn', 'Cross-sell', 'L2'],
-  ['PLP'],
-];
-for (const sq of desDefs) {
-  const did = id();
-  members.push({ id: did, fullName: nextName(), title: 'Designer', squads: sq, salary: 140000, parentId: vpDes, avatarUrl: avatar(did) });
-}
+// 4 Designers
+const desDefs: string[][] = [['PLP','PDP','Checkout','Basket'],['Order Management','Search','Navigation'],['Learn','Cross-sell','L2'],['PLP']];
+for (const sq of desDefs) add('Designer', sq, 140000, cdo);
 
-// ── Per-squad dev & QA teams ───────────────────────────────────────────────
+// ── Level 4-5: Per-squad Lead Dev, Lead QA, Devs, QAs ─────────────────────
 const devCounts: Record<string, number> = {
-  'PLP': 6, 'PDP': 5, 'Order Management': 6, 'Checkout': 7, 'Basket': 5,
-  'Search': 6, 'Navigation': 5, 'Learn': 6, 'Cross-sell': 7, 'L2': 5,
+  'PLP': 14, 'PDP': 12, 'Order Management': 14, 'Checkout': 15, 'Basket': 12,
+  'Search': 14, 'Navigation': 12, 'Learn': 14, 'Cross-sell': 15, 'L2': 12,
 };
 const qaCounts: Record<string, number> = {
-  'PLP': 4, 'PDP': 3, 'Order Management': 4, 'Checkout': 3, 'Basket': 4,
-  'Search': 3, 'Navigation': 3, 'Learn': 4, 'Cross-sell': 4, 'L2': 3,
+  'PLP': 6, 'PDP': 5, 'Order Management': 6, 'Checkout': 5, 'Basket': 6,
+  'Search': 5, 'Navigation': 5, 'Learn': 6, 'Cross-sell': 6, 'L2': 5,
 };
 
 for (const s of ALL_SQUADS) {
   const em = emIds[s];
   const qa = qaIds[s];
 
-  // Lead Dev → EM
-  const leadDevId = id();
-  members.push({ id: leadDevId, fullName: nextName(), title: 'Lead Developer', squads: [s], salary: 175000, parentId: em, avatarUrl: avatar(leadDevId) });
-
-  // Lead QA → QA Manager
-  const leadQaId = id();
-  members.push({ id: leadQaId, fullName: nextName(), title: 'Lead QA Engineer', squads: [s], salary: 160000, parentId: qa, avatarUrl: avatar(leadQaId) });
-
-  // Devs → EM
+  // Lead Dev + Devs → EM
+  add('Lead Developer', [s], 175000, em);
   const dc = devCounts[s];
   for (let i = 0; i < dc; i++) {
-    const did = id();
     const title = i < 2 ? 'Senior Developer' : i < dc - 1 ? 'Developer' : 'Junior Developer';
     const sal = i < 2 ? 155000 : i < dc - 1 ? 135000 : 110000;
-    members.push({ id: did, fullName: nextName(), title, squads: [s], salary: sal, parentId: em, avatarUrl: avatar(did) });
+    add(title, [s], sal, em);
   }
 
-  // QAs → QA Manager
+  // Lead QA + QAs → QA Manager
+  add('Lead QA Engineer', [s], 160000, qa);
   const qc = qaCounts[s];
   for (let i = 0; i < qc; i++) {
-    const qid = id();
     const title = i === 0 ? 'Senior QA Engineer' : 'QA Engineer';
     const sal = i === 0 ? 140000 : 120000;
-    members.push({ id: qid, fullName: nextName(), title, squads: [s], salary: sal, parentId: qa, avatarUrl: avatar(qid) });
+    add(title, [s], sal, qa);
   }
 }
 
 // ── Unallocated ────────────────────────────────────────────────────────────
-const u1 = id(), u2 = id(), u3 = id(), u4 = id();
-const unallocated: Person[] = [
-  { id: u1, fullName: nextName(), title: 'Frontend Engineer',  squads: [], salary: 140000, parentId: null, avatarUrl: avatar(u1) },
-  { id: u2, fullName: nextName(), title: 'Data Engineer',      squads: [], salary: 138000, parentId: null, avatarUrl: avatar(u2) },
-  { id: u3, fullName: nextName(), title: 'Product Designer',   squads: [], salary: 128000, parentId: null, avatarUrl: avatar(u3) },
-  { id: u4, fullName: nextName(), title: 'Backend Engineer',   squads: [], salary: 143000, parentId: null, avatarUrl: avatar(u4) },
-];
+for (let i = 0; i < 8; i++) {
+  add(pick(['Developer', 'Designer', 'QA Engineer', 'Business Analyst', 'Senior Developer', 'Scrum Master']), [], randSalary(120000), null);
+}
 
-export const seedPersons: Person[] = [...leadership, ...members, ...unallocated];
+// Extra ICs spread across squads to reach ~300
+for (const s of ALL_SQUADS) {
+  for (let i = 0; i < 4; i++) {
+    const titles = ['Developer', 'Senior Developer', 'QA Engineer', 'Designer'];
+    const sals = [135000, 155000, 120000, 140000];
+    add(titles[i], [s], randSalary(sals[i]), emIds[s]);
+  }
+}
+
+export const seedPersons: Person[] = persons;
