@@ -1,0 +1,87 @@
+"use client";
+
+import { create } from "zustand";
+
+interface AuthState {
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  devLogin: () => void;
+  loginWithSSO: (organizationId: string) => void;
+  handleSSOCallback: (accessToken: string, refreshToken: string) => void;
+  logout: () => void;
+  getAccessToken: () => string | null;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+export const useAuth = create<AuthState>((set, get) => ({
+  accessToken: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
+
+  login: async (email: string, password: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message =
+          errorData.message || (response.status === 401 ? "Invalid credentials" : "Login failed");
+        set({ isLoading: false, error: message });
+        return;
+      }
+
+      const data = await response.json();
+      const { accessToken, refreshToken } = data;
+
+      // Store access token in memory, refresh token in localStorage
+      set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
+      if (typeof window !== "undefined" && refreshToken) {
+        localStorage.setItem("strata-refresh-token", refreshToken);
+      }
+    } catch {
+      set({ isLoading: false, error: "Network error. Please try again." });
+    }
+  },
+
+  devLogin: () => {
+    // Development-only bypass — sets a mock token without calling the backend
+    set({
+      accessToken: "dev-mock-token",
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    });
+  },
+
+  loginWithSSO: (organizationId: string) => {
+    // Redirect to the backend SSO initiation endpoint
+    const returnUrl = typeof window !== "undefined" ? window.location.pathname : "/";
+    window.location.href = `${API_URL}/auth/sso/${organizationId}/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+  },
+
+  handleSSOCallback: (accessToken: string, refreshToken: string) => {
+    set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
+    if (typeof window !== "undefined" && refreshToken) {
+      localStorage.setItem("strata-refresh-token", refreshToken);
+    }
+  },
+
+  logout: () => {
+    set({ accessToken: null, isAuthenticated: false, error: null });
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("strata-refresh-token");
+    }
+  },
+
+  getAccessToken: () => get().accessToken,
+}));

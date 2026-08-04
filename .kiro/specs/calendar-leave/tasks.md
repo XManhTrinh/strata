@@ -1,0 +1,331 @@
+# Implementation Plan: Calendar & Leave Module
+
+## Overview
+
+This plan implements the unified Calendar & Leave module that replaces the existing basic leave system. Tasks follow a bottom-up approach: database schema first, then domain logic, services, API layer, background workers, permission integration, frontend components, and finally data migration from the legacy module.
+
+## Tasks
+
+- [x] 1. Database schema and Prisma models
+  - [x] 1.1 Add calendar enums and EventType model to Prisma schema
+    - Add `LeaveRequestStatus`, `RecurrenceFrequency`, `EventVisibility` enums
+    - Add `EventType` model with company relation, unique constraint on `[companyId, name]`, and indexes
+    - _Requirements: 2.1, 2.2, 2.5_
+  - [x] 1.2 Add LeaveTypeConfig model to Prisma schema
+    - Add `LeaveTypeConfig` model with `defaultAllocation`, `requiresApproval`, `carryOver`, `maxCarryOverDays`, `isSystem`, `archivedAt`
+    - Add unique constraint on `[companyId, name]` and indexes
+    - _Requirements: 10.1, 10.2, 10.4_
+  - [x] 1.3 Add CalendarEvent model to Prisma schema
+    - Add `CalendarEvent` model with recurrence fields (`isRecurring`, `recurrenceMasterId`, `recurrenceFrequency`, `recurrenceDaysOfWeek`, `recurrenceDayOfMonth`, `recurrenceEndDate`, `recurrenceCount`)
+    - Add self-relation for recurrence instances, relations to Company and EventType
+    - Add composite indexes on `[companyId, ownerUserId, startDate, endDate]` and `[companyId, startDate, endDate]`
+    - _Requirements: 1.1, 1.3, 13.1_
+  - [x] 1.4 Add CalendarLeaveRequest model to Prisma schema
+    - Add `CalendarLeaveRequest` with unique `calendarEventId` relation, `status`, `workingDays`, `reviewerId`, `reviewNotes`, `reviewedAt`
+    - Add indexes on `[leaveTypeId, status]` and `[calendarEventId]`
+    - _Requirements: 3.1, 3.2, 4.5_
+  - [x] 1.5 Add LeaveBalance and AccrualPolicy models to Prisma schema
+    - Add `LeaveBalance` with `allocated`, `used`, `adjustment`, `carriedOver` fields and unique constraint on `[companyId, userId, leaveTypeId, year]`
+    - Add `AccrualPolicy` with `monthlyAccrual`, `maxAccumulation`, `isActive` and unique constraint on `[companyId, leaveTypeId]`
+    - _Requirements: 5.1, 6.1, 6.4_
+  - [x] 1.6 Generate and verify Prisma migration
+    - Run `npx prisma migrate dev --name add-calendar-leave-models`
+    - Verify generated SQL is correct and all relations resolve
+    - _Requirements: 1.1, 5.1_
+
+- [x] 2. Core domain logic
+  - [x] 2.1 Implement date range validation (`calendar.domain.ts`)
+    - Create `apps/api/src/calendar/domain/calendar.domain.ts`
+    - Implement `validateDateRange(startDate, endDate)` that throws on `start >= end`
+    - _Requirements: 1.2_
+  - [ ]* 2.2 Write property test for date range validation
+    - **Property 1: Date Range Validation**
+    - **Validates: Requirements 1.2**
+  - [x] 2.3 Implement working days calculation (`working-days.domain.ts`)
+    - Create `apps/api/src/calendar/domain/working-days.domain.ts`
+    - Implement `calculateWorkingDays(startDate, endDate)` excluding Saturdays and Sundays
+    - _Requirements: 5.4_
+  - [ ]* 2.4 Write property test for working days calculation
+    - **Property 10: Working Days Calculation Excludes Weekends**
+    - **Validates: Requirements 5.4**
+  - [x] 2.5 Implement recurrence expansion logic (`recurrence.domain.ts`)
+    - Create `apps/api/src/calendar/domain/recurrence.domain.ts`
+    - Implement `expandRecurrence(pattern, startDate, endDate, maxDate)` supporting DAILY, WEEKLY, MONTHLY, YEARLY patterns
+    - Cap at 365 days or specified end date / count
+    - _Requirements: 1.3, 13.1, 13.2_
+  - [ ]* 2.6 Write property test for recurrence expansion
+    - **Property 2: Recurrence Expansion Correctness and Bounds**
+    - **Validates: Requirements 1.3, 13.2**
+  - [x] 2.7 Implement leave status machine (`calendar.domain.ts`)
+    - Implement `validateStatusTransition(currentStatus, newStatus)` enforcing only PENDING→APPROVED, PENDING→REJECTED, APPROVED→CANCELLED
+    - _Requirements: 4.5, 4.6_
+  - [ ]* 2.8 Write property test for status transition validity
+    - **Property 8: Status Transition Validity**
+    - **Validates: Requirements 4.5, 4.6**
+  - [x] 2.9 Implement overlap detection (`calendar.domain.ts`)
+    - Implement `checkOverlap(existingEvents, newStart, newEnd)` detecting date range overlaps
+    - _Requirements: 3.5_
+  - [ ]* 2.10 Write property test for overlap detection
+    - **Property 7: Leave Overlap Detection**
+    - **Validates: Requirements 3.5**
+  - [x] 2.11 Implement balance sufficiency validation (`calendar.domain.ts`)
+    - Implement `validateBalanceSufficiency(available, requested)` returning `{ sufficient, shortfall }`
+    - Implement `calculateAvailableBalance(allocated, carriedOver, adjustment, used)` using formula: available = allocated + carriedOver + adjustment - used
+    - _Requirements: 3.3, 3.4, 5.2_
+  - [ ]* 2.12 Write property test for balance sufficiency
+    - **Property 6: Balance Sufficiency Validation**
+    - **Validates: Requirements 3.3, 3.4**
+
+- [x] 3. Checkpoint - Ensure all domain logic tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 4. Data access layer and DTOs
+  - [ ] 4.1 Create DTO classes for calendar events
+    - Create `apps/api/src/calendar/dto/create-calendar-event.dto.ts` with validation decorators
+    - Create `apps/api/src/calendar/dto/update-calendar-event.dto.ts`
+    - Create `apps/api/src/calendar/dto/calendar-query.dto.ts` with date range, filters, pagination
+    - _Requirements: 1.1, 1.3_
+  - [ ] 4.2 Create DTO classes for leave requests and types
+    - Create `apps/api/src/calendar/dto/submit-leave-request.dto.ts`
+    - Create `apps/api/src/calendar/dto/create-leave-type.dto.ts`
+    - Create `apps/api/src/calendar/dto/create-event-type.dto.ts`
+    - Create `apps/api/src/calendar/dto/create-accrual-policy.dto.ts`
+    - Create `apps/api/src/calendar/dto/adjust-balance.dto.ts`
+    - _Requirements: 3.2, 10.2, 2.2, 6.4, 6.2_
+  - [ ] 4.3 Implement CalendarRepository
+    - Create `apps/api/src/calendar/repository/calendar.repository.ts`
+    - Implement data access methods: findEvents (with scope-filtered query), findLeaveRequests, findBalances, upsertBalance
+    - Use Prisma with proper indexing for date range queries
+    - _Requirements: 1.1, 5.1, 8.1_
+
+- [ ] 5. Backend services
+  - [ ] 5.1 Implement BalanceService
+    - Create `apps/api/src/calendar/services/balance.service.ts`
+    - Implement `getBalances`, `deductBalance`, `restoreBalance`, `adjustBalance`, `initializeBalances`
+    - Implement balance adjustment with mandatory reason field and audit record creation
+    - _Requirements: 5.1, 5.2, 6.1, 6.2, 6.3_
+  - [ ]* 5.2 Write property test for balance conservation across transitions
+    - **Property 9: Balance Conservation Across Status Transitions**
+    - **Validates: Requirements 4.2, 4.3, 4.8, 5.2**
+  - [ ] 5.3 Implement CalendarService
+    - Create `apps/api/src/calendar/services/calendar.service.ts`
+    - Implement `getEvents` with scope-based filtering (intersect user filter with authorized user set from ScopeResolver)
+    - Implement `createEvent` with date validation, recurrence expansion, and archived type check
+    - Implement `updateEvent` with leave-linked event rejection
+    - Implement `deleteEvent` with recurrence delete modes (single/future/all)
+    - Implement EventType CRUD with name uniqueness and archive logic
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 2.1, 2.4, 2.6, 12.5, 13.3, 13.4_
+  - [ ]* 5.4 Write property tests for CalendarService
+    - **Property 3: Personal Event Visibility Isolation**
+    - **Property 5: Archived Type Prevents New Entity Creation**
+    - **Property 18: Leave-Linked Events Not Directly Editable**
+    - **Validates: Requirements 1.6, 2.4, 10.5, 12.5**
+  - [ ] 5.5 Implement LeaveService
+    - Create `apps/api/src/calendar/services/leave.service.ts`
+    - Implement `submitRequest`: validate balance sufficiency, check overlap, create CalendarEvent + CalendarLeaveRequest, handle auto-approval for `requiresApproval=false` types, enqueue notification
+    - Implement `approveRequest`: validate transition, deduct balance, update status, enqueue notification; support `forceApprove` for negative balance warning
+    - Implement `rejectRequest`: validate transition, update status (no balance change), enqueue notification
+    - Implement `cancelRequest`: validate transition, restore balance if was APPROVED, update status, enqueue notification
+    - Implement LeaveType CRUD with name uniqueness and archive logic
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 4.1, 4.2, 4.3, 4.4, 4.5, 4.8, 5.5, 5.6, 10.1, 10.2, 10.3, 10.4, 10.5_
+  - [ ]* 5.6 Write property tests for LeaveService
+    - **Property 15: Auto-Approval for No-Approval Leave Types**
+    - **Property 19: No Recurrence For Leave Requests**
+    - **Validates: Requirements 10.3, 13.5**
+  - [ ] 5.7 Implement AccrualService
+    - Create `apps/api/src/calendar/services/accrual.service.ts`
+    - Implement `processMonthlyAccrual` for all active policies: increment allocated balance by monthlyAccrual, capped at maxAccumulation
+    - Implement `processYearEndCarryOver`: for each employee, compute unused balance, carry forward capped at maxCarryOverDays (or zero if carryOver=false)
+    - Implement CRUD for accrual policies
+    - _Requirements: 6.4, 6.5, 6.7_
+  - [ ]* 5.8 Write property tests for AccrualService
+    - **Property 11: Monthly Accrual Processing**
+    - **Property 12: Year-End Carry-Over Logic**
+    - **Validates: Requirements 6.4, 6.5, 6.7**
+
+- [ ] 6. Checkpoint - Ensure all service tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 7. API controllers and endpoints
+  - [ ] 7.1 Implement CalendarController
+    - Create `apps/api/src/calendar/controllers/calendar.controller.ts`
+    - Implement `GET /api/v2/companies/:companyId/calendar/events` with AuthorizationGuard for `calendar:view_own`
+    - Implement `GET /api/v2/companies/:companyId/calendar/accessible-scope` returning authorized teams/users for FilterSelector
+    - Implement `POST /api/v2/companies/:companyId/calendar/events`
+    - Implement `PATCH /api/v2/companies/:companyId/calendar/events/:id`
+    - Implement `DELETE /api/v2/companies/:companyId/calendar/events/:id` with deleteMode query param
+    - _Requirements: 1.1, 1.4, 7.1, 8.1, 9.1_
+  - [ ] 7.2 Implement LeaveController
+    - Create `apps/api/src/calendar/controllers/leave.controller.ts`
+    - Implement `POST /api/v2/companies/:companyId/calendar/leave-requests` with `calendar:submit_leave` permission
+    - Implement `POST .../leave-requests/:id/approve` with `calendar:approve_leave` permission and scope check
+    - Implement `POST .../leave-requests/:id/reject` with `calendar:approve_leave` permission and scope check
+    - Implement `POST .../leave-requests/:id/cancel` with `calendar:submit_leave` permission
+    - Implement `GET /api/v2/companies/:companyId/calendar/leave-requests` with scope-based filtering
+    - _Requirements: 3.1, 3.7, 4.1, 4.7, 12.1, 12.2, 12.3, 12.4_
+  - [ ] 7.3 Implement BalanceController
+    - Create `apps/api/src/calendar/controllers/balance.controller.ts`
+    - Implement `GET /api/v2/companies/:companyId/calendar/balances` for own balances
+    - Implement `GET .../balances/:userId` with `calendar:manage_balances` permission
+    - Implement `POST .../balances/:userId/adjust` with `calendar:manage_balances` at COMPANY scope
+    - _Requirements: 5.1, 5.3, 6.1, 6.2, 6.6_
+  - [ ] 7.4 Implement LeaveTypeController and EventTypeController
+    - Create `apps/api/src/calendar/controllers/leave-type.controller.ts`
+    - Implement CRUD for leave types with `calendar:manage_policies` permission
+    - Create `apps/api/src/calendar/controllers/event-type.controller.ts`
+    - Implement CRUD for event types with `calendar:manage_event_types` permission
+    - _Requirements: 2.2, 2.7, 10.2, 10.6_
+  - [ ] 7.5 Implement AccrualPolicy endpoints
+    - Add accrual policy CRUD routes to a controller (or within BalanceController)
+    - Implement `GET/POST/PATCH/DELETE /api/v2/companies/:companyId/calendar/accrual-policies` with `calendar:manage_policies` permission
+    - _Requirements: 6.4_
+  - [ ] 7.6 Implement Team Availability endpoint
+    - Implement `GET /api/v2/companies/:companyId/calendar/availability` with `calendar:view_team` permission
+    - Return daily counts of team members available vs. on leave for a date range
+    - _Requirements: 8.4_
+  - [ ]* 7.7 Write integration tests for API endpoints
+    - Test full leave request lifecycle: submit → approve → verify on calendar → cancel → verify removal
+    - Test scope-based calendar query with real org tree data
+    - Test permission denial (403) for unauthorized operations
+    - _Requirements: 3.1, 4.2, 4.8, 8.1, 11.3_
+
+- [ ] 8. Background workers
+  - [ ] 8.1 Implement AccrualWorker
+    - Create `apps/api/src/calendar/workers/accrual.worker.ts`
+    - Register BullMQ processor for `calendar` queue, job name `process-monthly-accrual`
+    - Schedule repeatable job with cron `0 0 1 * *` (1st of each month)
+    - Call AccrualService.processMonthlyAccrual for all companies with active policies
+    - Configure retry (3 attempts, exponential backoff)
+    - _Requirements: 6.5_
+  - [ ] 8.2 Implement NotificationWorker
+    - Create `apps/api/src/calendar/workers/notification.worker.ts`
+    - Register BullMQ processor for notification dispatch jobs
+    - Handle job types: leave-submitted, leave-approved, leave-rejected, leave-cancelled
+    - Create notification records via the platform's notification service
+    - Configure retry (3 attempts, exponential backoff)
+    - _Requirements: 14.1, 14.2, 14.3, 14.5_
+
+- [ ] 9. Permission integration and module registration
+  - [ ] 9.1 Create CalendarModule with @RegisterFeature decorator
+    - Create `apps/api/src/calendar/calendar.module.ts` with the `@RegisterFeature` decorator registering feature key `calendar` and all 8 permissions
+    - Wire all controllers, services, repository, and BullMQ queue imports
+    - Export CalendarService, LeaveService, BalanceService
+    - _Requirements: 11.1_
+  - [ ] 9.2 Add AuthorizationGuard usage to all controllers
+    - Apply `@UseGuards(AuthGuard, AuthorizationGuard)` to all calendar controllers
+    - Use `@RequirePermission('calendar', 'view_own')` and similar decorators per endpoint
+    - Implement scope-based checks for approve_leave (DIRECT_REPORTS, ORGANIZATION_UNIT, BRANCH, COMPANY)
+    - Ensure 403 responses are non-specific per security requirements
+    - _Requirements: 11.2, 11.3, 11.4_
+  - [ ]* 9.3 Write property test for permission enforcement
+    - **Property 14: Permission Enforcement Across Calendar Operations**
+    - **Property 16: Disabled Feature Denial**
+    - **Validates: Requirements 2.7, 3.7, 4.7, 6.6, 7.6, 8.6, 9.6, 10.6, 11.5**
+  - [ ] 9.4 Register CalendarModule in AppModule
+    - Import CalendarModule into `apps/api/src/app.module.ts`
+    - Ensure feature self-registration runs on application bootstrap
+    - _Requirements: 11.1_
+
+- [ ] 10. Checkpoint - Ensure backend integration tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 11. Frontend calendar page
+  - [ ] 11.1 Create shared types and utility functions
+    - Create `apps/web/src/features/calendar/types/calendar.types.ts` with TypeScript interfaces matching API DTOs
+    - Create `apps/web/src/features/calendar/utils/calendar.utils.ts` with date helpers and color mapping
+    - _Requirements: 1.7, 7.3_
+  - [ ] 11.2 Implement data fetching hooks
+    - Create `apps/web/src/features/calendar/hooks/useCalendarEvents.ts` for fetching events with date range and filters
+    - Create `apps/web/src/features/calendar/hooks/useLeaveBalances.ts` for balance data
+    - Create `apps/web/src/features/calendar/hooks/useAccessibleScope.ts` for loading authorized teams/people
+    - Create `apps/web/src/features/calendar/hooks/useLeaveWorkflow.ts` for submit/approve/reject/cancel mutations
+    - _Requirements: 7.1, 5.3, 8.1_
+  - [ ] 11.3 Implement CalendarView main component
+    - Create `apps/web/src/features/calendar/CalendarView.tsx` as the main page component
+    - Integrate a calendar library for day/week/month view rendering
+    - Color-code events by EventType configuration
+    - Display pending leave requests with dashed border or reduced opacity
+    - Render click handlers on date/time slots to open creation forms
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
+  - [ ] 11.4 Implement FilterSelector component
+    - Create `apps/web/src/features/calendar/components/FilterSelector.tsx`
+    - On mount, call accessible-scope endpoint to get available teams/people
+    - Render multi-select dropdown grouped by organization unit
+    - Default to user's own org unit; pass selections as query params on events fetch
+    - _Requirements: 8.1, 9.2_
+  - [ ] 11.5 Implement LeaveBalancePanel component
+    - Create `apps/web/src/features/calendar/components/LeaveBalancePanel.tsx`
+    - Display remaining balance per leave type in a sidebar summary
+    - Show warning indicator when balance falls below 3 days
+    - _Requirements: 5.3, 14.4_
+  - [ ] 11.6 Implement LeaveRequestForm component
+    - Create `apps/web/src/features/calendar/components/LeaveRequestForm.tsx`
+    - Modal form with Leave_Type selector, start date, end date, notes
+    - Client-side balance validation before submission
+    - Display error messages for insufficient balance, overlap, and validation failures
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+  - [ ] 11.7 Implement ApprovalActions and TeamAvailabilityBar components
+    - Create `apps/web/src/features/calendar/components/ApprovalActions.tsx` with inline approve/reject buttons for pending leave requests (visible only to managers with `approve_leave` permission)
+    - Create `apps/web/src/features/calendar/components/TeamAvailabilityBar.tsx` showing X/Y team members available per day
+    - _Requirements: 4.1, 8.3, 8.4, 8.5_
+  - [ ] 11.8 Implement EventForm component
+    - Create `apps/web/src/features/calendar/components/EventForm.tsx`
+    - Modal form for creating/editing general calendar events with title, EventType, dates, visibility, recurrence options
+    - _Requirements: 1.1, 1.3, 13.1_
+  - [ ]* 11.9 Write unit tests for frontend components
+    - Test CalendarView renders events with correct colors and pending styles
+    - Test LeaveRequestForm validation (date range, balance check)
+    - Test FilterSelector respects accessible scope
+    - _Requirements: 7.3, 7.4, 3.3_
+
+- [ ] 12. Migration from existing leave module
+  - [ ] 12.1 Implement migration service
+    - Create `apps/api/src/calendar/migration/migration.service.ts`
+    - Implement legacy LeaveRequest → CalendarEvent + CalendarLeaveRequest conversion
+    - Map existing LeaveType enum values (ANNUAL, SICK, PERSONAL, PARENTAL, UNPAID) to new LeaveTypeConfig records
+    - Resolve employeeId → userId through Employee → Person → User chain
+    - Compute workingDays for each migrated request
+    - Generate migration report (migrated count, unmapped data, conflicts)
+    - _Requirements: 16.1, 16.2, 16.3, 16.4_
+  - [ ] 12.2 Implement migration CLI command
+    - Create `apps/api/src/calendar/migration/migration.command.ts`
+    - Support `--dry-run` mode that reports what would be migrated without writing
+    - Support `--execute` mode that performs the actual migration
+    - Accept `--companyId` parameter for per-company migration
+    - _Requirements: 16.4_
+  - [ ] 12.3 Implement backward-compatible API proxy endpoints
+    - Create thin proxy endpoints at existing `/api/leave/*` paths that forward to new calendar-leave endpoints
+    - Add deprecation headers (`Sunset`, `Deprecation`) with 90-day expiry
+    - _Requirements: 16.5_
+  - [ ]* 12.4 Write integration tests for migration
+    - Seed legacy LeaveRequest data, run migration, verify new schema records
+    - Verify status mapping, date preservation, and working days computation
+    - Verify backward-compatible endpoints return correct data
+    - _Requirements: 16.1, 16.2, 16.3_
+
+- [ ] 13. Audit trail integration
+  - [ ] 13.1 Add audit record creation to all state-changing operations
+    - Integrate with existing audit service for: leave request status changes, balance adjustments, accrual policy changes, event type / leave type create/archive/modify
+    - Ensure audit records capture actor, previous state, new state, timestamp, and reason (where applicable)
+    - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
+
+- [ ] 14. Default type seeding
+  - [ ] 14.1 Implement default EventType and LeaveType seeding
+    - Create seed logic that runs when the calendar feature is enabled for a company
+    - Seed default EventTypes: Leave, Conference, Sick Leave, Training, Meeting, Out of Office, Work From Home (with `isSystem=true`)
+    - Seed default LeaveTypes: Annual, Sick, Conference, Training, Personal, Parental, Unpaid (with `isSystem=true`)
+    - _Requirements: 2.1, 10.1_
+
+- [ ] 15. Final checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+## Notes
+
+- Tasks marked with `*` are optional and can be skipped for faster MVP
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation
+- Property tests validate universal correctness properties from the design document
+- Unit tests validate specific examples and edge cases
+- The design uses TypeScript throughout (NestJS for backend, Next.js/React for frontend)
+- Background workers use BullMQ consistent with platform patterns
+- Permission integration uses the existing Authorization Engine V2 `@RegisterFeature` decorator pattern

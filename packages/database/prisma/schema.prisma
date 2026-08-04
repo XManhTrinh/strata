@@ -1,0 +1,808 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────────
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+  SUSPENDED
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  PERSONAL
+  PARENTAL
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum PermissionScope {
+  SELF
+  TEAM
+  ORGANIZATION
+}
+
+enum NotificationType {
+  LEAVE_REQUEST
+  LEAVE_APPROVED
+  LEAVE_REJECTED
+  REPORT_READY
+  SYSTEM_ALERT
+  JOB_FAILED
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum AuditOperation {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+// ─── SSO/OIDC Models ────────────────────────────────────────────────────────────
+
+enum SSOProvider {
+  AZURE_AD
+  GOOGLE
+  OKTA
+  GENERIC_OIDC
+}
+
+model SSOConfig {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  provider       SSOProvider
+  clientId       String
+  clientSecret   String
+  issuerUrl      String
+  callbackUrl    String
+  enabled        Boolean      @default(true)
+  autoProvision  Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// ─── API Key Model ──────────────────────────────────────────────────────────────
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  prefix     String
+  keyHash    String
+  userId     String
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+}
+
+// ─── Core Identity Models ───────────────────────────────────────────────────────
+
+model Person {
+  id          String     @id @default(cuid())
+  fullName    String
+  dateOfBirth DateTime
+  email       String
+  phone       String?
+  address     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  employees   Employee[]
+  user        User?
+}
+
+model Employee {
+  id                  String               @id @default(cuid())
+  uin                 String
+  personId            String
+  organizationId      String
+  departmentId        String?
+  positionId          String?
+  startDate           DateTime
+  endDate             DateTime?
+  status              EmploymentStatus     @default(ACTIVE)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  person              Person               @relation(fields: [personId], references: [id])
+  organization        Organization         @relation(fields: [organizationId], references: [id])
+  department          Department?          @relation(fields: [departmentId], references: [id])
+  position            Position?            @relation(fields: [positionId], references: [id])
+  teamMemberships     TeamMembership[]
+  capacityAllocations CapacityAllocation[]
+  leaveRequests       LeaveRequest[]
+
+  @@unique([uin, organizationId])
+}
+
+// ─── Organization Models ────────────────────────────────────────────────────────
+
+model Organization {
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  departments Department[]
+  employees   Employee[]
+  tribes      Tribe[]
+  ssoConfig   SSOConfig?
+}
+
+model Department {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  parentId       String?
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  parent         Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children       Department[] @relation("DepartmentHierarchy")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  positions      Position[]
+  employees      Employee[]
+  budgets        Budget[]
+}
+
+model Position {
+  id           String     @id @default(cuid())
+  title        String
+  level        Int
+  description  String?
+  departmentId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  department   Department @relation(fields: [departmentId], references: [id])
+  employees    Employee[]
+}
+
+// ─── Engineering Hierarchy Models ───────────────────────────────────────────────
+
+model Tribe {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  clusters       Cluster[]
+}
+
+model Cluster {
+  id        String   @id @default(cuid())
+  name      String
+  tribeId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tribe     Tribe    @relation(fields: [tribeId], references: [id])
+  squads    Squad[]
+}
+
+model Squad {
+  id          String               @id @default(cuid())
+  name        String
+  clusterId   String
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  cluster     Cluster              @relation(fields: [clusterId], references: [id])
+  memberships TeamMembership[]
+  allocations CapacityAllocation[]
+}
+
+model TeamMembership {
+  id         String    @id @default(cuid())
+  employeeId String
+  squadId    String
+  role       String?
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+  squad      Squad     @relation(fields: [squadId], references: [id])
+
+  @@unique([employeeId, squadId])
+}
+
+model CapacityAllocation {
+  id         String   @id @default(cuid())
+  employeeId String
+  squadId    String
+  percentage Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  squad      Squad    @relation(fields: [squadId], references: [id])
+
+  @@unique([employeeId, squadId])
+}
+
+// ─── Budget Model ───────────────────────────────────────────────────────────────
+
+model Budget {
+  id           String     @id @default(cuid())
+  departmentId String
+  fiscalPeriod String
+  amount       Decimal    @db.Decimal(15, 2)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  department   Department @relation(fields: [departmentId], references: [id])
+}
+
+// ─── Leave Model ────────────────────────────────────────────────────────────────
+
+model LeaveRequest {
+  id         String      @id @default(cuid())
+  employeeId String
+  type       LeaveType
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  employee   Employee    @relation(fields: [employeeId], references: [id])
+}
+
+// ─── Auth & Access Control Models ───────────────────────────────────────────────
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  personId        String           @unique
+  isLocked        Boolean          @default(false)
+  lockedUntil     DateTime?
+  failedAttempts  Int              @default(0)
+  ssoProviderId   String?
+  ssoSubjectId    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  person          Person           @relation(fields: [personId], references: [id])
+  roleAssignments RoleAssignment[]
+  notifications   Notification[]
+  auditRecords    AuditRecord[]
+  refreshTokens   RefreshToken[]
+  apiKeys         ApiKey[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  permissions RolePermission[]
+  assignments RoleAssignment[]
+}
+
+model Permission {
+  id        String           @id @default(cuid())
+  action    String
+  resource  String
+  createdAt DateTime         @default(now())
+
+  roles     RolePermission[]
+
+  @@unique([action, resource])
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+model RoleAssignment {
+  id     String          @id @default(cuid())
+  userId String
+  roleId String
+  scope  PermissionScope
+
+  user   User            @relation(fields: [userId], references: [id])
+  role   Role            @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId, scope])
+}
+
+// ─── Notification Model ─────────────────────────────────────────────────────────
+
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  message   String
+  type      NotificationType
+  priority  NotificationPriority @default(NORMAL)
+  isRead    Boolean              @default(false)
+  createdAt DateTime             @default(now())
+  readAt    DateTime?
+
+  user      User                 @relation(fields: [userId], references: [id])
+}
+
+// ─── Audit Model ────────────────────────────────────────────────────────────────
+
+model AuditRecord {
+  id         String         @id @default(cuid())
+  userId     String
+  entityType String
+  entityId   String
+  operation  AuditOperation
+  diff       Json
+  timestamp  DateTime       @default(now())
+
+  user       User           @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// V2 Permission System — Scalable Dynamic Authorization
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── New Enums ──────────────────────────────────────────────────────────────────
+
+enum PermissionScopeV2 {
+  OWN
+  DIRECT_REPORTS
+  ORGANIZATION_UNIT
+  BRANCH
+  COMPANY
+  GLOBAL
+}
+
+// ─── Company (extends Organization concept) ─────────────────────────────────────
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  settings  Json?    @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  organizationUnitTypes  OrganizationUnitType[]
+  organizationUnits      OrganizationUnit[]
+  positions              PositionV2[]
+  roles                  RoleV2[]
+  users                  UserCompanyMembership[]
+  features               CompanyFeature[]
+  reportingRelationships ReportingRelationship[]
+
+  // Calendar & Leave relations
+  eventTypes         EventType[]
+  leaveTypeConfigs   LeaveTypeConfig[]
+  calendarEvents     CalendarEvent[]
+
+  // Legacy link (migration bridge)
+  legacyOrganizationId String? @unique
+}
+
+// ─── Organization Unit Types ────────────────────────────────────────────────────
+
+model OrganizationUnitType {
+  id           String    @id @default(cuid())
+  companyId    String
+  name         String
+  description  String?
+  icon         String?
+  color        String?
+  displayOrder Int       @default(0)
+  archivedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company Company            @relation(fields: [companyId], references: [id])
+  units   OrganizationUnit[]
+
+  @@unique([companyId, name])
+  @@index([companyId, archivedAt])
+}
+
+// ─── Organization Units (replaces Department) ───────────────────────────────────
+
+model OrganizationUnit {
+  id         String    @id @default(cuid())
+  companyId  String
+  typeId     String
+  name       String
+  code       String?
+  parentId   String?
+  sortOrder  Int       @default(0)
+  managerId  String?
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Materialized path for fast ancestor/descendant queries
+  path String @default("/")
+
+  company  Company              @relation(fields: [companyId], references: [id])
+  type     OrganizationUnitType @relation(fields: [typeId], references: [id])
+  parent   OrganizationUnit?    @relation("OrgUnitHierarchy", fields: [parentId], references: [id])
+  children OrganizationUnit[]   @relation("OrgUnitHierarchy")
+
+  members UserCompanyMembership[] @relation("UserOrgUnit")
+
+  @@index([companyId, parentId])
+  @@index([companyId, typeId])
+  @@index([companyId, path])
+  @@index([managerId])
+}
+
+// ─── Positions (replaces existing Position, company-scoped) ─────────────────────
+
+model PositionV2 {
+  id                   String    @id @default(cuid())
+  companyId            String
+  name                 String
+  description          String?
+  careerLevel          Int?
+  canHaveDirectReports Boolean   @default(false)
+  archivedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  company Company                @relation(fields: [companyId], references: [id])
+  users   UserCompanyMembership[]
+
+  @@unique([companyId, name])
+  @@index([companyId, archivedAt])
+}
+
+// ─── Reporting Relationships (independent of org unit) ──────────────────────────
+
+model ReportingRelationship {
+  id        String   @id @default(cuid())
+  companyId String
+  userId    String   @unique // Each user has at most one manager
+  managerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId, managerId])
+  @@index([companyId, userId])
+}
+
+// ─── User-Company Membership (multi-tenant user context) ────────────────────────
+
+model UserCompanyMembership {
+  id           String   @id @default(cuid())
+  userId       String
+  companyId    String
+  positionId   String?
+  orgUnitId    String?
+  isSuperAdmin Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company         Company           @relation(fields: [companyId], references: [id])
+  position        PositionV2?       @relation(fields: [positionId], references: [id])
+  orgUnit         OrganizationUnit? @relation("UserOrgUnit", fields: [orgUnitId], references: [id])
+  roleAssignments RoleAssignmentV2[]
+
+  @@unique([userId, companyId])
+  @@index([companyId, orgUnitId])
+  @@index([companyId, isSuperAdmin])
+}
+
+// ─── Roles (replaces existing Role, company-scoped) ─────────────────────────────
+
+model RoleV2 {
+  id          String    @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  isSystem    Boolean   @default(false)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company     Company                    @relation(fields: [companyId], references: [id])
+  permissions RolePermissionAssignment[]
+  assignments RoleAssignmentV2[]
+
+  @@unique([companyId, name])
+  @@index([companyId, archivedAt])
+}
+
+// ─── Features (platform-level registry) ─────────────────────────────────────────
+
+model Feature {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  displayName String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions FeaturePermission[]
+  companies   CompanyFeature[]
+}
+
+model FeaturePermission {
+  id           String    @id @default(cuid())
+  featureId    String
+  key          String
+  displayName  String
+  description  String?
+  deprecatedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  feature         Feature                    @relation(fields: [featureId], references: [id])
+  roleAssignments RolePermissionAssignment[]
+
+  @@unique([featureId, key])
+}
+
+// ─── Company-Feature enablement ─────────────────────────────────────────────────
+
+model CompanyFeature {
+  id        String   @id @default(cuid())
+  companyId String
+  featureId String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id])
+  feature Feature @relation(fields: [featureId], references: [id])
+
+  @@unique([companyId, featureId])
+}
+
+// ─── Role-Permission Assignment (the core tuple) ────────────────────────────────
+
+model RolePermissionAssignment {
+  id                  String            @id @default(cuid())
+  roleId              String
+  featurePermissionId String
+  scope               PermissionScopeV2
+  createdAt           DateTime          @default(now())
+
+  role              RoleV2            @relation(fields: [roleId], references: [id])
+  featurePermission FeaturePermission @relation(fields: [featurePermissionId], references: [id])
+
+  @@unique([roleId, featurePermissionId, scope])
+  @@index([roleId])
+  @@index([featurePermissionId])
+}
+
+// ─── Role Assignment (user ↔ role within company) ───────────────────────────────
+
+model RoleAssignmentV2 {
+  id           String   @id @default(cuid())
+  membershipId String
+  roleId       String
+  assignedAt   DateTime @default(now())
+  assignedBy   String?
+
+  membership UserCompanyMembership @relation(fields: [membershipId], references: [id])
+  role       RoleV2                @relation(fields: [roleId], references: [id])
+
+  @@unique([membershipId, roleId])
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Calendar & Leave Module
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Calendar Enums ─────────────────────────────────────────────────────────────
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum EventVisibility {
+  PERSONAL
+  SHARED
+}
+
+// ─── Event Type (company-configurable) ──────────────────────────────────────────
+
+model EventType {
+  id          String    @id @default(cuid())
+  companyId   String
+  name        String
+  color       String    @default("#3B82F6")
+  icon        String?
+  description String?
+  isSystem    Boolean   @default(false)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company     Company   @relation(fields: [companyId], references: [id])
+  events      CalendarEvent[]
+
+  @@unique([companyId, name])
+  @@index([companyId, archivedAt])
+}
+
+// ─── Leave Type (company-configurable) ──────────────────────────────────────────
+
+model LeaveTypeConfig {
+  id                String    @id @default(cuid())
+  companyId         String
+  name              String
+  color             String    @default("#10B981")
+  defaultAllocation Decimal   @db.Decimal(5, 1)
+  requiresApproval  Boolean   @default(true)
+  carryOver         Boolean   @default(false)
+  maxCarryOverDays  Decimal?  @db.Decimal(5, 1)
+  isSystem          Boolean   @default(false)
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  company           Company   @relation(fields: [companyId], references: [id])
+  balances          LeaveBalance[]
+  requests          CalendarLeaveRequest[]
+  accrualPolicies   AccrualPolicy[]
+
+  @@unique([companyId, name])
+  @@index([companyId, archivedAt])
+}
+
+// ─── Calendar Event ─────────────────────────────────────────────────────────────
+
+model CalendarEvent {
+  id              String          @id @default(cuid())
+  companyId       String
+  ownerUserId     String
+  eventTypeId     String
+  title           String
+  startDate       DateTime
+  endDate         DateTime
+  allDay          Boolean         @default(false)
+  visibility      EventVisibility @default(SHARED)
+  notes           String?
+
+  // Recurrence fields
+  isRecurring         Boolean              @default(false)
+  recurrenceMasterId  String?
+  recurrenceFrequency RecurrenceFrequency?
+  recurrenceDaysOfWeek Int[]
+  recurrenceDayOfMonth Int?
+  recurrenceEndDate   DateTime?
+  recurrenceCount     Int?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  company          Company         @relation(fields: [companyId], references: [id])
+  eventType        EventType       @relation(fields: [eventTypeId], references: [id])
+  recurrenceMaster CalendarEvent?  @relation("RecurrenceInstances", fields: [recurrenceMasterId], references: [id])
+  instances        CalendarEvent[] @relation("RecurrenceInstances")
+  leaveRequest     CalendarLeaveRequest?
+
+  @@index([companyId, ownerUserId, startDate, endDate])
+  @@index([companyId, startDate, endDate])
+  @@index([recurrenceMasterId])
+}
+
+// ─── Leave Request (extends CalendarEvent) ──────────────────────────────────────
+
+model CalendarLeaveRequest {
+  id              String             @id @default(cuid())
+  calendarEventId String             @unique
+  leaveTypeId     String
+  status          LeaveRequestStatus @default(PENDING)
+  workingDays     Decimal            @db.Decimal(4, 1)
+  reviewerId      String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  calendarEvent   CalendarEvent      @relation(fields: [calendarEventId], references: [id], onDelete: Cascade)
+  leaveType       LeaveTypeConfig    @relation(fields: [leaveTypeId], references: [id])
+
+  @@index([leaveTypeId, status])
+  @@index([calendarEventId])
+}
+
+// ─── Leave Balance ──────────────────────────────────────────────────────────────
+
+model LeaveBalance {
+  id            String   @id @default(cuid())
+  companyId     String
+  userId        String
+  leaveTypeId   String
+  year          Int
+  allocated     Decimal  @db.Decimal(5, 1)
+  used          Decimal  @db.Decimal(5, 1) @default(0)
+  adjustment    Decimal  @db.Decimal(5, 1) @default(0)
+  carriedOver   Decimal  @db.Decimal(5, 1) @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  leaveType     LeaveTypeConfig @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([companyId, userId, leaveTypeId, year])
+  @@index([companyId, userId, year])
+}
+
+// ─── Accrual Policy ─────────────────────────────────────────────────────────────
+
+model AccrualPolicy {
+  id              String   @id @default(cuid())
+  companyId       String
+  leaveTypeId     String
+  monthlyAccrual  Decimal  @db.Decimal(4, 2)
+  maxAccumulation Decimal? @db.Decimal(5, 1)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  leaveType       LeaveTypeConfig @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([companyId, leaveTypeId])
+  @@index([companyId, isActive])
+}
