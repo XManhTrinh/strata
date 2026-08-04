@@ -31,8 +31,8 @@ export function Header() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        {/* Dev: Role switcher */}
-        {process.env.NODE_ENV === "development" && (
+        {/* Role switcher */}
+        {(
           <div className="flex items-center gap-1">
             {(["super_admin", "manager", "user"] as UserRoleView[]).map((r) => (
               <button

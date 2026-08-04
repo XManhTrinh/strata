@@ -200,8 +200,8 @@ export default function LoginPage() {
           </form>
         )}
 
-        {/* Dev login — only shown in development */}
-        {process.env.NODE_ENV === "development" && (
+        {/* Dev login */}
+        {(
           <div className="pt-4 border-t border-border">
             <button
               type="button"
