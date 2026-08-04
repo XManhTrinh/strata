@@ -223,18 +223,18 @@ function OrgFlowInner({
   const { zoom } = useViewport();
   const [ghost, setGhost] = useState<OverlayInfo | null>(null);
   const [isOverUnallocated, setIsOverUnallocated] = useState(false);
-  // Start with all parent nodes collapsed
+  // Collapse all nodes with children except the roots (so first level is visible on load)
   const defaultCollapsed = useMemo(() => {
     const ids = new Set<string>();
-    function walk(nodes: TreeNode[]) {
+    function walk(nodes: TreeNode[], isRoot: boolean) {
       for (const n of nodes) {
         if (n.children.length > 0) {
-          ids.add(n.person.id);
-          walk(n.children);
+          if (!isRoot) ids.add(n.person.id);
+          walk(n.children, false);
         }
       }
     }
-    walk(tree);
+    walk(tree, true);
     return ids;
   }, [tree]);
 

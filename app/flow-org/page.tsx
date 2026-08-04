@@ -5,7 +5,7 @@ import { MockPersonRepository } from "@/lib/org-tree/MockPersonRepository";
 import { MockAIProvider } from "@/lib/org-tree/MockAIProvider";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person } from "@/lib/org-tree/types";
-import { buildSquadTree } from "@/lib/org-tree/tree";
+import { buildSquadTree, buildTree } from "@/lib/org-tree/tree";
 import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
@@ -58,7 +58,26 @@ export default function FlowOrgPage() {
   const isAllView = selectedSquads.size === 0;
 
   const activeTree = useMemo(() => {
-    if (isAllView) return [];
+    if (isAllView) {
+      // Find the single true root (person with parentId null who has the most descendants)
+      // to avoid orphan roots appearing at the same level as the CEO
+      const roots = persons.filter(p => p.parentId === null);
+      const trueRoot = roots.reduce((best, p) => {
+        const bestCount = persons.filter(x => x.parentId === best.id).length;
+        const pCount = persons.filter(x => x.parentId === p.id).length;
+        return pCount > bestCount ? p : best;
+      }, roots[0]);
+      if (!trueRoot) return [];
+      // Only include persons reachable from the true root
+      const reachable = new Set<string>();
+      const queue = [trueRoot.id];
+      while (queue.length) {
+        const cur = queue.shift()!;
+        reachable.add(cur);
+        persons.filter(p => p.parentId === cur).forEach(p => queue.push(p.id));
+      }
+      return buildTree(persons.filter(p => reachable.has(p.id)));
+    }
     return buildSquadTree(persons, Array.from(selectedSquads));
   }, [isAllView, selectedSquads, persons]);
 
@@ -163,11 +182,6 @@ export default function FlowOrgPage() {
         ) : error ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
-          </div>
-        ) : isAllView ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
-            <p className="text-gray-400 dark:text-gray-500 text-sm">Select a squad or tribe to view the org chart</p>
-            <p className="text-gray-300 dark:text-gray-600 text-xs">{persons.length.toLocaleString()} people across {ALL_SQUADS.length} squads</p>
           </div>
         ) : (
           <OrgFlow
