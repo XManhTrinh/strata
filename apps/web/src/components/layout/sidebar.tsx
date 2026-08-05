@@ -60,7 +60,6 @@ const allNavSections: NavSection[] = [
     title: "Finance",
     items: [
       { label: "Budgets", href: "/budgets", icon: "💰", feature: "budgets" },
-      { label: "Leave", href: "/leave", icon: "🏖️", feature: "leave" },
     ],
   },
   {
