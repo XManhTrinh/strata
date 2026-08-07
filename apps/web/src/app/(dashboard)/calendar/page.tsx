@@ -57,7 +57,7 @@ export default function CalendarPage() {
   if (isError) {
     return (
       <div className="h-[calc(100vh-64px-24px)] flex items-center justify-center">
-        <Card>
+        <Card variant="filled">
           <CardContent className="flex flex-col items-center justify-center p-8">
             <p className="text-sm text-destructive mb-4">
               {error?.message || "Failed to load calendar data"}

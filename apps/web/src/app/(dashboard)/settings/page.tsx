@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AppBar } from "@/components/layout/app-bar";
+import { Card, CardContent } from "@/components/ui/card";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 
 interface SettingsCard {
@@ -79,15 +80,19 @@ export default function SettingsPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="group rounded-lg border border-border bg-background p-6 transition-colors hover:border-primary/50 hover:bg-muted/30"
+            className="group"
           >
-            <div className="mb-3 text-2xl">{card.icon}</div>
-            <h2 className="text-base font-semibold text-foreground group-hover:text-primary">
-              {card.title}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {card.description}
-            </p>
+            <Card variant="outlined" className="h-full p-6 transition-colors hover:border-primary/50">
+              <CardContent className="p-0">
+                <div className="mb-3 text-2xl">{card.icon}</div>
+                <h2 className="text-base font-semibold text-foreground group-hover:text-primary">
+                  {card.title}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {card.description}
+                </p>
+              </CardContent>
+            </Card>
           </Link>
         ))}
       </div>

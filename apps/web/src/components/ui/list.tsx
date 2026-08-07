@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
@@ -42,7 +43,22 @@ const List = React.forwardRef<HTMLUListElement, ListProps>(
 );
 List.displayName = "List";
 
-export interface ListItemProps extends React.HTMLAttributes<HTMLLIElement> {
+const listItemVariants = cva("flex items-center gap-4 px-4", {
+  variants: {
+    lines: {
+      1: "min-h-[56px]",
+      2: "min-h-[72px]",
+      3: "min-h-[88px]",
+    },
+  },
+  defaultVariants: {
+    lines: 1,
+  },
+});
+
+export interface ListItemProps
+  extends React.HTMLAttributes<HTMLLIElement>,
+    VariantProps<typeof listItemVariants> {
   /** Headline text */
   headline: string;
   /** Supporting (secondary) text */
@@ -80,16 +96,12 @@ const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>(
     },
     ref
   ) => {
-    const heightClass =
-      lines === 3 ? "min-h-[88px]" : lines === 2 ? "min-h-[72px]" : "min-h-[56px]";
-
     return (
       <li
         ref={ref}
         className={cn(
-          "flex items-center gap-4 px-4",
-          heightClass,
-          interactive && "cursor-pointer hover:bg-surface-foreground/[0.08] active:bg-surface-foreground/[0.12] transition-colors",
+          listItemVariants({ lines }),
+          interactive && "cursor-pointer hover:bg-surface-foreground/8 active:bg-surface-foreground/12 transition-colors",
           className
         )}
         {...props}
@@ -140,4 +152,4 @@ const ListItem = React.forwardRef<HTMLLIElement, ListItemProps>(
 );
 ListItem.displayName = "ListItem";
 
-export { List, ListItem };
+export { List, ListItem, listItemVariants };

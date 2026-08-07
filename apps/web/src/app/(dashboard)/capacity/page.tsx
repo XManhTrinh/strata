@@ -21,7 +21,7 @@ export default function CapacityPage() {
             </p>
           </div>
         </AppBar>
-        <Card>
+        <Card variant="filled">
           <CardContent className="flex flex-col items-center justify-center p-8">
             <p className="text-sm text-destructive mb-4">
               {error?.message || "Failed to load capacity data"}
@@ -46,7 +46,7 @@ export default function CapacityPage() {
             </p>
           </div>
         </AppBar>
-        <Card>
+        <Card variant="outlined">
           <CardContent className="p-0">
             <div className="grid grid-cols-[1fr_1fr_2fr_auto] gap-4 border-b border-border px-4 py-3">
               <span className="text-sm font-medium text-muted-foreground">Name</span>
@@ -84,7 +84,7 @@ export default function CapacityPage() {
         </div>
       </AppBar>
 
-      <Card>
+      <Card variant="outlined">
         <CardContent className="p-0">
           <div className="grid grid-cols-[1fr_1fr_2fr_auto] gap-4 border-b border-border px-4 py-3">
             <span className="text-sm font-medium text-muted-foreground">Name</span>

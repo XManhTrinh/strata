@@ -8,6 +8,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,49 +54,52 @@ export function Header() {
           {/* Role switcher — dev only */}
           <div className="hidden lg:flex items-center gap-0.5 mr-2">
             {(["super_admin", "manager", "user"] as UserRoleView[]).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  role === r
-                    ? roleColors[r]
-                    : "text-muted-foreground hover:bg-[hsl(var(--on-surface)/0.08)]"
-                }`}
-                title={`Switch to ${roleLabels[r]} view`}
-              >
-                {roleLabels[r]}
-              </button>
+              <Tooltip key={r} content={`Switch to ${roleLabels[r]} view`} side="bottom">
+                <button
+                  onClick={() => setRole(r)}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    role === r
+                      ? roleColors[r]
+                      : "text-muted-foreground hover:bg-[hsl(var(--on-surface)/0.08)]"
+                  }`}
+                >
+                  {roleLabels[r]}
+                </button>
+              </Tooltip>
             ))}
           </div>
 
           {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-          >
-            <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} />
-          </Button>
+          <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} side="bottom">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            >
+              <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} />
+            </Button>
+          </Tooltip>
 
           {/* Notifications */}
           <NotificationDropdown />
 
           {/* Search / Command palette */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden sm:inline-flex"
-            aria-label="Search"
-            title="Search (⌘K)"
-            onClick={() => {
-              window.dispatchEvent(
-                new KeyboardEvent("keydown", { key: "k", metaKey: true })
-              );
-            }}
-          >
-            <Icon name="search" size={24} />
-          </Button>
+          <Tooltip content="Search (⌘K)" side="bottom">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden sm:inline-flex"
+              aria-label="Search"
+              onClick={() => {
+                window.dispatchEvent(
+                  new KeyboardEvent("keydown", { key: "k", metaKey: true })
+                );
+              }}
+            >
+              <Icon name="search" size={24} />
+            </Button>
+          </Tooltip>
 
           {/* User menu */}
           <DropdownMenu>

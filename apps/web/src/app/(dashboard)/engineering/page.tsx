@@ -245,7 +245,7 @@ export default function EngineeringPage() {
             </p>
           </div>
         </AppBar>
-        <Card>
+        <Card variant="filled">
           <CardContent className="flex flex-col items-center justify-center p-8">
             <p className="text-sm text-destructive mb-4">
               {error?.message || "Failed to load organization data"}
@@ -304,7 +304,7 @@ export default function EngineeringPage() {
         </div>
       </AppBar>
 
-      <Card className="py-2">
+      <Card variant="outlined" className="py-2">
         <CardContent className="p-0">
           {tree.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center p-8">

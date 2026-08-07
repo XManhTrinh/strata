@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { Icon } from "@/components/ui/icon";
+import { Tooltip } from "@/components/ui/tooltip";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
 import {
@@ -202,14 +203,15 @@ export function Sidebar() {
               </motion.span>
             )}
           </AnimatePresence>
-          <button
-            onClick={toggle}
-            className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors min-w-11 min-h-11 flex items-center justify-center"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? "→" : "←"}
-          </button>
+          <Tooltip content={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
+            <button
+              onClick={toggle}
+              className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors min-w-11 min-h-11 flex items-center justify-center"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {collapsed ? "→" : "←"}
+            </button>
+          </Tooltip>
         </div>
 
         {/* Desktop navigation */}

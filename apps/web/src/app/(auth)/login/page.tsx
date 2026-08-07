@@ -4,9 +4,8 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { TextField } from "@/components/ui/text-field";
+import { Divider } from "@/components/ui/divider";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -100,58 +99,48 @@ export default function LoginPage() {
           <>
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                  <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+                <div className="rounded-md border border-error/30 bg-error/10 p-3">
+                  <p className="text-sm text-error">{error}</p>
                 </div>
               )}
 
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (emailError) validateEmail(e.target.value);
-                  }}
-                  onBlur={() => validateEmail(email)}
-                  placeholder="you@company.com"
-                  className={emailError ? "border-red-500" : ""}
-                  autoComplete="email"
-                  aria-invalid={!!emailError}
-                  aria-describedby={emailError ? "email-error" : undefined}
-                />
-                {emailError && (
-                  <p id="email-error" className="text-xs text-red-600 dark:text-red-400">
-                    {emailError}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="email"
+                type="email"
+                variant="outlined"
+                label="Email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) validateEmail(e.target.value);
+                }}
+                onBlur={() => validateEmail(email)}
+                placeholder="you@company.com"
+                error={!!emailError}
+                errorText={emailError}
+                autoComplete="email"
+                aria-invalid={!!emailError}
+                aria-describedby={emailError ? "email-error" : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (passwordError) validatePassword(e.target.value);
-                  }}
-                  onBlur={() => validatePassword(password)}
-                  placeholder="••••••••"
-                  className={passwordError ? "border-red-500" : ""}
-                  autoComplete="current-password"
-                  aria-invalid={!!passwordError}
-                  aria-describedby={passwordError ? "password-error" : undefined}
-                />
-                {passwordError && (
-                  <p id="password-error" className="text-xs text-red-600 dark:text-red-400">
-                    {passwordError}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="password"
+                type="password"
+                variant="outlined"
+                label="Password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (passwordError) validatePassword(e.target.value);
+                }}
+                onBlur={() => validatePassword(password)}
+                placeholder="••••••••"
+                error={!!passwordError}
+                errorText={passwordError}
+                autoComplete="current-password"
+                aria-invalid={!!passwordError}
+                aria-describedby={passwordError ? "password-error" : undefined}
+              />
 
               <Button
                 type="submit"
@@ -165,7 +154,7 @@ export default function LoginPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <Separator />
+                <Divider />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">Or</span>
@@ -194,17 +183,16 @@ export default function LoginPage() {
           </>
         ) : (
           <form onSubmit={handleSSOLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="sso-org">Organization ID</Label>
-              <Input
-                id="sso-org"
-                type="text"
-                value={ssoOrgId}
-                onChange={(e) => setSsoOrgId(e.target.value)}
-                placeholder="Enter your organization ID"
-                autoFocus
-              />
-            </div>
+            <TextField
+              id="sso-org"
+              type="text"
+              variant="outlined"
+              label="Organization ID"
+              value={ssoOrgId}
+              onChange={(e) => setSsoOrgId(e.target.value)}
+              placeholder="Enter your organization ID"
+              autoFocus
+            />
 
             <Button
               type="submit"
@@ -228,7 +216,8 @@ export default function LoginPage() {
         )}
 
         {/* Dev login */}
-        <div className="pt-4 border-t border-border">
+        <div className="pt-4">
+          <Divider className="mb-4" />
           <Button
             type="button"
             variant="outline"

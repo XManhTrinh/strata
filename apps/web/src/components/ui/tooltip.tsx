@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { motion, AnimatePresence } from "motion/react";
 
 import { cn } from "@/lib/utils";
@@ -9,18 +10,35 @@ import { cn } from "@/lib/utils";
  * Material Design 3 Tooltip
  *
  * M3 Specs (m3.material.io/components/tooltips/specs):
- * - Plain tooltip: single line, max 1 line
+ * - Plain tooltip: single line, max 200px width
+ * - Rich tooltip: multi-line, max 320px width, surface-container bg
  * - Height: 24px (plain), flexible (rich)
  * - Corner radius: 4px
- * - Background: inverse-surface
- * - Text: inverse-on-surface, Body Small (12px/16px)
- * - Padding: 8px horizontal, 4px vertical
- * - Max width: 200px (plain)
+ * - Background: inverse-surface (plain), surface-container (rich)
+ * - Text: inverse-on-surface (plain), on-surface (rich), Body Small (12px/16px)
+ * - Padding: 8px horizontal, 4px vertical (plain); 12px (rich)
  * - Delay: 500ms before show, 200ms to hide
  * - Uses framer-motion for fade-in
  */
 
-export interface TooltipProps {
+const tooltipVariants = cva(
+  "absolute z-50 pointer-events-none rounded-[4px]",
+  {
+    variants: {
+      variant: {
+        plain:
+          "max-w-[200px] px-2 py-1 bg-[hsl(var(--on-surface))] text-[hsl(var(--surface))] text-[12px] leading-4 whitespace-nowrap",
+        rich:
+          "max-w-[320px] px-3 py-2 bg-surface-variant text-surface-foreground text-[14px] leading-5 whitespace-normal shadow-md",
+      },
+    },
+    defaultVariants: {
+      variant: "plain",
+    },
+  }
+);
+
+export interface TooltipProps extends VariantProps<typeof tooltipVariants> {
   /** Tooltip text content */
   content: string;
   /** Children element that triggers the tooltip */
@@ -38,6 +56,7 @@ export interface TooltipProps {
 function Tooltip({
   content,
   children,
+  variant,
   side = "top",
   className,
   delayShow = 500,
@@ -94,10 +113,7 @@ function Tooltip({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              "absolute z-50 pointer-events-none",
-              "max-w-[200px] px-2 py-1 rounded-[4px]",
-              "bg-[hsl(var(--on-surface))] text-[hsl(var(--surface))]",
-              "text-[12px] leading-4 whitespace-nowrap",
+              tooltipVariants({ variant }),
               positionClasses[side],
               className
             )}
@@ -111,4 +127,4 @@ function Tooltip({
   );
 }
 
-export { Tooltip };
+export { Tooltip, tooltipVariants };

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { motion, AnimatePresence } from "motion/react";
 
 import { cn } from "@/lib/utils";
@@ -21,7 +22,22 @@ import { Icon } from "@/components/ui/icon";
  * - Uses framer-motion for slide-up entrance
  */
 
-export interface SnackbarProps {
+const snackbarVariants = cva(
+  "fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-[560px] flex items-center min-h-12 gap-2 px-4 py-3 rounded-[4px] shadow-lg",
+  {
+    variants: {
+      variant: {
+        default: "bg-[hsl(var(--on-surface))] text-[hsl(var(--surface))]",
+        error: "bg-error text-error-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+export interface SnackbarProps extends VariantProps<typeof snackbarVariants> {
   /** Whether snackbar is visible */
   open: boolean;
   /** Message text */
@@ -45,6 +61,7 @@ const Snackbar = React.forwardRef<HTMLDivElement, SnackbarProps>(
     {
       open,
       message,
+      variant,
       actionLabel,
       onAction,
       onClose,
@@ -73,13 +90,7 @@ const Snackbar = React.forwardRef<HTMLDivElement, SnackbarProps>(
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={cn(
-              "fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-[560px]",
-              "flex items-center min-h-12 gap-2 px-4 py-3 rounded-[4px]",
-              "bg-[hsl(var(--on-surface))] text-[hsl(var(--surface))]",
-              "shadow-lg",
-              className
-            )}
+            className={cn(snackbarVariants({ variant }), className)}
             role="status"
             aria-live="polite"
           >
@@ -96,7 +107,12 @@ const Snackbar = React.forwardRef<HTMLDivElement, SnackbarProps>(
                   onAction?.();
                   onClose?.();
                 }}
-                className="shrink-0 text-[14px] leading-5 font-medium text-[hsl(var(--primary))] hover:opacity-80 transition-opacity px-2"
+                className={cn(
+                  "shrink-0 text-[14px] leading-5 font-medium hover:opacity-80 transition-opacity px-2",
+                  variant === "error"
+                    ? "text-error-foreground"
+                    : "text-[hsl(var(--primary))]"
+                )}
               >
                 {actionLabel}
               </button>
@@ -107,10 +123,23 @@ const Snackbar = React.forwardRef<HTMLDivElement, SnackbarProps>(
               <button
                 type="button"
                 onClick={onClose}
-                className="shrink-0 flex items-center justify-center w-8 h-8 -mr-1 rounded-full hover:bg-[hsl(var(--surface)/0.08)] transition-colors"
+                className={cn(
+                  "shrink-0 flex items-center justify-center w-8 h-8 -mr-1 rounded-full transition-colors",
+                  variant === "error"
+                    ? "hover:bg-error-foreground/8"
+                    : "hover:bg-[hsl(var(--surface)/0.08)]"
+                )}
                 aria-label="Dismiss"
               >
-                <Icon name="close" size={20} className="text-[hsl(var(--surface))]" />
+                <Icon
+                  name="close"
+                  size={20}
+                  className={cn(
+                    variant === "error"
+                      ? "text-error-foreground"
+                      : "text-[hsl(var(--surface))]"
+                  )}
+                />
               </button>
             )}
           </motion.div>
@@ -121,4 +150,4 @@ const Snackbar = React.forwardRef<HTMLDivElement, SnackbarProps>(
 );
 Snackbar.displayName = "Snackbar";
 
-export { Snackbar };
+export { Snackbar, snackbarVariants };

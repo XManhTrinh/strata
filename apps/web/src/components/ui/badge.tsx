@@ -27,8 +27,8 @@ const badgeVariants = cva(
       },
       status: {
         error: "bg-error text-error-foreground",
-        success: "bg-[hsl(160_60%_42%)] text-[hsl(0_0%_100%)]",
-        warning: "bg-[hsl(40_90%_50%)] text-[hsl(0_0%_0%)]",
+        success: "bg-tertiary text-tertiary-foreground",
+        warning: "bg-tertiary-container text-tertiary-container-foreground",
       },
     },
     defaultVariants: {

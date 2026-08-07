@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableHeader,
@@ -104,31 +104,16 @@ export default function FeaturesPage() {
       key: "enabled",
       header: "Enabled",
       render: (row) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
+        <Switch
+          checked={row.enabled}
+          onChange={(e) => {
             e.stopPropagation();
             toggleEnabled(row.featureId, row.enabled, row.displayName);
           }}
           disabled={toggleFeatureMutation.isPending}
-          className="p-0 h-auto hover:bg-transparent"
-          role="switch"
-          aria-checked={row.enabled}
           aria-label={`${row.enabled ? "Disable" : "Enable"} ${row.displayName}`}
-        >
-          <span
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              row.enabled ? "bg-primary" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
-                row.enabled ? "translate-x-4.5" : "translate-x-1"
-              }`}
-            />
-          </span>
-        </Button>
+          size="small"
+        />
       ),
     },
   ];

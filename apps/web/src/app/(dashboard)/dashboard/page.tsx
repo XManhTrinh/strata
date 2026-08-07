@@ -63,7 +63,7 @@ export default function DashboardPage() {
             </p>
           </div>
         </AppBar>
-        <Card className="flex flex-col items-center justify-center p-8">
+        <Card variant="filled" className="flex flex-col items-center justify-center p-8">
           <CardContent className="flex flex-col items-center pt-6">
             <p className="text-sm text-destructive mb-4">
               {employeesErr?.message || leaveErr?.message || eventsErr?.message || "Failed to load dashboard data"}
@@ -105,7 +105,7 @@ export default function DashboardPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
+            <Card key={i} variant="elevated">
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-24" />
               </CardHeader>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Activity */}
-        <Card className="lg:col-span-2">
+        <Card variant="elevated" className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Upcoming Events</CardTitle>
           </CardHeader>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Actions */}
-        <Card>
+        <Card variant="elevated">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
