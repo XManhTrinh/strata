@@ -118,7 +118,7 @@ export function NavigationRail({ items, topAction, bottomAction, className }: Na
     <aside
       ref={railRef}
       className={cn(
-        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-[hsl(var(--surface-variant)/0.4)] hidden md:flex",
+        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-surface-variant hidden md:flex",
         className
       )}
       aria-label="Main navigation"
