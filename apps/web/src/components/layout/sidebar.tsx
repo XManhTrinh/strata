@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
+import { Divider } from "@/components/ui/divider";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
 import {
@@ -19,9 +20,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: string;
-  /** Required feature key — item only shows if user has any permission in this feature */
   feature: string;
-  /** Optional: specific permission required (otherwise any permission in the feature suffices) */
   permission?: string;
 }
 
@@ -30,10 +29,6 @@ interface NavSection {
   items: NavItem[];
 }
 
-/**
- * Full navigation definition. Items are filtered by permission at render time.
- * Super admin sees everything. Other roles only see items they have access to.
- */
 const allNavSections: NavSection[] = [
   {
     title: "Overview",
@@ -94,57 +89,112 @@ const allNavSections: NavSection[] = [
 ];
 
 /**
- * Shared navigation content rendered both in the persistent desktop sidebar
- * and inside the mobile Sheet drawer.
+ * M3 Navigation Drawer Item
+ *
+ * Specs (m3.material.io/components/navigation-drawer):
+ * - Height: 56px
+ * - Shape: rounded-full (28px radius)
+ * - Active: secondary-container bg, on-secondary-container text, icon filled
+ * - Inactive: transparent, on-surface-variant text, icon outlined
+ * - Padding: 16px start (icon), 12px gap, 24px end
+ * - Icon: 24px
+ * - Label: Label Large (14px/20px)
  */
-function SidebarNavContent({
+function NavDrawerItem({
+  item,
+  isActive,
+  collapsed,
+  onNavigate,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
+  const content = (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={isActive ? "page" : undefined}
+      className={`
+        flex items-center gap-3 rounded-full h-14 transition-colors duration-200
+        ${collapsed ? "justify-center w-14 px-0 mx-auto" : "px-4 mx-3"}
+        ${isActive
+          ? "bg-secondary-container text-secondary-container-foreground font-medium"
+          : "text-surface-variant-foreground hover:bg-surface-foreground/8"
+        }
+      `}
+    >
+      <Icon
+        name={item.icon}
+        size={24}
+        filled={isActive}
+        className="shrink-0"
+      />
+      {!collapsed && (
+        <span className="text-[14px] leading-5 whitespace-nowrap truncate">
+          {item.label}
+        </span>
+      )}
+    </Link>
+  );
+
+  if (collapsed) {
+    return (
+      <Tooltip content={item.label} side="right">
+        {content}
+      </Tooltip>
+    );
+  }
+
+  return content;
+}
+
+/**
+ * M3 Navigation Drawer Content
+ * Renders nav sections with items and dividers between groups.
+ */
+function NavigationDrawerContent({
   visibleSections,
   pathname,
   collapsed,
-  reducedMotion,
   onNavigate,
 }: {
   visibleSections: NavSection[];
   pathname: string;
   collapsed: boolean;
-  reducedMotion: boolean;
   onNavigate?: () => void;
 }) {
   return (
-    <nav className="flex-1 overflow-y-auto py-4 px-2">
-      {visibleSections.map((section) => (
-        <div key={section.title} className="mb-4">
-          {!collapsed && (
-            <span className="block px-2 mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-              {section.title}
-            </span>
+    <nav className="flex-1 overflow-y-auto py-3">
+      {visibleSections.map((section, sectionIndex) => (
+        <div key={section.title}>
+          {/* Section divider (between groups, not before first) */}
+          {sectionIndex > 0 && (
+            <div className="py-2 px-4">
+              <Divider />
+            </div>
           )}
-          <ul className="space-y-0.5">
+
+          {/* Section label */}
+          {!collapsed && (
+            <p className="px-7 pt-4 pb-1 text-[11px] leading-4 font-medium tracking-wider uppercase text-surface-variant-foreground">
+              {section.title}
+            </p>
+          )}
+
+          {/* Nav items */}
+          <ul className="space-y-0.5 mt-1">
             {section.items.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
-                <li key={item.href + item.label}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={`flex items-center gap-3 rounded-md px-2 py-2 min-h-11 text-sm transition-colors relative ${
-                      isActive
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                    }`}
-                    title={collapsed ? item.label : undefined}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r" />
-                    )}
-                    <Icon name={item.icon} size={20} className="shrink-0" />
-                    {!collapsed && (
-                      <span className="whitespace-nowrap">
-                        {item.label}
-                      </span>
-                    )}
-                  </Link>
+                <li key={item.href}>
+                  <NavDrawerItem
+                    item={item}
+                    isActive={isActive}
+                    collapsed={collapsed}
+                    onNavigate={onNavigate}
+                  />
                 </li>
               );
             })}
@@ -155,13 +205,24 @@ function SidebarNavContent({
   );
 }
 
+/**
+ * M3 Navigation Drawer (Sidebar)
+ *
+ * Desktop: Standard navigation drawer (360px expanded, 80px rail)
+ * Mobile: Modal navigation drawer via Sheet (slides from left)
+ *
+ * Specs: m3.material.io/components/navigation-drawer
+ * - Background: surface-container (slightly elevated surface)
+ * - No visible border (uses elevation/tint instead)
+ * - Header: 64px with branding
+ * - Rail mode: 80px width, icons only with tooltips
+ */
 export function Sidebar() {
   const { collapsed, toggle, mobileOpen, setMobileOpen } = useSidebar();
   const { hasPermission } = useUserPermissions();
   const pathname = usePathname();
   const reducedMotion = useReducedMotionContext();
 
-  // Filter sections and items based on permissions
   const visibleSections = allNavSections
     .map((section) => ({
       ...section,
@@ -171,75 +232,74 @@ export function Sidebar() {
     }))
     .filter((section) => section.items.length > 0);
 
-  // If user has no nav items at all, hide sidebar
   if (visibleSections.length === 0) return null;
 
-  const width = collapsed ? 64 : 256;
+  const width = collapsed ? 80 : 280;
   const transition = reducedMotion
     ? { duration: 0 }
-    : { duration: 0.2, ease: "easeInOut" as const };
+    : { duration: 0.25, ease: [0.2, 0, 0, 1] }; // M3 emphasized easing
 
   return (
     <>
-      {/* Desktop: Persistent sidebar panel (≥768px) */}
+      {/* Desktop: Navigation Drawer (≥768px) */}
       <motion.aside
-        className="hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col border-r border-border bg-card overflow-hidden"
+        className="hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col bg-[hsl(var(--surface-variant)/0.3)] overflow-hidden"
         animate={{ width }}
         transition={transition}
         aria-label="Main navigation"
       >
-        {/* Logo / Toggle area */}
-        <div className="flex h-16 items-center justify-between px-3 border-b border-border shrink-0">
+        {/* Header — branding + menu toggle */}
+        <div className="flex h-16 items-center px-4 shrink-0">
+          <Tooltip content={collapsed ? "Expand menu" : "Collapse menu"} side="right">
+            <button
+              onClick={toggle}
+              className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/8 transition-colors"
+              aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
+            >
+              <Icon name="menu" size={24} />
+            </button>
+          </Tooltip>
+
           <AnimatePresence mode="wait">
             {!collapsed && (
               <motion.span
-                initial={reducedMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reducedMotion ? 0 : 0.15 }}
-                className="text-lg font-bold text-foreground whitespace-nowrap"
+                initial={reducedMotion ? false : { opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: reducedMotion ? 0 : 0.2 }}
+                className="ml-4 text-[22px] leading-7 font-normal text-surface-foreground whitespace-nowrap"
               >
                 Strata
               </motion.span>
             )}
           </AnimatePresence>
-          <Tooltip content={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
-            <button
-              onClick={toggle}
-              className="p-2 rounded-md hover:bg-secondary text-muted-foreground transition-colors min-w-11 min-h-11 flex items-center justify-center"
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {collapsed ? "→" : "←"}
-            </button>
-          </Tooltip>
         </div>
 
-        {/* Desktop navigation */}
-        <SidebarNavContent
+        {/* Navigation items */}
+        <NavigationDrawerContent
           visibleSections={visibleSections}
           pathname={pathname}
           collapsed={collapsed}
-          reducedMotion={reducedMotion}
         />
       </motion.aside>
 
-      {/* Mobile: Sheet sidebar (<768px) */}
+      {/* Mobile: Modal Navigation Drawer (<768px) */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="w-70 p-0 flex flex-col"
+          className="w-[280px] p-0 flex flex-col bg-[hsl(var(--surface))]"
           aria-label="Mobile navigation"
         >
-          <SheetHeader className="px-4 py-4 border-b border-border">
-            <SheetTitle className="text-lg font-bold">Strata</SheetTitle>
+          <SheetHeader className="flex h-16 items-center px-4">
+            <SheetTitle className="text-[22px] leading-7 font-normal">
+              Strata
+            </SheetTitle>
           </SheetHeader>
 
-          {/* Mobile navigation — always expanded, close sheet on navigate */}
-          <SidebarNavContent
+          <NavigationDrawerContent
             visibleSections={visibleSections}
             pathname={pathname}
             collapsed={false}
-            reducedMotion={reducedMotion}
             onNavigate={() => setMobileOpen(false)}
           />
         </SheetContent>

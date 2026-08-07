@@ -34,8 +34,8 @@ export function AppShell({ children }: AppShellProps) {
           className={`flex flex-col min-h-screen transition-[margin-left] duration-200 ease-in-out ${
             hasAdminPermissions
               ? collapsed
-                ? "md:ml-16"
-                : "md:ml-64"
+                ? "md:ml-20"
+                : "md:ml-[280px]"
               : ""
           }`}
         >
