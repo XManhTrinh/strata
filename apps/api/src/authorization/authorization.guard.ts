@@ -59,8 +59,8 @@ export class AuthorizationGuard implements CanActivate {
       return true;
     }
 
-    // Super Admin bypass — skip authorization checks for admin@admin
-    if (user.email === 'admin@admin' || user.sub === 'usr_admin_001') {
+    // Super Admin bypass — skip authorization checks for admin@admin.com
+    if (user.email === 'admin@admin.com' || user.sub === 'usr_admin_001') {
       (request as any).effectiveScope = 'GLOBAL';
       return true;
     }

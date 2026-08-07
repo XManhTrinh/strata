@@ -973,21 +973,21 @@ async function seedSuperAdmin(companyId: string, organizationId: string) {
 
   const person = await prisma.person.upsert({
     where: { id: "per_admin_001" },
-    update: { fullName: "Super Admin", email: "admin@admin" },
+    update: { fullName: "Super Admin", email: "admin@admin.com" },
     create: {
       id: "per_admin_001",
       fullName: "Super Admin",
-      email: "admin@admin",
+      email: "admin@admin.com",
       dateOfBirth: new Date(1990, 0, 1),
     },
   });
 
   const user = await prisma.user.upsert({
-    where: { email: "admin@admin" },
+    where: { email: "admin@admin.com" },
     update: { passwordHash },
     create: {
       id: "usr_admin_001",
-      email: "admin@admin",
+      email: "admin@admin.com",
       passwordHash,
       personId: person.id,
     },
@@ -1017,7 +1017,7 @@ async function seedSuperAdmin(companyId: string, organizationId: string) {
     },
   });
 
-  log(`Super Admin: admin@admin / admin (isSuperAdmin: true)`);
+  log(`Super Admin: admin@admin.com / admin (isSuperAdmin: true)`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
