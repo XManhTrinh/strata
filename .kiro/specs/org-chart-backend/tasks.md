@@ -123,15 +123,15 @@ This plan connects the existing org chart frontend to real backend endpoints. We
     - _Requirements: 4.1, 5.1_
 
 - [ ] 8. Integrate frontend hooks with org chart page
-  - [ ] 8.1 Replace `MockPersonRepository` usage with `useOrgChart` hook
+  - [x] 8.1 Replace `MockPersonRepository` usage with `useOrgChart` hook
     - In the org chart page component, replace `useOrgTree(repository)` with `useOrgChart(companyId)`
     - Map `OrgTreeNode[]` response to the shape expected by existing `OrgFlow`/`ReactFlow` tree rendering components
     - _Requirements: 6.1, 6.2, 6.6_
-  - [ ] 8.2 Add loading and error states to the org chart page
+  - [x] 8.2 Add loading and error states to the org chart page
     - Show loading indicator while data is fetching
     - Display error message if API returns an error
     - _Requirements: 6.7, 6.8_
-  - [ ] 8.3 Add "Teams" view mode with unit selector
+  - [x] 8.3 Add "Teams" view mode with unit selector
     - Add a view mode toggle (Reporting / Teams)
     - In Teams mode, render a unit selector using existing org units data
     - When a unit is selected, call `useOrgChartByUnit(companyId, unitId)` and display the unit employees
