@@ -969,7 +969,7 @@ async function logSummary() {
 
 async function seedSuperAdmin(companyId: string, organizationId: string) {
   logSection("Super Admin Account");
-  const passwordHash = await bcrypt.hash("admin", 10);
+  const passwordHash = await bcrypt.hash("superadmin", 10);
 
   const person = await prisma.person.upsert({
     where: { id: "per_admin_001" },
@@ -1017,7 +1017,7 @@ async function seedSuperAdmin(companyId: string, organizationId: string) {
     },
   });
 
-  log(`Super Admin: admin@admin.com / admin (isSuperAdmin: true)`);
+  log(`Super Admin: admin@admin.com / superadmin (isSuperAdmin: true)`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
