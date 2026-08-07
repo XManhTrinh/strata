@@ -3,6 +3,10 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -90,10 +94,8 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-sm font-medium text-foreground">
-                  Email
-                </label>
-                <input
+                <Label htmlFor="email">Email</Label>
+                <Input
                   id="email"
                   type="email"
                   value={email}
@@ -103,9 +105,7 @@ export default function LoginPage() {
                   }}
                   onBlur={() => validateEmail(email)}
                   placeholder="you@company.com"
-                  className={`h-10 w-full rounded-sm border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
-                    emailError ? "border-red-500" : "border-border"
-                  }`}
+                  className={emailError ? "border-red-500" : ""}
                   autoComplete="email"
                   aria-invalid={!!emailError}
                   aria-describedby={emailError ? "email-error" : undefined}
@@ -118,10 +118,8 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <input
+                <Label htmlFor="password">Password</Label>
+                <Input
                   id="password"
                   type="password"
                   value={password}
@@ -131,9 +129,7 @@ export default function LoginPage() {
                   }}
                   onBlur={() => validatePassword(password)}
                   placeholder="••••••••"
-                  className={`h-10 w-full rounded-sm border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
-                    passwordError ? "border-red-500" : "border-border"
-                  }`}
+                  className={passwordError ? "border-red-500" : ""}
                   autoComplete="current-password"
                   aria-invalid={!!passwordError}
                   aria-describedby={passwordError ? "password-error" : undefined}
@@ -145,85 +141,92 @@ export default function LoginPage() {
                 )}
               </div>
 
-              <button
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="h-10 w-full rounded-sm bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                size="lg"
+                className="w-full"
               >
                 {isLoading ? "Signing in..." : "Sign in"}
-              </button>
+              </Button>
             </form>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+                <Separator />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">Or</span>
               </div>
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
               onClick={() => loginWithGoogle("/")}
-              className="h-10 w-full rounded-sm border border-border bg-background text-sm font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               Sign in with Google
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
               onClick={() => setShowSSO(true)}
-              className="h-10 w-full rounded-sm border border-border bg-background text-sm font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               Sign in with SSO
-            </button>
+            </Button>
           </>
         ) : (
           <form onSubmit={handleSSOLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="sso-org" className="text-sm font-medium text-foreground">
-                Organization ID
-              </label>
-              <input
+              <Label htmlFor="sso-org">Organization ID</Label>
+              <Input
                 id="sso-org"
                 type="text"
                 value={ssoOrgId}
                 onChange={(e) => setSsoOrgId(e.target.value)}
                 placeholder="Enter your organization ID"
-                className="h-10 w-full rounded-sm border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 autoFocus
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={!ssoOrgId.trim()}
-              className="h-10 w-full rounded-sm bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              size="lg"
+              className="w-full"
             >
               Continue with SSO
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
               onClick={() => setShowSSO(false)}
-              className="h-10 w-full rounded-sm border border-border bg-background text-sm font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               Back to email login
-            </button>
+            </Button>
           </form>
         )}
 
         {/* Dev login */}
         <div className="pt-4 border-t border-border">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="lg"
+            className="w-full border-dashed border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50"
             onClick={handleDevLogin}
             disabled={isLoading}
-            className="h-10 w-full rounded-sm border border-dashed border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 text-sm font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             🚀 Dev Login (skip auth)
-          </button>
+          </Button>
           <p className="mt-1.5 text-[10px] text-center text-muted-foreground">
             Development only — calls /auth/dev-login endpoint
           </p>

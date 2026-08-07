@@ -7,7 +7,7 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
 ## Tasks
 
 - [ ] 1. Foundation Setup
-  - [-] 1.1 Install dependencies in `apps/web/`
+  - [x] 1.1 Install dependencies in `apps/web/`
     - Run: `npm install clsx class-variance-authority @radix-ui/react-slot @radix-ui/react-dialog @radix-ui/react-select @radix-ui/react-dropdown-menu @radix-ui/react-tabs @radix-ui/react-avatar @radix-ui/react-label @radix-ui/react-separator sonner lucide-react`
     - Verify all packages appear in `apps/web/package.json` dependencies
     - _Requirements: 2.2_
@@ -149,22 +149,22 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
   - Ensure the project builds successfully (`npm run build` in `apps/web`)
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Page Migrations Phase 1
-  - [ ] 5.1 Migrate login page at `apps/web/src/app/(auth)/login/page.tsx`
+- [x] 5. Page Migrations Phase 1
+  - [x] 5.1 Migrate login page at `apps/web/src/app/(auth)/login/page.tsx`
     - Replace raw `<button>` elements with `Button` component
     - Replace raw `<input>` elements with `Input` component
     - Replace raw `<label>` elements with `Label` component
     - Add `Separator` between login methods if applicable
     - _Requirements: 5.1, 5.2, 5.6_
 
-  - [ ] 5.2 Migrate dashboard page at `apps/web/src/app/(dashboard)/dashboard/page.tsx`
+  - [x] 5.2 Migrate dashboard page at `apps/web/src/app/(dashboard)/dashboard/page.tsx`
     - Replace stat/metric containers with `Card` components
     - Add `Skeleton` loading states for async data
     - Replace raw buttons with `Button` component
     - Apply page transition animation using `pageTransitionVariants`
     - _Requirements: 5.1, 5.10_
 
-  - [ ] 5.3 Migrate people page at `apps/web/src/app/(dashboard)/people/page.tsx`
+  - [x] 5.3 Migrate people page at `apps/web/src/app/(dashboard)/people/page.tsx`
     - Replace raw buttons with `Button` component
     - Replace raw inputs with `Input` and `Label`
     - Replace custom modal overlays with `AnimatedDialog`
@@ -172,7 +172,7 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
     - Add `toast.success()` / `toast.error()` to create/update/delete mutation callbacks
     - _Requirements: 5.1, 5.2, 5.4, 5.5, 5.7_
 
-  - [ ] 5.4 Migrate employees page at `apps/web/src/app/(dashboard)/employees/page.tsx`
+  - [x] 5.4 Migrate employees page at `apps/web/src/app/(dashboard)/employees/page.tsx`
     - Replace raw buttons with `Button` component
     - Replace raw inputs with `Input` and `Label`
     - Replace raw `<select>` with `Select`, `SelectTrigger`, `SelectContent`, `SelectItem`
@@ -188,43 +188,43 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
     - Test toast calls on mutation success/error
     - _Requirements: 5.6, 5.7, 5.8_
 
-- [ ] 6. Page Migrations Phase 2
-  - [ ] 6.1 Migrate settings/roles page at `apps/web/src/app/(dashboard)/settings/roles/page.tsx`
+- [x] 6. Page Migrations Phase 2
+  - [x] 6.1 Migrate settings/roles page at `apps/web/src/app/(dashboard)/settings/roles/page.tsx`
     - Replace buttons, inputs, selects, and dialogs with shadcn components
     - Add toast notifications to CRUD mutations
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.9_
 
-  - [ ] 6.2 Migrate settings/org-structure page at `apps/web/src/app/(dashboard)/settings/org-structure/page.tsx`
+  - [x] 6.2 Migrate settings/org-structure page at `apps/web/src/app/(dashboard)/settings/org-structure/page.tsx`
     - Replace buttons, inputs, and dialogs with shadcn components
     - Add toast notifications to CRUD mutations
     - _Requirements: 5.1, 5.2, 5.4, 5.5, 5.9_
 
-  - [ ] 6.3 Migrate settings/positions page at `apps/web/src/app/(dashboard)/settings/positions/page.tsx`
+  - [x] 6.3 Migrate settings/positions page at `apps/web/src/app/(dashboard)/settings/positions/page.tsx`
     - Replace buttons, inputs, and dialogs with shadcn components
     - Add toast notifications to CRUD mutations
     - _Requirements: 5.1, 5.2, 5.4, 5.5, 5.9_
 
-  - [ ] 6.4 Migrate settings/features page at `apps/web/src/app/(dashboard)/settings/features/page.tsx`
+  - [x] 6.4 Migrate settings/features page at `apps/web/src/app/(dashboard)/settings/features/page.tsx`
     - Replace buttons and inputs with shadcn components
     - _Requirements: 5.1, 5.2, 5.9_
 
-  - [ ] 6.5 Migrate engineering page at `apps/web/src/app/(dashboard)/engineering/page.tsx`
+  - [x] 6.5 Migrate engineering page at `apps/web/src/app/(dashboard)/engineering/page.tsx`
     - Replace buttons with `Button`, containers with `Card`
     - _Requirements: 5.1_
 
-  - [ ] 6.6 Migrate capacity page at `apps/web/src/app/(dashboard)/capacity/page.tsx`
+  - [x] 6.6 Migrate capacity page at `apps/web/src/app/(dashboard)/capacity/page.tsx`
     - Replace buttons with `Button`, containers with `Card`
     - _Requirements: 5.1_
 
-  - [ ] 6.7 Migrate calendar page at `apps/web/src/app/(dashboard)/calendar/page.tsx`
+  - [x] 6.7 Migrate calendar page at `apps/web/src/app/(dashboard)/calendar/page.tsx`
     - Replace buttons with `Button`, containers with `Card`
     - _Requirements: 5.1_
 
-  - [ ] 6.8 Migrate reports page at `apps/web/src/app/(dashboard)/reports/page.tsx`
+  - [x] 6.8 Migrate reports page at `apps/web/src/app/(dashboard)/reports/page.tsx`
     - Replace buttons with `Button`, selects with `Select`
     - _Requirements: 5.1, 5.3_
 
-  - [ ] 6.9 Migrate audit page at `apps/web/src/app/(dashboard)/audit/page.tsx`
+  - [x] 6.9 Migrate audit page at `apps/web/src/app/(dashboard)/audit/page.tsx`
     - Replace buttons with `Button`, selects with `Select`, tables with `Table`
     - _Requirements: 5.1, 5.3_
 
@@ -233,22 +233,22 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
     - Test toast integration on mutations
     - _Requirements: 5.9_
 
-- [ ] 7. Layout Components (Responsive Sidebar + Header)
-  - [ ] 7.1 Refactor sidebar at `apps/web/src/components/layout/sidebar.tsx`
+- [x] 7. Layout Components (Responsive Sidebar + Header)
+  - [x] 7.1 Refactor sidebar at `apps/web/src/components/layout/sidebar.tsx`
     - On viewports ≥768px: render sidebar as persistent panel (current behavior)
     - On viewports <768px: hide sidebar, render inside a `Sheet` component triggered from mobile nav
     - Sheet slides in from left edge with overlay backdrop
     - Use `sheetVariants` animation from motion.ts
     - _Requirements: 7.2, 7.3, 7.7_
 
-  - [ ] 7.2 Refactor header at `apps/web/src/components/layout/header.tsx`
+  - [x] 7.2 Refactor header at `apps/web/src/components/layout/header.tsx`
     - Add mobile menu trigger button (visible <768px) that opens the sidebar Sheet
     - Replace any custom dropdown with `DropdownMenu` component for user/notification menus
     - Use `Avatar` component for user avatar in header
     - Ensure 44×44px minimum touch targets for mobile
     - _Requirements: 7.1, 7.5_
 
-  - [ ] 7.3 Update dashboard layout at `apps/web/src/app/(dashboard)/layout.tsx`
+  - [x] 7.3 Update dashboard layout at `apps/web/src/app/(dashboard)/layout.tsx`
     - Wire responsive sidebar logic (Sheet on mobile, persistent on desktop)
     - Ensure mobile-first base styles with progressive breakpoint enhancements
     - Add horizontal scroll wrapper or stacked card layout for data tables on mobile
@@ -260,7 +260,7 @@ This plan implements a shadcn/ui component library with M3 theming, Framer Motio
     - Test sidebar visible as persistent panel on desktop
     - _Requirements: 7.2, 7.3_
 
-- [ ] 8. Final Checkpoint
+- [x] 8. Final Checkpoint
   - Run full build (`npm run build` in `apps/web`)
   - Ensure all tests pass, ask the user if questions arise.
   - Verify no raw `<button>`, `<input>`, or `<select>` elements remain in migrated pages

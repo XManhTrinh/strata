@@ -1,19 +1,22 @@
 "use client";
 
 import { create } from "zustand";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface SidebarStore {
   collapsed: boolean;
   hydrated: boolean;
+  mobileOpen: boolean;
   toggle: () => void;
   setCollapsed: (collapsed: boolean) => void;
+  setMobileOpen: (open: boolean) => void;
   hydrate: () => void;
 }
 
 const useSidebarStore = create<SidebarStore>((set) => ({
   collapsed: false, // Always start with false for SSR consistency
   hydrated: false,
+  mobileOpen: false,
   toggle: () =>
     set((state) => {
       const next = !state.collapsed;
@@ -28,6 +31,7 @@ const useSidebarStore = create<SidebarStore>((set) => ({
     }
     set({ collapsed });
   },
+  setMobileOpen: (open: boolean) => set({ mobileOpen: open }),
   hydrate: () => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("strata-sidebar-collapsed");
@@ -51,7 +55,9 @@ export function useSidebar() {
 
   return {
     collapsed: store.collapsed,
+    mobileOpen: store.mobileOpen,
     toggle: store.toggle,
     setCollapsed: store.setCollapsed,
+    setMobileOpen: store.setMobileOpen,
   };
 }

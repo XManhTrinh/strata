@@ -26,12 +26,8 @@ export function AppShell({ children }: AppShellProps) {
       <SkipToContent />
       <RouteAnnouncer />
       <div className="min-h-screen bg-background">
-        {/* Sidebar - hidden on mobile and for users with only basic permissions */}
-        {hasAdminPermissions && (
-          <div className="hidden md:block">
-            <Sidebar />
-          </div>
-        )}
+        {/* Sidebar - handles its own responsive visibility (persistent on desktop, Sheet on mobile) */}
+        {hasAdminPermissions && <Sidebar />}
 
         {/* Main content area */}
         <div
@@ -44,7 +40,7 @@ export function AppShell({ children }: AppShellProps) {
           }`}
         >
           <Header />
-          <main id="main-content" className="flex-1 px-6 pb-6" tabIndex={-1}>
+          <main id="main-content" className="flex-1 px-4 pb-4 md:px-6 md:pb-6" tabIndex={-1}>
             {children}
           </main>
         </div>

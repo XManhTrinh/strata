@@ -3,6 +3,25 @@
 import { useState, useMemo } from "react";
 import { Badge, SearchInput } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AnimatedDialog,
+  AnimatedDialogContent,
+  AnimatedDialogHeader,
+  AnimatedDialogTitle,
+  AnimatedDialogDescription,
+  AnimatedDialogFooter,
+} from "@/components/ui/animated-dialog";
+import { toast } from "sonner";
 import {
   useOrgUnits,
   useCreateOrgUnit,
@@ -86,14 +105,15 @@ function TreeNode({
         style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         {hasChildren ? (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 text-muted-foreground"
             onClick={() => setExpanded(!expanded)}
-            className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-muted"
             aria-label={expanded ? "Collapse" : "Expand"}
           >
             <span className="text-xs">{expanded ? "▼" : "▶"}</span>
-          </button>
+          </Button>
         ) : (
           <span className="inline-block h-5 w-5" />
         )}
@@ -107,27 +127,30 @@ function TreeNode({
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onEdit(unit)}
           >
             Edit
-          </button>
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onAddChild(unit.id)}
           >
             Add Child
-          </button>
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onArchive(unit.id)}
           >
             Archive
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -186,7 +209,15 @@ export default function OrgStructurePage() {
           typeId: formData.typeId || undefined,
           parentId: formData.parentId || null,
         },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Organization unit updated successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to update organization unit");
+          },
+        }
       );
     } else {
       createMutation.mutate(
@@ -196,13 +227,31 @@ export default function OrgStructurePage() {
           typeId: formData.typeId,
           parentId: formData.parentId || null,
         },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Organization unit created successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to create organization unit");
+          },
+        }
       );
     }
   };
 
   const handleArchive = (id: string) => {
-    deleteMutation.mutate({ companyId: COMPANY_ID, id });
+    deleteMutation.mutate(
+      { companyId: COMPANY_ID, id },
+      {
+        onSuccess: () => {
+          toast.success("Organization unit archived successfully");
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to archive organization unit");
+        },
+      }
+    );
   };
 
   if (error) {
@@ -232,13 +281,9 @@ export default function OrgStructurePage() {
             Build and manage your organization&apos;s hierarchical structure.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => openCreate()}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => openCreate()}>
           Create Unit
-        </button>
+        </Button>
       </AppBar>
 
       <div className="max-w-sm">
@@ -279,83 +324,84 @@ export default function OrgStructurePage() {
       )}
 
       {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">
+      <AnimatedDialog open={showModal} onOpenChange={setShowModal}>
+        <AnimatedDialogContent className="sm:max-w-md">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>
               {editingUnit ? "Edit Organization Unit" : "Create Organization Unit"}
-            </h2>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label htmlFor="unit-name" className="block text-sm font-medium text-foreground">
-                  Name
-                </label>
-                <input
-                  id="unit-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Engineering"
-                />
-              </div>
-              <div>
-                <label htmlFor="unit-type" className="block text-sm font-medium text-foreground">
-                  Type
-                </label>
-                <select
-                  id="unit-type"
-                  value={formData.typeId}
-                  onChange={(e) => setFormData({ ...formData, typeId: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="">Select a type...</option>
-                  {orgUnitTypes.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="unit-parent" className="block text-sm font-medium text-foreground">
-                  Parent Unit
-                </label>
-                <select
-                  id="unit-parent"
-                  value={formData.parentId}
-                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="">None (root level)</option>
-                  {orgUnits.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
-              </div>
+            </AnimatedDialogTitle>
+            <AnimatedDialogDescription>
+              {editingUnit
+                ? "Update the details for this organization unit."
+                : "Add a new unit to your organization hierarchy."}
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="unit-name">Name</Label>
+              <Input
+                id="unit-name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Engineering"
+              />
             </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            <div className="space-y-2">
+              <Label htmlFor="unit-type">Type</Label>
+              <Select
+                value={formData.typeId}
+                onValueChange={(value) => setFormData({ ...formData, typeId: value })}
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                <SelectTrigger id="unit-type">
+                  <SelectValue placeholder="Select a type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {orgUnitTypes.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="unit-parent">Parent Unit</Label>
+              <Select
+                value={formData.parentId || "none"}
+                onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
               >
-                {createMutation.isPending || updateMutation.isPending
-                  ? "Saving..."
-                  : editingUnit
-                    ? "Save Changes"
-                    : "Create"}
-              </button>
+                <SelectTrigger id="unit-parent">
+                  <SelectValue placeholder="None (root level)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (root level)</SelectItem>
+                  {orgUnits.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-      )}
+          <AnimatedDialogFooter>
+            <Button variant="outline" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Saving..."
+                : editingUnit
+                  ? "Save Changes"
+                  : "Create"}
+            </Button>
+          </AnimatedDialogFooter>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
     </div>
   );
 }

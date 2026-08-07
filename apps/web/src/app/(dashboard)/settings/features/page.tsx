@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { toast } from "sonner";
 import { useFeatures, useToggleFeature, COMPANY_ID, type CompanyFeature } from "@/services";
 
 interface FeatureRow {
@@ -42,12 +52,24 @@ export default function FeaturesPage() {
 
   const features: FeatureRow[] = companyFeatures?.map(toFeatureRow) ?? [];
 
-  const toggleEnabled = (featureId: string, currentEnabled: boolean) => {
-    toggleFeatureMutation.mutate({
-      companyId: COMPANY_ID,
-      featureId,
-      enabled: !currentEnabled,
-    });
+  const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
+    toggleFeatureMutation.mutate(
+      {
+        companyId: COMPANY_ID,
+        featureId,
+        enabled: !currentEnabled,
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            `Feature "${displayName}" ${!currentEnabled ? "enabled" : "disabled"} successfully`
+          );
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to toggle feature");
+        },
+      }
+    );
   };
 
   const filteredFeatures = features.filter(
@@ -82,26 +104,31 @@ export default function FeaturesPage() {
       key: "enabled",
       header: "Enabled",
       render: (row) => (
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={(e) => {
             e.stopPropagation();
-            toggleEnabled(row.featureId, row.enabled);
+            toggleEnabled(row.featureId, row.enabled, row.displayName);
           }}
           disabled={toggleFeatureMutation.isPending}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-            row.enabled ? "bg-primary" : "bg-muted"
-          } disabled:opacity-50`}
+          className="p-0 h-auto hover:bg-transparent"
           role="switch"
           aria-checked={row.enabled}
           aria-label={`${row.enabled ? "Disable" : "Enable"} ${row.displayName}`}
         >
           <span
-            className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
-              row.enabled ? "translate-x-4.5" : "translate-x-1"
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              row.enabled ? "bg-primary" : "bg-muted"
             }`}
-          />
-        </button>
+          >
+            <span
+              className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+                row.enabled ? "translate-x-4.5" : "translate-x-1"
+              }`}
+            />
+          </span>
+        </Button>
       ),
     },
   ];
@@ -190,26 +217,26 @@ export default function FeaturesPage() {
                   </Badge>
                 </div>
                 <div className="mt-3 rounded-md border border-border">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Key</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Name</th>
-                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Key</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Description</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {feature.permissions.map((perm) => (
-                        <tr key={perm.key} className="border-t border-border">
-                          <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                        <TableRow key={perm.key}>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
                             {feature.key}:{perm.key}
-                          </td>
-                          <td className="px-3 py-2 text-foreground">{perm.displayName}</td>
-                          <td className="px-3 py-2 text-muted-foreground">{perm.description}</td>
-                        </tr>
+                          </TableCell>
+                          <TableCell className="text-foreground">{perm.displayName}</TableCell>
+                          <TableCell className="text-muted-foreground">{perm.description}</TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             );

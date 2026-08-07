@@ -3,6 +3,25 @@
 import { useState, useCallback } from "react";
 import { Badge, SearchInput } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AnimatedDialog,
+  AnimatedDialogContent,
+  AnimatedDialogHeader,
+  AnimatedDialogTitle,
+  AnimatedDialogDescription,
+  AnimatedDialogFooter,
+} from "@/components/ui/animated-dialog";
+import { toast } from "sonner";
 import {
   useRoles,
   useCreateRole,
@@ -64,10 +83,14 @@ export default function RolesPage() {
       { companyId: COMPANY_ID, name: newRoleName.trim(), description: newRoleDescription.trim() || undefined },
       {
         onSuccess: (newRole) => {
+          toast.success("Role created successfully");
           setSelectedRoleId(newRole.id);
           setNewRoleName("");
           setNewRoleDescription("");
           setShowCreateModal(false);
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to create role");
         },
       }
     );
@@ -80,7 +103,11 @@ export default function RolesPage() {
       { companyId: COMPANY_ID, name: duplicateName, description: selectedRole.description || undefined },
       {
         onSuccess: (newRole) => {
+          toast.success("Role duplicated successfully");
           setSelectedRoleId(newRole.id);
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to duplicate role");
         },
       }
     );
@@ -90,18 +117,38 @@ export default function RolesPage() {
     (featurePermissionId: string, checked: boolean, existingPermId?: string) => {
       if (!effectiveSelectedId) return;
       if (checked) {
-        addPermissionMutation.mutate({
-          companyId: COMPANY_ID,
-          roleId: effectiveSelectedId,
-          featurePermissionId,
-          scope: "OWN",
-        });
+        addPermissionMutation.mutate(
+          {
+            companyId: COMPANY_ID,
+            roleId: effectiveSelectedId,
+            featurePermissionId,
+            scope: "OWN",
+          },
+          {
+            onSuccess: () => {
+              toast.success("Permission added");
+            },
+            onError: (err) => {
+              toast.error(err.message || "Failed to add permission");
+            },
+          }
+        );
       } else if (existingPermId) {
-        removePermissionMutation.mutate({
-          companyId: COMPANY_ID,
-          roleId: effectiveSelectedId,
-          permId: existingPermId,
-        });
+        removePermissionMutation.mutate(
+          {
+            companyId: COMPANY_ID,
+            roleId: effectiveSelectedId,
+            permId: existingPermId,
+          },
+          {
+            onSuccess: () => {
+              toast.success("Permission removed");
+            },
+            onError: (err) => {
+              toast.error(err.message || "Failed to remove permission");
+            },
+          }
+        );
       }
     },
     [effectiveSelectedId, addPermissionMutation, removePermissionMutation]
@@ -120,12 +167,25 @@ export default function RolesPage() {
           },
           {
             onSuccess: () => {
-              addPermissionMutation.mutate({
-                companyId: COMPANY_ID,
-                roleId: effectiveSelectedId,
-                featurePermissionId,
-                scope: newScope,
-              });
+              addPermissionMutation.mutate(
+                {
+                  companyId: COMPANY_ID,
+                  roleId: effectiveSelectedId,
+                  featurePermissionId,
+                  scope: newScope,
+                },
+                {
+                  onSuccess: () => {
+                    toast.success("Scope updated");
+                  },
+                  onError: (err) => {
+                    toast.error(err.message || "Failed to update scope");
+                  },
+                }
+              );
+            },
+            onError: (err) => {
+              toast.error(err.message || "Failed to update scope");
             },
           }
         );
@@ -185,21 +245,18 @@ export default function RolesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={handleDuplicateRole}
             disabled={createRoleMutation.isPending}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-50"
           >
             Duplicate Role
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => setShowCreateModal(true)}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Create Role
-          </button>
+          </Button>
         </div>
       </AppBar>
 
@@ -215,24 +272,27 @@ export default function RolesPage() {
           </div>
           <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
             {filteredRoles.map((role) => (
-              <button
+              <Button
                 key={role.id}
                 type="button"
+                variant="ghost"
                 onClick={() => setSelectedRoleId(role.id)}
-                className={`w-full border-b border-border px-4 py-3 text-left transition-colors hover:bg-muted/50 ${
+                className={`w-full h-auto border-b border-border rounded-none px-4 py-3 text-left justify-start transition-colors hover:bg-muted/50 ${
                   role.id === effectiveSelectedId ? "bg-muted/70" : ""
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">{role.name}</span>
-                  {role.isSystem && (
-                    <Badge variant="info">System</Badge>
-                  )}
+                <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground">{role.name}</span>
+                    {role.isSystem && (
+                      <Badge variant="info">System</Badge>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                    {role.description}
+                  </p>
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                  {role.description}
-                </p>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -270,63 +330,54 @@ export default function RolesPage() {
       </div>
 
       {/* Create Role Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">Create Role</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+      <AnimatedDialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <AnimatedDialogContent className="sm:max-w-md">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>Create Role</AnimatedDialogTitle>
+            <AnimatedDialogDescription>
               Create a new role. You can assign permissions after creation.
-            </p>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label htmlFor="role-name" className="block text-sm font-medium text-foreground">
-                  Name
-                </label>
-                <input
-                  id="role-name"
-                  type="text"
-                  value={newRoleName}
-                  onChange={(e) => setNewRoleName(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Finance Administrator"
-                  autoFocus
-                  onKeyDown={(e) => { if (e.key === "Enter") handleCreateRole(); }}
-                />
-              </div>
-              <div>
-                <label htmlFor="role-desc" className="block text-sm font-medium text-foreground">
-                  Description
-                </label>
-                <input
-                  id="role-desc"
-                  type="text"
-                  value={newRoleDescription}
-                  onChange={(e) => setNewRoleDescription(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Brief description of this role's responsibilities"
-                />
-              </div>
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="role-name">Name</Label>
+              <Input
+                id="role-name"
+                type="text"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+                placeholder="e.g., Finance Administrator"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === "Enter") handleCreateRole(); }}
+              />
             </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowCreateModal(false); setNewRoleName(""); setNewRoleDescription(""); }}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateRole}
-                disabled={!newRoleName.trim() || createRoleMutation.isPending}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {createRoleMutation.isPending ? "Creating..." : "Create"}
-              </button>
+            <div className="space-y-2">
+              <Label htmlFor="role-desc">Description</Label>
+              <Input
+                id="role-desc"
+                type="text"
+                value={newRoleDescription}
+                onChange={(e) => setNewRoleDescription(e.target.value)}
+                placeholder="Brief description of this role's responsibilities"
+              />
             </div>
           </div>
-        </div>
-      )}
+          <AnimatedDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setShowCreateModal(false); setNewRoleName(""); setNewRoleDescription(""); }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateRole}
+              disabled={!newRoleName.trim() || createRoleMutation.isPending}
+            >
+              {createRoleMutation.isPending ? "Creating..." : "Create"}
+            </Button>
+          </AnimatedDialogFooter>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
     </div>
   );
 }
@@ -394,21 +445,27 @@ function PermissionMatrix({ features, rolePermissions, onToggle, onScopeChange, 
                         {fp.displayName}
                       </td>
                       <td className="px-3 py-2">
-                        <select
+                        <Select
                           value={currentScope}
                           disabled={!isEnabled || isMutating}
-                          onChange={(e) => {
-                            const newScope = e.target.value as Scope;
+                          onValueChange={(value) => {
+                            const newScope = value as Scope;
                             onScopeChange(fp.id, newScope, assigned?.id);
                           }}
-                          className={`rounded border border-border bg-background px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${isEnabled ? scopeColors[currentScope] : "text-muted-foreground"}`}
                         >
-                          {scopeOptions.map((s) => (
-                            <option key={s} value={s}>
-                              {s.replace(/_/g, " ")}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger
+                            className={`h-7 w-[160px] text-xs font-medium ${isEnabled ? scopeColors[currentScope] : "text-muted-foreground"}`}
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {scopeOptions.map((s) => (
+                              <SelectItem key={s} value={s}>
+                                {s.replace(/_/g, " ")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </td>
                     </tr>
                   );

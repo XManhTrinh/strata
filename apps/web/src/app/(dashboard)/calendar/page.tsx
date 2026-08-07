@@ -1,6 +1,8 @@
 "use client";
 
 import { CalendarView } from "@/features/calendar/CalendarView";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   useCalendarEvents,
   useCreateLeaveRequest,
@@ -55,18 +57,16 @@ export default function CalendarPage() {
   if (isError) {
     return (
       <div className="h-[calc(100vh-64px-24px)] flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
-          <p className="text-sm text-destructive mb-4">
-            {error?.message || "Failed to load calendar data"}
-          </p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <p className="text-sm text-destructive mb-4">
+              {error?.message || "Failed to load calendar data"}
+            </p>
+            <Button onClick={() => refetch()}>
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
