@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Badge, SearchInput } from "@strata/ui";
+import { Badge } from "@strata/ui";
+import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -265,9 +266,9 @@ export default function RolesPage() {
         {/* Left Panel: Role List */}
         <div className="rounded-lg border border-border bg-background">
           <div className="border-b border-border p-3">
-            <SearchInput
+            <SearchBar
               value={roleSearch}
-              onChange={setRoleSearch}
+              onValueChange={setRoleSearch}
               placeholder="Search roles..."
             />
           </div>

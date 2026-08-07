@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DataTable, SearchInput, type Column } from "@strata/ui";
+import { DataTable, type Column } from "@strata/ui";
+import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { usePeople, useCreatePerson, useUpdatePerson, useDeletePerson } from "@/services";
 import type { Person, CreatePersonRequest } from "@/services";
@@ -186,16 +187,15 @@ export default function PeoplePage() {
         <Button onClick={openAdd}>Add Person</Button>
       </AppBar>
 
-      <div className="max-w-sm">
-        <SearchInput
-          value={search}
-          onChange={(val) => {
-            setSearch(val);
-            setPage(1);
-          }}
-          placeholder="Search people..."
-        />
-      </div>
+      <SearchBar
+        className="max-w-sm"
+        value={search}
+        onValueChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
+        placeholder="Search people..."
+      />
 
       <DataTable<PersonRow>
         columns={columns}

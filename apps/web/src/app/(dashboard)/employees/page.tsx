@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
+import { DataTable, Badge, type Column } from "@strata/ui";
+import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from "@/services";
 import type { Employee, CreateEmployeeRequest } from "@/services";
@@ -230,16 +231,15 @@ export default function EmployeesPage() {
       </AppBar>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="max-w-sm flex-1">
-          <SearchInput
-            value={search}
-            onChange={(val) => {
-              setSearch(val);
-              setPage(1);
-            }}
-            placeholder="Search employees..."
-          />
-        </div>
+        <SearchBar
+          className="max-w-sm flex-1"
+          value={search}
+          onValueChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+          placeholder="Search employees..."
+        />
         <Select
           value={statusFilter}
           onValueChange={(value) => {

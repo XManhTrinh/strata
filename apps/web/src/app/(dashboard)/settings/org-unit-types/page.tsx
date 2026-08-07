@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
+import { DataTable, Badge, type Column } from "@strata/ui";
+import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,13 +217,12 @@ export default function OrgUnitTypesPage() {
         </Button>
       </AppBar>
 
-      <div className="max-w-sm">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search types..."
-        />
-      </div>
+      <SearchBar
+        className="max-w-sm"
+        value={search}
+        onValueChange={setSearch}
+        placeholder="Search types..."
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">

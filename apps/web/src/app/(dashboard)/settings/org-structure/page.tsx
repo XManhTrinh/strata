@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Badge, SearchInput } from "@strata/ui";
+import { Badge } from "@strata/ui";
+import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -286,13 +287,12 @@ export default function OrgStructurePage() {
         </Button>
       </AppBar>
 
-      <div className="max-w-sm">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Search units..."
-        />
-      </div>
+      <SearchBar
+        className="max-w-sm"
+        value={search}
+        onValueChange={setSearch}
+        placeholder="Search units..."
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
