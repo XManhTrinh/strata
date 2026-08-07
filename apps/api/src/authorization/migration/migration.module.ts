@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../../auth/auth.module';
+import { FeatureRegistryService } from '../feature-registry/feature-registry.service';
 import { MigrationService } from './migration.service';
 import { MigrationCommand } from './migration.command';
 
@@ -7,7 +9,8 @@ import { MigrationCommand } from './migration.command';
  * from the legacy permission system (v1) to the new scalable authorization (v2).
  */
 @Module({
-  providers: [MigrationService, MigrationCommand],
+  imports: [AuthModule],
+  providers: [MigrationService, MigrationCommand, FeatureRegistryService],
   exports: [MigrationService, MigrationCommand],
 })
 export class MigrationModule {}
