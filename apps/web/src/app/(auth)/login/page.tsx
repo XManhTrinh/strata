@@ -16,13 +16,18 @@ export default function LoginPage() {
   const [showSSO, setShowSSO] = useState(false);
   const [ssoOrgId, setSsoOrgId] = useState("");
 
-  const { login, loginWithGoogle, devLogin, isLoading, error, isAuthenticated } = useAuth();
+  const { login, loginWithGoogle, devLogin, isLoading, error, isAuthenticated, checkSession } = useAuth();
   const router = useRouter();
+
+  // Check if already authenticated on mount
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/");
+      router.replace("/");
     }
   }, [isAuthenticated, router]);
 
@@ -76,6 +81,13 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background">
+      {/* Show loading spinner while checking existing session */}
+      {isLoading && !email && !password ? (
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Checking session...</p>
+        </div>
+      ) : (
       <div className="w-full max-w-sm space-y-6 p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground">Sign in to Strata</h1>
@@ -232,6 +244,7 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+      )}
     </main>
   );
 }
