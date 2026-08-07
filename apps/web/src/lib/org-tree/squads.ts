@@ -20,6 +20,14 @@ export const TRIBES: Tribe[] = [
     name: "Design & UX",
     squads: ["Product Design", "Brand"],
   },
+  {
+    name: "People & Culture",
+    squads: ["HR Operations", "Talent Acquisition", "Learning & Development"],
+  },
+  {
+    name: "Business Operations",
+    squads: ["Finance", "Legal", "Marketing", "Sales"],
+  },
 ];
 
 export const ALL_SQUADS = TRIBES.flatMap((t) => t.squads);

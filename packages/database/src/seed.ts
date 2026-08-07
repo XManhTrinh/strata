@@ -24,6 +24,11 @@ const IDS = {
     design: "ou_design_001",
     finance: "ou_finance_001",
     people: "ou_people_001",
+    hr: "ou_hr_001",
+    legal: "ou_legal_001",
+    marketing: "ou_marketing_001",
+    sales: "ou_sales_001",
+    operations: "ou_operations_001",
     // Tribes (under Engineering)
     platformTribe: "ou_platform_tribe_001",
     productTribe: "ou_product_tribe_001",
@@ -91,9 +96,9 @@ const IDS = {
     engineeringWrite: "fp_engineering_write_001",
   },
   // Users (Person, User, Employee share index) — first 12 hardcoded, rest generated
-  persons: Array.from({ length: 150 }, (_, i) => `per_${String(i + 1).padStart(3, "0")}`),
-  users: Array.from({ length: 150 }, (_, i) => `usr_${String(i + 1).padStart(3, "0")}`),
-  employees: Array.from({ length: 150 }, (_, i) => `emp_${String(i + 1).padStart(3, "0")}`),
+  persons: Array.from({ length: 500 }, (_, i) => `per_${String(i + 1).padStart(3, "0")}`),
+  users: Array.from({ length: 500 }, (_, i) => `usr_${String(i + 1).padStart(3, "0")}`),
+  employees: Array.from({ length: 500 }, (_, i) => `emp_${String(i + 1).padStart(3, "0")}`),
   // Event Types
   eventTypes: {
     meeting: "evt_meeting_001",
@@ -170,7 +175,7 @@ function generateAdditionalUsers(count: number) {
   }));
 }
 
-const ADDITIONAL_USERS = generateAdditionalUsers(138); // Generate 138 more users (13–150)
+const ADDITIONAL_USERS = generateAdditionalUsers(488); // Generate 488 more users (13–500)
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -700,7 +705,7 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
       });
     }
   }
-  log(`Assigned ${assignments.length + 138} user-role mappings`);
+  log(`Assigned ${assignments.length + 488} user-role mappings`);
 }
 
 async function seedReportingRelationships(companyId: string) {
@@ -708,102 +713,163 @@ async function seedReportingRelationships(companyId: string) {
   
   const relationships: { userId: string; managerId: string }[] = [];
   
-  // ─── Level 1: C-suite → CEO/CTO (Sarah, idx 0 is root — no manager for her) ───
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEVEL 1: C-suite → CEO (Sarah, idx 0 is root)
+  // ═══════════════════════════════════════════════════════════════════════════
   relationships.push({ userId: IDS.users[1], managerId: IDS.users[0] });  // CFO David → CEO
   relationships.push({ userId: IDS.users[2], managerId: IDS.users[0] });  // CPO Amara → CEO
   relationships.push({ userId: IDS.users[3], managerId: IDS.users[0] });  // VP Eng Marcus → CEO
   
-  // ─── Level 2: Reports to CPO (Amara, idx 2) ────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEVEL 2: VPs and Directors
+  // ═══════════════════════════════════════════════════════════════════════════
   relationships.push({ userId: IDS.users[4], managerId: IDS.users[2] });  // VP Product Priya → CPO
   relationships.push({ userId: IDS.users[10], managerId: IDS.users[2] }); // Design lead Maya → CPO
-  
-  // ─── Level 2: Reports to VP Engineering (Marcus, idx 3) ────────────────────────
   relationships.push({ userId: IDS.users[5], managerId: IDS.users[3] });  // Director James → VP Eng
   relationships.push({ userId: IDS.users[6], managerId: IDS.users[3] });  // Sr EM Lisa → VP Eng
   relationships.push({ userId: IDS.users[7], managerId: IDS.users[3] });  // EM Andre → VP Eng
   
-  // ─── Level 3: Reports to Sr EM Lisa (idx 6) ────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEVEL 3: Managers and Leads
+  // ═══════════════════════════════════════════════════════════════════════════
   relationships.push({ userId: IDS.users[8], managerId: IDS.users[6] });  // Staff Eng Emily → Lisa
   relationships.push({ userId: IDS.users[9], managerId: IDS.users[6] });  // Sr Eng Kevin → Lisa
-  
-  // ─── Level 3: Reports to VP Product Priya (idx 4) ──────────────────────────────
   relationships.push({ userId: IDS.users[11], managerId: IDS.users[4] }); // Sr PM Raj → VP Product
   
-  // ─── Level 4: indexes 12-19 → Staff Eng Emily (idx 8) — her senior eng team ───
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENGINEERING (indexes 12-249, ~238 engineers across multiple teams)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Emily's team (idx 8): 8 direct leads + their teams
   for (let i = 12; i <= 19; i++) {
     relationships.push({ userId: IDS.users[i], managerId: IDS.users[8] });
   }
-  
-  // ─── Level 4: indexes 20-27 → Sr Eng Kevin (idx 9) — his eng team ─────────────
-  for (let i = 20; i <= 27; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[9] });
-  }
-  
-  // ─── Level 4: indexes 28-39 → EM Andre (idx 7) — his direct team ──────────────
-  for (let i = 28; i <= 39; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[7] });
-  }
-  
-  // ─── Level 4: indexes 40-49 → Director James (idx 5) — senior engineers ───────
-  for (let i = 40; i <= 49; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[5] });
-  }
-  
-  // ─── Level 5: indexes 50-59 → split among indexes 40-44 (senior engs under James)
-  // Each of indexes 40-44 manages 2 engineers from 50-59
-  for (let i = 50; i <= 59; i++) {
-    const managerIdx = 40 + Math.floor((i - 50) / 2); // 40,40,41,41,42,42,43,43,44,44
+  // Each of Emily's leads (12-19) manages 10 engineers (indexes 100-179)
+  for (let i = 100; i <= 179; i++) {
+    const managerIdx = 12 + Math.floor((i - 100) / 10); // 12 manages 100-109, 13 manages 110-119, etc.
     relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 4: indexes 60-69 → Design lead Maya (idx 10) — design team ─────────
-  for (let i = 60; i <= 69; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[10] });
+  // Kevin's team (idx 9): 8 direct leads
+  for (let i = 20; i <= 27; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[9] });
+  }
+  // Each of Kevin's leads (20-27) manages 5 engineers (indexes 180-219)
+  for (let i = 180; i <= 219; i++) {
+    const managerIdx = 20 + Math.floor((i - 180) / 5);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 4: indexes 70-79 → Sr PM Raj (idx 11) — PM team ────────────────────
-  for (let i = 70; i <= 79; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[11] });
-  }
-  
-  // ─── Level 3: indexes 80-89 → CFO David (idx 1) — finance team ────────────────
-  for (let i = 80; i <= 89; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[1] });
-  }
-  
-  // ─── Level 4: indexes 90-94 → Sr EM Lisa (idx 6) — additional reports ─────────
-  for (let i = 90; i <= 94; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[6] });
-  }
-  
-  // ─── Level 4: indexes 95-99 → EM Andre (idx 7) — additional reports ───────────
-  for (let i = 95; i <= 99; i++) {
+  // Andre's team (idx 7): 12 direct reports
+  for (let i = 28; i <= 39; i++) {
     relationships.push({ userId: IDS.users[i], managerId: IDS.users[7] });
   }
-  
-  // ─── Level 5: indexes 100-109 → index 12 (senior lead under Emily) ────────────
-  for (let i = 100; i <= 109; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[12] });
+  // Andre's leads (28-33) each manage 5 engineers (indexes 220-249)
+  for (let i = 220; i <= 249; i++) {
+    const managerIdx = 28 + Math.floor((i - 220) / 5);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 5: indexes 110-119 → index 13 (senior lead under Emily) ────────────
-  for (let i = 110; i <= 119; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[13] });
+  // James's team (idx 5): 10 senior engineers + their reports
+  for (let i = 40; i <= 49; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[5] });
+  }
+  // James's seniors (40-49) each manage 3 engineers (indexes 250-279)
+  for (let i = 250; i <= 279; i++) {
+    const managerIdx = 40 + Math.floor((i - 250) / 3);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 5: indexes 120-129 → index 40 (senior lead under James) ────────────
-  for (let i = 120; i <= 129; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[40] });
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DESIGN (indexes 60-69 + 280-309, ~30 designers)
+  // ═══════════════════════════════════════════════════════════════════════════
+  for (let i = 60; i <= 69; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[10] }); // → Maya
+  }
+  // Design leads (60-64) each manage 6 junior designers (indexes 280-309)
+  for (let i = 280; i <= 309; i++) {
+    const managerIdx = 60 + Math.floor((i - 280) / 6);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 5: indexes 130-139 → index 41 (senior lead under James) ────────────
-  for (let i = 130; i <= 139; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[41] });
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PRODUCT (indexes 70-79 + 310-349, ~30 PMs)
+  // ═══════════════════════════════════════════════════════════════════════════
+  for (let i = 70; i <= 79; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[11] }); // → Raj
+  }
+  // PM leads (70-74) each manage 8 PMs (indexes 310-349)
+  for (let i = 310; i <= 349; i++) {
+    const managerIdx = 70 + Math.floor((i - 310) / 8);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
   
-  // ─── Level 5: indexes 140-149 → index 42 (senior lead under James) ────────────
-  for (let i = 140; i <= 149; i++) {
-    relationships.push({ userId: IDS.users[i], managerId: IDS.users[42] });
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FINANCE (indexes 80-89 + 350-379, ~40 people)
+  // ═══════════════════════════════════════════════════════════════════════════
+  for (let i = 80; i <= 89; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[1] }); // → CFO David
+  }
+  // Finance leads (80-84) each manage 6 analysts (indexes 350-379)
+  for (let i = 350; i <= 379; i++) {
+    const managerIdx = 80 + Math.floor((i - 350) / 6);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // HR / PEOPLE (indexes 380-419, ~40 people) → reports to CEO
+  // Head of HR = idx 50, reports to CEO
+  // ═══════════════════════════════════════════════════════════════════════════
+  relationships.push({ userId: IDS.users[50], managerId: IDS.users[0] }); // Head of HR → CEO
+  for (let i = 51; i <= 55; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[50] }); // HR managers → Head of HR
+  }
+  // HR team (indexes 380-419) → HR managers (51-55), 8 each
+  for (let i = 380; i <= 419; i++) {
+    const managerIdx = 51 + Math.floor((i - 380) / 8);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LEGAL (indexes 420-449, ~30 people) → reports to CEO
+  // Head of Legal = idx 56, reports to CEO
+  // ═══════════════════════════════════════════════════════════════════════════
+  relationships.push({ userId: IDS.users[56], managerId: IDS.users[0] }); // Head of Legal → CEO
+  for (let i = 57; i <= 59; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[56] }); // Legal managers → Head of Legal
+  }
+  // Legal team (indexes 420-449) → Legal managers (57-59), 10 each
+  for (let i = 420; i <= 449; i++) {
+    const managerIdx = 57 + Math.floor((i - 420) / 10);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MARKETING (indexes 450-474, ~25 people) → reports to CPO
+  // Head of Marketing = idx 90, reports to CPO
+  // ═══════════════════════════════════════════════════════════════════════════
+  relationships.push({ userId: IDS.users[90], managerId: IDS.users[2] }); // Head of Marketing → CPO
+  for (let i = 91; i <= 94; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[90] }); // Marketing leads
+  }
+  // Marketing team (indexes 450-474) → Marketing leads (91-94), ~6 each
+  for (let i = 450; i <= 474; i++) {
+    const managerIdx = 91 + Math.floor((i - 450) / 7);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SALES (indexes 475-499, ~25 people) → reports to CEO
+  // Head of Sales = idx 95, reports to CEO
+  // ═══════════════════════════════════════════════════════════════════════════
+  relationships.push({ userId: IDS.users[95], managerId: IDS.users[0] }); // Head of Sales → CEO
+  for (let i = 96; i <= 99; i++) {
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[95] }); // Sales managers
+  }
+  // Sales team (indexes 475-499) → Sales managers (96-99), ~6 each
+  for (let i = 475; i <= 499; i++) {
+    const managerIdx = 96 + Math.floor((i - 475) / 7);
+    relationships.push({ userId: IDS.users[i], managerId: IDS.users[managerIdx] });
   }
 
   for (const r of relationships) {
