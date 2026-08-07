@@ -52,24 +52,9 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
   const closeTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const railRef = React.useRef<HTMLElement>(null);
   const flyoutRef = React.useRef<HTMLDivElement>(null);
-  const itemRefs = React.useRef<Map<string, HTMLElement>>(new Map());
 
-  // Get the hovered item's data for flyout content
+  // Get the hovered item's data for drawer content
   const activeHoverItem = items.find((i) => i.label === hoveredItem && i.children?.length);
-
-  // Calculate flyout vertical position based on the hovered item
-  const [flyoutTop, setFlyoutTop] = React.useState(0);
-
-  React.useEffect(() => {
-    if (hoveredItem && railRef.current) {
-      const itemEl = itemRefs.current.get(hoveredItem);
-      if (itemEl && railRef.current) {
-        const railRect = railRef.current.getBoundingClientRect();
-        const itemRect = itemEl.getBoundingClientRect();
-        setFlyoutTop(itemRect.top - railRect.top);
-      }
-    }
-  }, [hoveredItem]);
 
   const cancelClose = () => {
     if (closeTimeout.current) {
@@ -129,9 +114,6 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
           return (
             <div
               key={item.href}
-              ref={(el) => {
-                if (el) itemRefs.current.set(item.label, el);
-              }}
               onMouseEnter={() => handleItemEnter(item.label)}
               onMouseLeave={handleItemLeave}
             >
@@ -147,26 +129,61 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
         })}
       </nav>
 
-      {/* Single flyout drawer — positioned to the right of the rail */}
+      {/* Full-height navigation drawer — slides out next to the rail */}
       <AnimatePresence>
         {activeHoverItem && (
           <motion.div
             ref={flyoutRef}
-            key="flyout"
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -8 }}
-            transition={{ duration: 0.15 }}
-            className="fixed left-20 z-50"
-            style={{ top: flyoutTop }}
+            key="drawer"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 256, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] as [number, number, number, number] }}
+            className="fixed left-20 top-0 bottom-0 z-30 overflow-hidden"
             onMouseEnter={handleFlyoutEnter}
             onMouseLeave={handleFlyoutLeave}
           >
-            <FlyoutDrawer
-              title={activeHoverItem.label}
-              items={activeHoverItem.children!}
-              pathname={pathname}
-            />
+            <div className="w-64 h-full bg-[hsl(var(--surface))] border-r border-outline-variant/30 flex flex-col">
+              {/* Drawer header */}
+              <div className="flex items-center h-16 px-6 shrink-0">
+                <h2 className="text-[16px] leading-6 font-medium text-surface-foreground">
+                  {activeHoverItem.label}
+                </h2>
+              </div>
+
+              {/* Sub-items */}
+              <nav className="flex-1 overflow-y-auto px-3 pb-4">
+                <ul className="space-y-1">
+                  {activeHoverItem.children!.map((sub) => {
+                    const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "/");
+
+                    return (
+                      <li key={sub.href}>
+                        <Link
+                          href={sub.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-full h-14 px-4 transition-colors duration-200",
+                            isSubActive
+                              ? "bg-secondary-container text-secondary-container-foreground font-medium"
+                              : "text-surface-variant-foreground hover:bg-surface-foreground/8 active:bg-surface-foreground/12"
+                          )}
+                        >
+                          <Icon
+                            name={sub.icon}
+                            size={24}
+                            filled={isSubActive}
+                            className="shrink-0"
+                          />
+                          <span className="text-[14px] leading-5 truncate">
+                            {sub.label}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -232,54 +249,4 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
   );
 }
 
-/**
- * Flyout Drawer — appears beside the rail showing sub-navigation items.
- * Content transitions when hovering between different parent items.
- */
-function FlyoutDrawer({
-  title,
-  items,
-  pathname,
-}: {
-  title: string;
-  items: NavigationRailSubItem[];
-  pathname: string;
-}) {
-  return (
-    <div className="w-56 rounded-2xl bg-[hsl(var(--surface))] shadow-xl border border-outline-variant/50 py-2 px-2">
-      {/* Header */}
-      <p className="px-3 py-2 text-[12px] leading-4 font-medium text-surface-variant-foreground uppercase tracking-wider">
-        {title}
-      </p>
 
-      {/* Sub-items */}
-      <ul className="space-y-0.5">
-        {items.map((sub) => {
-          const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "/");
-
-          return (
-            <li key={sub.href}>
-              <Link
-                href={sub.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-full h-10 px-3 transition-colors duration-150",
-                  isSubActive
-                    ? "bg-secondary-container text-secondary-container-foreground font-medium"
-                    : "text-surface-foreground hover:bg-surface-foreground/8"
-                )}
-              >
-                <Icon
-                  name={sub.icon}
-                  size={20}
-                  filled={isSubActive}
-                  className="shrink-0"
-                />
-                <span className="text-[13px] leading-5 truncate">{sub.label}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
