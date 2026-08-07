@@ -13,6 +13,7 @@ const IDS = {
     division: "out_division_001",
     department: "out_department_001",
     tribe: "out_tribe_001",
+    cluster: "out_cluster_001",
     squad: "out_squad_001",
   },
   // Org Units
@@ -26,16 +27,28 @@ const IDS = {
     // Tribes (under Engineering)
     platformTribe: "ou_platform_tribe_001",
     productTribe: "ou_product_tribe_001",
-    // Squads (under Platform Tribe)
+    // Clusters (under Platform Infrastructure Tribe)
+    coreInfraCluster: "ou_core_infra_cluster_001",
+    reliabilityCluster: "ou_reliability_cluster_001",
+    // Clusters (under Growth & Engagement Tribe)
+    consumerCluster: "ou_consumer_cluster_001",
+    monetizationCluster: "ou_monetization_cluster_001",
+    // Squads (under Core Infrastructure Cluster)
     infraSquad: "ou_infra_squad_001",
     webSquad: "ou_web_squad_001",
-    // Squads (under Growth & Engagement Tribe)
+    // Squads (under Reliability Cluster)
+    sreSquad: "ou_sre_squad_001",
+    // Squads (under Consumer Cluster)
     feedSquad: "ou_feed_squad_001",
     messagingSquad: "ou_messaging_squad_001",
-    // Squads (under Product)
+    // Squads (under Monetization Cluster)
+    adsSquad: "ou_ads_squad_001",
+    // Squads (under Product & Strategy)
     coreProductSquad: "ou_core_prod_001",
-    // Squads (under Design)
+    dataSquad: "ou_data_squad_001",
+    // Squads (under Design & UX)
     productDesignSquad: "ou_prod_design_001",
+    brandSquad: "ou_brand_squad_001",
   },
   // Positions
   positions: {
@@ -81,34 +94,6 @@ const IDS = {
   persons: Array.from({ length: 100 }, (_, i) => `per_${String(i + 1).padStart(3, "0")}`),
   users: Array.from({ length: 100 }, (_, i) => `usr_${String(i + 1).padStart(3, "0")}`),
   employees: Array.from({ length: 100 }, (_, i) => `emp_${String(i + 1).padStart(3, "0")}`),
-  // Legacy departments
-  departments: {
-    engineering: "dept_engineering_001",
-    product: "dept_product_001",
-    design: "dept_design_001",
-  },
-  // Legacy positions
-  legacyPositions: {
-    softwareEngineer: "lpos_sw_eng_001",
-    engineeringManager: "lpos_eng_mgr_001",
-    productManager: "lpos_prod_mgr_001",
-  },
-  // Engineering hierarchy
-  tribes: {
-    platform: "tribe_platform_001",
-    product: "tribe_product_001",
-  },
-  clusters: {
-    infrastructure: "cluster_infra_001",
-    frontend: "cluster_frontend_001",
-    backend: "cluster_backend_001",
-  },
-  squads: {
-    cloudInfra: "squad_cloud_infra_001",
-    devTools: "squad_dev_tools_001",
-    webApp: "squad_web_app_001",
-    mobileApp: "squad_mobile_001",
-  },
   // Event Types
   eventTypes: {
     meeting: "evt_meeting_001",
@@ -189,7 +174,7 @@ const ADDITIONAL_USERS = generateAdditionalUsers(88); // Generate 88 more users 
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TASK 6.1 — Company & Organization Structure
+// Company & Organization Structure
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function seedCompany() {
@@ -209,7 +194,7 @@ async function seedCompany() {
 }
 
 async function seedLegacyOrganization() {
-  logSection("Legacy Organization");
+  logSection("Organization (tenant record)");
   const org = await prisma.organization.upsert({
     where: { id: IDS.legacyOrg },
     update: { name: "Strata Technologies" },
@@ -218,7 +203,7 @@ async function seedLegacyOrganization() {
       name: "Strata Technologies",
     },
   });
-  log(`Legacy Organization: ${org.name} (${org.id})`);
+  log(`Organization: ${org.name} (${org.id})`);
   return org;
 }
 
@@ -228,7 +213,8 @@ async function seedOrgUnitTypes(companyId: string) {
     { id: IDS.orgUnitTypes.division, name: "Division", description: "Top-level strategic grouping", icon: "globe", color: "#1E40AF", displayOrder: 1 },
     { id: IDS.orgUnitTypes.department, name: "Department", description: "Functional organizational unit", icon: "building", color: "#3B82F6", displayOrder: 2 },
     { id: IDS.orgUnitTypes.tribe, name: "Tribe", description: "Cross-functional group of squads", icon: "users", color: "#8B5CF6", displayOrder: 3 },
-    { id: IDS.orgUnitTypes.squad, name: "Squad", description: "Autonomous delivery team", icon: "user-group", color: "#10B981", displayOrder: 4 },
+    { id: IDS.orgUnitTypes.cluster, name: "Cluster", description: "Group of related squads within a tribe", icon: "layers", color: "#F59E0B", displayOrder: 4 },
+    { id: IDS.orgUnitTypes.squad, name: "Squad", description: "Autonomous delivery team", icon: "user-group", color: "#10B981", displayOrder: 5 },
   ];
 
   const results = [];
@@ -248,10 +234,34 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
   logSection("Organization Units");
   const deptType = types.find((t) => t.name === "Department")!;
   const tribeType = types.find((t) => t.name === "Tribe")!;
+  const clusterType = types.find((t) => t.name === "Cluster")!;
   const squadType = types.find((t) => t.name === "Squad")!;
 
-  // Level 1 — Departments (root)
+  // Full hierarchy:
+  // Engineering (Department)
+  // ├── Platform Infrastructure (Tribe)
+  // │   ├── Core Infrastructure (Cluster)
+  // │   │   ├── Cloud Services (Squad)
+  // │   │   └── Developer Experience (Squad)
+  // │   └── Reliability (Cluster)
+  // │       └── Site Reliability (Squad)
+  // └── Growth & Engagement (Tribe)
+  //     ├── Consumer (Cluster)
+  //     │   ├── Feed & Discovery (Squad)
+  //     │   └── Messaging Platform (Squad)
+  //     └── Monetization (Cluster)
+  //         └── Ads Platform (Squad)
+  // Product & Strategy (Department)
+  // ├── Core Product (Squad)
+  // └── Data & Analytics (Squad)
+  // Design & UX (Department)
+  // ├── Product Design (Squad)
+  // └── Brand & Content (Squad)
+  // Finance & Operations (Department)
+  // People & Culture (Department)
+
   const units = [
+    // Level 1 — Departments (root)
     { id: IDS.orgUnits.engineering, typeId: deptType.id, name: "Engineering", code: "ENG", parentId: null, path: `/${IDS.orgUnits.engineering}`, sortOrder: 1 },
     { id: IDS.orgUnits.product, typeId: deptType.id, name: "Product & Strategy", code: "PROD", parentId: null, path: `/${IDS.orgUnits.product}`, sortOrder: 2 },
     { id: IDS.orgUnits.design, typeId: deptType.id, name: "Design & UX", code: "DSG", parentId: null, path: `/${IDS.orgUnits.design}`, sortOrder: 3 },
@@ -260,16 +270,28 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
     // Level 2 — Tribes under Engineering
     { id: IDS.orgUnits.platformTribe, typeId: tribeType.id, name: "Platform Infrastructure", code: "PLAT", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}`, sortOrder: 1 },
     { id: IDS.orgUnits.productTribe, typeId: tribeType.id, name: "Growth & Engagement", code: "GRWTH", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}`, sortOrder: 2 },
-    // Level 3 — Squads under Platform Infrastructure Tribe
-    { id: IDS.orgUnits.infraSquad, typeId: squadType.id, name: "Cloud Services", code: "CLOUD", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.infraSquad}`, sortOrder: 1 },
-    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Developer Experience", code: "DEVX", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.webSquad}`, sortOrder: 2 },
-    // Level 3 — Squads under Growth & Engagement Tribe
-    { id: IDS.orgUnits.feedSquad, typeId: squadType.id, name: "Feed & Discovery", code: "FEED", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.feedSquad}`, sortOrder: 1 },
-    { id: IDS.orgUnits.messagingSquad, typeId: squadType.id, name: "Messaging Platform", code: "MSG", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.messagingSquad}`, sortOrder: 2 },
+    // Level 3 — Clusters under Platform Infrastructure Tribe
+    { id: IDS.orgUnits.coreInfraCluster, typeId: clusterType.id, name: "Core Infrastructure", code: "CINF", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.coreInfraCluster}`, sortOrder: 1 },
+    { id: IDS.orgUnits.reliabilityCluster, typeId: clusterType.id, name: "Reliability", code: "REL", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.reliabilityCluster}`, sortOrder: 2 },
+    // Level 3 — Clusters under Growth & Engagement Tribe
+    { id: IDS.orgUnits.consumerCluster, typeId: clusterType.id, name: "Consumer", code: "CONS", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.consumerCluster}`, sortOrder: 1 },
+    { id: IDS.orgUnits.monetizationCluster, typeId: clusterType.id, name: "Monetization", code: "MNTX", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.monetizationCluster}`, sortOrder: 2 },
+    // Level 4 — Squads under Core Infrastructure Cluster
+    { id: IDS.orgUnits.infraSquad, typeId: squadType.id, name: "Cloud Services", code: "CLOUD", parentId: IDS.orgUnits.coreInfraCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.coreInfraCluster}/${IDS.orgUnits.infraSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Developer Experience", code: "DEVX", parentId: IDS.orgUnits.coreInfraCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.coreInfraCluster}/${IDS.orgUnits.webSquad}`, sortOrder: 2 },
+    // Level 4 — Squads under Reliability Cluster
+    { id: IDS.orgUnits.sreSquad, typeId: squadType.id, name: "Site Reliability", code: "SRE", parentId: IDS.orgUnits.reliabilityCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.reliabilityCluster}/${IDS.orgUnits.sreSquad}`, sortOrder: 1 },
+    // Level 4 — Squads under Consumer Cluster
+    { id: IDS.orgUnits.feedSquad, typeId: squadType.id, name: "Feed & Discovery", code: "FEED", parentId: IDS.orgUnits.consumerCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.consumerCluster}/${IDS.orgUnits.feedSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.messagingSquad, typeId: squadType.id, name: "Messaging Platform", code: "MSG", parentId: IDS.orgUnits.consumerCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.consumerCluster}/${IDS.orgUnits.messagingSquad}`, sortOrder: 2 },
+    // Level 4 — Squads under Monetization Cluster
+    { id: IDS.orgUnits.adsSquad, typeId: squadType.id, name: "Ads Platform", code: "ADS", parentId: IDS.orgUnits.monetizationCluster, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.monetizationCluster}/${IDS.orgUnits.adsSquad}`, sortOrder: 1 },
     // Level 2 — Squads under Product & Strategy
     { id: IDS.orgUnits.coreProductSquad, typeId: squadType.id, name: "Core Product", code: "CPROD", parentId: IDS.orgUnits.product, path: `/${IDS.orgUnits.product}/${IDS.orgUnits.coreProductSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.dataSquad, typeId: squadType.id, name: "Data & Analytics", code: "DATA", parentId: IDS.orgUnits.product, path: `/${IDS.orgUnits.product}/${IDS.orgUnits.dataSquad}`, sortOrder: 2 },
     // Level 2 — Squads under Design & UX
     { id: IDS.orgUnits.productDesignSquad, typeId: squadType.id, name: "Product Design", code: "PDSG", parentId: IDS.orgUnits.design, path: `/${IDS.orgUnits.design}/${IDS.orgUnits.productDesignSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.brandSquad, typeId: squadType.id, name: "Brand & Content", code: "BRND", parentId: IDS.orgUnits.design, path: `/${IDS.orgUnits.design}/${IDS.orgUnits.brandSquad}`, sortOrder: 2 },
   ];
 
   const results = [];
@@ -286,53 +308,8 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TASK 6.2 — Users, Roles, and Reporting
+// Users, Roles, and Reporting
 // ═══════════════════════════════════════════════════════════════════════════════
-
-async function seedLegacyDepartments(organizationId: string) {
-  logSection("Legacy Departments");
-  const departments = [
-    { id: IDS.departments.engineering, name: "Engineering", organizationId },
-    { id: IDS.departments.product, name: "Product", organizationId },
-    { id: IDS.departments.design, name: "Design", organizationId },
-  ];
-
-  const results = [];
-  for (const dept of departments) {
-    const result = await prisma.department.upsert({
-      where: { id: dept.id },
-      update: { name: dept.name },
-      create: { id: dept.id, name: dept.name, organizationId: dept.organizationId },
-    });
-    results.push(result);
-    log(`Department: ${result.name}`);
-  }
-  return results;
-}
-
-async function seedLegacyPositions(departments: Awaited<ReturnType<typeof seedLegacyDepartments>>) {
-  logSection("Legacy Positions");
-  const engDept = departments.find((d) => d.name === "Engineering")!;
-  const prodDept = departments.find((d) => d.name === "Product")!;
-
-  const positions = [
-    { id: IDS.legacyPositions.softwareEngineer, title: "Software Engineer", level: 3, departmentId: engDept.id },
-    { id: IDS.legacyPositions.engineeringManager, title: "Engineering Manager", level: 5, departmentId: engDept.id },
-    { id: IDS.legacyPositions.productManager, title: "Product Manager", level: 4, departmentId: prodDept.id },
-  ];
-
-  const results = [];
-  for (const pos of positions) {
-    const result = await prisma.position.upsert({
-      where: { id: pos.id },
-      update: { title: pos.title, level: pos.level },
-      create: { id: pos.id, title: pos.title, level: pos.level, departmentId: pos.departmentId },
-    });
-    results.push(result);
-    log(`Legacy Position: ${result.title}`);
-  }
-  return results;
-}
 
 async function seedPositions(companyId: string) {
   logSection("Positions (V2)");
@@ -371,16 +348,11 @@ async function seedPositions(companyId: string) {
 async function seedUsers(
   companyId: string,
   organizationId: string,
-  orgUnits: Awaited<ReturnType<typeof seedOrgUnits>>,
-  positions: Awaited<ReturnType<typeof seedPositions>>,
-  departments: Awaited<ReturnType<typeof seedLegacyDepartments>>
+  _orgUnits: Awaited<ReturnType<typeof seedOrgUnits>>,
+  _positions: Awaited<ReturnType<typeof seedPositions>>,
 ) {
   logSection("Users (Person + User + Employee + Membership)");
   const passwordHash = await bcrypt.hash("Test1234!", 10);
-
-  const engDept = departments.find((d) => d.name === "Engineering")!;
-  const prodDept = departments.find((d) => d.name === "Product")!;
-  const desDept = departments.find((d) => d.name === "Design")!;
 
   const posMap: Record<string, string> = {
     CTO: IDS.positions.cto,
@@ -416,24 +388,6 @@ async function seedUsers(
     "Product Manager": IDS.orgUnits.coreProductSquad,
     "Software Engineer": IDS.orgUnits.infraSquad,
     Designer: IDS.orgUnits.productDesignSquad,
-  };
-
-  const deptMap: Record<string, string> = {
-    CTO: engDept.id,
-    CFO: prodDept.id,
-    CPO: prodDept.id,
-    "VP Engineering": engDept.id,
-    "VP Product": prodDept.id,
-    Director: engDept.id,
-    "Senior Engineering Manager": engDept.id,
-    "Engineering Manager": engDept.id,
-    "Staff Engineer": engDept.id,
-    "Senior Engineer": engDept.id,
-    "Senior Designer": desDept.id,
-    "Senior Product Manager": prodDept.id,
-    "Product Manager": prodDept.id,
-    "Software Engineer": engDept.id,
-    Designer: desDept.id,
   };
 
   const users = [];
@@ -472,16 +426,16 @@ async function seedUsers(
     });
     users.push(user);
 
-    // Upsert Employee (linked to legacy Organization)
+    // Upsert Employee (linked to Organization, no departmentId)
     const employee = await prisma.employee.upsert({
       where: { uin_organizationId: { uin: `ACM-${String(1000 + i)}`, organizationId } },
-      update: { departmentId: deptMap[u.role] },
+      update: { departmentId: null },
       create: {
         id: employeeId,
         uin: `ACM-${String(1000 + i)}`,
         personId: person.id,
         organizationId,
-        departmentId: deptMap[u.role],
+        departmentId: null,
         startDate: new Date(2022, i % 12, 1),
         status: "ACTIVE",
       },
@@ -508,12 +462,15 @@ async function seedUsers(
   const orgUnitIds = [
     IDS.orgUnits.infraSquad,
     IDS.orgUnits.webSquad,
+    IDS.orgUnits.sreSquad,
     IDS.orgUnits.feedSquad,
     IDS.orgUnits.messagingSquad,
+    IDS.orgUnits.adsSquad,
     IDS.orgUnits.coreProductSquad,
+    IDS.orgUnits.dataSquad,
     IDS.orgUnits.productDesignSquad,
+    IDS.orgUnits.brandSquad,
   ];
-  const deptIds = [engDept.id, engDept.id, engDept.id, engDept.id, prodDept.id, desDept.id];
 
   for (let i = 0; i < ADDITIONAL_USERS.length; i++) {
     const idx = i + 12; // 0-based index in the full 100 array (12..99)
@@ -549,13 +506,13 @@ async function seedUsers(
 
     const employee = await prisma.employee.upsert({
       where: { uin_organizationId: { uin: `ACM-${String(1000 + idx)}`, organizationId } },
-      update: { departmentId: deptIds[i % deptIds.length] },
+      update: { departmentId: null },
       create: {
         id: employeeId,
         uin: `ACM-${String(1000 + idx)}`,
         personId: person.id,
         organizationId,
-        departmentId: deptIds[i % deptIds.length],
+        departmentId: null,
         startDate: new Date(2022, idx % 12, 1),
         status: "ACTIVE",
       },
@@ -748,13 +705,6 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
 
 async function seedReportingRelationships(companyId: string) {
   logSection("Reporting Relationships");
-  // Sarah (CTO) has: Marcus (VP Eng), James (Director) reporting to her
-  // David (CFO) reports to no one (peer to CTO)
-  // Amara (CPO) has: Priya (VP Product), Maya (Senior Designer) reporting to her
-  // Marcus (VP Eng) has: Lisa (Senior EM), Andre (EM) reporting to him
-  // Lisa (Senior EM) has: Emily (Staff), Kevin (Senior) reporting to her
-  // Andre (EM) has: additional engineers reporting to him
-  // Priya (VP Product) has: Raj (Senior PM) reporting to her
   const relationships = [
     { userId: IDS.users[3], managerId: IDS.users[0] },  // Marcus (VP Eng) → Sarah (CTO)
     { userId: IDS.users[5], managerId: IDS.users[0] },  // James (Director) → Sarah (CTO)
@@ -778,7 +728,7 @@ async function seedReportingRelationships(companyId: string) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TASK 6.3 — Calendar and Leave Data
+// Calendar and Leave Data
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function seedEventTypes(companyId: string) {
@@ -843,21 +793,30 @@ async function seedCalendarEvents(companyId: string, users: { id: string }[], ev
   const oooType = eventTypes.find((et) => et.name === "Out of Office")!;
   const workshopType = eventTypes.find((et) => et.name === "Workshop")!;
 
-  const events = [
-    // Current month events
+  const events: Array<{
+    id: string;
+    ownerUserId: string;
+    eventTypeId: string;
+    title: string;
+    startDate: Date;
+    endDate: Date;
+    allDay: boolean;
+    isRecurring?: boolean;
+    recurrenceFrequency?: string | null;
+    recurrenceDaysOfWeek?: number[];
+    recurrenceEndDate?: Date | null;
+  }> = [
     { id: "ce_001", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "Engineering All-Hands", startDate: new Date(currentYear, currentMonth, 5, 10, 0), endDate: new Date(currentYear, currentMonth, 5, 11, 0), allDay: false },
     { id: "ce_002", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Sprint Review - Platform", startDate: new Date(currentYear, currentMonth, 8, 9, 0), endDate: new Date(currentYear, currentMonth, 8, 10, 30), allDay: false },
     { id: "ce_003", ownerUserId: IDS.users[2], eventTypeId: meetingType.id, title: "Design Crit", startDate: new Date(currentYear, currentMonth, 10, 14, 0), endDate: new Date(currentYear, currentMonth, 10, 15, 0), allDay: false },
     { id: "ce_004", ownerUserId: IDS.users[3], eventTypeId: oooType.id, title: "James OOO - Conference", startDate: new Date(currentYear, currentMonth, 12), endDate: new Date(currentYear, currentMonth, 14), allDay: true },
     { id: "ce_005", ownerUserId: IDS.users[0], eventTypeId: holidayType.id, title: "Company Holiday", startDate: new Date(currentYear, currentMonth, 20), endDate: new Date(currentYear, currentMonth, 20), allDay: true },
     { id: "ce_006", ownerUserId: IDS.users[4], eventTypeId: workshopType.id, title: "Tech Debt Planning", startDate: new Date(currentYear, currentMonth, 15, 13, 0), endDate: new Date(currentYear, currentMonth, 15, 16, 0), allDay: false },
-    // Next month events
     { id: "ce_007", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "Product Sync", startDate: new Date(currentYear, currentMonth + 1, 3, 10, 0), endDate: new Date(currentYear, currentMonth + 1, 3, 12, 0), allDay: false },
     { id: "ce_008", ownerUserId: IDS.users[5], eventTypeId: oooType.id, title: "Andre Vacation", startDate: new Date(currentYear, currentMonth + 1, 10), endDate: new Date(currentYear, currentMonth + 1, 14), allDay: true },
     { id: "ce_009", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Sprint Review - Platform", startDate: new Date(currentYear, currentMonth + 1, 7, 15, 0), endDate: new Date(currentYear, currentMonth + 1, 7, 16, 0), allDay: false },
     { id: "ce_010", ownerUserId: IDS.users[6], eventTypeId: workshopType.id, title: "React Advanced Patterns", startDate: new Date(currentYear, currentMonth + 1, 18, 10, 0), endDate: new Date(currentYear, currentMonth + 1, 18, 12, 0), allDay: false },
-    // Recurring event (weekly standup)
-    { id: "ce_011", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Weekly Standup", startDate: new Date(currentYear, currentMonth, 1, 9, 0), endDate: new Date(currentYear, currentMonth, 1, 9, 15), allDay: false, isRecurring: true, recurrenceFrequency: "WEEKLY" as const, recurrenceDaysOfWeek: [1, 3, 5], recurrenceEndDate: new Date(currentYear, currentMonth + 3, 1) },
+    { id: "ce_011", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Weekly Standup", startDate: new Date(currentYear, currentMonth, 1, 9, 0), endDate: new Date(currentYear, currentMonth, 1, 9, 15), allDay: false, isRecurring: true, recurrenceFrequency: "WEEKLY", recurrenceDaysOfWeek: [1, 3, 5], recurrenceEndDate: new Date(currentYear, currentMonth + 3, 1) },
   ];
 
   const results = [];
@@ -875,9 +834,9 @@ async function seedCalendarEvents(companyId: string, users: { id: string }[], ev
         endDate: ev.endDate,
         allDay: ev.allDay,
         isRecurring: ev.isRecurring ?? false,
-        recurrenceFrequency: (ev as any).recurrenceFrequency ?? null,
-        recurrenceDaysOfWeek: (ev as any).recurrenceDaysOfWeek ?? [],
-        recurrenceEndDate: (ev as any).recurrenceEndDate ?? null,
+        recurrenceFrequency: ev.recurrenceFrequency ?? null,
+        recurrenceDaysOfWeek: ev.recurrenceDaysOfWeek ?? [],
+        recurrenceEndDate: ev.recurrenceEndDate ?? null,
       },
     });
     results.push(result);
@@ -937,7 +896,6 @@ async function seedLeaveRequests(
   ];
 
   for (const lr of leaveRequests) {
-    // Create a CalendarEvent for the leave request
     await prisma.calendarEvent.upsert({
       where: { id: lr.eventId },
       update: { title: lr.title, startDate: lr.startDate, endDate: lr.endDate },
@@ -953,7 +911,6 @@ async function seedLeaveRequests(
       },
     });
 
-    // Create the CalendarLeaveRequest
     await prisma.calendarLeaveRequest.upsert({
       where: { calendarEventId: lr.eventId },
       update: { status: lr.status, workingDays: lr.workingDays, reviewerId: lr.reviewerId },
@@ -973,210 +930,7 @@ async function seedLeaveRequests(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TASK 6.4 — Engineering, Capacity, and Budgets
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function seedEngineering(organizationId: string) {
-  logSection("Engineering Hierarchy (Tribes → Clusters → Squads)");
-
-  // Tribes
-  const tribes = [
-    { id: IDS.tribes.platform, name: "Platform Infrastructure", organizationId },
-    { id: IDS.tribes.product, name: "Growth & Engagement", organizationId },
-  ];
-  const tribeResults = [];
-  for (const t of tribes) {
-    const result = await prisma.tribe.upsert({
-      where: { id: t.id },
-      update: { name: t.name },
-      create: { id: t.id, name: t.name, organizationId: t.organizationId },
-    });
-    tribeResults.push(result);
-    log(`Tribe: ${result.name}`);
-  }
-
-  // Clusters
-  const clusters = [
-    { id: IDS.clusters.infrastructure, name: "Infrastructure", tribeId: IDS.tribes.platform },
-    { id: IDS.clusters.frontend, name: "Frontend", tribeId: IDS.tribes.product },
-    { id: IDS.clusters.backend, name: "Backend", tribeId: IDS.tribes.product },
-  ];
-  const clusterResults = [];
-  for (const c of clusters) {
-    const result = await prisma.cluster.upsert({
-      where: { id: c.id },
-      update: { name: c.name },
-      create: { id: c.id, name: c.name, tribeId: c.tribeId },
-    });
-    clusterResults.push(result);
-    log(`Cluster: ${result.name} (${tribes.find((t) => t.id === c.tribeId)?.name})`);
-  }
-
-  // Squads
-  const squads = [
-    { id: IDS.squads.cloudInfra, name: "Cloud Services", clusterId: IDS.clusters.infrastructure },
-    { id: IDS.squads.devTools, name: "Developer Experience", clusterId: IDS.clusters.infrastructure },
-    { id: IDS.squads.webApp, name: "Feed & Discovery", clusterId: IDS.clusters.frontend },
-    { id: IDS.squads.mobileApp, name: "Messaging Platform", clusterId: IDS.clusters.backend },
-  ];
-  const squadResults = [];
-  for (const s of squads) {
-    const result = await prisma.squad.upsert({
-      where: { id: s.id },
-      update: { name: s.name },
-      create: { id: s.id, name: s.name, clusterId: s.clusterId },
-    });
-    squadResults.push(result);
-    log(`Squad: ${result.name}`);
-  }
-
-  return { tribes: tribeResults, clusters: clusterResults, squads: squadResults };
-}
-
-async function seedTeamMemberships(employees: { id: string }[], _squads: { id: string; name: string }[]) {
-  logSection("Team Memberships");
-
-  // Assign employees to squads with roles
-  // Executives (0-5) don't have squad team memberships
-  // Lisa (idx 6, Senior EM) — Cloud Services & Developer Experience (oversees both)
-  // Andre (idx 7, EM) — Feed & Discovery
-  // Emily (idx 8, Staff Eng) — Cloud Services (primary)
-  // Kevin (idx 9, Senior Eng) — Feed & Discovery (primary)
-  // Maya (idx 10, Senior Designer) — Feed & Discovery (primary)
-  // Raj (idx 11, Senior PM) — Feed & Discovery (primary)
-  const memberships = [
-    { employeeId: employees[6].id, squadId: IDS.squads.cloudInfra, role: "Engineering Manager" },
-    { employeeId: employees[6].id, squadId: IDS.squads.devTools, role: "Engineering Manager" },
-    { employeeId: employees[7].id, squadId: IDS.squads.webApp, role: "Engineering Manager" },
-    { employeeId: employees[8].id, squadId: IDS.squads.cloudInfra, role: "Tech Lead" },
-    { employeeId: employees[8].id, squadId: IDS.squads.mobileApp, role: "Engineer" },
-    { employeeId: employees[9].id, squadId: IDS.squads.webApp, role: "Engineer" },
-    { employeeId: employees[9].id, squadId: IDS.squads.cloudInfra, role: "Engineer" },
-    { employeeId: employees[10].id, squadId: IDS.squads.webApp, role: "Designer" },
-    { employeeId: employees[10].id, squadId: IDS.squads.mobileApp, role: "Designer" },
-    { employeeId: employees[10].id, squadId: IDS.squads.devTools, role: "Designer" },
-    { employeeId: employees[11].id, squadId: IDS.squads.webApp, role: "Product Manager" },
-    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, role: "Product Manager" },
-  ];
-
-  for (const m of memberships) {
-    await prisma.teamMembership.upsert({
-      where: { employeeId_squadId: { employeeId: m.employeeId, squadId: m.squadId } },
-      update: { role: m.role },
-      create: { employeeId: m.employeeId, squadId: m.squadId, role: m.role },
-    });
-  }
-
-  // Spread additional users (12–99) across the 4 squads
-  const squadIdList = [IDS.squads.cloudInfra, IDS.squads.devTools, IDS.squads.webApp, IDS.squads.mobileApp];
-  for (let i = 12; i < employees.length; i++) {
-    const squadId = squadIdList[i % squadIdList.length];
-    await prisma.teamMembership.upsert({
-      where: { employeeId_squadId: { employeeId: employees[i].id, squadId } },
-      update: { role: "Engineer" },
-      create: { employeeId: employees[i].id, squadId, role: "Engineer" },
-    });
-  }
-  log(`Assigned ${memberships.length + Math.max(0, employees.length - 12)} team memberships`);
-}
-
-async function seedCapacityAllocations(employees: { id: string }[], _squads: { id: string }[]) {
-  logSection("Capacity Allocations");
-
-  // Each employee's allocations sum to 100%
-  // Executives (indices 0-5) don't get squad allocations
-  // Lisa (idx 6, Senior EM): 50% Cloud Services, 50% Developer Experience
-  // Andre (idx 7, EM): 100% Feed & Discovery
-  // Emily (idx 8, Staff Eng): 60% Cloud Services, 40% Messaging Platform
-  // Kevin (idx 9, Senior Eng): 70% Feed & Discovery, 30% Cloud Services
-  // Maya (idx 10, Senior Designer): 40% Feed & Discovery, 40% Messaging Platform, 20% Developer Experience
-  // Raj (idx 11, Senior PM): 50% Feed & Discovery, 50% Messaging Platform
-  const allocations = [
-    { employeeId: employees[6].id, squadId: IDS.squads.cloudInfra, percentage: 50 },
-    { employeeId: employees[6].id, squadId: IDS.squads.devTools, percentage: 50 },
-    { employeeId: employees[7].id, squadId: IDS.squads.webApp, percentage: 100 },
-    { employeeId: employees[8].id, squadId: IDS.squads.cloudInfra, percentage: 60 },
-    { employeeId: employees[8].id, squadId: IDS.squads.mobileApp, percentage: 40 },
-    { employeeId: employees[9].id, squadId: IDS.squads.webApp, percentage: 70 },
-    { employeeId: employees[9].id, squadId: IDS.squads.cloudInfra, percentage: 30 },
-    { employeeId: employees[10].id, squadId: IDS.squads.webApp, percentage: 40 },
-    { employeeId: employees[10].id, squadId: IDS.squads.mobileApp, percentage: 40 },
-    { employeeId: employees[10].id, squadId: IDS.squads.devTools, percentage: 20 },
-    { employeeId: employees[11].id, squadId: IDS.squads.webApp, percentage: 50 },
-    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, percentage: 50 },
-  ];
-
-  for (const a of allocations) {
-    await prisma.capacityAllocation.upsert({
-      where: { employeeId_squadId: { employeeId: a.employeeId, squadId: a.squadId } },
-      update: { percentage: a.percentage },
-      create: { employeeId: a.employeeId, squadId: a.squadId, percentage: a.percentage },
-    });
-  }
-
-  // Additional users (12–99): ~20% get split allocations (every 5th user)
-  const squadIdList = [IDS.squads.cloudInfra, IDS.squads.devTools, IDS.squads.webApp, IDS.squads.mobileApp];
-  for (let i = 12; i < employees.length; i++) {
-    const primarySquad = squadIdList[i % squadIdList.length];
-    if (i % 5 === 0) {
-      // 60/40 split between primary and secondary squad
-      const secondarySquad = squadIdList[(i + 1) % squadIdList.length];
-      await prisma.capacityAllocation.upsert({
-        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: primarySquad } },
-        update: { percentage: 60 },
-        create: { employeeId: employees[i].id, squadId: primarySquad, percentage: 60 },
-      });
-      await prisma.capacityAllocation.upsert({
-        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: secondarySquad } },
-        update: { percentage: 40 },
-        create: { employeeId: employees[i].id, squadId: secondarySquad, percentage: 40 },
-      });
-    } else {
-      // 100% to their assigned squad
-      await prisma.capacityAllocation.upsert({
-        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: primarySquad } },
-        update: { percentage: 100 },
-        create: { employeeId: employees[i].id, squadId: primarySquad, percentage: 100 },
-      });
-    }
-  }
-  log(`Created ${allocations.length + Math.max(0, employees.length - 12)} capacity allocations (with split allocations for ~20% of additional users)`);
-}
-
-async function seedBudgets(departments: { id: string; name: string }[]) {
-  logSection("Budgets");
-  const fiscalPeriods = ["FY2024-Q3", "FY2024-Q4"];
-  const budgetAmounts: Record<string, Record<string, number>> = {
-    Engineering: { "FY2024-Q3": 1050000, "FY2024-Q4": 1050000 },
-    Product: { "FY2024-Q3": 425000, "FY2024-Q4": 425000 },
-    Design: { "FY2024-Q3": 310000, "FY2024-Q4": 310000 },
-  };
-
-  let count = 0;
-  for (const dept of departments) {
-    for (const period of fiscalPeriods) {
-      const amount = budgetAmounts[dept.name]?.[period] ?? 100000;
-      // Use a deterministic id based on dept + period
-      const budgetId = `budget_${dept.id}_${period.replace(/[^a-zA-Z0-9]/g, "")}`;
-      await prisma.budget.upsert({
-        where: { id: budgetId },
-        update: { amount, fiscalPeriod: period },
-        create: {
-          id: budgetId,
-          departmentId: dept.id,
-          fiscalPeriod: period,
-          amount,
-        },
-      });
-      count++;
-      log(`Budget: ${dept.name} ${period} — $${amount.toLocaleString()}`);
-    }
-  }
-  log(`Created ${count} budget records`);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TASK 6.5 — Main entry point with completion logging
+// Main entry point
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function logSummary() {
@@ -1189,7 +943,6 @@ async function logSummary() {
     Organizations: await prisma.organization.count(),
     OrgUnitTypes: await prisma.organizationUnitType.count(),
     OrgUnits: await prisma.organizationUnit.count(),
-    Departments: await prisma.department.count(),
     "Positions (V2)": await prisma.positionV2.count(),
     Persons: await prisma.person.count(),
     Users: await prisma.user.count(),
@@ -1204,12 +957,6 @@ async function logSummary() {
     CalendarEvents: await prisma.calendarEvent.count(),
     LeaveBalances: await prisma.leaveBalance.count(),
     LeaveRequests: await prisma.calendarLeaveRequest.count(),
-    Tribes: await prisma.tribe.count(),
-    Clusters: await prisma.cluster.count(),
-    Squads: await prisma.squad.count(),
-    TeamMemberships: await prisma.teamMembership.count(),
-    CapacityAllocations: await prisma.capacityAllocation.count(),
-    Budgets: await prisma.budget.count(),
   };
 
   for (const [entity, count] of Object.entries(counts)) {
@@ -1223,34 +970,26 @@ async function main() {
   console.log("║          🌱 Strata Platform — Database Seed Script           ║");
   console.log("╚═══════════════════════════════════════════════════════════════╝");
 
-  // 6.1 — Company & Organization Structure
+  // Company & Organization Structure
   const company = await seedCompany();
   const legacyOrg = await seedLegacyOrganization();
   const orgUnitTypes = await seedOrgUnitTypes(company.id);
   const orgUnits = await seedOrgUnits(company.id, orgUnitTypes);
 
-  // 6.2 — Users, Roles, and Reporting
-  const departments = await seedLegacyDepartments(legacyOrg.id);
-  await seedLegacyPositions(departments);
+  // Users, Roles, and Reporting
   const positions = await seedPositions(company.id);
-  const { users, employees } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions, departments);
+  const { users } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions);
   await seedFeatures();
   const roles = await seedRoles(company.id);
   await seedRoleAssignments(company.id, users, roles);
   await seedReportingRelationships(company.id);
 
-  // 6.3 — Calendar and Leave Data
+  // Calendar and Leave Data
   const eventTypes = await seedEventTypes(company.id);
   const leaveTypes = await seedLeaveTypes(company.id);
   await seedCalendarEvents(company.id, users, eventTypes);
   await seedLeaveBalances(company.id, users, leaveTypes);
   await seedLeaveRequests(company.id, users, leaveTypes, eventTypes);
-
-  // 6.4 — Engineering, Capacity, and Budgets
-  const { squads } = await seedEngineering(legacyOrg.id);
-  await seedTeamMemberships(employees, squads);
-  await seedCapacityAllocations(employees, squads);
-  await seedBudgets(departments);
 
   // Summary
   await logSummary();
