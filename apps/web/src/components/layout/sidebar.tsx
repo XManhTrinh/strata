@@ -4,43 +4,22 @@ import { useTheme } from "@/lib/theme";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
 import {
   NavigationRail,
   type NavigationRailItem,
 } from "@/components/ui/navigation-rail";
 
 /**
- * All possible rail items — filtered by role at render time.
+ * Super Admin sees only Dashboard + Settings (platform configuration).
+ * They configure the business — they don't operate it.
  */
-const allRailItems: (NavigationRailItem & { roles: string[] })[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "dashboard", roles: ["super_admin", "manager", "user"] },
-  {
-    label: "People",
-    href: "/people",
-    icon: "person",
-    roles: ["manager"],
-    children: [
-      { label: "People", href: "/people", icon: "person" },
-      { label: "Employees", href: "/employees", icon: "group" },
-    ],
-  },
-  { label: "Org Chart", href: "/org-chart", icon: "account_tree", roles: ["manager", "user"] },
-  {
-    label: "Engineering",
-    href: "/engineering",
-    icon: "engineering",
-    roles: ["manager"],
-    children: [
-      { label: "Teams", href: "/engineering", icon: "engineering" },
-      { label: "Capacity", href: "/capacity", icon: "trending_up" },
-    ],
-  },
-  { label: "Budgets", href: "/budgets", icon: "payments", roles: ["manager"] },
+const superAdminRailItems: NavigationRailItem[] = [
+  { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
   {
     label: "Settings",
     href: "/settings",
     icon: "settings",
-    roles: ["super_admin"],
     children: [
       { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
       { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
@@ -49,7 +28,39 @@ const allRailItems: (NavigationRailItem & { roles: string[] })[] = [
       { label: "Features", href: "/settings/features", icon: "extension" },
     ],
   },
-  { label: "Calendar", href: "/calendar", icon: "calendar_month", roles: ["manager", "user"] },
+];
+
+/**
+ * All possible items for manager/user roles.
+ * Each item has a required `feature` — shown only if the user has
+ * any permission in that feature (via backend roles & permissions).
+ */
+const permissionBasedItems: (NavigationRailItem & { feature: string })[] = [
+  { label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
+  {
+    label: "People",
+    href: "/people",
+    icon: "person",
+    feature: "people",
+    children: [
+      { label: "People", href: "/people", icon: "person" },
+      { label: "Employees", href: "/employees", icon: "group" },
+    ],
+  },
+  { label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
+  {
+    label: "Engineering",
+    href: "/engineering",
+    icon: "engineering",
+    feature: "capacity",
+    children: [
+      { label: "Teams", href: "/engineering", icon: "engineering" },
+      { label: "Capacity", href: "/capacity", icon: "trending_up" },
+    ],
+  },
+  { label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
+  { label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
+  { label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
 ];
 
 /** Simple Strata logo SVG */
@@ -78,20 +89,27 @@ function StrataLogo() {
 /**
  * Sidebar — M3 Navigation Rail with hover drawer
  *
- * Desktop: 80px rail with logo at top, theme toggle at bottom
- * Items are filtered by the current user role:
- * - super_admin: Dashboard + Settings (with all sub-items)
- * - manager: Dashboard + People + Org Chart + Engineering + Budgets + Calendar
- * - user: Dashboard + Org Chart + Calendar
+ * - Super Admin: hardcoded Dashboard + Settings
+ * - Manager/User: items filtered by backend permissions (hasFeatureAccess)
  */
 export function Sidebar() {
   const { role } = useUserRole();
+  const { hasFeatureAccess } = useUserPermissions();
   const { theme, setTheme } = useTheme();
 
-  // Filter rail items by current role
-  const railItems: NavigationRailItem[] = allRailItems
-    .filter((item) => item.roles.includes(role))
-    .map(({ roles: _roles, ...item }) => item);
+  // Determine rail items based on role
+  let railItems: NavigationRailItem[];
+
+  if (role === "super_admin") {
+    // Super admin always sees Dashboard + Settings — hardcoded
+    railItems = superAdminRailItems;
+  } else {
+    // Manager/user: filter by backend permissions
+    // Always show Dashboard, filter the rest by feature access
+    railItems = permissionBasedItems
+      .filter((item) => item.feature === "dashboard" || hasFeatureAccess(item.feature))
+      .map(({ feature: _feature, ...item }) => item);
+  }
 
   if (railItems.length === 0) return null;
 
