@@ -237,7 +237,7 @@ export function Sidebar() {
   const width = collapsed ? 80 : 280;
   const transition = reducedMotion
     ? { duration: 0 }
-    : { duration: 0.25, ease: [0.2, 0, 0, 1] }; // M3 emphasized easing
+    : { duration: 0.25, ease: [0.2, 0, 0, 1] as [number, number, number, number] };
 
   return (
     <>
