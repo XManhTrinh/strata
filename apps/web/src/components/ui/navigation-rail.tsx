@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { useRipple } from "@/components/ui/ripple";
 import * as React from "react";
 
 export interface NavigationRailSubItem {
@@ -175,34 +174,37 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
   );
 }
 
-/** Individual rail item with ripple and hover propagation */
+/** Individual rail item — M3 active indicator animates from center outward */
 function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: boolean }) {
-  const { ripples, trigger, containerRef } = useRipple();
-
   return (
     <Link
-      ref={containerRef as React.RefObject<HTMLAnchorElement | null>}
       href={item.href}
       aria-current={isActive ? "page" : undefined}
-      onMouseDown={trigger}
-      onTouchStart={trigger}
-      className="group relative overflow-hidden flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-2xl"
+      className="group relative flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-2xl"
     >
-      {/* Pill indicator */}
-      <div
-        className={cn(
-          "flex items-center justify-center w-14 h-8 rounded-full transition-colors duration-200",
-          isActive
-            ? "bg-secondary-container"
-            : "bg-transparent group-hover:bg-surface-foreground/8"
+      {/* Pill indicator — animates scale from center when active */}
+      <div className="relative flex items-center justify-center w-14 h-8">
+        {/* Active background pill — scales from 0 to 1 */}
+        <motion.div
+          className="absolute inset-0 rounded-full bg-secondary-container"
+          initial={false}
+          animate={{
+            scale: isActive ? 1 : 0,
+            opacity: isActive ? 1 : 0,
+          }}
+          transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] as [number, number, number, number] }}
+        />
+        {/* Hover/press state layer — only when inactive */}
+        {!isActive && (
+          <div className="absolute inset-0 rounded-full transition-colors duration-200 group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12" />
         )}
-      >
+        {/* Icon */}
         <Icon
           name={item.icon}
           size={24}
           filled={isActive}
           className={cn(
-            "transition-colors duration-200",
+            "relative z-10 transition-colors duration-200",
             isActive
               ? "text-secondary-container-foreground"
               : "text-surface-variant-foreground group-hover:text-surface-foreground"
@@ -221,20 +223,6 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
       >
         {item.label}
       </span>
-
-      {/* Ripple circles */}
-      {ripples.map((ripple) => (
-        <span
-          key={ripple.id}
-          className="absolute rounded-full bg-surface-foreground/12 animate-[ripple_500ms_ease-out_forwards] pointer-events-none"
-          style={{
-            left: ripple.x - ripple.size / 2,
-            top: ripple.y - ripple.size / 2,
-            width: ripple.size,
-            height: ripple.size,
-          }}
-        />
-      ))}
     </Link>
   );
 }
