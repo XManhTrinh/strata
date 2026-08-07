@@ -93,6 +93,7 @@ const allNavSections: NavSection[] = [
 /**
  * Primary rail items — one per key section (max 7)
  * These are the most important items shown in the Navigation Rail on desktop.
+ * Settings has sub-items that appear in a flyout drawer on hover.
  */
 const railItems: NavigationRailItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
@@ -100,7 +101,18 @@ const railItems: NavigationRailItem[] = [
   { label: "Org Chart", href: "/org-chart", icon: "account_tree" },
   { label: "Engineering", href: "/engineering", icon: "engineering" },
   { label: "Budgets", href: "/budgets", icon: "payments" },
-  { label: "Settings", href: "/settings", icon: "settings" },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: "settings",
+    children: [
+      { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
+      { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
+      { label: "Positions", href: "/settings/positions", icon: "work" },
+      { label: "Roles & Permissions", href: "/settings/roles", icon: "admin_panel_settings" },
+      { label: "Features", href: "/settings/features", icon: "extension" },
+    ],
+  },
   { label: "Calendar", href: "/calendar", icon: "calendar_month" },
 ];
 
