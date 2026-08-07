@@ -3,96 +3,22 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import {
+  usePositions,
+  useCreatePosition,
+  useUpdatePosition,
+  useArchivePosition,
+  useDeletePosition,
+  COMPANY_ID,
+  type AdminPosition,
+} from "@/services";
 
-interface Position {
-  id: string;
-  name: string;
-  description: string;
-  careerLevel: number;
-  canHaveDirectReports: boolean;
-  status: "Active" | "Archived";
-  assignedCount: number;
-  [key: string]: unknown;
-}
-
-const mockPositions: Position[] = [
-  { id: "1", name: "Junior Engineer", description: "Entry-level software engineering role", careerLevel: 1, canHaveDirectReports: false, status: "Active", assignedCount: 12 },
-  { id: "2", name: "Software Engineer", description: "Mid-level individual contributor", careerLevel: 2, canHaveDirectReports: false, status: "Active", assignedCount: 24 },
-  { id: "3", name: "Senior Engineer", description: "Senior individual contributor with mentoring responsibilities", careerLevel: 3, canHaveDirectReports: false, status: "Active", assignedCount: 18 },
-  { id: "4", name: "Staff Engineer", description: "Technical leadership across teams", careerLevel: 4, canHaveDirectReports: false, status: "Active", assignedCount: 6 },
-  { id: "5", name: "Engineering Manager", description: "People manager for engineering teams", careerLevel: 3, canHaveDirectReports: true, status: "Active", assignedCount: 8 },
-  { id: "6", name: "Senior Engineering Manager", description: "Manages multiple engineering teams", careerLevel: 4, canHaveDirectReports: true, status: "Active", assignedCount: 4 },
-  { id: "7", name: "Director of Engineering", description: "Department-level engineering leadership", careerLevel: 5, canHaveDirectReports: true, status: "Active", assignedCount: 2 },
-  { id: "8", name: "VP of Engineering", description: "Executive engineering leadership", careerLevel: 6, canHaveDirectReports: true, status: "Active", assignedCount: 1 },
-  { id: "9", name: "Product Manager", description: "Product strategy and roadmap ownership", careerLevel: 3, canHaveDirectReports: false, status: "Active", assignedCount: 5 },
-  { id: "10", name: "Technical Lead", description: "Deprecated in favor of Staff Engineer", careerLevel: 4, canHaveDirectReports: true, status: "Archived", assignedCount: 0 },
-];
-
-const columns: Column<Position>[] = [
-  { key: "name", header: "Name", sortable: true },
-  {
-    key: "careerLevel",
-    header: "Career Level",
-    sortable: true,
-    render: (row) => (
-      <span className="inline-flex items-center gap-1">
-        <span className="text-sm font-medium text-foreground">L{row.careerLevel}</span>
-      </span>
-    ),
-  },
-  {
-    key: "canHaveDirectReports",
-    header: "Can Have Direct Reports",
-    render: (row) => (
-      <span className={`text-sm ${row.canHaveDirectReports ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
-        {row.canHaveDirectReports ? "✓ Yes" : "— No"}
-      </span>
-    ),
-  },
-  {
-    key: "assignedCount",
-    header: "Assigned",
-    sortable: true,
-    render: (row) => <span className="text-muted-foreground">{row.assignedCount}</span>,
-  },
-  {
-    key: "status",
-    header: "Status",
-    sortable: true,
-    render: (row) => (
-      <Badge variant={row.status === "Active" ? "success" : "default"}>
-        {row.status}
-      </Badge>
-    ),
-  },
-  {
-    key: "actions",
-    header: "",
-    render: (row) => (
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {row.status === "Active" ? "Archive" : "Delete"}
-        </button>
-      </div>
-    ),
-  },
-];
+type PositionRow = AdminPosition & Record<string, unknown>;
 
 export default function PositionsPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [editingPosition, setEditingPosition] = useState<Position | null>(null);
+  const [editingPosition, setEditingPosition] = useState<AdminPosition | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -100,10 +26,16 @@ export default function PositionsPage() {
     canHaveDirectReports: false,
   });
 
-  const filteredPositions = mockPositions.filter(
+  const { data: positions = [], isLoading, error } = usePositions(COMPANY_ID);
+  const createMutation = useCreatePosition();
+  const updateMutation = useUpdatePosition();
+  const archiveMutation = useArchivePosition();
+  const deleteMutation = useDeletePosition();
+
+  const filteredPositions = positions.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.description.toLowerCase().includes(search.toLowerCase())
+      (p.description || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const openCreate = () => {
@@ -112,16 +44,132 @@ export default function PositionsPage() {
     setShowModal(true);
   };
 
-  const openEdit = (position: Position) => {
+  const openEdit = (position: PositionRow) => {
     setEditingPosition(position);
     setFormData({
       name: position.name,
-      description: position.description,
-      careerLevel: position.careerLevel,
+      description: position.description || "",
+      careerLevel: position.careerLevel || 1,
       canHaveDirectReports: position.canHaveDirectReports,
     });
     setShowModal(true);
   };
+
+  const handleSubmit = () => {
+    if (editingPosition) {
+      updateMutation.mutate(
+        { companyId: COMPANY_ID, id: editingPosition.id, ...formData },
+        { onSuccess: () => setShowModal(false) }
+      );
+    } else {
+      createMutation.mutate(
+        { companyId: COMPANY_ID, ...formData },
+        { onSuccess: () => setShowModal(false) }
+      );
+    }
+  };
+
+  const handleArchive = (id: string) => {
+    archiveMutation.mutate({ companyId: COMPANY_ID, id });
+  };
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate({ companyId: COMPANY_ID, id });
+  };
+
+  const columns: Column<PositionRow>[] = [
+    { key: "name", header: "Name", sortable: true },
+    {
+      key: "careerLevel",
+      header: "Career Level",
+      sortable: true,
+      render: (row) => (
+        <span className="inline-flex items-center gap-1">
+          <span className="text-sm font-medium text-foreground">
+            {row.careerLevel != null ? `L${row.careerLevel}` : "—"}
+          </span>
+        </span>
+      ),
+    },
+    {
+      key: "canHaveDirectReports",
+      header: "Can Have Direct Reports",
+      render: (row) => (
+        <span className={`text-sm ${row.canHaveDirectReports ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+          {row.canHaveDirectReports ? "✓ Yes" : "— No"}
+        </span>
+      ),
+    },
+    {
+      key: "archived",
+      header: "Status",
+      sortable: true,
+      render: (row) => (
+        <Badge variant={!row.archived ? "success" : "default"}>
+          {row.archived ? "Archived" : "Active"}
+        </Badge>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      render: (row) => (
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEdit(row);
+            }}
+          >
+            Edit
+          </button>
+          {row.archived ? (
+            <button
+              type="button"
+              className="rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(row.id);
+              }}
+            >
+              Delete
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleArchive(row.id);
+              }}
+            >
+              Archive
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <AppBar className="justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Positions</h1>
+            <p className="text-xs text-muted-foreground">
+              Configure positions with career levels and reporting capabilities.
+            </p>
+          </div>
+        </AppBar>
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+          Failed to load positions. Please try again.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -149,13 +197,19 @@ export default function PositionsPage() {
         />
       </div>
 
-      <DataTable<Position>
-        columns={columns}
-        data={filteredPositions}
-        pageSize={10}
-        emptyMessage="No positions found"
-        onRowClick={openEdit}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
+      ) : (
+        <DataTable<PositionRow>
+          columns={columns}
+          data={filteredPositions as PositionRow[]}
+          pageSize={10}
+          emptyMessage="No positions found"
+          onRowClick={openEdit}
+        />
+      )}
 
       {/* Create/Edit Modal */}
       {showModal && (
@@ -229,10 +283,15 @@ export default function PositionsPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                onClick={handleSubmit}
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                {editingPosition ? "Save Changes" : "Create"}
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : editingPosition
+                    ? "Save Changes"
+                    : "Create"}
               </button>
             </div>
           </div>

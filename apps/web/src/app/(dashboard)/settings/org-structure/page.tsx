@@ -1,97 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Badge, SearchInput } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import {
+  useOrgUnits,
+  useCreateOrgUnit,
+  useUpdateOrgUnit,
+  useDeleteOrgUnit,
+  type OrganizationUnit,
+} from "@/services";
+import { useOrgUnitTypes, COMPANY_ID } from "@/services";
 
-interface OrgUnit {
+interface OrgTreeNode {
   id: string;
   name: string;
-  type: string;
+  typeId: string;
+  typeName: string;
   typeColor: string;
-  memberCount: number;
-  managerId: string | null;
-  managerName: string | null;
-  children: OrgUnit[];
+  parentId: string | null;
+  children: OrgTreeNode[];
 }
 
-const mockOrgTree: OrgUnit[] = [
-  {
-    id: "ou-1",
-    name: "Acme Corporation",
-    type: "Division",
-    typeColor: "#EF4444",
-    memberCount: 142,
-    managerId: "u-1",
-    managerName: "Jane Smith",
-    children: [
-      {
-        id: "ou-2",
-        name: "Engineering",
-        type: "Department",
-        typeColor: "#3B82F6",
-        memberCount: 64,
-        managerId: "u-2",
-        managerName: "Lin Zhang",
-        children: [
-          {
-            id: "ou-5",
-            name: "Platform Tribe",
-            type: "Tribe",
-            typeColor: "#8B5CF6",
-            memberCount: 24,
-            managerId: "u-5",
-            managerName: "Alex Rivera",
-            children: [
-              { id: "ou-8", name: "Infrastructure Squad", type: "Squad", typeColor: "#10B981", memberCount: 6, managerId: "u-8", managerName: "Tom Lee", children: [] },
-              { id: "ou-9", name: "DevOps Squad", type: "Squad", typeColor: "#10B981", memberCount: 5, managerId: "u-9", managerName: "Sara Kim", children: [] },
-              { id: "ou-10", name: "Data Platform Squad", type: "Squad", typeColor: "#10B981", memberCount: 7, managerId: null, managerName: null, children: [] },
-            ],
-          },
-          {
-            id: "ou-6",
-            name: "Product Tribe",
-            type: "Tribe",
-            typeColor: "#8B5CF6",
-            memberCount: 28,
-            managerId: "u-6",
-            managerName: "Maya Patel",
-            children: [
-              { id: "ou-11", name: "Core App Squad", type: "Squad", typeColor: "#10B981", memberCount: 8, managerId: "u-11", managerName: "Chris Wu", children: [] },
-              { id: "ou-12", name: "Growth Squad", type: "Squad", typeColor: "#10B981", memberCount: 6, managerId: null, managerName: null, children: [] },
-            ],
-          },
-        ],
-      },
-      {
-        id: "ou-3",
-        name: "Product & Design",
-        type: "Department",
-        typeColor: "#3B82F6",
-        memberCount: 32,
-        managerId: "u-3",
-        managerName: "Marcus Johnson",
-        children: [
-          { id: "ou-7", name: "UX Chapter", type: "Chapter", typeColor: "#F59E0B", memberCount: 8, managerId: "u-7", managerName: "David Park", children: [] },
-        ],
-      },
-      {
-        id: "ou-4",
-        name: "People & Operations",
-        type: "Department",
-        typeColor: "#3B82F6",
-        memberCount: 18,
-        managerId: "u-4",
-        managerName: "Olivia Thompson",
-        children: [],
-      },
-    ],
-  },
-];
+function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
+  const nodeMap = new Map<string, OrgTreeNode>();
 
-function TreeNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }) {
+  // Create all nodes first
+  for (const unit of units) {
+    nodeMap.set(unit.id, {
+      id: unit.id,
+      name: unit.name,
+      typeId: unit.typeId,
+      typeName: unit.type?.name || "Unknown",
+      typeColor: "#6B7280",
+      parentId: unit.parentId,
+      children: [],
+    });
+  }
+
+  // Build parent-child relationships
+  const roots: OrgTreeNode[] = [];
+  for (const node of nodeMap.values()) {
+    if (node.parentId && nodeMap.has(node.parentId)) {
+      nodeMap.get(node.parentId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
+
+function filterTree(nodes: OrgTreeNode[], search: string): OrgTreeNode[] {
+  if (!search) return nodes;
+  const lower = search.toLowerCase();
+
+  function matches(node: OrgTreeNode): boolean {
+    if (node.name.toLowerCase().includes(lower)) return true;
+    return node.children.some(matches);
+  }
+
+  return nodes.filter(matches);
+}
+
+function TreeNode({
+  unit,
+  depth = 0,
+  onEdit,
+  onArchive,
+  onAddChild,
+}: {
+  unit: OrgTreeNode;
+  depth?: number;
+  onEdit: (unit: OrgTreeNode) => void;
+  onArchive: (id: string) => void;
+  onAddChild: (parentId: string) => void;
+}) {
   const [expanded, setExpanded] = useState(depth < 2);
-
   const hasChildren = unit.children.length > 0;
 
   return (
@@ -117,34 +102,29 @@ function TreeNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }) {
           <span className="font-medium text-foreground">{unit.name}</span>
           <Badge variant="default">
             <span style={{ color: unit.typeColor }}>●</span>
-            <span className="ml-1">{unit.type}</span>
+            <span className="ml-1">{unit.typeName}</span>
           </Badge>
-          <span className="text-xs text-muted-foreground">
-            {unit.memberCount} {unit.memberCount === 1 ? "member" : "members"}
-          </span>
-          {unit.managerName && (
-            <span className="text-xs text-muted-foreground">
-              · Managed by {unit.managerName}
-            </span>
-          )}
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => onEdit(unit)}
           >
             Edit
           </button>
           <button
             type="button"
             className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => onAddChild(unit.id)}
           >
             Add Child
           </button>
           <button
             type="button"
             className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => onArchive(unit.id)}
           >
             Archive
           </button>
@@ -154,7 +134,14 @@ function TreeNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }) {
       {expanded && hasChildren && (
         <div>
           {unit.children.map((child) => (
-            <TreeNode key={child.id} unit={child} depth={depth + 1} />
+            <TreeNode
+              key={child.id}
+              unit={child}
+              depth={depth + 1}
+              onEdit={onEdit}
+              onArchive={onArchive}
+              onAddChild={onAddChild}
+            />
           ))}
         </div>
       )}
@@ -164,8 +151,77 @@ function TreeNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }) {
 
 export default function OrgStructurePage() {
   const [search, setSearch] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [formData, setFormData] = useState({ name: "", type: "", parent: "" });
+  const [showModal, setShowModal] = useState(false);
+  const [editingUnit, setEditingUnit] = useState<OrgTreeNode | null>(null);
+  const [formData, setFormData] = useState({ name: "", typeId: "", parentId: "" });
+
+  const { data: orgUnits = [], isLoading, error } = useOrgUnits(COMPANY_ID);
+  const { data: orgUnitTypes = [] } = useOrgUnitTypes(COMPANY_ID);
+  const createMutation = useCreateOrgUnit();
+  const updateMutation = useUpdateOrgUnit();
+  const deleteMutation = useDeleteOrgUnit();
+
+  const tree = useMemo(() => buildTree(orgUnits), [orgUnits]);
+  const filteredTree = useMemo(() => filterTree(tree, search), [tree, search]);
+
+  const openCreate = (parentId?: string) => {
+    setEditingUnit(null);
+    setFormData({ name: "", typeId: "", parentId: parentId || "" });
+    setShowModal(true);
+  };
+
+  const openEdit = (unit: OrgTreeNode) => {
+    setEditingUnit(unit);
+    setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId || "" });
+    setShowModal(true);
+  };
+
+  const handleSubmit = () => {
+    if (editingUnit) {
+      updateMutation.mutate(
+        {
+          companyId: COMPANY_ID,
+          id: editingUnit.id,
+          name: formData.name,
+          typeId: formData.typeId || undefined,
+          parentId: formData.parentId || null,
+        },
+        { onSuccess: () => setShowModal(false) }
+      );
+    } else {
+      createMutation.mutate(
+        {
+          companyId: COMPANY_ID,
+          name: formData.name,
+          typeId: formData.typeId,
+          parentId: formData.parentId || null,
+        },
+        { onSuccess: () => setShowModal(false) }
+      );
+    }
+  };
+
+  const handleArchive = (id: string) => {
+    deleteMutation.mutate({ companyId: COMPANY_ID, id });
+  };
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <AppBar className="justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Organization Structure</h1>
+            <p className="text-xs text-muted-foreground">
+              Build and manage your organization&apos;s hierarchical structure.
+            </p>
+          </div>
+        </AppBar>
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+          Failed to load organization structure. Please try again.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -178,7 +234,7 @@ export default function OrgStructurePage() {
         </div>
         <button
           type="button"
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => openCreate()}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           Create Unit
@@ -193,22 +249,42 @@ export default function OrgStructurePage() {
         />
       </div>
 
-      <div className="rounded-lg border border-border bg-background">
-        <div className="border-b border-border px-4 py-3">
-          <span className="text-sm font-medium text-muted-foreground">Organization Hierarchy</span>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <span className="text-sm text-muted-foreground">Loading...</span>
         </div>
-        <div className="py-2">
-          {mockOrgTree.map((unit) => (
-            <TreeNode key={unit.id} unit={unit} />
-          ))}
+      ) : (
+        <div className="rounded-lg border border-border bg-background">
+          <div className="border-b border-border px-4 py-3">
+            <span className="text-sm font-medium text-muted-foreground">Organization Hierarchy</span>
+          </div>
+          <div className="py-2">
+            {filteredTree.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                No organization units found
+              </div>
+            ) : (
+              filteredTree.map((unit) => (
+                <TreeNode
+                  key={unit.id}
+                  unit={unit}
+                  onEdit={openEdit}
+                  onArchive={handleArchive}
+                  onAddChild={(parentId) => openCreate(parentId)}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Create Modal */}
-      {showCreateModal && (
+      {/* Create/Edit Modal */}
+      {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">Create Organization Unit</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {editingUnit ? "Edit Organization Unit" : "Create Organization Unit"}
+            </h2>
             <div className="mt-4 space-y-4">
               <div>
                 <label htmlFor="unit-name" className="block text-sm font-medium text-foreground">
@@ -229,16 +305,14 @@ export default function OrgStructurePage() {
                 </label>
                 <select
                   id="unit-type"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  value={formData.typeId}
+                  onChange={(e) => setFormData({ ...formData, typeId: e.target.value })}
                   className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Select a type...</option>
-                  <option value="division">Division</option>
-                  <option value="department">Department</option>
-                  <option value="tribe">Tribe</option>
-                  <option value="squad">Squad</option>
-                  <option value="chapter">Chapter</option>
+                  {orgUnitTypes.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -247,32 +321,36 @@ export default function OrgStructurePage() {
                 </label>
                 <select
                   id="unit-parent"
-                  value={formData.parent}
-                  onChange={(e) => setFormData({ ...formData, parent: e.target.value })}
+                  value={formData.parentId}
+                  onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
                   className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">None (root level)</option>
-                  <option value="ou-1">Acme Corporation</option>
-                  <option value="ou-2">Engineering</option>
-                  <option value="ou-3">Product & Design</option>
-                  <option value="ou-4">People & Operations</option>
+                  {orgUnits.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
                 </select>
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => setShowModal(false)}
                 className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => setShowCreateModal(false)}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                onClick={handleSubmit}
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
-                Create
+                {createMutation.isPending || updateMutation.isPending
+                  ? "Saving..."
+                  : editingUnit
+                    ? "Save Changes"
+                    : "Create"}
               </button>
             </div>
           </div>
