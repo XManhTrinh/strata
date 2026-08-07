@@ -199,7 +199,7 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
     <Link
       href={item.href}
       aria-current={isActive ? "page" : undefined}
-      className="group relative flex flex-col items-center justify-center gap-1 w-[76px] h-14 rounded-2xl"
+      className="group relative flex flex-col items-center justify-center gap-1 w-[76px] py-2 rounded-2xl"
     >
       {/* Pill indicator — animates scale from center when active */}
       <div className="relative flex items-center justify-center w-[76px] h-8">
