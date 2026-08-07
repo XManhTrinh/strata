@@ -28,10 +28,20 @@ const IDS = {
   positions: {
     softwareEngineer: "pos_sw_eng_001",
     seniorEngineer: "pos_sr_eng_001",
+    staffEngineer: "pos_staff_eng_001",
     engineeringManager: "pos_eng_mgr_001",
+    seniorEngineeringManager: "pos_sr_eng_mgr_001",
     productManager: "pos_prod_mgr_001",
+    seniorProductManager: "pos_sr_prod_mgr_001",
     designer: "pos_designer_001",
+    seniorDesigner: "pos_sr_designer_001",
     cto: "pos_cto_001",
+    cfo: "pos_cfo_001",
+    cpo: "pos_cpo_001",
+    vpEngineering: "pos_vp_eng_001",
+    vpProduct: "pos_vp_prod_001",
+    vpDesign: "pos_vp_design_001",
+    director: "pos_director_001",
   },
   // Roles
   roles: {
@@ -114,17 +124,17 @@ function logSection(title: string) {
 
 const USER_DATA = [
   { firstName: "Sarah", lastName: "Chen", email: "sarah.chen@strata.io", role: "CTO" },
-  { firstName: "Marcus", lastName: "Williams", email: "marcus.williams@strata.io", role: "Engineering Manager" },
-  { firstName: "Priya", lastName: "Patel", email: "priya.patel@strata.io", role: "Engineering Manager" },
-  { firstName: "James", lastName: "O'Brien", email: "james.obrien@strata.io", role: "Product Manager" },
-  { firstName: "Lisa", lastName: "Nakamura", email: "lisa.nakamura@strata.io", role: "Senior Engineer" },
-  { firstName: "Andre", lastName: "Santos", email: "andre.santos@strata.io", role: "Software Engineer" },
-  { firstName: "Emily", lastName: "Richardson", email: "emily.richardson@strata.io", role: "Software Engineer" },
-  { firstName: "Kevin", lastName: "Zhao", email: "kevin.zhao@strata.io", role: "Software Engineer" },
-  { firstName: "Maya", lastName: "Johansson", email: "maya.johansson@strata.io", role: "Designer" },
-  { firstName: "Raj", lastName: "Krishnamurthy", email: "raj.krishnamurthy@strata.io", role: "Software Engineer" },
-  { firstName: "Sophie", lastName: "Dubois", email: "sophie.dubois@strata.io", role: "Software Engineer" },
-  { firstName: "Daniel", lastName: "Kim", email: "daniel.kim@strata.io", role: "Software Engineer" },
+  { firstName: "David", lastName: "Thompson", email: "david.thompson@strata.io", role: "CFO" },
+  { firstName: "Amara", lastName: "Okafor", email: "amara.okafor@strata.io", role: "CPO" },
+  { firstName: "Marcus", lastName: "Williams", email: "marcus.williams@strata.io", role: "VP Engineering" },
+  { firstName: "Priya", lastName: "Patel", email: "priya.patel@strata.io", role: "VP Product" },
+  { firstName: "James", lastName: "O'Brien", email: "james.obrien@strata.io", role: "Director" },
+  { firstName: "Lisa", lastName: "Nakamura", email: "lisa.nakamura@strata.io", role: "Senior Engineering Manager" },
+  { firstName: "Andre", lastName: "Santos", email: "andre.santos@strata.io", role: "Engineering Manager" },
+  { firstName: "Emily", lastName: "Richardson", email: "emily.richardson@strata.io", role: "Staff Engineer" },
+  { firstName: "Kevin", lastName: "Zhao", email: "kevin.zhao@strata.io", role: "Senior Engineer" },
+  { firstName: "Maya", lastName: "Johansson", email: "maya.johansson@strata.io", role: "Senior Designer" },
+  { firstName: "Raj", lastName: "Krishnamurthy", email: "raj.krishnamurthy@strata.io", role: "Senior Product Manager" },
 ];
 
 // ─── Additional Users (13–100) ────────────────────────────────────────────────
@@ -304,12 +314,22 @@ async function seedLegacyPositions(departments: Awaited<ReturnType<typeof seedLe
 async function seedPositions(companyId: string) {
   logSection("Positions (V2)");
   const positions = [
-    { id: IDS.positions.softwareEngineer, name: "Software Engineer", careerLevel: 3, canHaveDirectReports: false },
-    { id: IDS.positions.seniorEngineer, name: "Senior Engineer", careerLevel: 4, canHaveDirectReports: false },
+    { id: IDS.positions.cto, name: "CTO", careerLevel: 8, canHaveDirectReports: true },
+    { id: IDS.positions.cfo, name: "CFO", careerLevel: 8, canHaveDirectReports: true },
+    { id: IDS.positions.cpo, name: "CPO", careerLevel: 8, canHaveDirectReports: true },
+    { id: IDS.positions.vpEngineering, name: "VP Engineering", careerLevel: 7, canHaveDirectReports: true },
+    { id: IDS.positions.vpProduct, name: "VP Product", careerLevel: 7, canHaveDirectReports: true },
+    { id: IDS.positions.vpDesign, name: "VP Design", careerLevel: 7, canHaveDirectReports: true },
+    { id: IDS.positions.director, name: "Director of Engineering", careerLevel: 6, canHaveDirectReports: true },
+    { id: IDS.positions.seniorEngineeringManager, name: "Senior Engineering Manager", careerLevel: 5, canHaveDirectReports: true },
     { id: IDS.positions.engineeringManager, name: "Engineering Manager", careerLevel: 5, canHaveDirectReports: true },
-    { id: IDS.positions.productManager, name: "Product Manager", careerLevel: 4, canHaveDirectReports: false },
+    { id: IDS.positions.staffEngineer, name: "Staff Engineer", careerLevel: 5, canHaveDirectReports: false },
+    { id: IDS.positions.seniorEngineer, name: "Senior Engineer", careerLevel: 4, canHaveDirectReports: false },
+    { id: IDS.positions.seniorProductManager, name: "Senior Product Manager", careerLevel: 4, canHaveDirectReports: false },
+    { id: IDS.positions.seniorDesigner, name: "Senior Designer", careerLevel: 4, canHaveDirectReports: false },
+    { id: IDS.positions.productManager, name: "Product Manager", careerLevel: 3, canHaveDirectReports: false },
+    { id: IDS.positions.softwareEngineer, name: "Software Engineer", careerLevel: 3, canHaveDirectReports: false },
     { id: IDS.positions.designer, name: "Designer", careerLevel: 3, canHaveDirectReports: false },
-    { id: IDS.positions.cto, name: "CTO", careerLevel: 7, canHaveDirectReports: true },
   ];
 
   const results = [];
@@ -341,27 +361,54 @@ async function seedUsers(
 
   const posMap: Record<string, string> = {
     CTO: IDS.positions.cto,
+    CFO: IDS.positions.cfo,
+    CPO: IDS.positions.cpo,
+    "VP Engineering": IDS.positions.vpEngineering,
+    "VP Product": IDS.positions.vpProduct,
+    Director: IDS.positions.director,
+    "Senior Engineering Manager": IDS.positions.seniorEngineeringManager,
     "Engineering Manager": IDS.positions.engineeringManager,
-    "Product Manager": IDS.positions.productManager,
+    "Staff Engineer": IDS.positions.staffEngineer,
     "Senior Engineer": IDS.positions.seniorEngineer,
+    "Senior Designer": IDS.positions.seniorDesigner,
+    "Senior Product Manager": IDS.positions.seniorProductManager,
+    "Product Manager": IDS.positions.productManager,
     "Software Engineer": IDS.positions.softwareEngineer,
     Designer: IDS.positions.designer,
   };
 
   const orgUnitMap: Record<string, string> = {
     CTO: IDS.orgUnits.engineering,
-    "Engineering Manager": IDS.orgUnits.engineering,
+    CFO: IDS.orgUnits.product,
+    CPO: IDS.orgUnits.product,
+    "VP Engineering": IDS.orgUnits.engineering,
+    "VP Product": IDS.orgUnits.product,
+    Director: IDS.orgUnits.engineering,
+    "Senior Engineering Manager": IDS.orgUnits.platformTribe,
+    "Engineering Manager": IDS.orgUnits.productTribe,
+    "Staff Engineer": IDS.orgUnits.platformTribe,
+    "Senior Engineer": IDS.orgUnits.infraSquad,
+    "Senior Designer": IDS.orgUnits.design,
+    "Senior Product Manager": IDS.orgUnits.product,
     "Product Manager": IDS.orgUnits.product,
-    "Senior Engineer": IDS.orgUnits.platformTribe,
     "Software Engineer": IDS.orgUnits.infraSquad,
     Designer: IDS.orgUnits.design,
   };
 
   const deptMap: Record<string, string> = {
     CTO: engDept.id,
+    CFO: prodDept.id,
+    CPO: prodDept.id,
+    "VP Engineering": engDept.id,
+    "VP Product": prodDept.id,
+    Director: engDept.id,
+    "Senior Engineering Manager": engDept.id,
     "Engineering Manager": engDept.id,
-    "Product Manager": prodDept.id,
+    "Staff Engineer": engDept.id,
     "Senior Engineer": engDept.id,
+    "Senior Designer": desDept.id,
+    "Senior Product Manager": prodDept.id,
+    "Product Manager": prodDept.id,
     "Software Engineer": engDept.id,
     Designer: desDept.id,
   };
@@ -427,7 +474,7 @@ async function seedUsers(
         companyId,
         positionId: posMap[u.role],
         orgUnitId: orgUnitMap[u.role],
-        isSuperAdmin: u.role === "CTO",
+        isSuperAdmin: u.role === "CTO" || u.role === "CFO" || u.role === "CPO",
       },
     });
 
@@ -627,17 +674,17 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
   // Map users to roles based on their position in USER_DATA
   const assignments: Array<{ userId: string; roleId: string }> = [
     { userId: IDS.users[0], roleId: adminRole.id },     // Sarah (CTO) → Admin
-    { userId: IDS.users[1], roleId: managerRole.id },   // Marcus (Eng Mgr) → Manager
-    { userId: IDS.users[2], roleId: managerRole.id },   // Priya (Eng Mgr) → Manager
-    { userId: IDS.users[3], roleId: managerRole.id },   // James (PM) → Manager
-    { userId: IDS.users[4], roleId: employeeRole.id },  // Lisa → Employee
-    { userId: IDS.users[5], roleId: employeeRole.id },  // Andre → Employee
-    { userId: IDS.users[6], roleId: employeeRole.id },  // Emily → Employee
-    { userId: IDS.users[7], roleId: employeeRole.id },  // Kevin → Employee
-    { userId: IDS.users[8], roleId: employeeRole.id },  // Maya → Employee
-    { userId: IDS.users[9], roleId: employeeRole.id },  // Raj → Employee
-    { userId: IDS.users[10], roleId: employeeRole.id }, // Sophie → Employee
-    { userId: IDS.users[11], roleId: employeeRole.id }, // Daniel → Employee
+    { userId: IDS.users[1], roleId: adminRole.id },     // David (CFO) → Admin
+    { userId: IDS.users[2], roleId: adminRole.id },     // Amara (CPO) → Admin
+    { userId: IDS.users[3], roleId: managerRole.id },   // Marcus (VP Eng) → Manager
+    { userId: IDS.users[4], roleId: managerRole.id },   // Priya (VP Product) → Manager
+    { userId: IDS.users[5], roleId: managerRole.id },   // James (Director) → Manager
+    { userId: IDS.users[6], roleId: managerRole.id },   // Lisa (Senior EM) → Manager
+    { userId: IDS.users[7], roleId: managerRole.id },   // Andre (EM) → Manager
+    { userId: IDS.users[8], roleId: employeeRole.id },  // Emily (Staff Eng) → Employee
+    { userId: IDS.users[9], roleId: employeeRole.id },  // Kevin (Senior Eng) → Employee
+    { userId: IDS.users[10], roleId: employeeRole.id }, // Maya (Senior Designer) → Employee
+    { userId: IDS.users[11], roleId: employeeRole.id }, // Raj (Senior PM) → Employee
   ];
 
   for (const a of assignments) {
@@ -671,21 +718,23 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
 
 async function seedReportingRelationships(companyId: string) {
   logSection("Reporting Relationships");
-  // Sarah (CTO) manages Marcus and Priya (Eng Managers)
-  // Marcus manages Lisa, Andre, Emily
-  // Priya manages Kevin, Raj, Sophie, Daniel
+  // Sarah (CTO) has: Marcus (VP Eng), James (Director) reporting to her
+  // David (CFO) reports to no one (peer to CTO)
+  // Amara (CPO) has: Priya (VP Product), Maya (Senior Designer) reporting to her
+  // Marcus (VP Eng) has: Lisa (Senior EM), Andre (EM) reporting to him
+  // Lisa (Senior EM) has: Emily (Staff), Kevin (Senior) reporting to her
+  // Andre (EM) has: additional engineers reporting to him
+  // Priya (VP Product) has: Raj (Senior PM) reporting to her
   const relationships = [
-    { userId: IDS.users[1], managerId: IDS.users[0] }, // Marcus → Sarah
-    { userId: IDS.users[2], managerId: IDS.users[0] }, // Priya → Sarah
-    { userId: IDS.users[3], managerId: IDS.users[0] }, // James → Sarah
-    { userId: IDS.users[4], managerId: IDS.users[1] }, // Lisa → Marcus
-    { userId: IDS.users[5], managerId: IDS.users[1] }, // Andre → Marcus
-    { userId: IDS.users[6], managerId: IDS.users[1] }, // Emily → Marcus
-    { userId: IDS.users[7], managerId: IDS.users[2] }, // Kevin → Priya
-    { userId: IDS.users[8], managerId: IDS.users[3] }, // Maya → James
-    { userId: IDS.users[9], managerId: IDS.users[2] }, // Raj → Priya
-    { userId: IDS.users[10], managerId: IDS.users[2] }, // Sophie → Priya
-    { userId: IDS.users[11], managerId: IDS.users[2] }, // Daniel → Priya
+    { userId: IDS.users[3], managerId: IDS.users[0] },  // Marcus (VP Eng) → Sarah (CTO)
+    { userId: IDS.users[5], managerId: IDS.users[0] },  // James (Director) → Sarah (CTO)
+    { userId: IDS.users[4], managerId: IDS.users[2] },  // Priya (VP Product) → Amara (CPO)
+    { userId: IDS.users[10], managerId: IDS.users[2] }, // Maya (Senior Designer) → Amara (CPO)
+    { userId: IDS.users[6], managerId: IDS.users[3] },  // Lisa (Senior EM) → Marcus (VP Eng)
+    { userId: IDS.users[7], managerId: IDS.users[3] },  // Andre (EM) → Marcus (VP Eng)
+    { userId: IDS.users[8], managerId: IDS.users[6] },  // Emily (Staff Eng) → Lisa (Senior EM)
+    { userId: IDS.users[9], managerId: IDS.users[6] },  // Kevin (Senior Eng) → Lisa (Senior EM)
+    { userId: IDS.users[11], managerId: IDS.users[4] }, // Raj (Senior PM) → Priya (VP Product)
   ];
 
   for (const r of relationships) {
@@ -958,23 +1007,26 @@ async function seedTeamMemberships(employees: { id: string }[], _squads: { id: s
   logSection("Team Memberships");
 
   // Assign employees to squads with roles
-  // employees[4] (Lisa) — Cloud Services, Senior
-  // employees[5] (Andre) — Cloud Services
-  // employees[6] (Emily) — Feed & Discovery
-  // employees[7] (Kevin) — Feed & Discovery
-  // employees[8] (Maya) — Feed & Discovery (designer)
-  // employees[9] (Raj) — Developer Experience
-  // employees[10] (Sophie) — Developer Experience
-  // employees[11] (Daniel) — Messaging Platform
+  // Executives (0-5) don't have squad team memberships
+  // Lisa (idx 6, Senior EM) — Cloud Services & Developer Experience (oversees both)
+  // Andre (idx 7, EM) — Feed & Discovery
+  // Emily (idx 8, Staff Eng) — Cloud Services (primary)
+  // Kevin (idx 9, Senior Eng) — Feed & Discovery (primary)
+  // Maya (idx 10, Senior Designer) — Feed & Discovery (primary)
+  // Raj (idx 11, Senior PM) — Feed & Discovery (primary)
   const memberships = [
-    { employeeId: employees[4].id, squadId: IDS.squads.cloudInfra, role: "Tech Lead" },
-    { employeeId: employees[5].id, squadId: IDS.squads.cloudInfra, role: "Engineer" },
-    { employeeId: employees[6].id, squadId: IDS.squads.webApp, role: "Engineer" },
-    { employeeId: employees[7].id, squadId: IDS.squads.webApp, role: "Engineer" },
-    { employeeId: employees[8].id, squadId: IDS.squads.webApp, role: "Designer" },
-    { employeeId: employees[9].id, squadId: IDS.squads.devTools, role: "Tech Lead" },
-    { employeeId: employees[10].id, squadId: IDS.squads.devTools, role: "Engineer" },
-    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, role: "Engineer" },
+    { employeeId: employees[6].id, squadId: IDS.squads.cloudInfra, role: "Engineering Manager" },
+    { employeeId: employees[6].id, squadId: IDS.squads.devTools, role: "Engineering Manager" },
+    { employeeId: employees[7].id, squadId: IDS.squads.webApp, role: "Engineering Manager" },
+    { employeeId: employees[8].id, squadId: IDS.squads.cloudInfra, role: "Tech Lead" },
+    { employeeId: employees[8].id, squadId: IDS.squads.mobileApp, role: "Engineer" },
+    { employeeId: employees[9].id, squadId: IDS.squads.webApp, role: "Engineer" },
+    { employeeId: employees[9].id, squadId: IDS.squads.cloudInfra, role: "Engineer" },
+    { employeeId: employees[10].id, squadId: IDS.squads.webApp, role: "Designer" },
+    { employeeId: employees[10].id, squadId: IDS.squads.mobileApp, role: "Designer" },
+    { employeeId: employees[10].id, squadId: IDS.squads.devTools, role: "Designer" },
+    { employeeId: employees[11].id, squadId: IDS.squads.webApp, role: "Product Manager" },
+    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, role: "Product Manager" },
   ];
 
   for (const m of memberships) {
@@ -1002,18 +1054,26 @@ async function seedCapacityAllocations(employees: { id: string }[], _squads: { i
   logSection("Capacity Allocations");
 
   // Each employee's allocations sum to 100%
+  // Executives (indices 0-5) don't get squad allocations
+  // Lisa (idx 6, Senior EM): 50% Cloud Services, 50% Developer Experience
+  // Andre (idx 7, EM): 100% Feed & Discovery
+  // Emily (idx 8, Staff Eng): 60% Cloud Services, 40% Messaging Platform
+  // Kevin (idx 9, Senior Eng): 70% Feed & Discovery, 30% Cloud Services
+  // Maya (idx 10, Senior Designer): 40% Feed & Discovery, 40% Messaging Platform, 20% Developer Experience
+  // Raj (idx 11, Senior PM): 50% Feed & Discovery, 50% Messaging Platform
   const allocations = [
-    { employeeId: employees[4].id, squadId: IDS.squads.cloudInfra, percentage: 100 },
-    { employeeId: employees[5].id, squadId: IDS.squads.cloudInfra, percentage: 100 },
-    { employeeId: employees[6].id, squadId: IDS.squads.webApp, percentage: 100 },
-    { employeeId: employees[7].id, squadId: IDS.squads.webApp, percentage: 80 },
-    { employeeId: employees[7].id, squadId: IDS.squads.mobileApp, percentage: 20 },
-    { employeeId: employees[8].id, squadId: IDS.squads.webApp, percentage: 60 },
+    { employeeId: employees[6].id, squadId: IDS.squads.cloudInfra, percentage: 50 },
+    { employeeId: employees[6].id, squadId: IDS.squads.devTools, percentage: 50 },
+    { employeeId: employees[7].id, squadId: IDS.squads.webApp, percentage: 100 },
+    { employeeId: employees[8].id, squadId: IDS.squads.cloudInfra, percentage: 60 },
     { employeeId: employees[8].id, squadId: IDS.squads.mobileApp, percentage: 40 },
-    { employeeId: employees[9].id, squadId: IDS.squads.devTools, percentage: 100 },
-    { employeeId: employees[10].id, squadId: IDS.squads.devTools, percentage: 70 },
-    { employeeId: employees[10].id, squadId: IDS.squads.cloudInfra, percentage: 30 },
-    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, percentage: 100 },
+    { employeeId: employees[9].id, squadId: IDS.squads.webApp, percentage: 70 },
+    { employeeId: employees[9].id, squadId: IDS.squads.cloudInfra, percentage: 30 },
+    { employeeId: employees[10].id, squadId: IDS.squads.webApp, percentage: 40 },
+    { employeeId: employees[10].id, squadId: IDS.squads.mobileApp, percentage: 40 },
+    { employeeId: employees[10].id, squadId: IDS.squads.devTools, percentage: 20 },
+    { employeeId: employees[11].id, squadId: IDS.squads.webApp, percentage: 50 },
+    { employeeId: employees[11].id, squadId: IDS.squads.mobileApp, percentage: 50 },
   ];
 
   for (const a of allocations) {
@@ -1024,17 +1084,33 @@ async function seedCapacityAllocations(employees: { id: string }[], _squads: { i
     });
   }
 
-  // 100% capacity for additional users (12–99) to their assigned squad
+  // Additional users (12–99): ~20% get split allocations (every 5th user)
   const squadIdList = [IDS.squads.cloudInfra, IDS.squads.devTools, IDS.squads.webApp, IDS.squads.mobileApp];
   for (let i = 12; i < employees.length; i++) {
-    const squadId = squadIdList[i % squadIdList.length];
-    await prisma.capacityAllocation.upsert({
-      where: { employeeId_squadId: { employeeId: employees[i].id, squadId } },
-      update: { percentage: 100 },
-      create: { employeeId: employees[i].id, squadId, percentage: 100 },
-    });
+    const primarySquad = squadIdList[i % squadIdList.length];
+    if (i % 5 === 0) {
+      // 60/40 split between primary and secondary squad
+      const secondarySquad = squadIdList[(i + 1) % squadIdList.length];
+      await prisma.capacityAllocation.upsert({
+        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: primarySquad } },
+        update: { percentage: 60 },
+        create: { employeeId: employees[i].id, squadId: primarySquad, percentage: 60 },
+      });
+      await prisma.capacityAllocation.upsert({
+        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: secondarySquad } },
+        update: { percentage: 40 },
+        create: { employeeId: employees[i].id, squadId: secondarySquad, percentage: 40 },
+      });
+    } else {
+      // 100% to their assigned squad
+      await prisma.capacityAllocation.upsert({
+        where: { employeeId_squadId: { employeeId: employees[i].id, squadId: primarySquad } },
+        update: { percentage: 100 },
+        create: { employeeId: employees[i].id, squadId: primarySquad, percentage: 100 },
+      });
+    }
   }
-  log(`Created ${allocations.length + Math.max(0, employees.length - 12)} capacity allocations`);
+  log(`Created ${allocations.length + Math.max(0, employees.length - 12)} capacity allocations (with split allocations for ~20% of additional users)`);
 }
 
 async function seedBudgets(departments: { id: string; name: string }[]) {
