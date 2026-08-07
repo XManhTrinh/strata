@@ -3,42 +3,44 @@
 import { useTheme } from "@/lib/theme";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { useUserRole } from "@/hooks/use-user-role";
 import {
   NavigationRail,
   type NavigationRailItem,
 } from "@/components/ui/navigation-rail";
 
 /**
- * Primary rail items — one per key section (max 7)
- * Items with children open the navigation drawer on hover.
+ * All possible rail items — filtered by role at render time.
  */
-const railItems: NavigationRailItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
+const allRailItems: (NavigationRailItem & { roles: string[] })[] = [
+  { label: "Dashboard", href: "/dashboard", icon: "dashboard", roles: ["super_admin", "manager", "user"] },
   {
     label: "People",
     href: "/people",
     icon: "person",
+    roles: ["manager"],
     children: [
       { label: "People", href: "/people", icon: "person" },
       { label: "Employees", href: "/employees", icon: "group" },
     ],
   },
-  { label: "Org Chart", href: "/org-chart", icon: "account_tree" },
+  { label: "Org Chart", href: "/org-chart", icon: "account_tree", roles: ["manager", "user"] },
   {
     label: "Engineering",
     href: "/engineering",
     icon: "engineering",
+    roles: ["manager"],
     children: [
       { label: "Teams", href: "/engineering", icon: "engineering" },
       { label: "Capacity", href: "/capacity", icon: "trending_up" },
     ],
   },
-  { label: "Budgets", href: "/budgets", icon: "payments" },
+  { label: "Budgets", href: "/budgets", icon: "payments", roles: ["manager"] },
   {
     label: "Settings",
     href: "/settings",
     icon: "settings",
+    roles: ["super_admin"],
     children: [
       { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
       { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
@@ -47,7 +49,7 @@ const railItems: NavigationRailItem[] = [
       { label: "Features", href: "/settings/features", icon: "extension" },
     ],
   },
-  { label: "Calendar", href: "/calendar", icon: "calendar_month" },
+  { label: "Calendar", href: "/calendar", icon: "calendar_month", roles: ["manager", "user"] },
 ];
 
 /** Simple Strata logo SVG */
@@ -77,15 +79,21 @@ function StrataLogo() {
  * Sidebar — M3 Navigation Rail with hover drawer
  *
  * Desktop: 80px rail with logo at top, theme toggle at bottom
- * Items with children open a full-height navigation drawer on hover
+ * Items are filtered by the current user role:
+ * - super_admin: Dashboard + Settings (with all sub-items)
+ * - manager: Dashboard + People + Org Chart + Engineering + Budgets + Calendar
+ * - user: Dashboard + Org Chart + Calendar
  */
 export function Sidebar() {
-  const { hasPermission } = useUserPermissions();
+  const { role } = useUserRole();
   const { theme, setTheme } = useTheme();
 
-  // Check if user has any nav permissions
-  const hasAny = railItems.some((item) => true); // Rail items are always shown for simplicity
-  if (!hasAny) return null;
+  // Filter rail items by current role
+  const railItems: NavigationRailItem[] = allRailItems
+    .filter((item) => item.roles.includes(role))
+    .map(({ roles: _roles, ...item }) => item);
+
+  if (railItems.length === 0) return null;
 
   return (
     <NavigationRail
