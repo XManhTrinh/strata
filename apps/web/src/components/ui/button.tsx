@@ -5,26 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-38 [&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0 text-[14px] leading-[20px] tracking-[0.1px]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90 active:scale-[0.97]",
+          "bg-primary text-primary-foreground shadow-md rounded-full hover:shadow-lg hover:bg-primary/92 active:scale-[0.97]",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:shadow-md hover:bg-destructive/90 active:scale-[0.97]",
+          "bg-destructive text-destructive-foreground shadow-md rounded-full hover:shadow-lg hover:bg-destructive/92 active:scale-[0.97]",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:shadow-md active:scale-[0.97]",
+          "border border-outline bg-transparent text-primary rounded-full hover:bg-primary/8 active:scale-[0.97]",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md active:scale-[0.97]",
-        ghost: "hover:bg-accent hover:text-accent-foreground active:scale-[0.97]",
-        link: "text-primary underline-offset-4 hover:underline cursor-pointer",
+          "bg-secondary-container text-secondary-container-foreground rounded-full shadow-sm hover:shadow-md hover:bg-secondary-container/90 active:scale-[0.97]",
+        ghost: "rounded-full text-foreground hover:bg-accent active:scale-[0.97]",
+        link: "text-primary underline-offset-4 hover:underline cursor-pointer rounded-none",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-lg px-3 text-xs",
-        lg: "h-11 rounded-xl px-8",
-        icon: "h-9 w-9 rounded-full",
+        default: "h-10 px-6 min-w-[48px]",
+        sm: "h-[34px] px-4 min-w-[48px] text-[13px]",
+        lg: "h-12 px-8 min-w-[48px] text-[15px]",
+        icon: "h-10 w-10 rounded-full",
       },
     },
     defaultVariants: {
