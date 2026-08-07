@@ -475,6 +475,12 @@ async function seedUsers(
     IDS.orgUnits.dataSquad,
     IDS.orgUnits.productDesignSquad,
     IDS.orgUnits.brandSquad,
+    IDS.orgUnits.hr,
+    IDS.orgUnits.legal,
+    IDS.orgUnits.marketing,
+    IDS.orgUnits.sales,
+    IDS.orgUnits.finance,
+    IDS.orgUnits.engineering,
   ];
 
   for (let i = 0; i < ADDITIONAL_USERS.length; i++) {

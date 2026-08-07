@@ -4,11 +4,10 @@ import { useMemo, useState, useCallback } from "react";
 import { ApiPersonRepository } from "@/lib/org-tree/ApiPersonRepository";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
-import { buildSquadTree, buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
-import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
+import { buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
 import { Button } from "@/components/ui/button";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
-import { useOrgChartPeople } from "@/services";
+import { useOrgChartPeople, useOrgUnits } from "@/services";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";
@@ -29,6 +28,7 @@ interface PendingGroupMove {
 
 export default function OrgChartPage() {
   const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople();
+  const { data: orgUnits = [] } = useOrgUnits("cm_acme_corp_001");
 
   const repository = useMemo(
     () => new ApiPersonRepository(orgChartPeople ?? []),
@@ -40,26 +40,26 @@ export default function OrgChartPage() {
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
   const [pendingGroupMove, setPendingGroupMove] =
     useState<PendingGroupMove | null>(null);
-  const [selectedSquads, setSelectedSquads] = useState<Set<string>>(new Set());
+  const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<OrgChartViewMode>("reporting");
   const [timelineDate] = useState<string | null>(null);
 
-  const toggleSquad = useCallback((squad: string) => {
-    setSelectedSquads((prev) => {
+  const toggleUnit = useCallback((unitName: string) => {
+    setSelectedUnits((prev) => {
       const next = new Set(prev);
-      if (next.has(squad)) {
-        next.delete(squad);
+      if (next.has(unitName)) {
+        next.delete(unitName);
       } else {
-        next.add(squad);
+        next.add(unitName);
       }
       return next;
     });
   }, []);
 
-  const clearSquads = useCallback(() => setSelectedSquads(new Set()), []);
+  const clearUnits = useCallback(() => setSelectedUnits(new Set()), []);
 
-  const isAllView = selectedSquads.size === 0;
+  const isAllView = selectedUnits.size === 0;
 
   // Filter persons by timeline date
   const filteredPersons = useMemo(() => {
@@ -98,19 +98,21 @@ export default function OrgChartPage() {
       }
       return buildTree(filteredPersons.filter((p) => reachable.has(p.id)));
     }
-    return buildSquadTree(filteredPersons, Array.from(selectedSquads));
-  }, [isAllView, selectedSquads, filteredPersons, viewMode]);
+    // Filter by selected org units (match on departmentName)
+    const unitFilteredPersons = filteredPersons.filter(
+      (p) => p.departmentName && selectedUnits.has(p.departmentName)
+    );
+    return buildTree(unitFilteredPersons);
+  }, [isAllView, selectedUnits, filteredPersons, viewMode]);
 
   const selectedMemberCount = useMemo(() => {
     if (isAllView) return filteredPersons.length;
-    return new Set(
-      filteredPersons
-        .filter((p) => p.squads.some((s) => selectedSquads.has(s)))
-        .map((p) => p.id)
-    ).size;
-  }, [isAllView, selectedSquads, filteredPersons]);
+    return filteredPersons.filter(
+      (p) => p.departmentName && selectedUnits.has(p.departmentName)
+    ).length;
+  }, [isAllView, selectedUnits, filteredPersons]);
 
-  // Enhanced search: matches fullName, uin, title, departmentName, squads, status
+  // Enhanced search
   const matchedIds = useMemo<Set<string>>(() => {
     const q = search.trim().toLowerCase();
     if (!q) return new Set();
@@ -121,7 +123,6 @@ export default function OrgChartPage() {
           if (p.uin && p.uin.toLowerCase().includes(q)) return true;
           if (p.title.toLowerCase().includes(q)) return true;
           if (p.departmentName && p.departmentName.toLowerCase().includes(q)) return true;
-          if (p.squads.some((s) => s.toLowerCase().includes(q))) return true;
           if (p.status.toLowerCase().includes(q)) return true;
           return false;
         })
@@ -136,13 +137,14 @@ export default function OrgChartPage() {
     return getPathToRoot(filteredPersons, targetId);
   }, [matchedIds, filteredPersons]);
 
-  const squadCounts = useMemo(() => {
+  // Count people per org unit name
+  const unitCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const squad of ALL_SQUADS) {
-      counts[squad] = filteredPersons.filter((p) => p.squads.includes(squad)).length;
+    for (const unit of orgUnits) {
+      counts[unit.name] = filteredPersons.filter((p) => p.departmentName === unit.name).length;
     }
     return counts;
-  }, [filteredPersons]);
+  }, [filteredPersons, orgUnits]);
 
   const onEdit = useCallback((person: Person) => {
     console.log("Edit person:", person.fullName);
@@ -172,12 +174,12 @@ export default function OrgChartPage() {
         <FlowOrgHeader
           search={search}
           onSearchChange={setSearch}
-          selectedSquads={selectedSquads}
-          onToggleSquad={toggleSquad}
-          onClearSquads={clearSquads}
-          squadCounts={squadCounts}
+          selectedSquads={selectedUnits}
+          onToggleSquad={toggleUnit}
+          onClearSquads={clearUnits}
+          squadCounts={unitCounts}
           totalCount={filteredPersons.length}
-          tribes={TRIBES}
+          orgUnits={orgUnits}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           searchResultCount={search.trim() ? matchedIds.size : undefined}
@@ -188,20 +190,20 @@ export default function OrgChartPage() {
         {/* Status bar */}
         <div className="px-6 flex items-center gap-3 h-8 shrink-0">
           {!isAllView && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Showing{" "}
-              <span className="font-medium text-gray-700 dark:text-gray-200">
+              <span className="font-medium text-foreground">
                 {selectedMemberCount}
               </span>{" "}
-              {selectedMemberCount === 1 ? "person" : "people"} across{" "}
-              <span className="font-medium text-gray-700 dark:text-gray-200">
-                {Array.from(selectedSquads).join(", ")}
+              {selectedMemberCount === 1 ? "person" : "people"} in{" "}
+              <span className="font-medium text-foreground">
+                {Array.from(selectedUnits).join(", ")}
               </span>{" "}
               —{" "}
               <button
                 type="button"
-                onClick={clearSquads}
-                className="text-indigo-500 hover:text-indigo-400 underline underline-offset-2"
+                onClick={clearUnits}
+                className="text-primary hover:underline"
               >
                 clear
               </button>
