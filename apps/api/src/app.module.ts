@@ -16,9 +16,10 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { SearchModule } from './search/search.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { OrgChartModule } from './org-chart/org-chart.module';
 
 @Module({
-  imports: [AuthModule, AuthorizationModule, PermissionsModule, PeopleModule, EmployeesModule, AuditModule, OrganizationsModule, EngineeringModule, CapacityModule, BudgetingModule, LeaveModule, NotificationsModule, ReportsModule, SearchModule, CalendarModule],
+  imports: [AuthModule, AuthorizationModule, PermissionsModule, PeopleModule, EmployeesModule, AuditModule, OrganizationsModule, EngineeringModule, CapacityModule, BudgetingModule, LeaveModule, NotificationsModule, ReportsModule, SearchModule, CalendarModule, OrgChartModule],
   controllers: [AppController],
   providers: [],
 })

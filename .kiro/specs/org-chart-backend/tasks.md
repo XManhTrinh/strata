@@ -6,25 +6,25 @@ This plan connects the existing org chart frontend to real backend endpoints. We
 
 ## Tasks
 
-- [ ] 1. Create OrgChartModule with types and service skeleton
-  - [ ] 1.1 Create the org-chart directory and module file at `apps/api/src/org-chart/org-chart.module.ts`
+- [x] 1. Create OrgChartModule with types and service skeleton
+  - [x] 1.1 Create the org-chart directory and module file at `apps/api/src/org-chart/org-chart.module.ts`
     - Register `OrgChartController` and `OrgChartService` as providers
     - Import PrismaClient and Redis from existing providers
     - _Requirements: 1.1, 1.6_
-  - [ ] 1.2 Define TypeScript interfaces for internal and response types
+  - [x] 1.2 Define TypeScript interfaces for internal and response types
     - Create `apps/api/src/org-chart/org-chart.types.ts`
     - Define `OrgTreeNode`, `FlatEmployee`, `FlatRelationship`, `UnitViewResponse`, `UnitEmployee`, `UnitAncestor` interfaces
     - _Requirements: 1.2, 3.2, 3.3, 3.5_
-  - [ ] 1.3 Create `OrgChartService` at `apps/api/src/org-chart/org-chart.service.ts`
+  - [x] 1.3 Create `OrgChartService` at `apps/api/src/org-chart/org-chart.service.ts`
     - Inject `PrismaClient` and `Redis`
     - Stub methods: `getTree`, `getUnitView`, `invalidateTree`, `buildTree`
     - _Requirements: 1.1, 1.4, 2.1_
-  - [ ] 1.4 Register `OrgChartModule` in `apps/api/src/app.module.ts`
+  - [x] 1.4 Register `OrgChartModule` in `apps/api/src/app.module.ts`
     - Add import to the AppModule imports array
     - _Requirements: 1.1_
 
-- [ ] 2. Implement tree construction logic (pure function)
-  - [ ] 2.1 Implement the `buildTree` method in `OrgChartService`
+- [x] 2. Implement tree construction logic (pure function)
+  - [x] 2.1 Implement the `buildTree` method in `OrgChartService`
     - Accept `FlatEmployee[]` and `FlatRelationship[]` as inputs
     - Build a `Map<userId, OrgTreeNode>` from employees (all with empty directReports)
     - Iterate relationships to push child nodes into parent's directReports
@@ -43,8 +43,8 @@ This plan connects the existing org chart frontend to real backend endpoints. We
     - Build tree, flatten back to (userId, managerId) pairs, compare to original set
     - **Validates: Requirements 7.2, 7.3, 7.4**
 
-- [ ] 3. Implement tree endpoint with caching
-  - [ ] 3.1 Implement `getTree` method in `OrgChartService`
+- [x] 3. Implement tree endpoint with caching
+  - [x] 3.1 Implement `getTree` method in `OrgChartService`
     - Check Redis cache at key `org-chart:tree:{companyId}` first
     - On cache hit: parse JSON and return
     - On cache miss: run three parallel Prisma queries (`userCompanyMembership.findMany`, `reportingRelationship.findMany`, `user.findMany` with person include)
@@ -53,7 +53,7 @@ This plan connects the existing org chart frontend to real backend endpoints. We
     - Store result in Redis with 300s TTL
     - Handle Redis failures gracefully (skip cache on error, log warning)
     - _Requirements: 1.1, 1.4, 2.1, 2.2, 2.5_
-  - [ ] 3.2 Create `OrgChartController` at `apps/api/src/org-chart/org-chart.controller.ts`
+  - [x] 3.2 Create `OrgChartController` at `apps/api/src/org-chart/org-chart.controller.ts`
     - Route: `@Controller('api/v2/companies/:companyId/org-chart')`
     - Apply `@UseGuards(AuthorizationGuard)` for auth
     - Implement `GET /` handler calling `service.getTree(companyId)`
@@ -66,14 +66,14 @@ This plan connects the existing org chart frontend to real backend endpoints. We
     - Test: returns 404 for non-existent company
     - _Requirements: 2.1, 2.2, 1.5_
 
-- [ ] 4. Implement unit view endpoint
-  - [ ] 4.1 Implement `getUnitView` method in `OrgChartService`
+- [x] 4. Implement unit view endpoint
+  - [x] 4.1 Implement `getUnitView` method in `OrgChartService`
     - Query `OrganizationUnit` by id within company, return 404 if not found
     - Query employees whose `UserCompanyMembership.orgUnitId` matches the unit
     - Walk the unit's `parentId` chain to build the ancestor array (root → unit)
     - Return `UnitViewResponse` with unit details, parentChain, and employees
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
-  - [ ] 4.2 Add unit endpoint to `OrgChartController`
+  - [x] 4.2 Add unit endpoint to `OrgChartController`
     - Implement `GET /unit/:unitId` handler calling `service.getUnitView(companyId, unitId)`
     - Return 404 if unitId does not exist within the company
     - _Requirements: 3.1, 3.4, 3.6_
@@ -90,11 +90,11 @@ This plan connects the existing org chart frontend to real backend endpoints. We
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Implement cache invalidation integration
-  - [ ] 6.1 Implement `invalidateTree` method in `OrgChartService`
+  - [x] 6.1 Implement `invalidateTree` method in `OrgChartService`
     - Delete Redis key `org-chart:tree:{companyId}`
     - Handle Redis failures gracefully (log warning, don't throw)
     - _Requirements: 2.3, 2.4_
-  - [ ] 6.2 Add org chart cache invalidation to `ReportingService`
+  - [x] 6.2 Add org chart cache invalidation to `ReportingService`
     - In `apps/api/src/authorization/admin/reporting.service.ts`
     - After `setManager` persists, call `redis.del(\`org-chart:tree:${companyId}\`)`
     - After `removeManager` persists, call `redis.del(\`org-chart:tree:${companyId}\`)`
@@ -106,7 +106,7 @@ This plan connects the existing org chart frontend to real backend endpoints. We
     - _Requirements: 2.3, 2.4_
 
 - [ ] 7. Create frontend service hooks
-  - [ ] 7.1 Create `apps/web/src/services/org-chart.service.ts`
+  - [x] 7.1 Create `apps/web/src/services/org-chart.service.ts`
     - Define `OrgTreeNode`, `UnitEmployee`, `UnitAncestor`, `UnitViewResponse` interfaces
     - Implement `useOrgChart(companyId)` hook using `useQuery`
       - queryKey: `["org-chart", companyId]`
@@ -118,7 +118,7 @@ This plan connects the existing org chart frontend to real backend endpoints. We
       - queryFn: call `apiClient<UnitViewResponse>(\`/api/v2/companies/${companyId}/org-chart/unit/${unitId}\`)`
       - enabled: `!!companyId && !!unitId`
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 5.1, 5.2, 5.3, 5.4_
-  - [ ] 7.2 Export hooks from `apps/web/src/services/index.ts`
+  - [x] 7.2 Export hooks from `apps/web/src/services/index.ts`
     - Add re-export for `org-chart.service.ts`
     - _Requirements: 4.1, 5.1_
 

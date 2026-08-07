@@ -68,6 +68,8 @@ export class ReportingService {
     if (oldRelationship && oldRelationship.managerId !== managerId) {
       await this.invalidateReportsCaches(companyId, oldRelationship.managerId);
     }
+    // Invalidate org chart cache
+    try { await this.redis.del(`org-chart:tree:${companyId}`); } catch { /* graceful */ }
 
     return result;
   }
@@ -112,6 +114,8 @@ export class ReportingService {
 
     // Invalidate old manager's direct reports cache
     await this.invalidateReportsCaches(companyId, relationship.managerId);
+    // Invalidate org chart cache
+    try { await this.redis.del(`org-chart:tree:${companyId}`); } catch { /* graceful */ }
 
     return { removed: true };
   }
