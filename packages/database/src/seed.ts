@@ -297,6 +297,12 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
     // Level 2 — Squads under Design & UX
     { id: IDS.orgUnits.productDesignSquad, typeId: squadType.id, name: "Product Design", code: "PDSG", parentId: IDS.orgUnits.design, path: `/${IDS.orgUnits.design}/${IDS.orgUnits.productDesignSquad}`, sortOrder: 1 },
     { id: IDS.orgUnits.brandSquad, typeId: squadType.id, name: "Brand & Content", code: "BRND", parentId: IDS.orgUnits.design, path: `/${IDS.orgUnits.design}/${IDS.orgUnits.brandSquad}`, sortOrder: 2 },
+    // Level 1 — Additional Departments
+    { id: IDS.orgUnits.hr, typeId: deptType.id, name: "Human Resources", code: "HR", parentId: null, path: `/${IDS.orgUnits.hr}`, sortOrder: 6 },
+    { id: IDS.orgUnits.legal, typeId: deptType.id, name: "Legal", code: "LGL", parentId: null, path: `/${IDS.orgUnits.legal}`, sortOrder: 7 },
+    { id: IDS.orgUnits.marketing, typeId: deptType.id, name: "Marketing", code: "MKT", parentId: null, path: `/${IDS.orgUnits.marketing}`, sortOrder: 8 },
+    { id: IDS.orgUnits.sales, typeId: deptType.id, name: "Sales", code: "SLS", parentId: null, path: `/${IDS.orgUnits.sales}`, sortOrder: 9 },
+    { id: IDS.orgUnits.operations, typeId: deptType.id, name: "Operations", code: "OPS", parentId: null, path: `/${IDS.orgUnits.operations}`, sortOrder: 10 },
   ];
 
   const results = [];
@@ -480,7 +486,7 @@ async function seedUsers(
     IDS.orgUnits.marketing,
     IDS.orgUnits.sales,
     IDS.orgUnits.finance,
-    IDS.orgUnits.engineering,
+    IDS.orgUnits.people,
   ];
 
   for (let i = 0; i < ADDITIONAL_USERS.length; i++) {
