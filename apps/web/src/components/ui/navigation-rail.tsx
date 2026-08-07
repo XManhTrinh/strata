@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
+import { NavigationDrawer } from "@/components/ui/navigation-drawer";
 import * as React from "react";
 
 export interface NavigationRailSubItem {
@@ -143,46 +144,10 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
             onMouseEnter={handleFlyoutEnter}
             onMouseLeave={handleFlyoutLeave}
           >
-            <div className="w-64 h-full bg-[hsl(var(--surface))] border-r border-outline-variant/30 flex flex-col">
-              {/* Drawer header */}
-              <div className="flex items-center h-16 px-6 shrink-0">
-                <h2 className="text-[16px] leading-6 font-medium text-surface-foreground">
-                  {activeHoverItem.label}
-                </h2>
-              </div>
-
-              {/* Sub-items */}
-              <nav className="flex-1 overflow-y-auto px-3 pb-4">
-                <ul className="space-y-1">
-                  {activeHoverItem.children!.map((sub) => {
-                    const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + "/");
-
-                    return (
-                      <li key={sub.href}>
-                        <Link
-                          href={sub.href}
-                          className={cn(
-                            "flex items-center gap-3 rounded-full h-14 px-4 transition-colors duration-200",
-                            isSubActive
-                              ? "bg-secondary-container text-secondary-container-foreground font-medium"
-                              : "text-surface-variant-foreground hover:bg-surface-foreground/8 active:bg-surface-foreground/12"
-                          )}
-                        >
-                          <Icon
-                            name={sub.icon}
-                            size={24}
-                            filled={isSubActive}
-                            className="shrink-0"
-                          />
-                          <span className="text-[14px] leading-5 truncate">
-                            {sub.label}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </nav>
+            <div className="w-64 h-full bg-[hsl(var(--surface))] border-r border-outline-variant/30">
+              <NavigationDrawer
+                sections={[{ title: activeHoverItem.label, items: activeHoverItem.children! }]}
+              />
             </div>
           </motion.div>
         )}
