@@ -65,7 +65,7 @@ export function NavigationDrawer({
   return (
     <div
       className={cn(
-        "flex flex-col h-full rounded-r-[28px] bg-surface-variant",
+        "flex flex-col h-full rounded-r-3xl bg-surface-variant",
         className
       )}
     >
