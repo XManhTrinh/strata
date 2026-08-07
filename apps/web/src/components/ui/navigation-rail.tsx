@@ -184,25 +184,20 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
     >
       {/* Pill indicator — animates scale from center when active */}
       <div className="relative flex items-center justify-center w-14 h-8">
-        {/* Active background pill — scales from 0 to 1 */}
+        {/* Active background pill — expands horizontally from center */}
         <motion.div
-          className="absolute inset-0 rounded-full bg-secondary-container"
+          className="absolute inset-0 rounded-full bg-secondary-container origin-center"
           initial={false}
           animate={{
-            scale: isActive ? 1 : 0,
+            scaleX: isActive ? 1 : 0,
             opacity: isActive ? 1 : 0,
           }}
           transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] as [number, number, number, number] }}
         />
-        {/* State layer — always present, different color for active vs inactive */}
-        <div
-          className={cn(
-            "absolute inset-0 rounded-full transition-colors duration-200",
-            isActive
-              ? "group-hover:bg-secondary-container-foreground/8 group-active:bg-secondary-container-foreground/12"
-              : "group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12"
-          )}
-        />
+        {/* Hover/press state layer — only when inactive */}
+        {!isActive && (
+          <div className="absolute inset-0 rounded-full transition-colors duration-200 group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12" />
+        )}
         {/* Icon */}
         <Icon
           name={item.icon}
