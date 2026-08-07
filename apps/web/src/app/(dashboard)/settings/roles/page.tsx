@@ -1,263 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Badge, SearchInput } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
-import { useRoles, useCreateRole, COMPANY_ID, type AdminRole } from "@/services";
+import {
+  useRoles,
+  useCreateRole,
+  useRolePermissions,
+  useAddRolePermission,
+  useRemoveRolePermission,
+  useAllFeatures,
+  COMPANY_ID,
+  type AdminRole,
+  type AdminFeature,
+  type RolePermissionDetail,
+} from "@/services";
 
-type Scope = "OWN" | "DIRECT_REPORTS" | "ORG_UNIT" | "BRANCH" | "COMPANY";
+type Scope = "OWN" | "DIRECT_REPORTS" | "ORGANIZATION_UNIT" | "BRANCH" | "COMPANY" | "GLOBAL";
 
-interface Permission {
-  key: string;
-  displayName: string;
-  scope: Scope;
-}
-
-interface FeaturePermissions {
-  featureKey: string;
-  featureDisplayName: string;
-  permissions: Permission[];
-}
-
-interface RoleWithPermissions {
-  id: string;
-  name: string;
-  description: string;
-  isSystem: boolean;
-  assignedUsers: number;
-  permissions: FeaturePermissions[];
-}
-
-const scopeOptions: Scope[] = ["OWN", "DIRECT_REPORTS", "ORG_UNIT", "BRANCH", "COMPANY"];
+const scopeOptions: Scope[] = ["OWN", "DIRECT_REPORTS", "ORGANIZATION_UNIT", "BRANCH", "COMPANY", "GLOBAL"];
 
 const scopeColors: Record<Scope, string> = {
   OWN: "text-blue-600 dark:text-blue-400",
   DIRECT_REPORTS: "text-purple-600 dark:text-purple-400",
-  ORG_UNIT: "text-amber-600 dark:text-amber-400",
+  ORGANIZATION_UNIT: "text-amber-600 dark:text-amber-400",
   BRANCH: "text-green-600 dark:text-green-400",
   COMPANY: "text-red-600 dark:text-red-400",
+  GLOBAL: "text-pink-600 dark:text-pink-400",
 };
-
-/** All available features and their permissions (the full catalog) */
-interface AvailablePermission {
-  key: string;
-  displayName: string;
-}
-
-interface AvailableFeature {
-  key: string;
-  displayName: string;
-  permissions: AvailablePermission[];
-}
-
-const ALL_AVAILABLE_FEATURES: AvailableFeature[] = [
-  {
-    key: "leave",
-    displayName: "Leave Management",
-    permissions: [
-      { key: "view_own", displayName: "View Own Requests" },
-      { key: "submit_request", displayName: "Submit Request" },
-      { key: "approve", displayName: "Approve Requests" },
-      { key: "reject", displayName: "Reject Requests" },
-      { key: "view_team", displayName: "View Team Requests" },
-      { key: "manage_policies", displayName: "Manage Policies" },
-    ],
-  },
-  {
-    key: "employees",
-    displayName: "Employee Directory",
-    permissions: [
-      { key: "view", displayName: "View Profiles" },
-      { key: "edit", displayName: "Edit Profiles" },
-      { key: "create", displayName: "Create Employees" },
-      { key: "terminate", displayName: "Terminate Employees" },
-      { key: "invite", displayName: "Invite Users" },
-    ],
-  },
-  {
-    key: "capacity",
-    displayName: "Capacity Planning",
-    permissions: [
-      { key: "view_own", displayName: "View Own Allocation" },
-      { key: "view_team", displayName: "View Team Allocation" },
-      { key: "manage", displayName: "Manage Allocation" },
-    ],
-  },
-  {
-    key: "budgets",
-    displayName: "Budget Management",
-    permissions: [
-      { key: "view", displayName: "View Budgets" },
-      { key: "manage", displayName: "Manage Budgets" },
-      { key: "approve", displayName: "Approve Budgets" },
-    ],
-  },
-  {
-    key: "org_chart",
-    displayName: "Organization Chart",
-    permissions: [
-      { key: "view", displayName: "View Org Chart" },
-      { key: "edit", displayName: "Edit Org Chart" },
-    ],
-  },
-  {
-    key: "calendar",
-    displayName: "Calendar",
-    permissions: [
-      { key: "view_own", displayName: "View Own Calendar" },
-      { key: "view_team", displayName: "View Team Calendar" },
-      { key: "view_company", displayName: "View Company Calendar" },
-      { key: "create_events", displayName: "Create Events" },
-    ],
-  },
-  {
-    key: "reports",
-    displayName: "Reports",
-    permissions: [
-      { key: "view", displayName: "View Reports" },
-      { key: "export", displayName: "Export Reports" },
-      { key: "schedule", displayName: "Schedule Reports" },
-    ],
-  },
-  {
-    key: "authorization",
-    displayName: "Authorization Management",
-    permissions: [
-      { key: "manage_roles", displayName: "Manage Roles" },
-      { key: "manage_org_structure", displayName: "Manage Org Structure" },
-      { key: "manage_positions", displayName: "Manage Positions" },
-      { key: "manage_features", displayName: "Manage Features" },
-      { key: "manage_reporting", displayName: "Manage Reporting" },
-    ],
-  },
-];
-
-/** Default permission matrix (client-side mock) for roles loaded from the backend */
-const DEFAULT_ROLE_PERMISSIONS: Record<string, FeaturePermissions[]> = {
-  Employee: [
-    {
-      featureKey: "leave",
-      featureDisplayName: "Leave Management",
-      permissions: [
-        { key: "view_own", displayName: "View Own Requests", scope: "OWN" },
-        { key: "submit_request", displayName: "Submit Request", scope: "OWN" },
-      ],
-    },
-    {
-      featureKey: "employees",
-      featureDisplayName: "Employee Directory",
-      permissions: [
-        { key: "view", displayName: "View Profiles", scope: "COMPANY" },
-      ],
-    },
-    {
-      featureKey: "capacity",
-      featureDisplayName: "Capacity Planning",
-      permissions: [
-        { key: "view_own", displayName: "View Own Allocation", scope: "OWN" },
-      ],
-    },
-  ],
-  Manager: [
-    {
-      featureKey: "leave",
-      featureDisplayName: "Leave Management",
-      permissions: [
-        { key: "view_own", displayName: "View Own Requests", scope: "OWN" },
-        { key: "submit_request", displayName: "Submit Request", scope: "OWN" },
-        { key: "approve", displayName: "Approve Requests", scope: "DIRECT_REPORTS" },
-        { key: "view_team", displayName: "View Team Requests", scope: "DIRECT_REPORTS" },
-      ],
-    },
-    {
-      featureKey: "employees",
-      featureDisplayName: "Employee Directory",
-      permissions: [
-        { key: "view", displayName: "View Profiles", scope: "COMPANY" },
-        { key: "edit", displayName: "Edit Profiles", scope: "DIRECT_REPORTS" },
-      ],
-    },
-    {
-      featureKey: "capacity",
-      featureDisplayName: "Capacity Planning",
-      permissions: [
-        { key: "view_own", displayName: "View Own Allocation", scope: "OWN" },
-        { key: "view_team", displayName: "View Team Allocation", scope: "DIRECT_REPORTS" },
-        { key: "manage", displayName: "Manage Allocation", scope: "DIRECT_REPORTS" },
-      ],
-    },
-  ],
-  Admin: [
-    {
-      featureKey: "authorization",
-      featureDisplayName: "Authorization Management",
-      permissions: [
-        { key: "manage_roles", displayName: "Manage Roles", scope: "COMPANY" },
-        { key: "manage_org_structure", displayName: "Manage Org Structure", scope: "COMPANY" },
-        { key: "manage_features", displayName: "Manage Features", scope: "COMPANY" },
-      ],
-    },
-    {
-      featureKey: "leave",
-      featureDisplayName: "Leave Management",
-      permissions: [
-        { key: "view_own", displayName: "View Own Requests", scope: "OWN" },
-        { key: "approve", displayName: "Approve Requests", scope: "COMPANY" },
-        { key: "manage_policies", displayName: "Manage Policies", scope: "COMPANY" },
-      ],
-    },
-    {
-      featureKey: "employees",
-      featureDisplayName: "Employee Directory",
-      permissions: [
-        { key: "view", displayName: "View Profiles", scope: "COMPANY" },
-        { key: "edit", displayName: "Edit Profiles", scope: "COMPANY" },
-        { key: "create", displayName: "Create Employees", scope: "COMPANY" },
-        { key: "terminate", displayName: "Terminate Employees", scope: "COMPANY" },
-      ],
-    },
-  ],
-};
-
-function toRoleWithPermissions(role: AdminRole): RoleWithPermissions {
-  return {
-    id: role.id,
-    name: role.name,
-    description: role.description ?? "",
-    isSystem: role.isSystem,
-    assignedUsers: 0,
-    permissions: DEFAULT_ROLE_PERMISSIONS[role.name] ?? [],
-  };
-}
 
 export default function RolesPage() {
   const { data: backendRoles, isLoading, error } = useRoles(COMPANY_ID);
+  const { data: allFeatures, isLoading: featuresLoading } = useAllFeatures();
   const createRoleMutation = useCreateRole();
+  const addPermissionMutation = useAddRolePermission();
+  const removePermissionMutation = useRemoveRolePermission();
 
-  const [localRoles, setLocalRoles] = useState<RoleWithPermissions[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [roleSearch, setRoleSearch] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleDescription, setNewRoleDescription] = useState("");
 
-  // Merge backend roles with local permission state
-  const roles: RoleWithPermissions[] = backendRoles
-    ? backendRoles.map((r) => {
-        const localOverride = localRoles.find((lr) => lr.id === r.id);
-        if (localOverride) return localOverride;
-        return toRoleWithPermissions(r);
-      })
-    : [];
-
+  const roles: AdminRole[] = backendRoles ?? [];
   const effectiveSelectedId = selectedRoleId ?? roles[0]?.id ?? null;
   const selectedRole = roles.find((r) => r.id === effectiveSelectedId) ?? roles[0];
 
   const filteredRoles = roles.filter(
     (r) =>
       r.name.toLowerCase().includes(roleSearch.toLowerCase()) ||
-      r.description.toLowerCase().includes(roleSearch.toLowerCase())
+      (r.description ?? "").toLowerCase().includes(roleSearch.toLowerCase())
   );
+
+  // Fetch permissions for the selected role
+  const {
+    data: rolePermissionDetail,
+    isLoading: permissionsLoading,
+  } = useRolePermissions(COMPANY_ID, effectiveSelectedId ?? "");
 
   const handleCreateRole = () => {
     if (!newRoleName.trim()) return;
@@ -281,32 +80,59 @@ export default function RolesPage() {
       { companyId: COMPANY_ID, name: duplicateName, description: selectedRole.description || undefined },
       {
         onSuccess: (newRole) => {
-          // Copy permissions locally
-          const duplicated: RoleWithPermissions = {
-            ...toRoleWithPermissions(newRole),
-            permissions: [...selectedRole.permissions],
-          };
-          setLocalRoles((prev) => [...prev, duplicated]);
           setSelectedRoleId(newRole.id);
         },
       }
     );
   };
 
-  const updateLocalPermissions = (roleId: string, updater: (perms: FeaturePermissions[]) => FeaturePermissions[]) => {
-    const role = roles.find((r) => r.id === roleId);
-    if (!role) return;
-    const updated: RoleWithPermissions = { ...role, permissions: updater(role.permissions) };
-    setLocalRoles((prev) => {
-      const existing = prev.findIndex((r) => r.id === roleId);
-      if (existing >= 0) {
-        const copy = [...prev];
-        copy[existing] = updated;
-        return copy;
+  const handleTogglePermission = useCallback(
+    (featurePermissionId: string, checked: boolean, existingPermId?: string) => {
+      if (!effectiveSelectedId) return;
+      if (checked) {
+        addPermissionMutation.mutate({
+          companyId: COMPANY_ID,
+          roleId: effectiveSelectedId,
+          featurePermissionId,
+          scope: "OWN",
+        });
+      } else if (existingPermId) {
+        removePermissionMutation.mutate({
+          companyId: COMPANY_ID,
+          roleId: effectiveSelectedId,
+          permId: existingPermId,
+        });
       }
-      return [...prev, updated];
-    });
-  };
+    },
+    [effectiveSelectedId, addPermissionMutation, removePermissionMutation]
+  );
+
+  const handleScopeChange = useCallback(
+    (featurePermissionId: string, newScope: Scope, existingPermId?: string) => {
+      if (!effectiveSelectedId) return;
+      // Remove old permission and add new one with updated scope
+      if (existingPermId) {
+        removePermissionMutation.mutate(
+          {
+            companyId: COMPANY_ID,
+            roleId: effectiveSelectedId,
+            permId: existingPermId,
+          },
+          {
+            onSuccess: () => {
+              addPermissionMutation.mutate({
+                companyId: COMPANY_ID,
+                roleId: effectiveSelectedId,
+                featurePermissionId,
+                scope: newScope,
+              });
+            },
+          }
+        );
+      }
+    },
+    [effectiveSelectedId, addPermissionMutation, removePermissionMutation]
+  );
 
   if (isLoading) {
     return (
@@ -345,6 +171,9 @@ export default function RolesPage() {
       </div>
     );
   }
+
+  // Build the feature catalog from real backend data
+  const featureCatalog: AdminFeature[] = allFeatures ?? [];
 
   return (
     <div className="space-y-4">
@@ -421,134 +250,20 @@ export default function RolesPage() {
             </div>
 
             <div className="max-h-[calc(100vh-320px)] overflow-y-auto p-4">
-              <div className="space-y-6">
-                {ALL_AVAILABLE_FEATURES.map((feature) => {
-                  const roleFeaturePerms = selectedRole.permissions.find(
-                    (fp) => fp.featureKey === feature.key
-                  );
-
-                  return (
-                    <div key={feature.key}>
-                      <h3 className="mb-2 text-sm font-semibold text-foreground">
-                        {feature.displayName}
-                      </h3>
-                      <div className="rounded-md border border-border">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted/50">
-                            <tr>
-                              <th className="w-10 px-3 py-2"></th>
-                              <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                                Permission
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                                Scope
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {feature.permissions.map((availPerm) => {
-                              const assignedPerm = roleFeaturePerms?.permissions.find(
-                                (p) => p.key === availPerm.key
-                              );
-                              const isEnabled = !!assignedPerm;
-                              const currentScope = assignedPerm?.scope ?? "OWN";
-
-                              return (
-                                <tr key={availPerm.key} className="border-t border-border">
-                                  <td className="px-3 py-2 text-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={isEnabled}
-                                      onChange={(e) => {
-                                        updateLocalPermissions(selectedRole.id, (perms) => {
-                                          const updatedPermissions = [...perms];
-                                          const featureIdx = updatedPermissions.findIndex(
-                                            (fp) => fp.featureKey === feature.key
-                                          );
-
-                                          if (e.target.checked) {
-                                            const newPerm: Permission = {
-                                              key: availPerm.key,
-                                              displayName: availPerm.displayName,
-                                              scope: "OWN",
-                                            };
-                                            if (featureIdx >= 0) {
-                                              updatedPermissions[featureIdx] = {
-                                                ...updatedPermissions[featureIdx],
-                                                permissions: [
-                                                  ...updatedPermissions[featureIdx].permissions,
-                                                  newPerm,
-                                                ],
-                                              };
-                                            } else {
-                                              updatedPermissions.push({
-                                                featureKey: feature.key,
-                                                featureDisplayName: feature.displayName,
-                                                permissions: [newPerm],
-                                              });
-                                            }
-                                          } else {
-                                            if (featureIdx >= 0) {
-                                              const filtered = updatedPermissions[featureIdx].permissions.filter(
-                                                (p) => p.key !== availPerm.key
-                                              );
-                                              if (filtered.length === 0) {
-                                                updatedPermissions.splice(featureIdx, 1);
-                                              } else {
-                                                updatedPermissions[featureIdx] = {
-                                                  ...updatedPermissions[featureIdx],
-                                                  permissions: filtered,
-                                                };
-                                              }
-                                            }
-                                          }
-
-                                          return updatedPermissions;
-                                        });
-                                      }}
-                                      className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
-                                    />
-                                  </td>
-                                  <td className={`px-3 py-2 ${isEnabled ? "text-foreground" : "text-muted-foreground"}`}>
-                                    {availPerm.displayName}
-                                  </td>
-                                  <td className="px-3 py-2">
-                                    <select
-                                      value={currentScope}
-                                      disabled={!isEnabled}
-                                      onChange={(e) => {
-                                        const newScope = e.target.value as Scope;
-                                        updateLocalPermissions(selectedRole.id, (perms) =>
-                                          perms.map((fp) => {
-                                            if (fp.featureKey !== feature.key) return fp;
-                                            return {
-                                              ...fp,
-                                              permissions: fp.permissions.map((p) =>
-                                                p.key === availPerm.key ? { ...p, scope: newScope } : p
-                                              ),
-                                            };
-                                          })
-                                        );
-                                      }}
-                                      className={`rounded border border-border bg-background px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${isEnabled ? scopeColors[currentScope] : "text-muted-foreground"}`}
-                                    >
-                                      {scopeOptions.map((s) => (
-                                        <option key={s} value={s}>
-                                          {s.replace(/_/g, " ")}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              {(permissionsLoading || featuresLoading) ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="ml-2 text-sm text-muted-foreground">Loading permissions...</span>
+                </div>
+              ) : (
+                <PermissionMatrix
+                  features={featureCatalog}
+                  rolePermissions={rolePermissionDetail}
+                  onToggle={handleTogglePermission}
+                  onScopeChange={handleScopeChange}
+                  isMutating={addPermissionMutation.isPending || removePermissionMutation.isPending}
+                />
+              )}
             </div>
           </div>
         )}
@@ -612,6 +327,97 @@ export default function RolesPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Permission Matrix Component ──────────────────────────────────────────────
+
+interface PermissionMatrixProps {
+  features: AdminFeature[];
+  rolePermissions: RolePermissionDetail | undefined;
+  onToggle: (featurePermissionId: string, checked: boolean, existingPermId?: string) => void;
+  onScopeChange: (featurePermissionId: string, newScope: Scope, existingPermId?: string) => void;
+  isMutating: boolean;
+}
+
+function PermissionMatrix({ features, rolePermissions, onToggle, onScopeChange, isMutating }: PermissionMatrixProps) {
+  if (!features.length) {
+    return (
+      <p className="text-sm text-muted-foreground py-4">No features available.</p>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {features.map((feature) => (
+        <div key={feature.id}>
+          <h3 className="mb-2 text-sm font-semibold text-foreground">
+            {feature.displayName}
+          </h3>
+          <div className="rounded-md border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="w-10 px-3 py-2"></th>
+                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                    Permission
+                  </th>
+                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">
+                    Scope
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {feature.permissions.map((fp) => {
+                  // Find if this permission is assigned to the role
+                  const assigned = rolePermissions?.permissions.find(
+                    (rp) => rp.featurePermissionId === fp.id
+                  );
+                  const isEnabled = !!assigned;
+                  const currentScope = (assigned?.scope as Scope) ?? "OWN";
+
+                  return (
+                    <tr key={fp.id} className="border-t border-border">
+                      <td className="px-3 py-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isEnabled}
+                          disabled={isMutating}
+                          onChange={(e) => {
+                            onToggle(fp.id, e.target.checked, assigned?.id);
+                          }}
+                          className="h-4 w-4 rounded border-border text-primary focus:ring-ring disabled:opacity-50"
+                        />
+                      </td>
+                      <td className={`px-3 py-2 ${isEnabled ? "text-foreground" : "text-muted-foreground"}`}>
+                        {fp.displayName}
+                      </td>
+                      <td className="px-3 py-2">
+                        <select
+                          value={currentScope}
+                          disabled={!isEnabled || isMutating}
+                          onChange={(e) => {
+                            const newScope = e.target.value as Scope;
+                            onScopeChange(fp.id, newScope, assigned?.id);
+                          }}
+                          className={`rounded border border-border bg-background px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${isEnabled ? scopeColors[currentScope] : "text-muted-foreground"}`}
+                        >
+                          {scopeOptions.map((s) => (
+                            <option key={s} value={s}>
+                              {s.replace(/_/g, " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

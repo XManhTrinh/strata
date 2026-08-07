@@ -1,4 +1,4 @@
-import { PrismaClient, PermissionScopeV2 } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -54,22 +54,10 @@ const IDS = {
     engineeringRead: "fp_engineering_read_001",
     engineeringWrite: "fp_engineering_write_001",
   },
-  // Users (Person, User, Employee share index)
-  persons: [
-    "per_001", "per_002", "per_003", "per_004", "per_005",
-    "per_006", "per_007", "per_008", "per_009", "per_010",
-    "per_011", "per_012",
-  ],
-  users: [
-    "usr_001", "usr_002", "usr_003", "usr_004", "usr_005",
-    "usr_006", "usr_007", "usr_008", "usr_009", "usr_010",
-    "usr_011", "usr_012",
-  ],
-  employees: [
-    "emp_001", "emp_002", "emp_003", "emp_004", "emp_005",
-    "emp_006", "emp_007", "emp_008", "emp_009", "emp_010",
-    "emp_011", "emp_012",
-  ],
+  // Users (Person, User, Employee share index) — first 12 hardcoded, rest generated
+  persons: Array.from({ length: 100 }, (_, i) => `per_${String(i + 1).padStart(3, "0")}`),
+  users: Array.from({ length: 100 }, (_, i) => `usr_${String(i + 1).padStart(3, "0")}`),
+  employees: Array.from({ length: 100 }, (_, i) => `emp_${String(i + 1).padStart(3, "0")}`),
   // Legacy departments
   departments: {
     engineering: "dept_engineering_001",
@@ -138,6 +126,43 @@ const USER_DATA = [
   { firstName: "Sophie", lastName: "Dubois", email: "sophie.dubois@strata.io", role: "Software Engineer" },
   { firstName: "Daniel", lastName: "Kim", email: "daniel.kim@strata.io", role: "Software Engineer" },
 ];
+
+// ─── Additional Users (13–100) ────────────────────────────────────────────────
+
+function generateAdditionalUsers(count: number) {
+  const firstNames = [
+    "Alex", "Jordan", "Taylor", "Morgan", "Casey", "Quinn", "Riley", "Avery",
+    "Jamie", "Cameron", "Dakota", "Reese", "Skyler", "Sage", "Rowan", "Finley",
+    "Charlie", "Hayden", "Emery", "Phoenix", "Kai", "Arden", "Blake", "Drew",
+    "Alexis", "Peyton", "Parker", "River", "Micah", "Eden", "Zion", "Remy",
+    "Tatum", "Lennox", "Atlas", "Oakley", "Nova", "Wren", "Scout", "Harley",
+    "Nico", "Rio", "Shay", "Lane", "Ellis", "Ira", "Kit", "Sol",
+    "Asa", "Bay", "Cruz", "Dex", "Fox", "Gray", "Hart", "Jade",
+    "Lake", "Mars", "Oak", "Penn", "Reed", "Storm", "Vale", "West",
+    "Aspen", "Briar", "Cedar", "Dove", "Echo", "Frost", "Glen", "Haven",
+    "Indigo", "Jasper", "Lark", "Moss", "North", "Ocean", "Pine", "Rain",
+    "Sky", "Terra", "Vera", "Winter", "Zephyr", "Amber", "Brook", "Coral",
+  ];
+  const lastNames = [
+    "Anderson", "Baker", "Carter", "Davis", "Edwards", "Fisher", "Garcia",
+    "Harris", "Ibrahim", "Jackson", "Kumar", "Lee", "Martinez", "Nelson",
+    "Okafor", "Park", "Quinn", "Robinson", "Singh", "Torres", "Ueda",
+    "Volkov", "Wang", "Xu", "Yamamoto", "Zhang", "Ali", "Bhat", "Costa",
+    "Diaz", "Evans", "Fernandez", "Gupta", "Hoffman", "Ivanov", "Johal",
+    "Khan", "Liu", "Moreau", "Nguyen", "Ortiz", "Petrov", "Rashid",
+    "Santos", "Tanaka", "Uddin", "Vega", "Weber", "Yang", "Zhu",
+  ];
+  const roles = ["Software Engineer", "Software Engineer", "Software Engineer", "Senior Engineer", "Designer"];
+
+  return Array.from({ length: count }, (_, i) => ({
+    firstName: firstNames[i % firstNames.length],
+    lastName: lastNames[i % lastNames.length],
+    email: `${firstNames[i % firstNames.length].toLowerCase()}.${lastNames[i % lastNames.length].toLowerCase()}@strata.io`,
+    role: roles[i % roles.length],
+  }));
+}
+
+const ADDITIONAL_USERS = generateAdditionalUsers(88); // Generate 88 more users (13–100)
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -409,6 +434,78 @@ async function seedUsers(
     log(`User: ${u.firstName} ${u.lastName} (${u.email}) — ${u.role}`);
   }
 
+  // ─── Additional Users (13–100) ──────────────────────────────────────────────
+  const orgUnitIds = [IDS.orgUnits.infraSquad, IDS.orgUnits.webSquad, IDS.orgUnits.engineering, IDS.orgUnits.platformTribe];
+  const deptIds = [engDept.id, engDept.id, engDept.id, desDept.id];
+
+  for (let i = 0; i < ADDITIONAL_USERS.length; i++) {
+    const idx = i + 12; // 0-based index in the full 100 array (12..99)
+    const u = ADDITIONAL_USERS[i];
+    const personId = IDS.persons[idx];
+    const userId = IDS.users[idx];
+    const employeeId = IDS.employees[idx];
+
+    const person = await prisma.person.upsert({
+      where: { id: personId },
+      update: { fullName: `${u.firstName} ${u.lastName}`, email: u.email },
+      create: {
+        id: personId,
+        fullName: `${u.firstName} ${u.lastName}`,
+        email: u.email,
+        dateOfBirth: new Date(1985 + (idx % 20), idx % 12, (idx * 3) % 28 + 1),
+        phone: `+1-555-${String(1000 + idx).padStart(4, "0")}`,
+        address: `${100 + idx} Main St, Tech City, TC ${10000 + idx}`,
+      },
+    });
+
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: { passwordHash },
+      create: {
+        id: userId,
+        email: u.email,
+        passwordHash,
+        personId: person.id,
+      },
+    });
+    users.push(user);
+
+    const employee = await prisma.employee.upsert({
+      where: { uin_organizationId: { uin: `ACM-${String(1000 + idx)}`, organizationId } },
+      update: { departmentId: deptIds[i % deptIds.length] },
+      create: {
+        id: employeeId,
+        uin: `ACM-${String(1000 + idx)}`,
+        personId: person.id,
+        organizationId,
+        departmentId: deptIds[i % deptIds.length],
+        startDate: new Date(2022, idx % 12, 1),
+        status: "ACTIVE",
+      },
+    });
+    employees.push(employee);
+
+    const assignedOrgUnit = orgUnitIds[i % orgUnitIds.length];
+    const assignedPosition = posMap[u.role] ?? IDS.positions.softwareEngineer;
+
+    await prisma.userCompanyMembership.upsert({
+      where: { userId_companyId: { userId: user.id, companyId } },
+      update: { positionId: assignedPosition, orgUnitId: assignedOrgUnit },
+      create: {
+        userId: user.id,
+        companyId,
+        positionId: assignedPosition,
+        orgUnitId: assignedOrgUnit,
+        isSuperAdmin: false,
+      },
+    });
+
+    if ((i + 1) % 10 === 0) {
+      log(`Created ${i + 1}/88 additional users...`);
+    }
+  }
+  log(`Total users created: ${users.length}`);
+
   return { users, employees };
 }
 
@@ -490,8 +587,7 @@ async function seedRoles(companyId: string) {
   }
 
   // Assign permissions to roles — covering all 6 PermissionScopeV2 values
-  const allPermIds = Object.values(IDS.featurePermissions);
-  const scopeAssignments: Array<{ roleId: string; featurePermissionId: string; scope: PermissionScopeV2 }> = [
+  const scopeAssignments: Array<{ roleId: string; featurePermissionId: string; scope: "OWN" | "DIRECT_REPORTS" | "ORGANIZATION_UNIT" | "BRANCH" | "COMPANY" | "GLOBAL" }> = [
     // Admin gets GLOBAL + COMPANY scope on all permissions
     { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.peopleRead, scope: "GLOBAL" },
     { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.peopleWrite, scope: "COMPANY" },
@@ -556,7 +652,21 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
       });
     }
   }
-  log(`Assigned ${assignments.length} user-role mappings`);
+
+  // Assign Employee role to additional users (13–100)
+  for (let i = 12; i < 100; i++) {
+    const membership = await prisma.userCompanyMembership.findUnique({
+      where: { userId_companyId: { userId: IDS.users[i], companyId } },
+    });
+    if (membership) {
+      await prisma.roleAssignmentV2.upsert({
+        where: { membershipId_roleId: { membershipId: membership.id, roleId: employeeRole.id } },
+        update: {},
+        create: { membershipId: membership.id, roleId: employeeRole.id, assignedBy: IDS.users[0] },
+      });
+    }
+  }
+  log(`Assigned ${assignments.length + 88} user-role mappings`);
 }
 
 async function seedReportingRelationships(companyId: string) {
@@ -844,7 +954,7 @@ async function seedEngineering(organizationId: string) {
   return { tribes: tribeResults, clusters: clusterResults, squads: squadResults };
 }
 
-async function seedTeamMemberships(employees: { id: string }[], squads: { id: string; name: string }[]) {
+async function seedTeamMemberships(employees: { id: string }[], _squads: { id: string; name: string }[]) {
   logSection("Team Memberships");
 
   // Assign employees to squads with roles
@@ -874,10 +984,21 @@ async function seedTeamMemberships(employees: { id: string }[], squads: { id: st
       create: { employeeId: m.employeeId, squadId: m.squadId, role: m.role },
     });
   }
-  log(`Assigned ${memberships.length} team memberships`);
+
+  // Spread additional users (12–99) across the 4 squads
+  const squadIdList = [IDS.squads.cloudInfra, IDS.squads.devTools, IDS.squads.webApp, IDS.squads.mobileApp];
+  for (let i = 12; i < employees.length; i++) {
+    const squadId = squadIdList[i % squadIdList.length];
+    await prisma.teamMembership.upsert({
+      where: { employeeId_squadId: { employeeId: employees[i].id, squadId } },
+      update: { role: "Engineer" },
+      create: { employeeId: employees[i].id, squadId, role: "Engineer" },
+    });
+  }
+  log(`Assigned ${memberships.length + Math.max(0, employees.length - 12)} team memberships`);
 }
 
-async function seedCapacityAllocations(employees: { id: string }[], squads: { id: string }[]) {
+async function seedCapacityAllocations(employees: { id: string }[], _squads: { id: string }[]) {
   logSection("Capacity Allocations");
 
   // Each employee's allocations sum to 100%
@@ -902,7 +1023,18 @@ async function seedCapacityAllocations(employees: { id: string }[], squads: { id
       create: { employeeId: a.employeeId, squadId: a.squadId, percentage: a.percentage },
     });
   }
-  log(`Created ${allocations.length} capacity allocations`);
+
+  // 100% capacity for additional users (12–99) to their assigned squad
+  const squadIdList = [IDS.squads.cloudInfra, IDS.squads.devTools, IDS.squads.webApp, IDS.squads.mobileApp];
+  for (let i = 12; i < employees.length; i++) {
+    const squadId = squadIdList[i % squadIdList.length];
+    await prisma.capacityAllocation.upsert({
+      where: { employeeId_squadId: { employeeId: employees[i].id, squadId } },
+      update: { percentage: 100 },
+      create: { employeeId: employees[i].id, squadId, percentage: 100 },
+    });
+  }
+  log(`Created ${allocations.length + Math.max(0, employees.length - 12)} capacity allocations`);
 }
 
 async function seedBudgets(departments: { id: string; name: string }[]) {

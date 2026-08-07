@@ -281,6 +281,13 @@ export function useFeatures(companyId: string) {
   });
 }
 
+export function useAllFeatures() {
+  return useQuery({
+    queryKey: ["all-features"],
+    queryFn: () => apiClient<AdminFeature[]>("/api/v2/features"),
+  });
+}
+
 export function useToggleFeature() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -291,6 +298,79 @@ export function useToggleFeature() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["features"] });
+    },
+  });
+}
+
+// ─── Role Permissions ─────────────────────────────────────────────────────────
+
+export interface RolePermissionDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  permissions: Array<{
+    id: string;
+    featurePermissionId: string;
+    scope: string;
+    featurePermission: {
+      id: string;
+      key: string;
+      displayName: string;
+      feature: { key: string; displayName: string };
+    };
+  }>;
+}
+
+// Get role with its permissions
+export function useRolePermissions(companyId: string, roleId: string) {
+  return useQuery({
+    queryKey: ["role-permissions", companyId, roleId],
+    queryFn: () => apiClient<RolePermissionDetail>(`/api/v2/companies/${companyId}/roles/${roleId}`),
+    enabled: !!companyId && !!roleId,
+  });
+}
+
+// Add a permission to a role
+export function useAddRolePermission() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId, roleId, featurePermissionId, scope }: { companyId: string; roleId: string; featurePermissionId: string; scope: string }) =>
+      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions`, {
+        method: "POST",
+        body: { featurePermissionId, scope },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
+    },
+  });
+}
+
+// Remove a permission from a role
+export function useRemoveRolePermission() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId, roleId, permId }: { companyId: string; roleId: string; permId: string }) =>
+      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions/${permId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
+    },
+  });
+}
+
+// Bulk set permissions for a role
+export function useBulkRolePermissions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId, roleId, permissions }: { companyId: string; roleId: string; permissions: Array<{ featurePermissionId: string; scope: string }> }) =>
+      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions/bulk`, {
+        method: "POST",
+        body: { permissions },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
     },
   });
 }
