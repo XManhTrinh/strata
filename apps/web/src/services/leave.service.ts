@@ -58,9 +58,7 @@ export function useLeaveRequests(companyId: string) {
   return useQuery({
     queryKey: ["leave-requests", companyId],
     queryFn: () =>
-      apiClient<CalendarLeaveRequest[]>("/calendar/leave-requests", {
-        params: { companyId },
-      }),
+      apiClient<CalendarLeaveRequest[]>(`/api/v2/companies/${companyId}/calendar/leave-requests`),
     enabled: !!companyId,
   });
 }
@@ -69,9 +67,7 @@ export function useLeaveBalances(companyId: string, userId: string) {
   return useQuery({
     queryKey: ["leave-balances", companyId, userId],
     queryFn: () =>
-      apiClient<LeaveBalance[]>("/calendar/leave-balances", {
-        params: { companyId, userId },
-      }),
+      apiClient<LeaveBalance[]>(`/api/v2/companies/${companyId}/calendar/balances/${userId}`),
     enabled: !!companyId && !!userId,
   });
 }
@@ -80,7 +76,7 @@ export function useCreateLeaveRequest() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateLeaveRequestData) =>
-      apiClient<CalendarLeaveRequest>("/calendar/leave-requests", {
+      apiClient<CalendarLeaveRequest>(`/api/v2/companies/${data.companyId}/calendar/leave-requests`, {
         method: "POST",
         body: data,
       }),
@@ -95,8 +91,8 @@ export function useCreateLeaveRequest() {
 export function useUpdateLeaveRequest() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: UpdateLeaveRequestData) =>
-      apiClient<CalendarLeaveRequest>(`/calendar/leave-requests/${id}`, {
+    mutationFn: ({ id, companyId, ...data }: UpdateLeaveRequestData) =>
+      apiClient<CalendarLeaveRequest>(`/api/v2/companies/${companyId}/calendar/leave-requests/${id}`, {
         method: "PUT",
         body: data,
       }),

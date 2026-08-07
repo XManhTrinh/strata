@@ -62,9 +62,8 @@ export function useCalendarEvents(
   return useQuery({
     queryKey: ["calendar-events", companyId, params],
     queryFn: () =>
-      apiClient<CalendarEvent[]>("/calendar/events", {
+      apiClient<CalendarEvent[]>(`/api/v2/companies/${companyId}/calendar/events`, {
         params: {
-          companyId,
           startDate: params?.startDate,
           endDate: params?.endDate,
           eventTypeId: params?.eventTypeId,
@@ -80,7 +79,7 @@ export function useCreateCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateCalendarEventRequest) =>
-      apiClient<CalendarEvent>("/calendar/events", {
+      apiClient<CalendarEvent>(`/api/v2/companies/${data.companyId}/calendar/events`, {
         method: "POST",
         body: data,
       }),
@@ -93,8 +92,8 @@ export function useCreateCalendarEvent() {
 export function useUpdateCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: UpdateCalendarEventRequest) =>
-      apiClient<CalendarEvent>(`/calendar/events/${id}`, {
+    mutationFn: ({ id, companyId, ...data }: UpdateCalendarEventRequest) =>
+      apiClient<CalendarEvent>(`/api/v2/companies/${companyId}/calendar/events/${id}`, {
         method: "PUT",
         body: data,
       }),
@@ -107,8 +106,8 @@ export function useUpdateCalendarEvent() {
 export function useDeleteCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      apiClient<void>(`/calendar/events/${id}`, {
+    mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
+      apiClient<void>(`/api/v2/companies/${companyId}/calendar/events/${id}`, {
         method: "DELETE",
       }),
     onSuccess: () => {
