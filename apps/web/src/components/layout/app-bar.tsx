@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/lib/utils";
 
 interface AppBarProps {
   children: ReactNode;
@@ -9,15 +9,15 @@ interface AppBarProps {
 }
 
 /**
- * Shared page-level toolbar/action bar.
- * Fixed min-height of 60px, items vertically centered, no top/bottom padding.
- * Use for page headers with actions, filters, navigation controls.
+ * Page-level action bar for page titles + action buttons.
+ * M3: Section header pattern.
+ * Height: 56px minimum, items vertically centered.
  */
 export function AppBar({ children, className }: AppBarProps) {
   return (
     <div
-      className={twMerge(
-        "flex items-center min-h-15",
+      className={cn(
+        "flex items-center min-h-14 gap-4",
         className
       )}
     >

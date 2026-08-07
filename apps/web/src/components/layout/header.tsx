@@ -1,12 +1,13 @@
 "use client";
 
 import { Breadcrumbs } from "./breadcrumbs";
-import { AppBar } from "./app-bar";
+import { TopAppBar } from "@/components/ui/top-app-bar";
 import { useTheme } from "@/lib/theme";
 import { useUserRole, type UserRoleView } from "@/hooks/use-user-role";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,103 +35,96 @@ export function Header() {
   const { setMobileOpen } = useSidebar();
 
   return (
-    <AppBar className="sticky top-0 z-30 h-16 justify-between bg-card/80 backdrop-blur-sm px-6">
-      {/* Left: Mobile menu trigger + Breadcrumbs */}
-      <div className="flex items-center gap-2">
-        {/* Mobile menu trigger — visible only on <768px */}
+    <TopAppBar
+      leadingIcon={
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden min-w-11 min-h-11"
+          className="md:hidden"
           onClick={() => setMobileOpen(true)}
           aria-label="Open navigation menu"
         >
-          <span aria-hidden="true" className="text-lg">☰</span>
+          <Icon name="menu" size={24} />
         </Button>
+      }
+      headline={<Breadcrumbs />}
+      trailingIcons={
+        <>
+          {/* Role switcher — dev only */}
+          <div className="hidden lg:flex items-center gap-0.5 mr-2">
+            {(["super_admin", "manager", "user"] as UserRoleView[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  role === r
+                    ? roleColors[r]
+                    : "text-muted-foreground hover:bg-[hsl(var(--on-surface)/0.08)]"
+                }`}
+                title={`Switch to ${roleLabels[r]} view`}
+              >
+                {roleLabels[r]}
+              </button>
+            ))}
+          </div>
 
-        <Breadcrumbs />
-      </div>
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          >
+            <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} />
+          </Button>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-3">
-        {/* Role switcher */}
-        <div className="flex items-center gap-1">
-          {(["super_admin", "manager", "user"] as UserRoleView[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors min-w-11 min-h-11 flex items-center justify-center ${
-                role === r
-                  ? roleColors[r]
-                  : "text-muted-foreground hover:bg-secondary"
-              }`}
-              title={`Switch to ${roleLabels[r]} view`}
-            >
-              {roleLabels[r]}
-            </button>
-          ))}
-        </div>
+          {/* Notifications */}
+          <NotificationDropdown />
 
-        {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="min-w-11 min-h-11"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-          title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-        >
-          {theme === "dark" ? "☀️" : "🌙"}
-        </Button>
+          {/* Search / Command palette */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex"
+            aria-label="Search"
+            title="Search (⌘K)"
+            onClick={() => {
+              window.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "k", metaKey: true })
+              );
+            }}
+          >
+            <Icon name="search" size={24} />
+          </Button>
 
-        {/* Notification dropdown */}
-        <NotificationDropdown />
-
-        {/* Command palette shortcut hint */}
-        <Button
-          variant="outline"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground min-h-11"
-          aria-label="Open command palette"
-          title="Open command palette (⌘K)"
-          onClick={() => {
-            window.dispatchEvent(
-              new KeyboardEvent("keydown", { key: "k", metaKey: true })
-            );
-          }}
-        >
-          <span>Search...</span>
-          <kbd className="rounded border border-border px-1 py-0.5 text-[10px] font-mono">
-            ⌘K
-          </kbd>
-        </Button>
-
-        {/* User menu — DropdownMenu with Avatar trigger */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="min-w-11 min-h-11 rounded-full"
-              aria-label="User menu"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="" alt="User avatar" />
-                <AvatarFallback className="bg-primary/20 text-sm font-medium text-primary">
-                  U
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </AppBar>
+          {/* User menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label="User menu"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="" alt="User avatar" />
+                  <AvatarFallback className="bg-primary/20 text-sm font-medium text-primary">
+                    U
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      }
+    />
   );
 }
