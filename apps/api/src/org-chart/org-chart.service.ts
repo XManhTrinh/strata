@@ -3,6 +3,7 @@ import { PrismaClient } from '@strata/database';
 import Redis from 'ioredis';
 import {
   OrgTreeNode,
+  OrgChartPerson,
   FlatEmployee,
   FlatRelationship,
   UnitViewResponse,
@@ -193,6 +194,108 @@ export class OrgChartService {
       parentChain,
       employees,
     };
+  }
+
+  /**
+   * Returns flat array of all people in the company's org chart.
+   * Salary is only included if the requesting user is:
+   * - super_admin (isSuperAdmin on membership), OR
+   * - in the management chain above that person
+   */
+  async getPeople(companyId: string, requestingUserId: string): Promise<OrgChartPerson[]> {
+    // 1. Fetch memberships, relationships, and employees in parallel
+    const [memberships, relationships, employees] = await Promise.all([
+      this.prisma.userCompanyMembership.findMany({
+        where: { companyId },
+        include: {
+          position: { select: { name: true } },
+          orgUnit: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.reportingRelationship.findMany({
+        where: { companyId },
+        select: { userId: true, managerId: true },
+      }),
+      this.prisma.employee.findMany({
+        where: { organizationId: companyId },
+        select: { id: true, personId: true, uin: true, status: true, departmentId: true },
+      }),
+    ]);
+
+    // 2. Fetch user/person data
+    const userIds = memberships.map(m => m.userId);
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      include: { person: { select: { fullName: true, email: true } } },
+    });
+
+    // 3. Build lookup maps
+    const userMap = new Map(users.map(u => [u.id, u]));
+    const memberMap = new Map(memberships.map(m => [m.userId, m]));
+    const relMap = new Map(relationships.map(r => [r.userId, r.managerId]));
+    const employeeByPerson = new Map(employees.map(e => [e.personId, e]));
+
+    // 4. Determine salary visibility
+    const managedUserIds = this.getSubordinateIds(requestingUserId, relationships);
+
+    const requestingMembership = memberships.find(m => m.userId === requestingUserId);
+    const isSuperAdmin = requestingMembership?.isSuperAdmin ?? false;
+
+    // 5. Map to OrgChartPerson[]
+    const people: OrgChartPerson[] = users.map(user => {
+      const membership = memberMap.get(user.id);
+      const parentId = relMap.get(user.id) ?? null;
+      const employee = employeeByPerson.get(user.personId);
+
+      const canSeeSalary = isSuperAdmin || managedUserIds.has(user.id);
+
+      return {
+        id: user.id,
+        fullName: (user as any).person?.fullName ?? user.email,
+        title: (membership as any)?.position?.name ?? 'No title',
+        squads: [],
+        salary: canSeeSalary ? (employee as any)?.salary ?? null : null,
+        parentId,
+        avatarUrl: null,
+        departmentId: (membership as any)?.orgUnit?.id ?? null,
+        departmentName: (membership as any)?.orgUnit?.name ?? null,
+        uin: employee?.uin ?? null,
+        status: employee?.status ?? 'ACTIVE',
+        capacityAllocation: canSeeSalary ? 100 : 0,
+        positionTitle: (membership as any)?.position?.name ?? null,
+      };
+    });
+
+    return people;
+  }
+
+  /**
+   * Get all user IDs that are subordinates (direct or indirect) of a manager.
+   */
+  private getSubordinateIds(
+    managerId: string,
+    relationships: { userId: string; managerId: string }[],
+  ): Set<string> {
+    const childrenMap = new Map<string, string[]>();
+    for (const rel of relationships) {
+      if (!childrenMap.has(rel.managerId)) {
+        childrenMap.set(rel.managerId, []);
+      }
+      childrenMap.get(rel.managerId)!.push(rel.userId);
+    }
+
+    const result = new Set<string>();
+    const queue = [managerId];
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+      const children = childrenMap.get(current) ?? [];
+      for (const child of children) {
+        result.add(child);
+        queue.push(child);
+      }
+    }
+
+    return result;
   }
 
   /**

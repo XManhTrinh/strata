@@ -73,3 +73,37 @@ export function useOrgChartByUnit(
     staleTime: 30_000,
   });
 }
+
+// ─── People (flat array for ReactFlow org chart) ─────────────────────────────
+
+export interface OrgChartPerson {
+  id: string;
+  fullName: string;
+  title: string;
+  squads: string[];
+  salary: number | null;
+  parentId: string | null;
+  avatarUrl: string | null;
+  departmentId: string | null;
+  departmentName: string | null;
+  uin: string | null;
+  status: string;
+  capacityAllocation: number;
+  positionTitle: string | null;
+}
+
+/**
+ * Fetch flat array of all people for the org chart.
+ * Salary visibility is controlled server-side based on the requesting user's permissions.
+ */
+export function useOrgChartPeople(companyId: string = COMPANY_ID) {
+  return useQuery<OrgChartPerson[]>({
+    queryKey: ["org-chart", "people", companyId],
+    queryFn: () =>
+      apiClient<OrgChartPerson[]>(
+        `/api/v2/companies/${companyId}/org-chart/people`
+      ),
+    enabled: !!companyId,
+    staleTime: 30_000,
+  });
+}

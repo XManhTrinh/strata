@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { MockPersonRepository } from "@/lib/org-tree/MockPersonRepository";
+import { ApiPersonRepository } from "@/lib/org-tree/ApiPersonRepository";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
 import { buildSquadTree, buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
 import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
 import { Button } from "@/components/ui/button";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
+import { useOrgChartPeople } from "@/services";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";
@@ -27,7 +28,12 @@ interface PendingGroupMove {
 }
 
 export default function OrgChartPage() {
-  const repository = useMemo(() => new MockPersonRepository(), []);
+  const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople();
+
+  const repository = useMemo(
+    () => new ApiPersonRepository(orgChartPeople ?? []),
+    [orgChartPeople]
+  );
   const { unallocated, persons, loading, error, reparent } =
     useOrgTree(repository);
 
@@ -212,7 +218,7 @@ export default function OrgChartPage() {
 
         {/* Main content */}
         <main className="flex-1 min-h-0">
-          {loading ? (
+          {(peopleLoading || loading) ? (
             <div className="flex items-center justify-center h-full">
               <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
             </div>
