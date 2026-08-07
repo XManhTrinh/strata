@@ -26,4 +26,4 @@ WORKDIR /app
 COPY --from=build /app /app
 ENV NODE_ENV=production
 EXPOSE 3001
-CMD ["sh", "-c", "cd packages/database && npx prisma db push --force-reset --skip-generate --accept-data-loss && cd /app && npx tsx packages/database/src/seed.ts && node apps/api/dist/main.js"]
+CMD ["sh", "-c", "cd packages/database && npx prisma db push --skip-generate && cd /app && node apps/api/dist/main.js"]

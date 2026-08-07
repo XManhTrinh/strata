@@ -223,7 +223,7 @@ This plan migrates authentication from localStorage-based JWT storage to httpOnl
     - Ensure ordering: AuthGuard → CsrfGuard
     - _Requirements: 4.2_
 
-- [ ] 13. Final checkpoint - Full integration verified
+- [x] 13. Final checkpoint - Full integration verified
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
