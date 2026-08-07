@@ -46,7 +46,7 @@ const AnimatedDialogContent = React.forwardRef<
     <DialogPrimitive.Content ref={ref} asChild {...props}>
       <motion.div
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-xl rounded-2xl",
           "w-[calc(100%-2rem)] sm:w-full",
           className
         )}

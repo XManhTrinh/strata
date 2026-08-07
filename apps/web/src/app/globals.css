@@ -177,6 +177,21 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+/* M3: All interactive elements get pointer cursor */
+button,
+a,
+[role="button"],
+[role="link"],
+[role="menuitem"],
+[role="switch"],
+[type="submit"],
+[type="button"],
+[type="reset"],
+select,
+summary {
+  cursor: pointer;
+}
+
 /* Screen reader only utility */
 .sr-only {
   position: absolute;
