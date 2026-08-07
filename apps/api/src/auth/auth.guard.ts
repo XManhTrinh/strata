@@ -41,6 +41,17 @@ export class AuthGuard implements CanActivate {
       return this.validateApiKey(request, token);
     }
 
+    // Dev bypass — allow the mock token from frontend dev login
+    if (token === 'dev-mock-token') {
+      (request as any).user = {
+        sub: 'usr_001',
+        email: 'alice.johnson@acme.test',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 86400,
+      };
+      return true;
+    }
+
     // Default: validate as JWT
     try {
       const secret = process.env.JWT_SECRET || 'default-secret';
