@@ -19,8 +19,8 @@ interface AuthState {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export const useAuth = create<AuthState>((set, get) => ({
-  accessToken: null,
-  isAuthenticated: false,
+  accessToken: typeof window !== "undefined" ? (localStorage.getItem("strata-access-token") || (localStorage.getItem("strata-refresh-token") ? "pending-refresh" : null)) : null,
+  isAuthenticated: typeof window !== "undefined" && !!(localStorage.getItem("strata-access-token") || localStorage.getItem("strata-refresh-token")),
   isLoading: false,
   error: null,
 
@@ -44,10 +44,13 @@ export const useAuth = create<AuthState>((set, get) => ({
       const data = await response.json();
       const { accessToken, refreshToken } = data;
 
-      // Store access token in memory, refresh token in localStorage
+      // Store access token in memory and localStorage, refresh token in localStorage
       set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
-      if (typeof window !== "undefined" && refreshToken) {
-        localStorage.setItem("strata-refresh-token", refreshToken);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("strata-access-token", accessToken);
+        if (refreshToken) {
+          localStorage.setItem("strata-refresh-token", refreshToken);
+        }
       }
     } catch {
       set({ isLoading: false, error: "Network error. Please try again." });
@@ -63,6 +66,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       error: null,
     });
     if (typeof window !== "undefined") {
+      localStorage.setItem("strata-access-token", "dev-mock-token");
       localStorage.setItem("strata-refresh-token", "dev-mock-refresh-token");
     }
   },
@@ -75,14 +79,18 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   handleSSOCallback: (accessToken: string, refreshToken: string) => {
     set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
-    if (typeof window !== "undefined" && refreshToken) {
-      localStorage.setItem("strata-refresh-token", refreshToken);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("strata-access-token", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("strata-refresh-token", refreshToken);
+      }
     }
   },
 
   logout: () => {
     set({ accessToken: null, isAuthenticated: false, error: null });
     if (typeof window !== "undefined") {
+      localStorage.removeItem("strata-access-token");
       localStorage.removeItem("strata-refresh-token");
     }
   },
@@ -123,8 +131,11 @@ export const useAuth = create<AuthState>((set, get) => ({
 
       set({ accessToken, isAuthenticated: true });
 
-      if (typeof window !== "undefined" && newRefreshToken) {
-        localStorage.setItem("strata-refresh-token", newRefreshToken);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("strata-access-token", accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem("strata-refresh-token", newRefreshToken);
+        }
       }
 
       return accessToken;
