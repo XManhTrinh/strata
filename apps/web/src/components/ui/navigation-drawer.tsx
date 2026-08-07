@@ -65,7 +65,7 @@ export function NavigationDrawer({
   return (
     <div
       className={cn(
-        "flex flex-col h-full rounded-r-2xl bg-[hsl(var(--surface))]",
+        "flex flex-col h-full rounded-r-2xl bg-[hsl(var(--surface-variant)/0.4)]",
         className
       )}
     >

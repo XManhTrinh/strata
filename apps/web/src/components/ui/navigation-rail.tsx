@@ -31,6 +31,8 @@ export interface NavigationRailProps {
   items: NavigationRailItem[];
   /** Optional FAB or menu icon at top */
   topAction?: React.ReactNode;
+  /** Optional action at bottom (e.g., theme toggle) */
+  bottomAction?: React.ReactNode;
   /** Additional className */
   className?: string;
 }
@@ -47,7 +49,7 @@ export interface NavigationRailProps {
  * - Leaving both rail and flyout closes the drawer after a short delay
  * - Items without children show a tooltip on hover
  */
-export function NavigationRail({ items, topAction, className }: NavigationRailProps) {
+export function NavigationRail({ items, topAction, bottomAction, className }: NavigationRailProps) {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
   const closeTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -180,6 +182,13 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Bottom action (e.g., theme toggle) */}
+      {bottomAction && (
+        <div className="flex items-center justify-center w-full pb-4 shrink-0">
+          {bottomAction}
+        </div>
+      )}
     </aside>
   );
 }

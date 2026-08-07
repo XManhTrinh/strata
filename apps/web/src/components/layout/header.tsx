@@ -2,9 +2,7 @@
 
 import { Breadcrumbs } from "./breadcrumbs";
 import { TopAppBar } from "@/components/ui/top-app-bar";
-import { useTheme } from "@/lib/theme";
 import { useUserRole, type UserRoleView } from "@/hooks/use-user-role";
-import { useSidebar } from "@/hooks/use-sidebar";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -31,23 +29,10 @@ const roleColors: Record<UserRoleView, string> = {
 };
 
 export function Header() {
-  const { theme, setTheme } = useTheme();
   const { role, setRole } = useUserRole();
-  const { setMobileOpen } = useSidebar();
 
   return (
     <TopAppBar
-      leadingIcon={
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Open navigation menu"
-        >
-          <Icon name="menu" size={24} />
-        </Button>
-      }
       headline={<Breadcrumbs />}
       trailingIcons={
         <>
@@ -68,18 +53,6 @@ export function Header() {
               </Tooltip>
             ))}
           </div>
-
-          {/* Theme toggle */}
-          <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} side="bottom">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-            >
-              <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} />
-            </Button>
-          </Tooltip>
 
           {/* Notifications */}
           <NotificationDropdown />
