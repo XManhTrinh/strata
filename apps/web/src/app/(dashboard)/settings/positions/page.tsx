@@ -6,6 +6,7 @@ import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -318,12 +319,10 @@ export default function PositionsPage() {
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <input
+              <Checkbox
                 id="pos-reports"
-                type="checkbox"
                 checked={formData.canHaveDirectReports}
-                onChange={(e) => setFormData({ ...formData, canHaveDirectReports: e.target.checked })}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
+                onChange={(e) => setFormData({ ...formData, canHaveDirectReports: (e.target as HTMLInputElement).checked })}
               />
               <Label htmlFor="pos-reports">Can have direct reports</Label>
             </div>

@@ -9,6 +9,7 @@ import { useCalendarEvents } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Icon } from "@/components/ui/icon";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 const COMPANY_ID = "cm_acme_corp_001";
@@ -122,28 +123,28 @@ export default function DashboardPage() {
             value={headcount}
             subtitle="Total employees"
             trend="up"
-            icon={<span aria-hidden="true">👥</span>}
+            icon={<Icon name="group" size={24} />}
           />
           <StatCard
             title="Pending Leave"
             value={pendingLeave}
             subtitle="Awaiting approval"
             trend="neutral"
-            icon={<span aria-hidden="true">📅</span>}
+            icon={<Icon name="event_busy" size={24} />}
           />
           <StatCard
             title="Upcoming Events"
             value={upcomingEvents}
             subtitle="Next 30 days"
             trend="neutral"
-            icon={<span aria-hidden="true">📊</span>}
+            icon={<Icon name="event" size={24} />}
           />
           <StatCard
             title="Active Teams"
             value="—"
             subtitle="Tribes & squads"
             trend="neutral"
-            icon={<span aria-hidden="true">🏢</span>}
+            icon={<Icon name="corporate_fare" size={24} />}
           />
         </div>
       )}
@@ -207,21 +208,21 @@ export default function DashboardPage() {
               variant="outline"
               className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
             >
-              <span className="mr-2" aria-hidden="true">➕</span>
+              <Icon name="person_add" size={20} className="mr-2" />
               Add Employee
             </Button>
             <Button
               variant="outline"
               className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
             >
-              <span className="mr-2" aria-hidden="true">🏢</span>
+              <Icon name="account_tree" size={20} className="mr-2" />
               View Org Chart
             </Button>
             <Button
               variant="outline"
               className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
             >
-              <span className="mr-2" aria-hidden="true">📋</span>
+              <Icon name="event_available" size={20} className="mr-2" />
               Submit Leave
             </Button>
           </CardContent>

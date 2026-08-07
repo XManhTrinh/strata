@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { Icon } from "@/components/ui/icon";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
 import {
@@ -36,57 +37,57 @@ const allNavSections: NavSection[] = [
   {
     title: "Overview",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: "📊", feature: "dashboard" },
+      { label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
     ],
   },
   {
     title: "People",
     items: [
-      { label: "People", href: "/people", icon: "👤", feature: "people" },
-      { label: "Employees", href: "/employees", icon: "👥", feature: "employees" },
+      { label: "People", href: "/people", icon: "person", feature: "people" },
+      { label: "Employees", href: "/employees", icon: "group", feature: "employees" },
     ],
   },
   {
     title: "Organization",
     items: [
-      { label: "Org Chart", href: "/org-chart", icon: "🏢", feature: "org_chart" },
-      { label: "Org Structure", href: "/settings/org-structure", icon: "🗂️", feature: "authorization", permission: "manage_org_structure" },
-      { label: "Unit Types", href: "/settings/org-unit-types", icon: "🏷️", feature: "authorization", permission: "manage_org_structure" },
-      { label: "Positions", href: "/settings/positions", icon: "💼", feature: "authorization", permission: "manage_positions" },
+      { label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
+      { label: "Org Structure", href: "/settings/org-structure", icon: "lan", feature: "authorization", permission: "manage_org_structure" },
+      { label: "Unit Types", href: "/settings/org-unit-types", icon: "label", feature: "authorization", permission: "manage_org_structure" },
+      { label: "Positions", href: "/settings/positions", icon: "work", feature: "authorization", permission: "manage_positions" },
     ],
   },
   {
     title: "Engineering",
     items: [
-      { label: "Teams", href: "/engineering", icon: "⚙️", feature: "engineering" },
-      { label: "Capacity", href: "/capacity", icon: "📈", feature: "capacity" },
+      { label: "Teams", href: "/engineering", icon: "engineering", feature: "engineering" },
+      { label: "Capacity", href: "/capacity", icon: "trending_up", feature: "capacity" },
     ],
   },
   {
     title: "Finance",
     items: [
-      { label: "Budgets", href: "/budgets", icon: "💰", feature: "budgets" },
+      { label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
     ],
   },
   {
     title: "Administration",
     items: [
-      { label: "Roles & Permissions", href: "/settings/roles", icon: "🔐", feature: "authorization", permission: "manage_roles" },
-      { label: "Features", href: "/settings/features", icon: "🧩", feature: "authorization", permission: "manage_features" },
+      { label: "Roles & Permissions", href: "/settings/roles", icon: "admin_panel_settings", feature: "authorization", permission: "manage_roles" },
+      { label: "Features", href: "/settings/features", icon: "extension", feature: "authorization", permission: "manage_features" },
     ],
   },
   {
     title: "System",
     items: [
-      { label: "Reports", href: "/reports", icon: "📋", feature: "reports" },
-      { label: "Audit", href: "/audit", icon: "🔍", feature: "audit" },
-      { label: "Settings", href: "/settings", icon: "⚙️", feature: "authorization", permission: "manage_roles" },
+      { label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
+      { label: "Audit", href: "/audit", icon: "policy", feature: "audit" },
+      { label: "Settings", href: "/settings", icon: "settings", feature: "authorization", permission: "manage_roles" },
     ],
   },
   {
     title: "Personal",
     items: [
-      { label: "Calendar", href: "/calendar", icon: "📅", feature: "calendar" },
+      { label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
     ],
   },
 ];
@@ -136,9 +137,7 @@ function SidebarNavContent({
                     {isActive && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r" />
                     )}
-                    <span className="text-base shrink-0 w-6 text-center" aria-hidden="true">
-                      {item.icon}
-                    </span>
+                    <Icon name={item.icon} size={20} className="shrink-0" />
                     {!collapsed && (
                       <span className="whitespace-nowrap">
                         {item.label}

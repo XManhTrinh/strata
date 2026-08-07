@@ -6,6 +6,7 @@ import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -431,14 +432,13 @@ function PermissionMatrix({ features, rolePermissions, onToggle, onScopeChange, 
                   return (
                     <tr key={fp.id} className="border-t border-border">
                       <td className="px-3 py-2 text-center">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={isEnabled}
                           disabled={isMutating}
                           onChange={(e) => {
-                            onToggle(fp.id, e.target.checked, assigned?.id);
+                            onToggle(fp.id, (e.target as HTMLInputElement).checked, assigned?.id);
                           }}
-                          className="h-4 w-4 rounded border-border text-primary focus:ring-ring disabled:opacity-50"
+                          className="w-10 h-10"
                         />
                       </td>
                       <td className={`px-3 py-2 ${isEnabled ? "text-foreground" : "text-muted-foreground"}`}>
