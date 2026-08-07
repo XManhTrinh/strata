@@ -16,18 +16,11 @@ import {
  */
 const superAdminRailItems: NavigationRailItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: "settings",
-    children: [
-      { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
-      { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
-      { label: "Positions", href: "/settings/positions", icon: "work" },
-      { label: "Roles & Permissions", href: "/settings/roles", icon: "admin_panel_settings" },
-      { label: "Features", href: "/settings/features", icon: "extension" },
-    ],
-  },
+  { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
+  { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
+  { label: "Positions", href: "/settings/positions", icon: "work" },
+  { label: "Roles", href: "/settings/roles", icon: "admin_panel_settings" },
+  { label: "Features", href: "/settings/features", icon: "extension" },
 ];
 
 /**
