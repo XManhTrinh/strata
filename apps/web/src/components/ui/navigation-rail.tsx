@@ -118,7 +118,7 @@ export function NavigationRail({ items, topAction, bottomAction, className }: Na
     <aside
       ref={railRef}
       className={cn(
-        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-surface-variant hidden md:flex",
+        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-surface-variant border-r border-outline-variant hidden md:flex",
         className
       )}
       aria-label="Main navigation"
@@ -170,7 +170,7 @@ export function NavigationRail({ items, topAction, bottomAction, className }: Na
               ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
               opacity: { duration: 0.2 },
             }}
-            className="fixed left-20 top-0 bottom-0 z-30 overflow-hidden"
+            className="fixed left-20 top-0 bottom-0 z-30 overflow-hidden shadow-xl"
             onMouseEnter={handleFlyoutEnter}
             onMouseLeave={handleFlyoutLeave}
           >
