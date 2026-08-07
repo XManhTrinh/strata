@@ -9,3 +9,4 @@ export * from "./leave.service";
 export * from "./budgets.service";
 export * from "./capacity.service";
 export * from "./admin.service";
+export * from "./reports.service";

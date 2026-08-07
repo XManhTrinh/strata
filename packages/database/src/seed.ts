@@ -125,18 +125,18 @@ function logSection(title: string) {
 // ─── User Data ────────────────────────────────────────────────────────────────
 
 const USER_DATA = [
-  { firstName: "Alice", lastName: "Johnson", email: "alice.johnson@acme.test", role: "CTO" },
-  { firstName: "Bob", lastName: "Smith", email: "bob.smith@acme.test", role: "Engineering Manager" },
-  { firstName: "Carol", lastName: "Williams", email: "carol.williams@acme.test", role: "Engineering Manager" },
-  { firstName: "David", lastName: "Brown", email: "david.brown@acme.test", role: "Product Manager" },
-  { firstName: "Eva", lastName: "Davis", email: "eva.davis@acme.test", role: "Senior Engineer" },
-  { firstName: "Frank", lastName: "Miller", email: "frank.miller@acme.test", role: "Software Engineer" },
-  { firstName: "Grace", lastName: "Wilson", email: "grace.wilson@acme.test", role: "Software Engineer" },
-  { firstName: "Henry", lastName: "Taylor", email: "henry.taylor@acme.test", role: "Software Engineer" },
-  { firstName: "Ivy", lastName: "Anderson", email: "ivy.anderson@acme.test", role: "Designer" },
-  { firstName: "Jack", lastName: "Thomas", email: "jack.thomas@acme.test", role: "Software Engineer" },
-  { firstName: "Karen", lastName: "Martinez", email: "karen.martinez@acme.test", role: "Software Engineer" },
-  { firstName: "Leo", lastName: "Garcia", email: "leo.garcia@acme.test", role: "Software Engineer" },
+  { firstName: "Sarah", lastName: "Chen", email: "sarah.chen@strata.io", role: "CTO" },
+  { firstName: "Marcus", lastName: "Williams", email: "marcus.williams@strata.io", role: "Engineering Manager" },
+  { firstName: "Priya", lastName: "Patel", email: "priya.patel@strata.io", role: "Engineering Manager" },
+  { firstName: "James", lastName: "O'Brien", email: "james.obrien@strata.io", role: "Product Manager" },
+  { firstName: "Lisa", lastName: "Nakamura", email: "lisa.nakamura@strata.io", role: "Senior Engineer" },
+  { firstName: "Andre", lastName: "Santos", email: "andre.santos@strata.io", role: "Software Engineer" },
+  { firstName: "Emily", lastName: "Richardson", email: "emily.richardson@strata.io", role: "Software Engineer" },
+  { firstName: "Kevin", lastName: "Zhao", email: "kevin.zhao@strata.io", role: "Software Engineer" },
+  { firstName: "Maya", lastName: "Johansson", email: "maya.johansson@strata.io", role: "Designer" },
+  { firstName: "Raj", lastName: "Krishnamurthy", email: "raj.krishnamurthy@strata.io", role: "Software Engineer" },
+  { firstName: "Sophie", lastName: "Dubois", email: "sophie.dubois@strata.io", role: "Software Engineer" },
+  { firstName: "Daniel", lastName: "Kim", email: "daniel.kim@strata.io", role: "Software Engineer" },
 ];
 
 
@@ -148,10 +148,10 @@ async function seedCompany() {
   logSection("Company");
   const company = await prisma.company.upsert({
     where: { slug: "acme-corp" },
-    update: { name: "Acme Corp" },
+    update: { name: "Strata Technologies" },
     create: {
       id: IDS.company,
-      name: "Acme Corp",
+      name: "Strata Technologies",
       slug: "acme-corp",
       settings: { theme: "default", locale: "en-US" },
     },
@@ -164,10 +164,10 @@ async function seedLegacyOrganization() {
   logSection("Legacy Organization");
   const org = await prisma.organization.upsert({
     where: { id: IDS.legacyOrg },
-    update: { name: "Acme Corp" },
+    update: { name: "Strata Technologies" },
     create: {
       id: IDS.legacyOrg,
-      name: "Acme Corp",
+      name: "Strata Technologies",
     },
   });
   log(`Legacy Organization: ${org.name} (${org.id})`);
@@ -204,14 +204,14 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
   // Level 1 — Departments (root)
   const units = [
     { id: IDS.orgUnits.engineering, typeId: deptType.id, name: "Engineering", code: "ENG", parentId: null, path: `/${IDS.orgUnits.engineering}`, sortOrder: 1 },
-    { id: IDS.orgUnits.product, typeId: deptType.id, name: "Product", code: "PROD", parentId: null, path: `/${IDS.orgUnits.product}`, sortOrder: 2 },
-    { id: IDS.orgUnits.design, typeId: deptType.id, name: "Design", code: "DSG", parentId: null, path: `/${IDS.orgUnits.design}`, sortOrder: 3 },
+    { id: IDS.orgUnits.product, typeId: deptType.id, name: "Product & Strategy", code: "PROD", parentId: null, path: `/${IDS.orgUnits.product}`, sortOrder: 2 },
+    { id: IDS.orgUnits.design, typeId: deptType.id, name: "Design & UX", code: "DSG", parentId: null, path: `/${IDS.orgUnits.design}`, sortOrder: 3 },
     // Level 2 — Tribes under Engineering
-    { id: IDS.orgUnits.platformTribe, typeId: tribeType.id, name: "Platform Tribe", code: "PLAT", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}`, sortOrder: 1 },
-    { id: IDS.orgUnits.productTribe, typeId: tribeType.id, name: "Product Tribe", code: "PTRIB", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}`, sortOrder: 2 },
+    { id: IDS.orgUnits.platformTribe, typeId: tribeType.id, name: "Platform Infrastructure", code: "PLAT", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}`, sortOrder: 1 },
+    { id: IDS.orgUnits.productTribe, typeId: tribeType.id, name: "Growth & Engagement", code: "GRWTH", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}`, sortOrder: 2 },
     // Level 3 — Squads under Platform Tribe
-    { id: IDS.orgUnits.infraSquad, typeId: squadType.id, name: "Infrastructure Squad", code: "INFRA", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.infraSquad}`, sortOrder: 1 },
-    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Web Squad", code: "WEB", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.webSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.infraSquad, typeId: squadType.id, name: "Cloud Services", code: "CLOUD", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.infraSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Feed & Discovery", code: "FEED", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.webSquad}`, sortOrder: 1 },
   ];
 
   const results = [];
@@ -530,18 +530,18 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
 
   // Map users to roles based on their position in USER_DATA
   const assignments: Array<{ userId: string; roleId: string }> = [
-    { userId: IDS.users[0], roleId: adminRole.id },     // Alice (CTO) → Admin
-    { userId: IDS.users[1], roleId: managerRole.id },   // Bob (Eng Mgr) → Manager
-    { userId: IDS.users[2], roleId: managerRole.id },   // Carol (Eng Mgr) → Manager
-    { userId: IDS.users[3], roleId: managerRole.id },   // David (PM) → Manager
-    { userId: IDS.users[4], roleId: employeeRole.id },  // Eva → Employee
-    { userId: IDS.users[5], roleId: employeeRole.id },  // Frank → Employee
-    { userId: IDS.users[6], roleId: employeeRole.id },  // Grace → Employee
-    { userId: IDS.users[7], roleId: employeeRole.id },  // Henry → Employee
-    { userId: IDS.users[8], roleId: employeeRole.id },  // Ivy → Employee
-    { userId: IDS.users[9], roleId: employeeRole.id },  // Jack → Employee
-    { userId: IDS.users[10], roleId: employeeRole.id }, // Karen → Employee
-    { userId: IDS.users[11], roleId: employeeRole.id }, // Leo → Employee
+    { userId: IDS.users[0], roleId: adminRole.id },     // Sarah (CTO) → Admin
+    { userId: IDS.users[1], roleId: managerRole.id },   // Marcus (Eng Mgr) → Manager
+    { userId: IDS.users[2], roleId: managerRole.id },   // Priya (Eng Mgr) → Manager
+    { userId: IDS.users[3], roleId: managerRole.id },   // James (PM) → Manager
+    { userId: IDS.users[4], roleId: employeeRole.id },  // Lisa → Employee
+    { userId: IDS.users[5], roleId: employeeRole.id },  // Andre → Employee
+    { userId: IDS.users[6], roleId: employeeRole.id },  // Emily → Employee
+    { userId: IDS.users[7], roleId: employeeRole.id },  // Kevin → Employee
+    { userId: IDS.users[8], roleId: employeeRole.id },  // Maya → Employee
+    { userId: IDS.users[9], roleId: employeeRole.id },  // Raj → Employee
+    { userId: IDS.users[10], roleId: employeeRole.id }, // Sophie → Employee
+    { userId: IDS.users[11], roleId: employeeRole.id }, // Daniel → Employee
   ];
 
   for (const a of assignments) {
@@ -561,21 +561,21 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
 
 async function seedReportingRelationships(companyId: string) {
   logSection("Reporting Relationships");
-  // Alice (CTO) manages Bob and Carol (Eng Managers)
-  // Bob manages Eva, Frank, Grace
-  // Carol manages Henry, Jack, Karen, Leo
+  // Sarah (CTO) manages Marcus and Priya (Eng Managers)
+  // Marcus manages Lisa, Andre, Emily
+  // Priya manages Kevin, Raj, Sophie, Daniel
   const relationships = [
-    { userId: IDS.users[1], managerId: IDS.users[0] }, // Bob → Alice
-    { userId: IDS.users[2], managerId: IDS.users[0] }, // Carol → Alice
-    { userId: IDS.users[3], managerId: IDS.users[0] }, // David → Alice
-    { userId: IDS.users[4], managerId: IDS.users[1] }, // Eva → Bob
-    { userId: IDS.users[5], managerId: IDS.users[1] }, // Frank → Bob
-    { userId: IDS.users[6], managerId: IDS.users[1] }, // Grace → Bob
-    { userId: IDS.users[7], managerId: IDS.users[2] }, // Henry → Carol
-    { userId: IDS.users[8], managerId: IDS.users[3] }, // Ivy → David
-    { userId: IDS.users[9], managerId: IDS.users[2] }, // Jack → Carol
-    { userId: IDS.users[10], managerId: IDS.users[2] }, // Karen → Carol
-    { userId: IDS.users[11], managerId: IDS.users[2] }, // Leo → Carol
+    { userId: IDS.users[1], managerId: IDS.users[0] }, // Marcus → Sarah
+    { userId: IDS.users[2], managerId: IDS.users[0] }, // Priya → Sarah
+    { userId: IDS.users[3], managerId: IDS.users[0] }, // James → Sarah
+    { userId: IDS.users[4], managerId: IDS.users[1] }, // Lisa → Marcus
+    { userId: IDS.users[5], managerId: IDS.users[1] }, // Andre → Marcus
+    { userId: IDS.users[6], managerId: IDS.users[1] }, // Emily → Marcus
+    { userId: IDS.users[7], managerId: IDS.users[2] }, // Kevin → Priya
+    { userId: IDS.users[8], managerId: IDS.users[3] }, // Maya → James
+    { userId: IDS.users[9], managerId: IDS.users[2] }, // Raj → Priya
+    { userId: IDS.users[10], managerId: IDS.users[2] }, // Sophie → Priya
+    { userId: IDS.users[11], managerId: IDS.users[2] }, // Daniel → Priya
   ];
 
   for (const r of relationships) {
@@ -656,16 +656,16 @@ async function seedCalendarEvents(companyId: string, users: { id: string }[], ev
 
   const events = [
     // Current month events
-    { id: "ce_001", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "All Hands Meeting", startDate: new Date(currentYear, currentMonth, 5, 10, 0), endDate: new Date(currentYear, currentMonth, 5, 11, 0), allDay: false },
-    { id: "ce_002", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Sprint Planning", startDate: new Date(currentYear, currentMonth, 8, 9, 0), endDate: new Date(currentYear, currentMonth, 8, 10, 30), allDay: false },
-    { id: "ce_003", ownerUserId: IDS.users[2], eventTypeId: meetingType.id, title: "Design Review", startDate: new Date(currentYear, currentMonth, 10, 14, 0), endDate: new Date(currentYear, currentMonth, 10, 15, 0), allDay: false },
-    { id: "ce_004", ownerUserId: IDS.users[3], eventTypeId: oooType.id, title: "David OOO - Conference", startDate: new Date(currentYear, currentMonth, 12), endDate: new Date(currentYear, currentMonth, 14), allDay: true },
+    { id: "ce_001", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "Engineering All-Hands", startDate: new Date(currentYear, currentMonth, 5, 10, 0), endDate: new Date(currentYear, currentMonth, 5, 11, 0), allDay: false },
+    { id: "ce_002", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Sprint Review - Platform", startDate: new Date(currentYear, currentMonth, 8, 9, 0), endDate: new Date(currentYear, currentMonth, 8, 10, 30), allDay: false },
+    { id: "ce_003", ownerUserId: IDS.users[2], eventTypeId: meetingType.id, title: "Design Crit", startDate: new Date(currentYear, currentMonth, 10, 14, 0), endDate: new Date(currentYear, currentMonth, 10, 15, 0), allDay: false },
+    { id: "ce_004", ownerUserId: IDS.users[3], eventTypeId: oooType.id, title: "James OOO - Conference", startDate: new Date(currentYear, currentMonth, 12), endDate: new Date(currentYear, currentMonth, 14), allDay: true },
     { id: "ce_005", ownerUserId: IDS.users[0], eventTypeId: holidayType.id, title: "Company Holiday", startDate: new Date(currentYear, currentMonth, 20), endDate: new Date(currentYear, currentMonth, 20), allDay: true },
-    { id: "ce_006", ownerUserId: IDS.users[4], eventTypeId: workshopType.id, title: "TypeScript Workshop", startDate: new Date(currentYear, currentMonth, 15, 13, 0), endDate: new Date(currentYear, currentMonth, 15, 16, 0), allDay: false },
+    { id: "ce_006", ownerUserId: IDS.users[4], eventTypeId: workshopType.id, title: "Tech Debt Planning", startDate: new Date(currentYear, currentMonth, 15, 13, 0), endDate: new Date(currentYear, currentMonth, 15, 16, 0), allDay: false },
     // Next month events
-    { id: "ce_007", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "Quarterly Review", startDate: new Date(currentYear, currentMonth + 1, 3, 10, 0), endDate: new Date(currentYear, currentMonth + 1, 3, 12, 0), allDay: false },
-    { id: "ce_008", ownerUserId: IDS.users[5], eventTypeId: oooType.id, title: "Frank Vacation", startDate: new Date(currentYear, currentMonth + 1, 10), endDate: new Date(currentYear, currentMonth + 1, 14), allDay: true },
-    { id: "ce_009", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Team Retrospective", startDate: new Date(currentYear, currentMonth + 1, 7, 15, 0), endDate: new Date(currentYear, currentMonth + 1, 7, 16, 0), allDay: false },
+    { id: "ce_007", ownerUserId: IDS.users[0], eventTypeId: meetingType.id, title: "Product Sync", startDate: new Date(currentYear, currentMonth + 1, 3, 10, 0), endDate: new Date(currentYear, currentMonth + 1, 3, 12, 0), allDay: false },
+    { id: "ce_008", ownerUserId: IDS.users[5], eventTypeId: oooType.id, title: "Andre Vacation", startDate: new Date(currentYear, currentMonth + 1, 10), endDate: new Date(currentYear, currentMonth + 1, 14), allDay: true },
+    { id: "ce_009", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Sprint Review - Platform", startDate: new Date(currentYear, currentMonth + 1, 7, 15, 0), endDate: new Date(currentYear, currentMonth + 1, 7, 16, 0), allDay: false },
     { id: "ce_010", ownerUserId: IDS.users[6], eventTypeId: workshopType.id, title: "React Advanced Patterns", startDate: new Date(currentYear, currentMonth + 1, 18, 10, 0), endDate: new Date(currentYear, currentMonth + 1, 18, 12, 0), allDay: false },
     // Recurring event (weekly standup)
     { id: "ce_011", ownerUserId: IDS.users[1], eventTypeId: meetingType.id, title: "Weekly Standup", startDate: new Date(currentYear, currentMonth, 1, 9, 0), endDate: new Date(currentYear, currentMonth, 1, 9, 15), allDay: false, isRecurring: true, recurrenceFrequency: "WEEKLY" as const, recurrenceDaysOfWeek: [1, 3, 5], recurrenceEndDate: new Date(currentYear, currentMonth + 3, 1) },
@@ -739,12 +739,12 @@ async function seedLeaveRequests(
   const sickLeave = leaveTypes.find((lt) => lt.name === "Sick Leave")!;
 
   const leaveRequests = [
-    { eventId: "ce_lr_001", leaveReqId: "lr_001", userId: IDS.users[4], title: "Eva - Annual Leave", startDate: new Date(currentYear, currentMonth, 22), endDate: new Date(currentYear, currentMonth, 24), leaveTypeId: annualLeave.id, status: "APPROVED" as const, workingDays: 3, reviewerId: IDS.users[1] },
-    { eventId: "ce_lr_002", leaveReqId: "lr_002", userId: IDS.users[6], title: "Grace - Sick Leave", startDate: new Date(currentYear, currentMonth, 18), endDate: new Date(currentYear, currentMonth, 18), leaveTypeId: sickLeave.id, status: "APPROVED" as const, workingDays: 1, reviewerId: IDS.users[1] },
-    { eventId: "ce_lr_003", leaveReqId: "lr_003", userId: IDS.users[7], title: "Henry - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 5), endDate: new Date(currentYear, currentMonth + 1, 9), leaveTypeId: annualLeave.id, status: "PENDING" as const, workingDays: 5, reviewerId: null },
-    { eventId: "ce_lr_004", leaveReqId: "lr_004", userId: IDS.users[9], title: "Jack - Sick Leave", startDate: new Date(currentYear, currentMonth, 25), endDate: new Date(currentYear, currentMonth, 25), leaveTypeId: sickLeave.id, status: "REJECTED" as const, workingDays: 1, reviewerId: IDS.users[2] },
-    { eventId: "ce_lr_005", leaveReqId: "lr_005", userId: IDS.users[10], title: "Karen - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 15), endDate: new Date(currentYear, currentMonth + 1, 19), leaveTypeId: annualLeave.id, status: "PENDING" as const, workingDays: 5, reviewerId: null },
-    { eventId: "ce_lr_006", leaveReqId: "lr_006", userId: IDS.users[11], title: "Leo - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 20), endDate: new Date(currentYear, currentMonth + 1, 22), leaveTypeId: annualLeave.id, status: "APPROVED" as const, workingDays: 3, reviewerId: IDS.users[2] },
+    { eventId: "ce_lr_001", leaveReqId: "lr_001", userId: IDS.users[4], title: "Lisa - Annual Leave", startDate: new Date(currentYear, currentMonth, 22), endDate: new Date(currentYear, currentMonth, 24), leaveTypeId: annualLeave.id, status: "APPROVED" as const, workingDays: 3, reviewerId: IDS.users[1] },
+    { eventId: "ce_lr_002", leaveReqId: "lr_002", userId: IDS.users[6], title: "Emily - Sick Leave", startDate: new Date(currentYear, currentMonth, 18), endDate: new Date(currentYear, currentMonth, 18), leaveTypeId: sickLeave.id, status: "APPROVED" as const, workingDays: 1, reviewerId: IDS.users[1] },
+    { eventId: "ce_lr_003", leaveReqId: "lr_003", userId: IDS.users[7], title: "Kevin - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 5), endDate: new Date(currentYear, currentMonth + 1, 9), leaveTypeId: annualLeave.id, status: "PENDING" as const, workingDays: 5, reviewerId: null },
+    { eventId: "ce_lr_004", leaveReqId: "lr_004", userId: IDS.users[9], title: "Raj - Sick Leave", startDate: new Date(currentYear, currentMonth, 25), endDate: new Date(currentYear, currentMonth, 25), leaveTypeId: sickLeave.id, status: "REJECTED" as const, workingDays: 1, reviewerId: IDS.users[2] },
+    { eventId: "ce_lr_005", leaveReqId: "lr_005", userId: IDS.users[10], title: "Sophie - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 15), endDate: new Date(currentYear, currentMonth + 1, 19), leaveTypeId: annualLeave.id, status: "PENDING" as const, workingDays: 5, reviewerId: null },
+    { eventId: "ce_lr_006", leaveReqId: "lr_006", userId: IDS.users[11], title: "Daniel - Annual Leave", startDate: new Date(currentYear, currentMonth + 1, 20), endDate: new Date(currentYear, currentMonth + 1, 22), leaveTypeId: annualLeave.id, status: "APPROVED" as const, workingDays: 3, reviewerId: IDS.users[2] },
   ];
 
   for (const lr of leaveRequests) {
@@ -792,8 +792,8 @@ async function seedEngineering(organizationId: string) {
 
   // Tribes
   const tribes = [
-    { id: IDS.tribes.platform, name: "Platform Tribe", organizationId },
-    { id: IDS.tribes.product, name: "Product Tribe", organizationId },
+    { id: IDS.tribes.platform, name: "Platform Infrastructure", organizationId },
+    { id: IDS.tribes.product, name: "Growth & Engagement", organizationId },
   ];
   const tribeResults = [];
   for (const t of tribes) {
@@ -825,10 +825,10 @@ async function seedEngineering(organizationId: string) {
 
   // Squads
   const squads = [
-    { id: IDS.squads.cloudInfra, name: "Cloud Infrastructure", clusterId: IDS.clusters.infrastructure },
-    { id: IDS.squads.devTools, name: "Developer Tools", clusterId: IDS.clusters.infrastructure },
-    { id: IDS.squads.webApp, name: "Web Application", clusterId: IDS.clusters.frontend },
-    { id: IDS.squads.mobileApp, name: "Mobile App", clusterId: IDS.clusters.backend },
+    { id: IDS.squads.cloudInfra, name: "Cloud Services", clusterId: IDS.clusters.infrastructure },
+    { id: IDS.squads.devTools, name: "Developer Experience", clusterId: IDS.clusters.infrastructure },
+    { id: IDS.squads.webApp, name: "Feed & Discovery", clusterId: IDS.clusters.frontend },
+    { id: IDS.squads.mobileApp, name: "Messaging Platform", clusterId: IDS.clusters.backend },
   ];
   const squadResults = [];
   for (const s of squads) {
@@ -848,14 +848,14 @@ async function seedTeamMemberships(employees: { id: string }[], squads: { id: st
   logSection("Team Memberships");
 
   // Assign employees to squads with roles
-  // employees[4] (Eva) — Cloud Infra, Senior
-  // employees[5] (Frank) — Cloud Infra
-  // employees[6] (Grace) — Web Application
-  // employees[7] (Henry) — Web Application
-  // employees[8] (Ivy) — Web Application (designer)
-  // employees[9] (Jack) — Developer Tools
-  // employees[10] (Karen) — Developer Tools
-  // employees[11] (Leo) — Mobile App
+  // employees[4] (Lisa) — Cloud Services, Senior
+  // employees[5] (Andre) — Cloud Services
+  // employees[6] (Emily) — Feed & Discovery
+  // employees[7] (Kevin) — Feed & Discovery
+  // employees[8] (Maya) — Feed & Discovery (designer)
+  // employees[9] (Raj) — Developer Experience
+  // employees[10] (Sophie) — Developer Experience
+  // employees[11] (Daniel) — Messaging Platform
   const memberships = [
     { employeeId: employees[4].id, squadId: IDS.squads.cloudInfra, role: "Tech Lead" },
     { employeeId: employees[5].id, squadId: IDS.squads.cloudInfra, role: "Engineer" },
@@ -909,9 +909,9 @@ async function seedBudgets(departments: { id: string; name: string }[]) {
   logSection("Budgets");
   const fiscalPeriods = ["FY2024-Q3", "FY2024-Q4"];
   const budgetAmounts: Record<string, Record<string, number>> = {
-    Engineering: { "FY2024-Q3": 450000, "FY2024-Q4": 500000 },
-    Product: { "FY2024-Q3": 180000, "FY2024-Q4": 200000 },
-    Design: { "FY2024-Q3": 120000, "FY2024-Q4": 150000 },
+    Engineering: { "FY2024-Q3": 1050000, "FY2024-Q4": 1050000 },
+    Product: { "FY2024-Q3": 425000, "FY2024-Q4": 425000 },
+    Design: { "FY2024-Q3": 310000, "FY2024-Q4": 310000 },
   };
 
   let count = 0;

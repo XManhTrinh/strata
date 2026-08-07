@@ -3,116 +3,51 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { useFeatures, useToggleFeature, COMPANY_ID, type CompanyFeature } from "@/services";
 
-interface FeaturePermission {
-  key: string;
-  displayName: string;
-  description: string;
-}
-
-interface Feature {
+interface FeatureRow {
   id: string;
   key: string;
   displayName: string;
   description: string;
   enabled: boolean;
   permissionsCount: number;
-  permissions: FeaturePermission[];
+  permissions: { key: string; displayName: string; description: string }[];
+  featureId: string;
   [key: string]: unknown;
 }
 
-const mockFeatures: Feature[] = [
-  {
-    id: "f-1",
-    key: "leave",
-    displayName: "Leave Management",
-    description: "Employee leave request and approval workflow",
-    enabled: true,
-    permissionsCount: 5,
-    permissions: [
-      { key: "view_own", displayName: "View Own Requests", description: "View own leave requests" },
-      { key: "submit_request", displayName: "Submit Request", description: "Submit a leave request" },
-      { key: "approve", displayName: "Approve Requests", description: "Approve leave requests" },
-      { key: "view_team", displayName: "View Team Requests", description: "View team leave requests" },
-      { key: "manage_policies", displayName: "Manage Policies", description: "Configure leave policies" },
-    ],
-  },
-  {
-    id: "f-2",
-    key: "employees",
-    displayName: "Employee Directory",
-    description: "Employee profile management and directory access",
-    enabled: true,
-    permissionsCount: 4,
-    permissions: [
-      { key: "view", displayName: "View Profiles", description: "View employee profiles" },
-      { key: "edit", displayName: "Edit Profiles", description: "Edit employee profiles" },
-      { key: "create", displayName: "Create Employees", description: "Create new employee records" },
-      { key: "terminate", displayName: "Terminate Employees", description: "Terminate employee records" },
-    ],
-  },
-  {
-    id: "f-3",
-    key: "capacity",
-    displayName: "Capacity Planning",
-    description: "Resource allocation and capacity management",
-    enabled: true,
-    permissionsCount: 3,
-    permissions: [
-      { key: "view_own", displayName: "View Own Allocation", description: "View own capacity allocation" },
-      { key: "view_team", displayName: "View Team Allocation", description: "View team capacity allocation" },
-      { key: "manage", displayName: "Manage Allocation", description: "Manage capacity allocation" },
-    ],
-  },
-  {
-    id: "f-4",
-    key: "budgets",
-    displayName: "Budget Management",
-    description: "Financial planning and budget tracking",
-    enabled: true,
-    permissionsCount: 3,
-    permissions: [
-      { key: "view", displayName: "View Budgets", description: "View budget data" },
-      { key: "manage", displayName: "Manage Budgets", description: "Create and update budgets" },
-      { key: "approve", displayName: "Approve Budgets", description: "Approve budget requests" },
-    ],
-  },
-  {
-    id: "f-5",
-    key: "engineering",
-    displayName: "Engineering Metrics",
-    description: "Engineering productivity and DORA metrics",
-    enabled: false,
-    permissionsCount: 2,
-    permissions: [
-      { key: "view", displayName: "View Metrics", description: "View engineering metrics" },
-      { key: "manage", displayName: "Manage Metrics", description: "Configure metric dashboards" },
-    ],
-  },
-  {
-    id: "f-6",
-    key: "authorization",
-    displayName: "Authorization Management",
-    description: "Manage roles, permissions, and organization structure",
-    enabled: true,
-    permissionsCount: 3,
-    permissions: [
-      { key: "manage_roles", displayName: "Manage Roles", description: "Create and edit roles" },
-      { key: "manage_org_structure", displayName: "Manage Org Structure", description: "Edit organization structure" },
-      { key: "manage_features", displayName: "Manage Features", description: "Enable/disable features" },
-    ],
-  },
-];
+function toFeatureRow(cf: CompanyFeature): FeatureRow {
+  return {
+    id: cf.feature.id,
+    key: cf.feature.key,
+    displayName: cf.feature.displayName,
+    description: cf.feature.description ?? "",
+    enabled: cf.enabled,
+    permissionsCount: cf.feature.permissions.length,
+    permissions: cf.feature.permissions.map((p) => ({
+      key: p.key,
+      displayName: p.displayName,
+      description: p.description ?? "",
+    })),
+    featureId: cf.featureId,
+  };
+}
 
 export default function FeaturesPage() {
+  const { data: companyFeatures, isLoading, error } = useFeatures(COMPANY_ID);
+  const toggleFeatureMutation = useToggleFeature();
   const [search, setSearch] = useState("");
-  const [features, setFeatures] = useState(mockFeatures);
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  const toggleEnabled = (featureId: string) => {
-    setFeatures((prev) =>
-      prev.map((f) => (f.id === featureId ? { ...f, enabled: !f.enabled } : f))
-    );
+  const features: FeatureRow[] = companyFeatures?.map(toFeatureRow) ?? [];
+
+  const toggleEnabled = (featureId: string, currentEnabled: boolean) => {
+    toggleFeatureMutation.mutate({
+      companyId: COMPANY_ID,
+      featureId,
+      enabled: !currentEnabled,
+    });
   };
 
   const filteredFeatures = features.filter(
@@ -122,7 +57,7 @@ export default function FeaturesPage() {
       f.key.toLowerCase().includes(search.toLowerCase())
   );
 
-  const columns: Column<Feature>[] = [
+  const columns: Column<FeatureRow>[] = [
     {
       key: "displayName",
       header: "Feature",
@@ -151,11 +86,12 @@ export default function FeaturesPage() {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            toggleEnabled(row.id);
+            toggleEnabled(row.featureId, row.enabled);
           }}
+          disabled={toggleFeatureMutation.isPending}
           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
             row.enabled ? "bg-primary" : "bg-muted"
-          }`}
+          } disabled:opacity-50`}
           role="switch"
           aria-checked={row.enabled}
           aria-label={`${row.enabled ? "Disable" : "Enable"} ${row.displayName}`}
@@ -169,6 +105,44 @@ export default function FeaturesPage() {
       ),
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <AppBar>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Features</h1>
+            <p className="text-xs text-muted-foreground">
+              View registered features and control which are enabled for your organization.
+            </p>
+          </div>
+        </AppBar>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <AppBar>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Features</h1>
+            <p className="text-xs text-muted-foreground">
+              View registered features and control which are enabled for your organization.
+            </p>
+          </div>
+        </AppBar>
+        <div className="flex items-center justify-center py-20">
+          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
+            Failed to load features. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -189,7 +163,7 @@ export default function FeaturesPage() {
         />
       </div>
 
-      <DataTable<Feature>
+      <DataTable<FeatureRow>
         columns={columns}
         data={filteredFeatures}
         pageSize={10}
