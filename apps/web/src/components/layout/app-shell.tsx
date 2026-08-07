@@ -4,7 +4,6 @@ import { type ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { SkipToContent } from "./skip-to-content";
-import { useSidebar } from "@/hooks/use-sidebar";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { RouteAnnouncer } from "@/components/accessibility/route-announcer";
 
@@ -13,7 +12,6 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { collapsed } = useSidebar();
   const { permissions } = useUserPermissions();
 
   // Sidebar is shown if user has any permission beyond just org_chart and calendar
@@ -26,17 +24,13 @@ export function AppShell({ children }: AppShellProps) {
       <SkipToContent />
       <RouteAnnouncer />
       <div className="min-h-screen bg-background">
-        {/* Sidebar - handles its own responsive visibility (persistent on desktop, Sheet on mobile) */}
+        {/* Sidebar - handles its own responsive visibility (rail on desktop, Sheet on mobile) */}
         {hasAdminPermissions && <Sidebar />}
 
-        {/* Main content area */}
+        {/* Main content area — rail is always 80px (md:ml-20) */}
         <div
-          className={`flex flex-col min-h-screen transition-[margin-left] duration-200 ease-in-out ${
-            hasAdminPermissions
-              ? collapsed
-                ? "md:ml-20"
-                : "md:ml-[280px]"
-              : ""
+          className={`flex flex-col min-h-screen ${
+            hasAdminPermissions ? "md:ml-20" : ""
           }`}
         >
           <Header />
