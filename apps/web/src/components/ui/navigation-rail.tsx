@@ -51,6 +51,7 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
   const closeTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const railRef = React.useRef<HTMLElement>(null);
   const flyoutRef = React.useRef<HTMLDivElement>(null);
 
@@ -64,20 +65,37 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
     }
   };
 
+  const cancelOpen = () => {
+    if (openTimeout.current) {
+      clearTimeout(openTimeout.current);
+      openTimeout.current = null;
+    }
+  };
+
   const scheduleClose = () => {
     cancelClose();
+    cancelOpen();
     closeTimeout.current = setTimeout(() => {
       setHoveredItem(null);
-    }, 200);
+    }, 300);
   };
 
   const handleItemEnter = (label: string, hasChildren: boolean) => {
     cancelClose();
+    cancelOpen();
     if (hasChildren) {
-      setHoveredItem(label);
+      if (hoveredItem) {
+        // Drawer already open — switch content immediately
+        setHoveredItem(label);
+      } else {
+        // Drawer closed — delay before opening
+        openTimeout.current = setTimeout(() => {
+          setHoveredItem(label);
+        }, 300);
+      }
     } else {
-      // No children — close drawer immediately
-      setHoveredItem(null);
+      // Item without children — close drawer with delay
+      scheduleClose();
     }
   };
 
@@ -87,6 +105,7 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
 
   const handleFlyoutEnter = () => {
     cancelClose();
+    cancelOpen();
   };
 
   const handleFlyoutLeave = () => {
