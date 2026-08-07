@@ -71,9 +71,14 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
     }, 200);
   };
 
-  const handleItemEnter = (label: string) => {
+  const handleItemEnter = (label: string, hasChildren: boolean) => {
     cancelClose();
-    setHoveredItem(label);
+    if (hasChildren) {
+      setHoveredItem(label);
+    } else {
+      // No children — close drawer immediately
+      setHoveredItem(null);
+    }
   };
 
   const handleItemLeave = () => {
@@ -115,7 +120,7 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
           return (
             <div
               key={item.href}
-              onMouseEnter={() => handleItemEnter(item.label)}
+              onMouseEnter={() => handleItemEnter(item.label, !!hasChildren)}
               onMouseLeave={handleItemLeave}
             >
               {hasChildren ? (
