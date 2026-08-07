@@ -1,6 +1,5 @@
 "use client";
 
-import { StatCard } from "@strata/ui";
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees } from "@/services";
@@ -10,9 +9,54 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@/components/ui/icon";
+import { List, ListItem } from "@/components/ui/list";
+import { Divider } from "@/components/ui/divider";
+import { Chip } from "@/components/ui/chips";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 const COMPANY_ID = "cm_acme_corp_001";
+
+interface StatCardData {
+  icon: string;
+  value: string | number;
+  label: string;
+  tint: string;
+  iconColor: string;
+}
+
+function StatCardSkeleton() {
+  return (
+    <Card variant="outlined">
+      <CardContent className="flex items-center gap-4 p-6">
+        <Skeleton className="h-12 w-12 rounded-2xl" />
+        <div className="flex-1">
+          <Skeleton className="h-9 w-16 mb-1" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData) {
+  return (
+    <Card variant="outlined">
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className={`flex items-center justify-center h-12 w-12 rounded-2xl ${tint}`}>
+          <Icon name={icon} size={24} className={iconColor} />
+        </div>
+        <div>
+          <p className="text-[36px] leading-11 font-normal text-foreground">
+            {value}
+          </p>
+          <p className="text-[14px] leading-5 text-muted-foreground">
+            {label}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function DashboardPage() {
   const {
@@ -52,29 +96,70 @@ export default function DashboardPage() {
     leaveData?.filter((r) => r.status === "PENDING").length ?? 0;
   const upcomingEvents = eventsData?.length ?? 0;
 
+  const stats: StatCardData[] = [
+    {
+      icon: "group",
+      value: headcount,
+      label: "Total employees",
+      tint: "bg-primary/12",
+      iconColor: "text-primary",
+    },
+    {
+      icon: "event_busy",
+      value: pendingLeave,
+      label: "Pending leave",
+      tint: "bg-tertiary/12",
+      iconColor: "text-tertiary",
+    },
+    {
+      icon: "event",
+      value: upcomingEvents,
+      label: "Upcoming events",
+      tint: "bg-secondary/12",
+      iconColor: "text-secondary",
+    },
+    {
+      icon: "corporate_fare",
+      value: "—",
+      label: "Tribes & squads",
+      tint: "bg-primary/12",
+      iconColor: "text-primary",
+    },
+  ];
+
   if (hasError) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Dashboard</h1>
-            <p className="text-xs text-muted-foreground">
-              Overview of your organization&apos;s key metrics.
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">
+              Dashboard
+            </h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
+              Overview of your organization&apos;s key metrics
             </p>
           </div>
         </AppBar>
-        <Card variant="filled" className="flex flex-col items-center justify-center p-8">
-          <CardContent className="flex flex-col items-center pt-6">
-            <p className="text-sm text-destructive mb-4">
-              {employeesErr?.message || leaveErr?.message || eventsErr?.message || "Failed to load dashboard data"}
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              {employeesErr?.message ||
+                leaveErr?.message ||
+                eventsErr?.message ||
+                "Failed to load dashboard data"}
             </p>
             <Button
+              variant="outline"
               onClick={() => {
                 refetchEmployees();
                 refetchLeave();
                 refetchEvents();
               }}
             >
+              <Icon name="refresh" size={18} />
               Retry
             </Button>
           </CardContent>
@@ -85,145 +170,135 @@ export default function DashboardPage() {
 
   return (
     <motion.div
-      className="space-y-4"
+      className="space-y-8"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
       exit="exit"
       transition={defaultTransition}
     >
+      {/* Header */}
       <AppBar>
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Dashboard</h1>
-          <p className="text-xs text-muted-foreground">
-            Overview of your organization&apos;s key metrics.
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">
+            Dashboard
+          </h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
+            Overview of your organization&apos;s key metrics
           </p>
         </div>
       </AppBar>
 
       {/* Stat Cards Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} variant="elevated">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 mb-2" />
-                <Skeleton className="h-3 w-32" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Headcount"
-            value={headcount}
-            subtitle="Total employees"
-            trend="up"
-            icon={<Icon name="group" size={24} />}
-          />
-          <StatCard
-            title="Pending Leave"
-            value={pendingLeave}
-            subtitle="Awaiting approval"
-            trend="neutral"
-            icon={<Icon name="event_busy" size={24} />}
-          />
-          <StatCard
-            title="Upcoming Events"
-            value={upcomingEvents}
-            subtitle="Next 30 days"
-            trend="neutral"
-            icon={<Icon name="event" size={24} />}
-          />
-          <StatCard
-            title="Active Teams"
-            value="—"
-            subtitle="Tribes & squads"
-            trend="neutral"
-            icon={<Icon name="corporate_fare" size={24} />}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))
+          : stats.map((stat) => (
+              <DashboardStatCard key={stat.label} {...stat} />
+            ))}
+      </div>
 
+      <Divider />
+
+      {/* Two-column layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent Activity */}
+        {/* Left: Upcoming Events */}
         <Card variant="elevated" className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Upcoming Events</CardTitle>
+            <CardTitle className="text-[16px] leading-6 font-medium">
+              Upcoming Events
+            </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-0 pt-0">
             {isLoading ? (
-              <div className="space-y-3">
+              <div className="px-4 space-y-4">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-md p-3">
-                    <div>
-                      <Skeleton className="h-4 w-48 mb-1" />
-                      <Skeleton className="h-3 w-24" />
+                  <div key={i} className="flex items-center gap-4 py-2">
+                    <Skeleton className="h-6 w-6 rounded-md" />
+                    <div className="flex-1">
+                      <Skeleton className="h-5 w-48 mb-1" />
+                      <Skeleton className="h-4 w-32" />
                     </div>
-                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-8 w-16 rounded-lg" />
                   </div>
                 ))}
               </div>
+            ) : (eventsData ?? []).length === 0 ? (
+              <div className="flex flex-col items-center py-8 text-center">
+                <Icon
+                  name="event_available"
+                  size={40}
+                  className="text-muted-foreground/40 mb-2"
+                />
+                <p className="text-[14px] leading-5 text-muted-foreground">
+                  No upcoming events
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-3">
+              <List dividers>
                 {(eventsData ?? []).slice(0, 5).map((event) => (
-                  <li
+                  <ListItem
                     key={event.id}
-                    className="flex items-center justify-between rounded-md p-3 hover:bg-muted/30 transition-colors"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {event.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(event.startDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {event.allDay ? "All day" : "Timed"}
-                    </span>
-                  </li>
+                    lines={2}
+                    headline={event.title}
+                    supportingText={new Date(
+                      event.startDate
+                    ).toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                    leadingIcon="calendar_today"
+                    trailingContent={
+                      <Chip variant="assist" leadingIcon={event.allDay ? "sunny" : "schedule"}>
+                        {event.allDay ? "All day" : "Timed"}
+                      </Chip>
+                    }
+                    interactive={false}
+                  />
                 ))}
-                {(eventsData ?? []).length === 0 && (
-                  <li className="text-sm text-muted-foreground p-3">
-                    No upcoming events
-                  </li>
-                )}
-              </ul>
+              </List>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
+        {/* Right: Quick Actions */}
         <Card variant="elevated">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="text-[16px] leading-6 font-medium">
+              Quick Actions
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              variant="outline"
-              className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
+              variant="secondary"
+              className="w-full justify-start"
             >
-              <Icon name="person_add" size={20} className="mr-2" />
+              <Icon name="person_add" size={20} />
               Add Employee
             </Button>
             <Button
-              variant="outline"
-              className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
+              variant="secondary"
+              className="w-full justify-start"
             >
-              <Icon name="account_tree" size={20} className="mr-2" />
+              <Icon name="account_tree" size={20} />
               View Org Chart
             </Button>
             <Button
-              variant="outline"
-              className="w-full justify-start px-4 py-3 h-auto text-sm font-medium"
+              variant="secondary"
+              className="w-full justify-start"
             >
-              <Icon name="event_available" size={20} className="mr-2" />
+              <Icon name="event_available" size={20} />
               Submit Leave
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full justify-start"
+            >
+              <Icon name="description" size={20} />
+              Generate Report
             </Button>
           </CardContent>
         </Card>
