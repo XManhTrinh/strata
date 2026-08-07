@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
+import { useRipple } from "@/components/ui/ripple";
+import * as React from "react";
 
 export interface NavigationRailItem {
   /** Display label */
@@ -27,25 +29,15 @@ export interface NavigationRailProps {
 /**
  * Material Design 3 Navigation Rail
  *
- * Vertical navigation rail for desktop viewports. Fixed left, 80px wide.
- * Shows up to 7 destinations with icon + optional label.
- *
  * @see https://m3.material.io/components/navigation-rail
  *
  * Specs:
  * - Width: 80px
- * - Position: fixed left, full height
- * - Background: surface
- * - Top: FAB or menu icon (optional, 56px area)
- * - Each item: 56px total height
- * - Icon container: pill 56×32px, centered
- * - Active indicator: secondary-container pill fill (56×32px)
- * - Icon: 24px, centered in pill
- * - Label below icon: Label Medium (12px/16px), optional
- * - Active: filled icon + on-secondary-container
- * - Inactive: outlined icon + on-surface-variant
- * - Items: centered horizontally, grouped vertically with 12px gap
- * - Max destinations: 7 (no scrolling)
+ * - Each item: 56px height, icon in pill (56×32px)
+ * - Active: secondary-container pill, filled icon, on-secondary-container
+ * - Inactive: transparent pill, outlined icon, on-surface-variant
+ * - Hover: entire item triggers pill highlight (on-surface at 8%)
+ * - Ripple on press
  */
 export function NavigationRail({ items, topAction, className }: NavigationRailProps) {
   const pathname = usePathname();
@@ -53,7 +45,7 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-surface hidden md:flex",
+        "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-[hsl(var(--surface-variant)/0.4)] hidden md:flex",
         className
       )}
       aria-label="Main navigation"
@@ -74,45 +66,75 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
 
           return (
             <Tooltip key={item.href} content={item.label} side="right">
-              <Link
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className="flex flex-col items-center justify-center gap-1 w-14 h-14"
-              >
-                {/* Active indicator pill */}
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-14 h-8 rounded-full transition-colors duration-200",
-                    isActive ? "bg-secondary-container" : "bg-transparent hover:bg-surface-foreground/8"
-                  )}
-                >
-                  <Icon
-                    name={item.icon}
-                    size={24}
-                    filled={isActive}
-                    className={cn(
-                      isActive
-                        ? "text-secondary-container-foreground"
-                        : "text-surface-variant-foreground"
-                    )}
-                  />
-                </div>
-                {/* Label */}
-                <span
-                  className={cn(
-                    "text-[12px] leading-4 font-medium",
-                    isActive
-                      ? "text-secondary-container-foreground"
-                      : "text-surface-variant-foreground"
-                  )}
-                >
-                  {item.label}
-                </span>
-              </Link>
+              <RailItem item={item} isActive={isActive} />
             </Tooltip>
           );
         })}
       </nav>
     </aside>
+  );
+}
+
+/** Individual rail item with ripple and proper hover propagation */
+function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: boolean }) {
+  const { ripples, trigger, containerRef } = useRipple();
+
+  return (
+    <Link
+      ref={containerRef as React.RefObject<HTMLAnchorElement | null>}
+      href={item.href}
+      aria-current={isActive ? "page" : undefined}
+      onMouseDown={trigger}
+      onTouchStart={trigger}
+      className="group relative overflow-hidden flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-2xl"
+    >
+      {/* Pill indicator — highlights on parent hover via group */}
+      <div
+        className={cn(
+          "flex items-center justify-center w-14 h-8 rounded-full transition-colors duration-200",
+          isActive
+            ? "bg-secondary-container"
+            : "bg-transparent group-hover:bg-surface-foreground/8"
+        )}
+      >
+        <Icon
+          name={item.icon}
+          size={24}
+          filled={isActive}
+          className={cn(
+            "transition-colors duration-200",
+            isActive
+              ? "text-secondary-container-foreground"
+              : "text-surface-variant-foreground group-hover:text-surface-foreground"
+          )}
+        />
+      </div>
+
+      {/* Label */}
+      <span
+        className={cn(
+          "text-[11px] leading-4 font-medium transition-colors duration-200",
+          isActive
+            ? "text-secondary-container-foreground"
+            : "text-surface-variant-foreground group-hover:text-surface-foreground"
+        )}
+      >
+        {item.label}
+      </span>
+
+      {/* Ripple circles */}
+      {ripples.map((ripple) => (
+        <span
+          key={ripple.id}
+          className="absolute rounded-full bg-surface-foreground/12 animate-[ripple_500ms_ease-out_forwards] pointer-events-none"
+          style={{
+            left: ripple.x - ripple.size / 2,
+            top: ripple.y - ripple.size / 2,
+            width: ripple.size,
+            height: ripple.size,
+          }}
+        />
+      ))}
+    </Link>
   );
 }

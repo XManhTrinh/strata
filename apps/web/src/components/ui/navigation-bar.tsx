@@ -101,7 +101,7 @@ export function NavigationBar({ items, className }: NavigationBarProps) {
               <li key={item.label} className="flex-1">
                 <button
                   onClick={item.onClick}
-                  className="flex w-full items-center justify-center"
+                  className="relative overflow-hidden flex w-full items-center justify-center"
                   aria-label={item.label}
                 >
                   {content}
@@ -114,7 +114,7 @@ export function NavigationBar({ items, className }: NavigationBarProps) {
             <li key={item.label} className="flex-1">
               <Link
                 href={item.href ?? "/"}
-                className="flex w-full items-center justify-center"
+                className="relative overflow-hidden flex w-full items-center justify-center"
                 aria-current={isActive ? "page" : undefined}
               >
                 {content}
