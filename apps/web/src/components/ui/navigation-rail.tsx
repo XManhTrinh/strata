@@ -131,7 +131,7 @@ export function NavigationRail({ items, topAction, bottomAction, className }: Na
       )}
 
       {/* Navigation items — vertically centered */}
-      <nav className="flex-1 flex flex-col items-center justify-center gap-3">
+      <nav className="flex-1 flex flex-col items-center justify-start pt-4 gap-3">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
