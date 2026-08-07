@@ -11,7 +11,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGuard>
       <ReducedMotionProvider>
-        <AppShell>{children}</AppShell>
+        <AppShell>
+          {/* Mobile-first responsive content wrapper:
+              - overflow-x-auto ensures data tables can scroll horizontally on mobile
+              - Base styles for mobile, md:/lg: for progressive enhancements
+              - gap/spacing scales up with viewport */}
+          <div className="w-full min-w-0 overflow-x-auto space-y-4 md:space-y-6">
+            {children}
+          </div>
+        </AppShell>
         <CommandPalette />
         <MobileNav />
       </ReducedMotionProvider>

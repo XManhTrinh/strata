@@ -3,6 +3,25 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AnimatedDialog,
+  AnimatedDialogContent,
+  AnimatedDialogHeader,
+  AnimatedDialogTitle,
+  AnimatedDialogDescription,
+  AnimatedDialogFooter,
+} from "@/components/ui/animated-dialog";
+import { toast } from "sonner";
 import {
   usePositions,
   useCreatePosition,
@@ -59,22 +78,58 @@ export default function PositionsPage() {
     if (editingPosition) {
       updateMutation.mutate(
         { companyId: COMPANY_ID, id: editingPosition.id, ...formData },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Position updated successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to update position");
+          },
+        }
       );
     } else {
       createMutation.mutate(
         { companyId: COMPANY_ID, ...formData },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Position created successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to create position");
+          },
+        }
       );
     }
   };
 
   const handleArchive = (id: string) => {
-    archiveMutation.mutate({ companyId: COMPANY_ID, id });
+    archiveMutation.mutate(
+      { companyId: COMPANY_ID, id },
+      {
+        onSuccess: () => {
+          toast.success("Position archived successfully");
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to archive position");
+        },
+      }
+    );
   };
 
   const handleDelete = (id: string) => {
-    deleteMutation.mutate({ companyId: COMPANY_ID, id });
+    deleteMutation.mutate(
+      { companyId: COMPANY_ID, id },
+      {
+        onSuccess: () => {
+          toast.success("Position deleted successfully");
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to delete position");
+        },
+      }
+    );
   };
 
   const columns: Column<PositionRow>[] = [
@@ -115,38 +170,41 @@ export default function PositionsPage() {
       header: "",
       render: (row) => (
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               openEdit(row);
             }}
           >
             Edit
-          </button>
+          </Button>
           {row.archived ? (
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
               onClick={(e) => {
                 e.stopPropagation();
                 handleDelete(row.id);
               }}
             >
               Delete
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
-              className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
               onClick={(e) => {
                 e.stopPropagation();
                 handleArchive(row.id);
               }}
             >
               Archive
-            </button>
+            </Button>
           )}
         </div>
       ),
@@ -180,13 +238,9 @@ export default function PositionsPage() {
             Configure positions with career levels and reporting capabilities.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={openCreate}>
           Create Position
-        </button>
+        </Button>
       </AppBar>
 
       <div className="max-w-sm">
@@ -211,92 +265,86 @@ export default function PositionsPage() {
         />
       )}
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">
+      {/* Create/Edit Position Dialog */}
+      <AnimatedDialog open={showModal} onOpenChange={setShowModal}>
+        <AnimatedDialogContent className="sm:max-w-md">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>
               {editingPosition ? "Edit Position" : "Create Position"}
-            </h2>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label htmlFor="pos-name" className="block text-sm font-medium text-foreground">
-                  Name
-                </label>
-                <input
-                  id="pos-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Senior Engineer"
-                />
-              </div>
-              <div>
-                <label htmlFor="pos-description" className="block text-sm font-medium text-foreground">
-                  Description
-                </label>
-                <input
-                  id="pos-description"
-                  type="text"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Role description"
-                />
-              </div>
-              <div>
-                <label htmlFor="pos-level" className="block text-sm font-medium text-foreground">
-                  Career Level
-                </label>
-                <select
-                  id="pos-level"
-                  value={formData.careerLevel}
-                  onChange={(e) => setFormData({ ...formData, careerLevel: Number(e.target.value) })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7].map((l) => (
-                    <option key={l} value={l}>Level {l}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  id="pos-reports"
-                  type="checkbox"
-                  checked={formData.canHaveDirectReports}
-                  onChange={(e) => setFormData({ ...formData, canHaveDirectReports: e.target.checked })}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
-                />
-                <label htmlFor="pos-reports" className="text-sm text-foreground">
-                  Can have direct reports
-                </label>
-              </div>
+            </AnimatedDialogTitle>
+            <AnimatedDialogDescription>
+              {editingPosition
+                ? "Update position details, career level, and reporting capabilities."
+                : "Create a new position with career level and reporting settings."}
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pos-name">Name</Label>
+              <Input
+                id="pos-name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Senior Engineer"
+              />
             </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            <div className="space-y-2">
+              <Label htmlFor="pos-description">Description</Label>
+              <Input
+                id="pos-description"
+                type="text"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Role description"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pos-level">Career Level</Label>
+              <Select
+                value={String(formData.careerLevel)}
+                onValueChange={(value) => setFormData({ ...formData, careerLevel: Number(value) })}
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending || updateMutation.isPending
-                  ? "Saving..."
-                  : editingPosition
-                    ? "Save Changes"
-                    : "Create"}
-              </button>
+                <SelectTrigger id="pos-level">
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7].map((l) => (
+                    <SelectItem key={l} value={String(l)}>
+                      Level {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="pos-reports"
+                type="checkbox"
+                checked={formData.canHaveDirectReports}
+                onChange={(e) => setFormData({ ...formData, canHaveDirectReports: e.target.checked })}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
+              />
+              <Label htmlFor="pos-reports">Can have direct reports</Label>
             </div>
           </div>
-        </div>
-      )}
+          <AnimatedDialogFooter>
+            <Button variant="outline" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Saving..."
+                : editingPosition
+                  ? "Save Changes"
+                  : "Create"}
+            </Button>
+          </AnimatedDialogFooter>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
     </div>
   );
 }

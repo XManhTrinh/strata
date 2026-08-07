@@ -8,6 +8,25 @@ import {
   OrganizationUnit,
 } from "@/services/organizations.service";
 import { COMPANY_ID } from "@/services/admin.service";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 // ─── Tree building ────────────────────────────────────────────────────────────
 
@@ -83,29 +102,31 @@ function OrgUnitTreeNode({
       >
         <div className="flex items-center gap-2">
           {hasChildren ? (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onToggle(node.id)}
-              className="text-xs text-muted-foreground hover:text-foreground w-4"
+              className="h-5 w-5 text-xs text-muted-foreground hover:text-foreground"
               aria-expanded={isExpanded}
               aria-label={isExpanded ? `Collapse ${node.name}` : `Expand ${node.name}`}
             >
               {isExpanded ? "▼" : "▶"}
-            </button>
+            </Button>
           ) : (
-            <span className="w-4 text-center text-xs text-muted-foreground">•</span>
+            <span className="w-5 text-center text-xs text-muted-foreground">•</span>
           )}
           <span className="text-sm font-medium text-foreground">{node.name}</span>
           <TypeBadge typeName={typeName} />
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => onAdd(node.id)}
-          className="rounded px-2 py-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 hover:bg-primary/10 transition-all"
+          className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-all"
           aria-label={`Add child unit under ${node.name}`}
         >
           + Add
-        </button>
+        </Button>
       </div>
       {isExpanded && hasChildren && (
         <div>
@@ -202,8 +223,12 @@ export default function EngineeringPage() {
       },
       {
         onSuccess: () => {
+          toast.success("Organization unit created successfully");
           setShowAddDialog(false);
           setNewUnitName("");
+        },
+        onError: (err) => {
+          toast.error(err.message || "Failed to create organization unit");
         },
       }
     );
@@ -220,18 +245,14 @@ export default function EngineeringPage() {
             </p>
           </div>
         </AppBar>
-        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
-          <p className="text-sm text-destructive mb-4">
-            {error?.message || "Failed to load organization data"}
-          </p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-8">
+            <p className="text-sm text-destructive mb-4">
+              {error?.message || "Failed to load organization data"}
+            </p>
+            <Button onClick={() => refetch()}>Retry</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -249,13 +270,12 @@ export default function EngineeringPage() {
         </AppBar>
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-md border border-border bg-card p-4"
-            >
-              <div className="h-5 w-48 rounded bg-muted mb-2" />
-              <div className="h-4 w-24 rounded bg-muted" />
-            </div>
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="h-5 w-48 rounded bg-muted mb-2" />
+                <div className="h-4 w-24 rounded bg-muted" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -272,108 +292,91 @@ export default function EngineeringPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={expandAll}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
-          >
+          <Button variant="outline" size="sm" onClick={expandAll}>
             Expand All
-          </button>
-          <button
-            type="button"
-            onClick={collapseAll}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
-          >
+          </Button>
+          <Button variant="outline" size="sm" onClick={collapseAll}>
             Collapse All
-          </button>
-          <button
-            type="button"
-            onClick={() => handleAdd(null)}
-            className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
+          </Button>
+          <Button size="sm" onClick={() => handleAdd(null)}>
             Add Root Unit
-          </button>
+          </Button>
         </div>
       </AppBar>
 
-      <div className="rounded-md border border-border bg-card py-2">
-        {tree.length === 0 ? (
-          <div className="text-sm text-muted-foreground text-center p-8">
-            No organization units found. Create one to get started.
-          </div>
-        ) : (
-          tree.map((node) => (
-            <OrgUnitTreeNode
-              key={node.id}
-              node={node}
-              expanded={expanded}
-              onToggle={toggleNode}
-              onAdd={handleAdd}
-            />
-          ))
-        )}
-      </div>
+      <Card className="py-2">
+        <CardContent className="p-0">
+          {tree.length === 0 ? (
+            <div className="text-sm text-muted-foreground text-center p-8">
+              No organization units found. Create one to get started.
+            </div>
+          ) : (
+            tree.map((node) => (
+              <OrgUnitTreeNode
+                key={node.id}
+                node={node}
+                expanded={expanded}
+                onToggle={toggleNode}
+                onAdd={handleAdd}
+              />
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add Org Unit Dialog */}
-      {showAddDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h2 className="text-lg font-semibold mb-4">
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
               {addParentId ? "Add Child Unit" : "Add Root Unit"}
-            </h2>
-            <form onSubmit={handleSubmitAdd} className="space-y-3">
-              <div>
-                <label htmlFor="unit-name" className="block text-sm font-medium text-foreground mb-1">
-                  Name
-                </label>
-                <input
-                  id="unit-name"
-                  type="text"
-                  required
-                  value={newUnitName}
-                  onChange={(e) => setNewUnitName(e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Enter unit name"
-                />
-              </div>
-              <div>
-                <label htmlFor="unit-type" className="block text-sm font-medium text-foreground mb-1">
-                  Type
-                </label>
-                <select
-                  id="unit-type"
-                  required
-                  value={newUnitTypeId}
-                  onChange={(e) => setNewUnitTypeId(e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitAdd} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="unit-name">Name</Label>
+              <Input
+                id="unit-name"
+                type="text"
+                required
+                value={newUnitName}
+                onChange={(e) => setNewUnitName(e.target.value)}
+                placeholder="Enter unit name"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="unit-type">Type</Label>
+              <Select
+                value={newUnitTypeId}
+                onValueChange={setNewUnitTypeId}
+              >
+                <SelectTrigger id="unit-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
                   {orgUnitTypes.map((t) => (
-                    <option key={t.id} value={t.id}>
+                    <SelectItem key={t.id} value={t.id}>
                       {t.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddDialog(false)}
-                  className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createOrgUnit.isPending}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                  {createOrgUnit.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createOrgUnit.isPending}>
+                {createOrgUnit.isPending ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

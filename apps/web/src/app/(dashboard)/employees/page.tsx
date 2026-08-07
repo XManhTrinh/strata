@@ -5,6 +5,25 @@ import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from "@/services";
 import type { Employee, CreateEmployeeRequest } from "@/services";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AnimatedDialog,
+  AnimatedDialogContent,
+  AnimatedDialogHeader,
+  AnimatedDialogFooter,
+  AnimatedDialogTitle,
+  AnimatedDialogDescription,
+} from "@/components/ui/animated-dialog";
+import { toast } from "sonner";
 
 type EmployeeRow = Employee & Record<string, unknown>;
 
@@ -77,26 +96,27 @@ export default function EmployeesPage() {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               openEdit(row as Employee);
             }}
-            className="rounded px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
           >
             Edit
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
               setDeleteId(row.id);
             }}
-            className="rounded px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >
             Delete
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -134,8 +154,12 @@ export default function EmployeesPage() {
     e.preventDefault();
     createMutation.mutate(formData, {
       onSuccess: () => {
+        toast.success("Employee created successfully");
         setShowAddDialog(false);
         resetForm();
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to create employee");
       },
     });
   };
@@ -147,11 +171,29 @@ export default function EmployeesPage() {
       { id: editEmployee.id, ...formData },
       {
         onSuccess: () => {
+          toast.success("Employee updated successfully");
           setEditEmployee(null);
           resetForm();
         },
+        onError: (error) => {
+          toast.error(error.message || "Failed to update employee");
+        },
       }
     );
+  };
+
+  const handleDelete = () => {
+    if (!deleteId) return;
+    deleteMutation.mutate(deleteId, {
+      onSuccess: () => {
+        toast.success("Employee deleted successfully");
+        setDeleteId(null);
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to delete employee");
+        setDeleteId(null);
+      },
+    });
   };
 
   if (isError) {
@@ -169,13 +211,7 @@ export default function EmployeesPage() {
           <p className="text-sm text-destructive mb-4">
             {error?.message || "Failed to load employee data"}
           </p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Retry
-          </button>
+          <Button onClick={() => refetch()}>Retry</Button>
         </div>
       </div>
     );
@@ -190,13 +226,7 @@ export default function EmployeesPage() {
             View and manage employee records with status tracking.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openAdd}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Add Employee
-        </button>
+        <Button onClick={openAdd}>Add Employee</Button>
       </AppBar>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -210,21 +240,24 @@ export default function EmployeesPage() {
             placeholder="Search employees..."
           />
         </div>
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
+          onValueChange={(value) => {
+            setStatusFilter(value);
             setPage(1);
           }}
-          className="h-9 rounded-sm border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          aria-label="Filter by status"
         >
-          {statusOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt === "ALL" ? "All Statuses" : opt.replace("_", " ")}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[180px]" aria-label="Filter by status">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.map((opt) => (
+              <SelectItem key={opt} value={opt}>
+                {opt === "ALL" ? "All Statuses" : opt.replace("_", " ")}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <DataTable<EmployeeRow>
@@ -239,225 +272,215 @@ export default function EmployeesPage() {
       />
 
       {/* Add Employee Dialog */}
-      {showAddDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h2 className="text-lg font-semibold mb-4">Add Employee</h2>
-            <form onSubmit={handleAdd} className="space-y-3">
-              <div>
-                <label htmlFor="add-uin" className="block text-sm font-medium text-foreground mb-1">UIN</label>
-                <input
-                  id="add-uin"
-                  type="text"
-                  required
-                  value={formData.uin}
-                  onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="add-personId" className="block text-sm font-medium text-foreground mb-1">Person ID</label>
-                <input
-                  id="add-personId"
-                  type="text"
-                  required
-                  value={formData.personId}
-                  onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="add-orgId" className="block text-sm font-medium text-foreground mb-1">Organization ID</label>
-                <input
-                  id="add-orgId"
-                  type="text"
-                  required
-                  value={formData.organizationId}
-                  onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="add-deptId" className="block text-sm font-medium text-foreground mb-1">Department ID</label>
-                <input
-                  id="add-deptId"
-                  type="text"
-                  value={formData.departmentId ?? ""}
-                  onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="add-startDate" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
-                <input
-                  id="add-startDate"
-                  type="date"
-                  required
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="add-status" className="block text-sm font-medium text-foreground mb-1">Status</label>
-                <select
-                  id="add-status"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Employee["status"] })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="ON_LEAVE">On Leave</option>
-                  <option value="TERMINATED">Terminated</option>
-                  <option value="SUSPENDED">Suspended</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddDialog(false)}
-                  className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createMutation.isPending}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                  {createMutation.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Employee Dialog */}
-      {editEmployee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h2 className="text-lg font-semibold mb-4">Edit Employee</h2>
-            <form onSubmit={handleEdit} className="space-y-3">
-              <div>
-                <label htmlFor="edit-uin" className="block text-sm font-medium text-foreground mb-1">UIN</label>
-                <input
-                  id="edit-uin"
-                  type="text"
-                  required
-                  value={formData.uin}
-                  onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-personId" className="block text-sm font-medium text-foreground mb-1">Person ID</label>
-                <input
-                  id="edit-personId"
-                  type="text"
-                  required
-                  value={formData.personId}
-                  onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-orgId" className="block text-sm font-medium text-foreground mb-1">Organization ID</label>
-                <input
-                  id="edit-orgId"
-                  type="text"
-                  required
-                  value={formData.organizationId}
-                  onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-deptId" className="block text-sm font-medium text-foreground mb-1">Department ID</label>
-                <input
-                  id="edit-deptId"
-                  type="text"
-                  value={formData.departmentId ?? ""}
-                  onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-startDate" className="block text-sm font-medium text-foreground mb-1">Start Date</label>
-                <input
-                  id="edit-startDate"
-                  type="date"
-                  required
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-status" className="block text-sm font-medium text-foreground mb-1">Status</label>
-                <select
-                  id="edit-status"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as Employee["status"] })}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="ON_LEAVE">On Leave</option>
-                  <option value="TERMINATED">Terminated</option>
-                  <option value="SUSPENDED">Suspended</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setEditEmployee(null)}
-                  className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                  {updateMutation.isPending ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-sm shadow-xl">
-            <h2 className="text-lg font-semibold mb-2">Confirm Delete</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Are you sure? This cannot be undone.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
+      <AnimatedDialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <AnimatedDialogContent className="sm:max-w-md">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>Add Employee</AnimatedDialogTitle>
+            <AnimatedDialogDescription>
+              Create a new employee record in your organization.
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <form onSubmit={handleAdd} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="add-uin">UIN</Label>
+              <Input
+                id="add-uin"
+                type="text"
+                required
+                value={formData.uin}
+                onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="add-personId">Person ID</Label>
+              <Input
+                id="add-personId"
+                type="text"
+                required
+                value={formData.personId}
+                onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="add-orgId">Organization ID</Label>
+              <Input
+                id="add-orgId"
+                type="text"
+                required
+                value={formData.organizationId}
+                onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="add-deptId">Department ID</Label>
+              <Input
+                id="add-deptId"
+                type="text"
+                value={formData.departmentId ?? ""}
+                onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="add-startDate">Start Date</Label>
+              <Input
+                id="add-startDate"
+                type="date"
+                required
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="add-status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
+              >
+                <SelectTrigger id="add-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="ON_LEAVE">On Leave</SelectItem>
+                  <SelectItem value="TERMINATED">Terminated</SelectItem>
+                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <AnimatedDialogFooter className="mt-4">
+              <Button
                 type="button"
-                onClick={() => setDeleteId(null)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                variant="outline"
+                onClick={() => setShowAddDialog(false)}
               >
                 Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteMutation.mutate(deleteId);
-                  setDeleteId(null);
-                }}
-                className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
-              >
-                Delete
-              </button>
+              </Button>
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </AnimatedDialogFooter>
+          </form>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
+
+      {/* Edit Employee Dialog */}
+      <AnimatedDialog open={!!editEmployee} onOpenChange={(open) => !open && setEditEmployee(null)}>
+        <AnimatedDialogContent className="sm:max-w-md">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>Edit Employee</AnimatedDialogTitle>
+            <AnimatedDialogDescription>
+              Update the employee&apos;s information.
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <form onSubmit={handleEdit} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="edit-uin">UIN</Label>
+              <Input
+                id="edit-uin"
+                type="text"
+                required
+                value={formData.uin}
+                onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
+              />
             </div>
-          </div>
-        </div>
-      )}
+            <div className="space-y-1">
+              <Label htmlFor="edit-personId">Person ID</Label>
+              <Input
+                id="edit-personId"
+                type="text"
+                required
+                value={formData.personId}
+                onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-orgId">Organization ID</Label>
+              <Input
+                id="edit-orgId"
+                type="text"
+                required
+                value={formData.organizationId}
+                onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-deptId">Department ID</Label>
+              <Input
+                id="edit-deptId"
+                type="text"
+                value={formData.departmentId ?? ""}
+                onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-startDate">Start Date</Label>
+              <Input
+                id="edit-startDate"
+                type="date"
+                required
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
+              >
+                <SelectTrigger id="edit-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="ON_LEAVE">On Leave</SelectItem>
+                  <SelectItem value="TERMINATED">Terminated</SelectItem>
+                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <AnimatedDialogFooter className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditEmployee(null)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </AnimatedDialogFooter>
+          </form>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AnimatedDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AnimatedDialogContent className="sm:max-w-sm">
+          <AnimatedDialogHeader>
+            <AnimatedDialogTitle>Confirm Delete</AnimatedDialogTitle>
+            <AnimatedDialogDescription>
+              Are you sure? This cannot be undone.
+            </AnimatedDialogDescription>
+          </AnimatedDialogHeader>
+          <AnimatedDialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteId(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </AnimatedDialogFooter>
+        </AnimatedDialogContent>
+      </AnimatedDialog>
     </div>
   );
 }

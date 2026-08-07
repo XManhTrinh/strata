@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
 import { useAuditLog } from "@/services";
 import type { AuditRecord } from "@/services";
 
@@ -66,13 +67,9 @@ export default function AuditPage() {
           <p className="text-sm text-destructive mb-4">
             {error?.message || "Failed to load audit data"}
           </p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
+          <Button onClick={() => refetch()}>
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     );

@@ -4,6 +4,22 @@ import { useState } from "react";
 import { Badge } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
 import { useReports, useCreateReport, type ReportRecord, type ReportType } from "@/services";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const statusVariant: Record<string, "success" | "warning" | "error" | "default"> = {
   completed: "success",
@@ -106,13 +122,9 @@ export default function ReportsPage() {
             Generate and download organizational reports.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowDialog(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => setShowDialog(true)}>
           Generate Report
-        </button>
+        </Button>
       </AppBar>
 
       {reportList.length === 0 ? (
@@ -154,12 +166,9 @@ export default function ReportsPage() {
                 </p>
               </div>
               {report.status === "completed" && (
-                <button
-                  type="button"
-                  className="w-full rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/50 transition-colors"
-                >
+                <Button variant="outline" size="sm" className="w-full">
                   Download
-                </button>
+                </Button>
               )}
               {(report.status === "processing" || report.status === "pending") && (
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -175,52 +184,46 @@ export default function ReportsPage() {
       )}
 
       {/* Generate Report Dialog */}
-      {showDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">Generate Report</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Report</DialogTitle>
+            <DialogDescription>
               Select a report type to generate.
-            </p>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label htmlFor="report-type" className="block text-sm font-medium text-foreground">
-                  Report Type
-                </label>
-                <select
-                  id="report-type"
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value as ReportType)}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Report Type
+              </label>
+              <Select value={selectedType} onValueChange={(value) => setSelectedType(value as ReportType)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select report type" />
+                </SelectTrigger>
+                <SelectContent>
                   {reportTypeOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowDialog(false)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleGenerate}
-                disabled={createReport.isPending}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {createReport.isPending ? "Generating..." : "Generate"}
-              </button>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerate}
+              disabled={createReport.isPending}
+            >
+              {createReport.isPending ? "Generating..." : "Generate"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
