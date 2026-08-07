@@ -1,51 +1,83 @@
 "use client";
 
+import { useState } from "react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { useAuditLog } from "@/services";
+import type { AuditRecord } from "@/services";
 
-interface AuditRecord {
-  id: string;
-  timestamp: string;
-  user: string;
-  entityType: string;
-  entityId: string;
-  operation: "CREATE" | "UPDATE" | "DELETE";
-  [key: string]: unknown;
-}
+type AuditRow = AuditRecord & Record<string, unknown>;
 
-const mockAuditRecords: AuditRecord[] = [
-  { id: "1", timestamp: "2024-12-15 14:32:10", user: "admin@strata.io", entityType: "Employee", entityId: "EMP-001", operation: "UPDATE" },
-  { id: "2", timestamp: "2024-12-15 14:28:05", user: "sarah.chen@strata.io", entityType: "LeaveRequest", entityId: "LR-042", operation: "CREATE" },
-  { id: "3", timestamp: "2024-12-15 13:45:22", user: "admin@strata.io", entityType: "Budget", entityId: "BDG-007", operation: "UPDATE" },
-  { id: "4", timestamp: "2024-12-15 12:10:48", user: "marcus.j@strata.io", entityType: "Squad", entityId: "SQD-003", operation: "UPDATE" },
-  { id: "5", timestamp: "2024-12-15 11:55:30", user: "admin@strata.io", entityType: "Employee", entityId: "EMP-009", operation: "CREATE" },
-  { id: "6", timestamp: "2024-12-15 10:20:15", user: "hr@strata.io", entityType: "Department", entityId: "DEP-002", operation: "DELETE" },
-  { id: "7", timestamp: "2024-12-14 16:45:00", user: "admin@strata.io", entityType: "Role", entityId: "ROLE-005", operation: "CREATE" },
-  { id: "8", timestamp: "2024-12-14 15:30:22", user: "emily.r@strata.io", entityType: "CapacityAllocation", entityId: "CAP-011", operation: "UPDATE" },
-];
-
-const operationVariant: Record<AuditRecord["operation"], "success" | "info" | "error"> = {
+const actionVariant: Record<string, "success" | "info" | "error"> = {
   CREATE: "success",
   UPDATE: "info",
   DELETE: "error",
 };
 
-const columns: Column<AuditRecord>[] = [
-  { key: "timestamp", header: "Timestamp", sortable: true },
-  { key: "user", header: "User", sortable: true },
+const columns: Column<AuditRow>[] = [
+  {
+    key: "createdAt",
+    header: "Timestamp",
+    sortable: true,
+    render: (row) => new Date(row.createdAt).toLocaleString(),
+  },
+  {
+    key: "userName",
+    header: "User",
+    sortable: true,
+    render: (row) => row.userName || row.userId,
+  },
   { key: "entityType", header: "Entity", sortable: true },
   { key: "entityId", header: "Entity ID" },
   {
-    key: "operation",
+    key: "action",
     header: "Operation",
     sortable: true,
     render: (row) => (
-      <Badge variant={operationVariant[row.operation]}>{row.operation}</Badge>
+      <Badge variant={actionVariant[row.action] ?? "info"}>{row.action}</Badge>
     ),
   },
 ];
 
 export default function AuditPage() {
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const { data, isLoading, isError, error, refetch } = useAuditLog({
+    page,
+    pageSize,
+  });
+
+  const records = data?.data ?? [];
+  const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <AppBar>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Audit Log</h1>
+            <p className="text-xs text-muted-foreground">
+              System audit trail showing all entity changes.
+            </p>
+          </div>
+        </AppBar>
+        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
+          <p className="text-sm text-destructive mb-4">
+            {error?.message || "Failed to load audit data"}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <AppBar>
@@ -57,10 +89,14 @@ export default function AuditPage() {
         </div>
       </AppBar>
 
-      <DataTable<AuditRecord>
+      <DataTable<AuditRow>
         columns={columns}
-        data={mockAuditRecords}
-        pageSize={10}
+        data={records as AuditRow[]}
+        isLoading={isLoading}
+        pageSize={pageSize}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         emptyMessage="No audit records found"
       />
     </div>
