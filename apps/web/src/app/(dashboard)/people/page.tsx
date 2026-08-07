@@ -3,28 +3,10 @@
 import { useState } from "react";
 import { DataTable, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { usePeople } from "@/services";
+import type { Person } from "@/services";
 
-interface Person {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string;
-  [key: string]: unknown;
-}
-
-const mockPeople: Person[] = [
-  { id: "1", fullName: "Sarah Chen", email: "sarah.chen@strata.io", phone: "+1 555-0101", dateOfBirth: "1990-03-15" },
-  { id: "2", fullName: "Marcus Johnson", email: "marcus.j@strata.io", phone: "+1 555-0102", dateOfBirth: "1985-07-22" },
-  { id: "3", fullName: "Emily Rodriguez", email: "emily.r@strata.io", phone: "+1 555-0103", dateOfBirth: "1992-11-08" },
-  { id: "4", fullName: "David Park", email: "david.p@strata.io", phone: "+1 555-0104", dateOfBirth: "1988-01-30" },
-  { id: "5", fullName: "Aisha Patel", email: "aisha.p@strata.io", phone: "+1 555-0105", dateOfBirth: "1995-06-12" },
-  { id: "6", fullName: "James Wilson", email: "james.w@strata.io", phone: "+1 555-0106", dateOfBirth: "1987-09-25" },
-  { id: "7", fullName: "Lin Zhang", email: "lin.z@strata.io", phone: "+1 555-0107", dateOfBirth: "1993-04-18" },
-  { id: "8", fullName: "Olivia Thompson", email: "olivia.t@strata.io", phone: "+1 555-0108", dateOfBirth: "1991-12-03" },
-];
-
-const columns: Column<Person>[] = [
+const columns: Column<Person & Record<string, unknown>>[] = [
   { key: "fullName", header: "Name", sortable: true },
   { key: "email", header: "Email", sortable: true },
   { key: "phone", header: "Phone" },
@@ -32,12 +14,44 @@ const columns: Column<Person>[] = [
 
 export default function PeoplePage() {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  const filteredPeople = mockPeople.filter(
-    (p) =>
-      p.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      p.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const { data, isLoading, isError, error, refetch } = usePeople({
+    page,
+    pageSize,
+    search: search || undefined,
+  });
+
+  const people = data?.data ?? [];
+  const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <AppBar className="justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">People</h1>
+            <p className="text-xs text-muted-foreground">
+              Manage people records across your organization.
+            </p>
+          </div>
+        </AppBar>
+        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
+          <p className="text-sm text-destructive mb-4">
+            {error?.message || "Failed to load people data"}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -59,15 +73,22 @@ export default function PeoplePage() {
       <div className="max-w-sm">
         <SearchInput
           value={search}
-          onChange={setSearch}
+          onChange={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
           placeholder="Search people..."
         />
       </div>
 
-      <DataTable<Person>
+      <DataTable<Person & Record<string, unknown>>
         columns={columns}
-        data={filteredPeople}
-        pageSize={10}
+        data={people as (Person & Record<string, unknown>)[]}
+        isLoading={isLoading}
+        pageSize={pageSize}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         emptyMessage="No people found"
       />
     </div>

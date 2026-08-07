@@ -13,6 +13,7 @@ interface AuthState {
   handleSSOCallback: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
   getAccessToken: () => string | null;
+  refreshAccessToken: () => Promise<string>;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -61,6 +62,9 @@ export const useAuth = create<AuthState>((set, get) => ({
       isLoading: false,
       error: null,
     });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("strata-refresh-token", "dev-mock-refresh-token");
+    }
   },
 
   loginWithSSO: (organizationId: string) => {
@@ -84,4 +88,57 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   getAccessToken: () => get().accessToken,
+
+  refreshAccessToken: async () => {
+    const refreshToken =
+      typeof window !== "undefined"
+        ? localStorage.getItem("strata-refresh-token")
+        : null;
+
+    if (!refreshToken) {
+      get().logout();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+      throw new Error("No refresh token available");
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        get().logout();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("Token refresh failed");
+      }
+
+      const data = await response.json();
+      const { accessToken, refreshToken: newRefreshToken } = data;
+
+      set({ accessToken, isAuthenticated: true });
+
+      if (typeof window !== "undefined" && newRefreshToken) {
+        localStorage.setItem("strata-refresh-token", newRefreshToken);
+      }
+
+      return accessToken;
+    } catch (error) {
+      // If the error is from our own throw above, re-throw it
+      if (error instanceof Error && (error.message === "Token refresh failed" || error.message === "No refresh token available")) {
+        throw error;
+      }
+      // Network or unexpected error
+      get().logout();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+      throw new Error("Token refresh failed");
+    }
+  },
 }));

@@ -3,27 +3,10 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { useEmployees } from "@/services";
+import type { Employee } from "@/services";
 
-interface Employee {
-  id: string;
-  uin: string;
-  name: string;
-  department: string;
-  position: string;
-  status: "ACTIVE" | "ON_LEAVE" | "TERMINATED" | "SUSPENDED";
-  [key: string]: unknown;
-}
-
-const mockEmployees: Employee[] = [
-  { id: "1", uin: "EMP-001", name: "Sarah Chen", department: "Engineering", position: "Senior Engineer", status: "ACTIVE" },
-  { id: "2", uin: "EMP-002", name: "Marcus Johnson", department: "Product", position: "Product Manager", status: "ACTIVE" },
-  { id: "3", uin: "EMP-003", name: "Emily Rodriguez", department: "Engineering", position: "Staff Engineer", status: "ON_LEAVE" },
-  { id: "4", uin: "EMP-004", name: "David Park", department: "Design", position: "UX Designer", status: "ACTIVE" },
-  { id: "5", uin: "EMP-005", name: "Aisha Patel", department: "Engineering", position: "Junior Engineer", status: "ACTIVE" },
-  { id: "6", uin: "EMP-006", name: "James Wilson", department: "Finance", position: "Financial Analyst", status: "SUSPENDED" },
-  { id: "7", uin: "EMP-007", name: "Lin Zhang", department: "Engineering", position: "Tech Lead", status: "ACTIVE" },
-  { id: "8", uin: "EMP-008", name: "Olivia Thompson", department: "HR", position: "HR Manager", status: "TERMINATED" },
-];
+type EmployeeRow = Employee & Record<string, unknown>;
 
 const statusVariant: Record<Employee["status"], "success" | "warning" | "error" | "info"> = {
   ACTIVE: "success",
@@ -32,11 +15,16 @@ const statusVariant: Record<Employee["status"], "success" | "warning" | "error" 
   SUSPENDED: "info",
 };
 
-const columns: Column<Employee>[] = [
+const columns: Column<EmployeeRow>[] = [
   { key: "uin", header: "UIN", sortable: true },
-  { key: "name", header: "Name", sortable: true },
-  { key: "department", header: "Department", sortable: true },
-  { key: "position", header: "Position" },
+  {
+    key: "name",
+    header: "Name",
+    sortable: true,
+    render: (row) => (row.person?.fullName ?? "—"),
+  },
+  { key: "departmentId", header: "Department" },
+  { key: "positionId", header: "Position" },
   {
     key: "status",
     header: "Status",
@@ -54,15 +42,45 @@ const statusOptions = ["ALL", "ACTIVE", "ON_LEAVE", "TERMINATED", "SUSPENDED"] a
 export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const filteredEmployees = mockEmployees.filter((e) => {
-    const matchesSearch =
-      e.name.toLowerCase().includes(search.toLowerCase()) ||
-      e.uin.toLowerCase().includes(search.toLowerCase()) ||
-      e.department.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "ALL" || e.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const { data, isLoading, isError, error, refetch } = useEmployees({
+    page,
+    limit,
+    search: search || undefined,
+    status: statusFilter === "ALL" ? undefined : (statusFilter as Employee["status"]),
   });
+
+  const employees = data?.data ?? [];
+  const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <AppBar className="justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Employees</h1>
+            <p className="text-xs text-muted-foreground">
+              View and manage employee records with status tracking.
+            </p>
+          </div>
+        </AppBar>
+        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
+          <p className="text-sm text-destructive mb-4">
+            {error?.message || "Failed to load employee data"}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -85,13 +103,19 @@ export default function EmployeesPage() {
         <div className="max-w-sm flex-1">
           <SearchInput
             value={search}
-            onChange={setSearch}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
             placeholder="Search employees..."
           />
         </div>
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
           className="h-9 rounded-sm border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Filter by status"
         >
@@ -103,10 +127,14 @@ export default function EmployeesPage() {
         </select>
       </div>
 
-      <DataTable<Employee>
+      <DataTable<EmployeeRow>
         columns={columns}
-        data={filteredEmployees}
-        pageSize={10}
+        data={employees as EmployeeRow[]}
+        isLoading={isLoading}
+        pageSize={limit}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         emptyMessage="No employees found"
       />
     </div>
