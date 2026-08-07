@@ -1,326 +1,313 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
-import { Card, CardContent } from "@/components/ui/card";
+import { useMemo, useState, useCallback } from "react";
+import { MockPersonRepository } from "@/lib/org-tree/MockPersonRepository";
+import { useOrgTree } from "@/lib/org-tree/useOrgTree";
+import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
+import { buildSquadTree, buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
+import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Chip } from "@/components/ui/chips";
-import { List, ListItem } from "@/components/ui/list";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
-import {
-  useOrgChart,
-  useOrgChartByUnit,
-  useOrgUnits,
-  type OrgTreeNode,
-} from "@/services";
+import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
+import OrgFlow from "@/components/flow-org/OrgFlow";
+import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
+import ReparentModal from "@/components/flow-org/ReparentModal";
+import ExportButton from "@/components/flow-org/ExportButton";
 
-const COMPANY_ID = "cm_acme_corp_001";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getInitials(fullName: string): string {
-  return fullName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+interface PendingDrop {
+  draggedId: string;
+  newParentId: string | null;
+  personName: string;
+  directReportCount: number;
 }
 
-// ─── OrgTreeNodeCard ──────────────────────────────────────────────────────────
-
-function OrgTreeNodeCard({
-  node,
-  depth = 0,
-}: {
-  node: OrgTreeNode;
-  depth?: number;
-}) {
-  const [expanded, setExpanded] = useState(depth < 2);
-  const hasReports = node.directReports.length > 0;
-  const initials = getInitials(node.fullName);
-
-  return (
-    <div style={{ marginLeft: depth > 0 ? 24 : 0 }}>
-      <Card variant="outlined" className="mb-2">
-        <CardContent className="flex items-center gap-3 p-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/12 text-primary text-sm font-medium shrink-0">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm text-surface-foreground truncate">
-              {node.fullName}
-            </p>
-            <p className="text-xs text-surface-variant-foreground truncate">
-              {node.positionTitle ?? "No position"}
-              {node.departmentName && ` · ${node.departmentName}`}
-            </p>
-          </div>
-          {hasReports && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setExpanded(!expanded)}
-              aria-label={expanded ? "Collapse" : "Expand"}
-            >
-              <Icon
-                name={expanded ? "expand_less" : "expand_more"}
-                size={20}
-              />
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-      {expanded &&
-        hasReports &&
-        node.directReports.map((child) => (
-          <OrgTreeNodeCard key={child.id} node={child} depth={depth + 1} />
-        ))}
-    </div>
-  );
+interface PendingGroupMove {
+  parentId: string;
+  targetId: string | null;
+  persons: Person[];
 }
-
-// ─── Reporting Tree Skeleton ──────────────────────────────────────────────────
-
-function TreeSkeleton() {
-  return (
-    <div className="space-y-2">
-      {[1, 2, 3].map((i) => (
-        <div key={i} style={{ marginLeft: i > 1 ? 24 : 0 }}>
-          <Card variant="outlined" className="mb-2">
-            <CardContent className="flex items-center gap-3 p-3">
-              <Skeleton className="w-9 h-9 rounded-full" />
-              <div className="flex-1 space-y-1.5">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-48" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Reporting View ───────────────────────────────────────────────────────────
-
-function ReportingView() {
-  const { data: tree, isLoading, error } = useOrgChart(COMPANY_ID);
-
-  if (isLoading) return <TreeSkeleton />;
-
-  if (error) {
-    return (
-      <Card variant="filled" className="p-4">
-        <div className="flex items-center gap-2 text-error">
-          <Icon name="error" size={20} />
-          <p className="text-sm">
-            Failed to load org chart: {error.message}
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
-  if (!tree || tree.length === 0) {
-    return (
-      <Card variant="outlined" className="p-6">
-        <div className="flex flex-col items-center gap-2 text-surface-variant-foreground">
-          <Icon name="account_tree" size={40} />
-          <p className="text-sm">No reporting relationships found.</p>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-1">
-      {tree.map((root) => (
-        <OrgTreeNodeCard key={root.id} node={root} depth={0} />
-      ))}
-    </div>
-  );
-}
-
-// ─── Teams View ───────────────────────────────────────────────────────────────
-
-function TeamsView() {
-  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
-  const { data: units, isLoading: unitsLoading } = useOrgUnits(COMPANY_ID);
-  const { data: unitView, isLoading: unitViewLoading, error: unitViewError } =
-    useOrgChartByUnit(COMPANY_ID, selectedUnitId || undefined);
-
-  return (
-    <div className="space-y-4">
-      {/* Unit selector */}
-      <div className="flex items-center gap-3">
-        <Icon name="corporate_fare" size={20} className="text-surface-variant-foreground" />
-        <select
-          value={selectedUnitId}
-          onChange={(e) => setSelectedUnitId(e.target.value)}
-          disabled={unitsLoading}
-          className="flex-1 h-10 px-3 rounded-lg border border-outline bg-transparent text-sm text-surface-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="">Select an organizational unit…</option>
-          {units?.map((unit) => (
-            <option key={unit.id} value={unit.id}>
-              {unit.name}
-              {unit.type ? ` (${unit.type.name})` : ""}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Loading state */}
-      {unitViewLoading && selectedUnitId && (
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-        </div>
-      )}
-
-      {/* Error state */}
-      {unitViewError && (
-        <Card variant="filled" className="p-4">
-          <div className="flex items-center gap-2 text-error">
-            <Icon name="error" size={20} />
-            <p className="text-sm">
-              Failed to load unit: {unitViewError.message}
-            </p>
-          </div>
-        </Card>
-      )}
-
-      {/* Unit view content */}
-      {unitView && !unitViewLoading && (
-        <>
-          {/* Ancestor breadcrumb */}
-          {unitView.parentChain.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap">
-              {unitView.parentChain.map((ancestor, idx) => (
-                <div key={ancestor.id} className="flex items-center gap-1">
-                  {idx > 0 && (
-                    <Icon
-                      name="chevron_right"
-                      size={18}
-                      className="text-surface-variant-foreground"
-                    />
-                  )}
-                  <Chip variant="assist" leadingIcon="apartment">
-                    {ancestor.name}
-                  </Chip>
-                </div>
-              ))}
-              <Icon
-                name="chevron_right"
-                size={18}
-                className="text-surface-variant-foreground"
-              />
-              <Chip variant="filter" selected leadingIcon="group">
-                {unitView.unit.name}
-              </Chip>
-            </div>
-          )}
-
-          {/* Employee list */}
-          {unitView.employees.length > 0 ? (
-            <Card variant="outlined">
-              <List dividers>
-                {unitView.employees.map((emp) => (
-                  <ListItem
-                    key={emp.id}
-                    headline={emp.fullName}
-                    supportingText={emp.positionTitle ?? "No position assigned"}
-                    leadingIcon="person"
-                    trailingContent={
-                      <Chip
-                        variant="filter"
-                        selected={emp.status === "active"}
-                      >
-                        {emp.status}
-                      </Chip>
-                    }
-                    lines={2}
-                    interactive={false}
-                  />
-                ))}
-              </List>
-            </Card>
-          ) : (
-            <Card variant="outlined" className="p-6">
-              <div className="flex flex-col items-center gap-2 text-surface-variant-foreground">
-                <Icon name="group_off" size={40} />
-                <p className="text-sm">No employees in this unit.</p>
-              </div>
-            </Card>
-          )}
-        </>
-      )}
-
-      {/* Empty prompt */}
-      {!selectedUnitId && !unitsLoading && (
-        <Card variant="outlined" className="p-6">
-          <div className="flex flex-col items-center gap-2 text-surface-variant-foreground">
-            <Icon name="touch_app" size={40} />
-            <p className="text-sm">Select a unit above to view its members.</p>
-          </div>
-        </Card>
-      )}
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OrgChartPage() {
+  const repository = useMemo(() => new MockPersonRepository(), []);
+  const { unallocated, persons, loading, error, reparent } =
+    useOrgTree(repository);
+
+  const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
+  const [pendingGroupMove, setPendingGroupMove] =
+    useState<PendingGroupMove | null>(null);
+  const [selectedSquads, setSelectedSquads] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<OrgChartViewMode>("reporting");
+  const [timelineDate] = useState<string | null>(null);
+
+  const toggleSquad = useCallback((squad: string) => {
+    setSelectedSquads((prev) => {
+      const next = new Set(prev);
+      if (next.has(squad)) {
+        next.delete(squad);
+      } else {
+        next.add(squad);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSquads = useCallback(() => setSelectedSquads(new Set()), []);
+
+  const isAllView = selectedSquads.size === 0;
+
+  // Filter persons by timeline date
+  const filteredPersons = useMemo(() => {
+    if (!timelineDate) return persons;
+    return persons.filter((p) => {
+      if (!p.startDate) return true;
+      return p.startDate <= timelineDate;
+    });
+  }, [persons, timelineDate]);
+
+  const activeTree = useMemo(() => {
+    if (viewMode === "department") {
+      return buildDepartmentTree(filteredPersons.filter((p) => p.parentId !== null));
+    }
+
+    if (isAllView) {
+      const roots = filteredPersons.filter((p) => p.parentId === null);
+      const trueRoot = roots.reduce(
+        (best: Person | null, p: Person) => {
+          if (!best) return p;
+          const bestCount = filteredPersons.filter((x) => x.parentId === best.id).length;
+          const pCount = filteredPersons.filter((x) => x.parentId === p.id).length;
+          return pCount > bestCount ? p : best;
+        },
+        null as Person | null
+      );
+      if (!trueRoot) return [];
+      const reachable = new Set<string>();
+      const queue = [trueRoot.id];
+      while (queue.length) {
+        const cur = queue.shift()!;
+        reachable.add(cur);
+        filteredPersons
+          .filter((p) => p.parentId === cur)
+          .forEach((p) => queue.push(p.id));
+      }
+      return buildTree(filteredPersons.filter((p) => reachable.has(p.id)));
+    }
+    return buildSquadTree(filteredPersons, Array.from(selectedSquads));
+  }, [isAllView, selectedSquads, filteredPersons, viewMode]);
+
+  const selectedMemberCount = useMemo(() => {
+    if (isAllView) return filteredPersons.length;
+    return new Set(
+      filteredPersons
+        .filter((p) => p.squads.some((s) => selectedSquads.has(s)))
+        .map((p) => p.id)
+    ).size;
+  }, [isAllView, selectedSquads, filteredPersons]);
+
+  // Enhanced search: matches fullName, uin, title, departmentName, squads, status
+  const matchedIds = useMemo<Set<string>>(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return new Set();
+    return new Set(
+      filteredPersons
+        .filter((p) => {
+          if (p.fullName.toLowerCase().includes(q)) return true;
+          if (p.uin && p.uin.toLowerCase().includes(q)) return true;
+          if (p.title.toLowerCase().includes(q)) return true;
+          if (p.departmentName && p.departmentName.toLowerCase().includes(q)) return true;
+          if (p.squads.some((s) => s.toLowerCase().includes(q))) return true;
+          if (p.status.toLowerCase().includes(q)) return true;
+          return false;
+        })
+        .map((p) => p.id)
+    );
+  }, [filteredPersons, search]);
+
+  // Path to root for single search result
+  const pathToRoot = useMemo(() => {
+    if (matchedIds.size !== 1) return undefined;
+    const targetId = Array.from(matchedIds)[0];
+    return getPathToRoot(filteredPersons, targetId);
+  }, [matchedIds, filteredPersons]);
+
+  const squadCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const squad of ALL_SQUADS) {
+      counts[squad] = filteredPersons.filter((p) => p.squads.includes(squad)).length;
+    }
+    return counts;
+  }, [filteredPersons]);
+
+  const onEdit = useCallback((person: Person) => {
+    console.log("Edit person:", person.fullName);
+  }, []);
+
+  const wrappedReparent = useCallback(
+    async (draggedId: string, newParentId: string | null, moveWithChildren?: boolean) => {
+      await reparent(draggedId, newParentId, moveWithChildren);
+    },
+    [reparent]
+  );
+
+  const onPendingDrop = useCallback((info: PendingDrop) => {
+    setPendingDrop(info);
+  }, []);
+
+  const onPendingGroupMove = useCallback((info: PendingGroupMove) => {
+    setPendingGroupMove(info);
+  }, []);
+
+  const onContextMenuAction = useCallback((action: string, targetId: string) => {
+    console.log("Context menu action:", action, "on", targetId);
+  }, []);
+
   return (
-    <motion.div
-      variants={pageTransitionVariants}
-      initial="initial"
-      animate="enter"
-      exit="exit"
-      transition={defaultTransition}
-      className="flex flex-col gap-4 p-6"
-    >
-      {/* App Bar */}
-      <AppBar>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-surface-foreground">
-            Org Chart
-          </h1>
-          <p className="text-sm text-surface-variant-foreground">
-            Reporting hierarchy and team structure
-          </p>
+    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 64px - 12px - 24px)" }}>
+        <FlowOrgHeader
+          search={search}
+          onSearchChange={setSearch}
+          selectedSquads={selectedSquads}
+          onToggleSquad={toggleSquad}
+          onClearSquads={clearSquads}
+          squadCounts={squadCounts}
+          totalCount={filteredPersons.length}
+          tribes={TRIBES}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          searchResultCount={search.trim() ? matchedIds.size : undefined}
+          pathToRoot={pathToRoot}
+          exportButton={<ExportButton />}
+        />
+
+        {/* Status bar */}
+        <div className="px-6 flex items-center gap-3 h-8 shrink-0">
+          {!isAllView && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Showing{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-200">
+                {selectedMemberCount}
+              </span>{" "}
+              {selectedMemberCount === 1 ? "person" : "people"} across{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-200">
+                {Array.from(selectedSquads).join(", ")}
+              </span>{" "}
+              —{" "}
+              <button
+                type="button"
+                onClick={clearSquads}
+                className="text-indigo-500 hover:text-indigo-400 underline underline-offset-2"
+              >
+                clear
+              </button>
+            </p>
+          )}
+          {search.trim() && (
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              {matchedIds.size === 0
+                ? "No matches"
+                : `${matchedIds.size} ${matchedIds.size === 1 ? "person" : "people"} highlighted`}
+            </p>
+          )}
         </div>
-      </AppBar>
 
-      {/* Tabs */}
-      <Tabs defaultValue="reporting">
-        <TabsList>
-          <TabsTrigger value="reporting">
-            <Icon name="account_tree" size={18} className="mr-2" />
-            Reporting
-          </TabsTrigger>
-          <TabsTrigger value="teams">
-            <Icon name="groups" size={18} className="mr-2" />
-            Teams
-          </TabsTrigger>
-        </TabsList>
+        {/* Main content */}
+        <main className="flex-1 min-h-0">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                {error}
+              </p>
+            </div>
+          ) : (
+            <OrgFlow
+              tree={activeTree}
+              unallocated={unallocated}
+              persons={filteredPersons}
+              matchedIds={matchedIds}
+              onEdit={onEdit}
+              reparent={wrappedReparent}
+              onPendingDrop={onPendingDrop}
+              onPendingGroupMove={onPendingGroupMove}
+              vacancies={MOCK_VACANCIES}
+              onContextMenuAction={onContextMenuAction}
+            />
+          )}
+        </main>
 
-        <TabsContent value="reporting">
-          <ReportingView />
-        </TabsContent>
+      {pendingDrop && (
+        <ReparentModal
+          personName={pendingDrop.personName}
+          directReportCount={pendingDrop.directReportCount}
+          targetIsUnallocated={pendingDrop.newParentId === null}
+          persons={filteredPersons}
+          draggedId={pendingDrop.draggedId}
+          onMoveWithReports={() => {
+            void wrappedReparent(pendingDrop.draggedId, pendingDrop.newParentId, true);
+            setPendingDrop(null);
+          }}
+          onLeaveReports={() => {
+            void wrappedReparent(pendingDrop.draggedId, pendingDrop.newParentId, false);
+            setPendingDrop(null);
+          }}
+          onReassignReports={(newParentId: string) => {
+            void wrappedReparent(
+              pendingDrop.draggedId,
+              pendingDrop.newParentId,
+              false
+            );
+            setPendingDrop(null);
+            filteredPersons
+              .filter((p) => p.parentId === pendingDrop.draggedId)
+              .forEach((p) => {
+                void wrappedReparent(p.id, newParentId, true);
+              });
+          }}
+          onCancel={() => setPendingDrop(null)}
+        />
+      )}
 
-        <TabsContent value="teams">
-          <TeamsView />
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+      {pendingGroupMove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setPendingGroupMove(null)}
+          />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Move {pendingGroupMove.persons.length} people
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+              Move all {pendingGroupMove.persons.length} direct reports{" "}
+              {pendingGroupMove.targetId
+                ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
+                : "to unallocated"}
+              ?
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => {
+                  for (const p of pendingGroupMove.persons) {
+                    void wrappedReparent(p.id, pendingGroupMove.targetId, true);
+                  }
+                  setPendingGroupMove(null);
+                }}
+              >
+                Confirm
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setPendingGroupMove(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
