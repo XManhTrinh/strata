@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -64,12 +65,9 @@ export default function SSOLoginPage() {
             )}
           </div>
 
-          <button
-            type="submit"
-            className="h-10 w-full rounded-sm bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
+          <Button type="submit" size="lg" className="w-full">
             Continue with SSO
-          </button>
+          </Button>
 
           <div className="text-center">
             <a

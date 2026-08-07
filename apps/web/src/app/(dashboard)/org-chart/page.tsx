@@ -6,6 +6,7 @@ import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
 import { buildSquadTree, buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
 import { ALL_SQUADS, TRIBES } from "@/lib/org-tree/squads";
+import { Button } from "@/components/ui/button";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
@@ -287,25 +288,22 @@ export default function OrgChartPage() {
               ?
             </p>
             <div className="flex flex-col gap-2">
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   for (const p of pendingGroupMove.persons) {
                     void wrappedReparent(p.id, pendingGroupMove.targetId, true);
                   }
                   setPendingGroupMove(null);
                 }}
-                className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
               >
                 Confirm
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setPendingGroupMove(null)}
-                className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </div>

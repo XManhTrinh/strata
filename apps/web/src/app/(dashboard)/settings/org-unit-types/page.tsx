@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { DataTable, Badge, SearchInput, type Column } from "@strata/ui";
 import { AppBar } from "@/components/layout/app-bar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import {
   useOrgUnitTypes,
   useCreateOrgUnitType,
@@ -54,22 +66,50 @@ export default function OrgUnitTypesPage() {
     if (editingType) {
       updateMutation.mutate(
         { companyId: COMPANY_ID, id: editingType.id, ...formData },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Type updated successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to update type");
+          },
+        }
       );
     } else {
       createMutation.mutate(
         { companyId: COMPANY_ID, ...formData },
-        { onSuccess: () => setShowModal(false) }
+        {
+          onSuccess: () => {
+            toast.success("Type created successfully");
+            setShowModal(false);
+          },
+          onError: (err) => {
+            toast.error(err.message || "Failed to create type");
+          },
+        }
       );
     }
   };
 
   const handleArchive = (id: string) => {
-    archiveMutation.mutate({ companyId: COMPANY_ID, id });
+    archiveMutation.mutate(
+      { companyId: COMPANY_ID, id },
+      {
+        onSuccess: () => toast.success("Type archived"),
+        onError: (err) => toast.error(err.message || "Failed to archive type"),
+      }
+    );
   };
 
   const handleRestore = (id: string) => {
-    restoreMutation.mutate({ companyId: COMPANY_ID, id });
+    restoreMutation.mutate(
+      { companyId: COMPANY_ID, id },
+      {
+        onSuccess: () => toast.success("Type restored"),
+        onError: (err) => toast.error(err.message || "Failed to restore type"),
+      }
+    );
   };
 
   const columns: Column<OrgUnitTypeRow>[] = [
@@ -113,19 +153,21 @@ export default function OrgUnitTypesPage() {
       header: "",
       render: (row) => (
         <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               openEdit(row);
             }}
           >
             Edit
-          </button>
-          <button
-            type="button"
-            className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               if (row.archived) {
@@ -136,7 +178,7 @@ export default function OrgUnitTypesPage() {
             }}
           >
             {row.archived ? "Restore" : "Archive"}
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -169,13 +211,9 @@ export default function OrgUnitTypesPage() {
             Define the types of organizational units used in your company structure.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={openCreate}>
           Create Type
-        </button>
+        </Button>
       </AppBar>
 
       <div className="max-w-sm">
@@ -200,91 +238,79 @@ export default function OrgUnitTypesPage() {
         />
       )}
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground">
+      {/* Create/Edit Dialog */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
               {editingType ? "Edit Type" : "Create Type"}
-            </h2>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label htmlFor="type-name" className="block text-sm font-medium text-foreground">
-                  Name
-                </label>
-                <input
-                  id="type-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Department"
-                />
-              </div>
-              <div>
-                <label htmlFor="type-description" className="block text-sm font-medium text-foreground">
-                  Description
-                </label>
-                <input
-                  id="type-description"
-                  type="text"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Brief description"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="type-icon" className="block text-sm font-medium text-foreground">
-                    Icon
-                  </label>
-                  <input
-                    id="type-icon"
-                    type="text"
-                    value={formData.icon}
-                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="type-color" className="block text-sm font-medium text-foreground">
-                    Color
-                  </label>
-                  <input
-                    id="type-color"
-                    type="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                    className="mt-1 h-9 w-full cursor-pointer rounded-md border border-border bg-background"
-                  />
-                </div>
-              </div>
+            </DialogTitle>
+            <DialogDescription>
+              {editingType
+                ? "Update the organization unit type details."
+                : "Define a new type for your organization structure."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="type-name">Name</Label>
+              <Input
+                id="type-name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Department"
+              />
             </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending || updateMutation.isPending
-                  ? "Saving..."
-                  : editingType
-                    ? "Save Changes"
-                    : "Create"}
-              </button>
+            <div className="space-y-2">
+              <Label htmlFor="type-description">Description</Label>
+              <Input
+                id="type-description"
+                type="text"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brief description"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type-icon">Icon</Label>
+                <Input
+                  id="type-icon"
+                  type="text"
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type-color">Color</Label>
+                <input
+                  id="type-color"
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="h-10 w-full cursor-pointer rounded-xl border border-input bg-background"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Saving..."
+                : editingType
+                  ? "Save Changes"
+                  : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
