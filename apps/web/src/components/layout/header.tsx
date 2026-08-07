@@ -3,6 +3,7 @@
 import { Breadcrumbs } from "./breadcrumbs";
 import { TopAppBar } from "@/components/ui/top-app-bar";
 import { useUserRole, type UserRoleView } from "@/hooks/use-user-role";
+import { useAuth } from "@/lib/auth";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -30,6 +31,7 @@ const roleColors: Record<UserRoleView, string> = {
 
 export function Header() {
   const { role, setRole } = useUserRole();
+  const { logout } = useAuth();
 
   return (
     <TopAppBar
@@ -95,7 +97,7 @@ export function Header() {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive">
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => logout()}>
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
