@@ -36,36 +36,76 @@ export interface NavigationRailProps {
 }
 
 /**
- * Material Design 3 Navigation Rail
+ * Material Design 3 Navigation Rail with Flyout Drawer
  *
  * @see https://m3.material.io/components/navigation-rail
  *
- * Specs:
- * - Width: 80px
- * - Each item: 56px height, icon in pill (56×32px)
- * - Active: secondary-container pill, filled icon, on-secondary-container
- * - Inactive: transparent pill, outlined icon, on-surface-variant
- * - Hover: entire item triggers pill highlight + flyout drawer for sub-items
- * - Ripple on press
+ * Behavior (like m3.material.io):
+ * - Hovering an item with children opens a flyout drawer to the right
+ * - Moving to another item with children smoothly transitions the drawer content
+ * - The drawer stays open while cursor is on the rail or on the flyout
+ * - Leaving both rail and flyout closes the drawer after a short delay
+ * - Items without children show a tooltip on hover
  */
 export function NavigationRail({ items, topAction, className }: NavigationRailProps) {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
-  const hoverTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const railRef = React.useRef<HTMLElement>(null);
+  const flyoutRef = React.useRef<HTMLDivElement>(null);
+  const itemRefs = React.useRef<Map<string, HTMLElement>>(new Map());
 
-  const handleMouseEnter = (label: string) => {
-    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+  // Get the hovered item's data for flyout content
+  const activeHoverItem = items.find((i) => i.label === hoveredItem && i.children?.length);
+
+  // Calculate flyout vertical position based on the hovered item
+  const [flyoutTop, setFlyoutTop] = React.useState(0);
+
+  React.useEffect(() => {
+    if (hoveredItem && railRef.current) {
+      const itemEl = itemRefs.current.get(hoveredItem);
+      if (itemEl && railRef.current) {
+        const railRect = railRef.current.getBoundingClientRect();
+        const itemRect = itemEl.getBoundingClientRect();
+        setFlyoutTop(itemRect.top - railRect.top);
+      }
+    }
+  }, [hoveredItem]);
+
+  const cancelClose = () => {
+    if (closeTimeout.current) {
+      clearTimeout(closeTimeout.current);
+      closeTimeout.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimeout.current = setTimeout(() => {
+      setHoveredItem(null);
+    }, 200);
+  };
+
+  const handleItemEnter = (label: string) => {
+    cancelClose();
     setHoveredItem(label);
   };
 
-  const handleMouseLeave = () => {
-    hoverTimeout.current = setTimeout(() => {
-      setHoveredItem(null);
-    }, 150);
+  const handleItemLeave = () => {
+    scheduleClose();
+  };
+
+  const handleFlyoutEnter = () => {
+    cancelClose();
+  };
+
+  const handleFlyoutLeave = () => {
+    scheduleClose();
   };
 
   return (
     <aside
+      ref={railRef}
       className={cn(
         "fixed left-0 top-0 bottom-0 z-40 w-20 flex-col items-center bg-[hsl(var(--surface-variant)/0.4)] hidden md:flex",
         className
@@ -86,16 +126,16 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
             pathname === item.href ||
             pathname.startsWith(item.href + "/");
           const hasChildren = item.children && item.children.length > 0;
-          const isHovered = hoveredItem === item.label;
 
           return (
             <div
               key={item.href}
-              className="relative"
-              onMouseEnter={() => hasChildren && handleMouseEnter(item.label)}
-              onMouseLeave={handleMouseLeave}
+              ref={(el) => {
+                if (el) itemRefs.current.set(item.label, el);
+              }}
+              onMouseEnter={() => handleItemEnter(item.label)}
+              onMouseLeave={handleItemLeave}
             >
-              {/* Rail item */}
               {hasChildren ? (
                 <RailItem item={item} isActive={isActive} />
               ) : (
@@ -103,38 +143,39 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
                   <RailItem item={item} isActive={isActive} />
                 </Tooltip>
               )}
-
-              {/* Flyout drawer for sub-items */}
-              {hasChildren && (
-                <AnimatePresence>
-                  {isHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -8 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-[calc(100%+4px)] top-1/2 -translate-y-1/2 z-50"
-                      onMouseEnter={() => handleMouseEnter(item.label)}
-                      onMouseLeave={handleMouseLeave}
-                    >
-                      <FlyoutDrawer
-                        title={item.label}
-                        items={item.children!}
-                        pathname={pathname}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
             </div>
           );
         })}
       </nav>
+
+      {/* Single flyout drawer — positioned to the right of the rail */}
+      <AnimatePresence>
+        {activeHoverItem && (
+          <motion.div
+            ref={flyoutRef}
+            key="flyout"
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.15 }}
+            className="fixed left-20 z-50"
+            style={{ top: flyoutTop }}
+            onMouseEnter={handleFlyoutEnter}
+            onMouseLeave={handleFlyoutLeave}
+          >
+            <FlyoutDrawer
+              title={activeHoverItem.label}
+              items={activeHoverItem.children!}
+              pathname={pathname}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </aside>
   );
 }
 
-/** Individual rail item with ripple and proper hover propagation */
+/** Individual rail item with ripple and hover propagation */
 function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: boolean }) {
   const { ripples, trigger, containerRef } = useRipple();
 
@@ -199,8 +240,8 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
 }
 
 /**
- * Flyout Drawer — appears on hover for nav items with sub-pages.
- * Like m3.material.io's navigation where hovering a section reveals sub-items.
+ * Flyout Drawer — appears beside the rail showing sub-navigation items.
+ * Content transitions when hovering between different parent items.
  */
 function FlyoutDrawer({
   title,

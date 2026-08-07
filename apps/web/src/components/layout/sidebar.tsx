@@ -97,9 +97,25 @@ const allNavSections: NavSection[] = [
  */
 const railItems: NavigationRailItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { label: "People", href: "/people", icon: "person" },
+  {
+    label: "People",
+    href: "/people",
+    icon: "person",
+    children: [
+      { label: "People", href: "/people", icon: "person" },
+      { label: "Employees", href: "/employees", icon: "group" },
+    ],
+  },
   { label: "Org Chart", href: "/org-chart", icon: "account_tree" },
-  { label: "Engineering", href: "/engineering", icon: "engineering" },
+  {
+    label: "Engineering",
+    href: "/engineering",
+    icon: "engineering",
+    children: [
+      { label: "Teams", href: "/engineering", icon: "engineering" },
+      { label: "Capacity", href: "/capacity", icon: "trending_up" },
+    ],
+  },
   { label: "Budgets", href: "/budgets", icon: "payments" },
   {
     label: "Settings",
