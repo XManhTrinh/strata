@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@strata/ui";
+import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
 import { useReports, useCreateReport, type ReportRecord, type ReportType } from "@/services";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chips";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Divider } from "@/components/ui/divider";
 import {
   Select,
   SelectContent,
@@ -20,12 +25,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
-const statusVariant: Record<string, "success" | "warning" | "error" | "default"> = {
-  completed: "success",
-  processing: "warning",
-  pending: "default",
+const statusIcon: Record<string, string> = {
+  completed: "check_circle",
+  processing: "pending",
+  pending: "schedule",
   failed: "error",
+};
+
+const statusColor: Record<string, string> = {
+  completed: "text-green-600 dark:text-green-400",
+  processing: "text-amber-600 dark:text-amber-400",
+  pending: "text-muted-foreground",
+  failed: "text-destructive",
 };
 
 const typeLabels: Record<ReportType, string> = {
@@ -33,6 +46,13 @@ const typeLabels: Record<ReportType, string> = {
   capacity: "Capacity",
   budget: "Budget",
   leave: "Leave",
+};
+
+const typeIcons: Record<ReportType, string> = {
+  headcount: "group",
+  capacity: "bar_chart",
+  budget: "account_balance",
+  leave: "event_busy",
 };
 
 const reportTypeOptions: { value: ReportType; label: string }[] = [
@@ -57,7 +77,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function ReportsPage() {
-  const { data: reports, isLoading, error } = useReports();
+  const { data: reports, isLoading, error, refetch } = useReports();
   const createReport = useCreateReport();
   const [showDialog, setShowDialog] = useState(false);
   const [selectedType, setSelectedType] = useState<ReportType>("headcount");
@@ -75,17 +95,26 @@ export default function ReportsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Reports</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Reports</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Generate and download organizational reports.
             </p>
           </div>
         </AppBar>
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} variant="outlined">
+              <CardContent className="p-6 space-y-3">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -93,20 +122,29 @@ export default function ReportsPage() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Reports</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Reports</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Generate and download organizational reports.
             </p>
           </div>
         </AppBar>
-        <div className="flex items-center justify-center py-20">
-          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
-            Failed to load reports. Please try again later.
-          </p>
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              Failed to load reports. Please try again later.
+            </p>
+            <Button variant="outline" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -114,71 +152,99 @@ export default function ReportsPage() {
   const reportList = reports ?? [];
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Reports</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Reports</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Generate and download organizational reports.
           </p>
         </div>
         <Button onClick={() => setShowDialog(true)}>
+          <Icon name="add" size={18} />
           Generate Report
         </Button>
       </AppBar>
 
+      {/* Reports Grid */}
       {reportList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm text-muted-foreground">No reports generated yet.</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Click &quot;Generate Report&quot; to create your first report.
-          </p>
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <Icon name="description" size={40} className="text-muted-foreground/40 mb-2" />
+            <p className="text-[14px] leading-5 text-muted-foreground">
+              No reports generated yet.
+            </p>
+            <p className="text-[12px] leading-4 text-muted-foreground mt-1">
+              Click &quot;Generate Report&quot; to create your first report.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {reportList.map((report: ReportRecord) => (
-            <div
-              key={report.id}
-              className="rounded-md border border-border bg-card p-4 space-y-3"
-            >
-              <div className="flex items-start justify-between">
-                <h3 className="text-sm font-semibold text-foreground leading-tight">
-                  {typeLabels[report.type]} Report
-                </h3>
-                <Badge variant={statusVariant[report.status] ?? "default"}>
-                  {report.status.toUpperCase()}
-                </Badge>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  Type: <span className="font-medium text-foreground">{typeLabels[report.type]}</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Requested: {formatDate(report.requestedAt)}
-                </p>
-                {report.completedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Completed: {formatDate(report.completedAt)}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  By: {report.requestedBy}
-                </p>
-              </div>
-              {report.status === "completed" && (
-                <Button variant="outline" size="sm" className="w-full">
-                  Download
-                </Button>
-              )}
-              {(report.status === "processing" || report.status === "pending") && (
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div className="h-full w-2/3 animate-pulse rounded-full bg-primary" />
+            <Card key={report.id} variant="outlined">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
+                      <Icon name={typeIcons[report.type]} size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] leading-5 font-medium text-foreground">
+                        {typeLabels[report.type]} Report
+                      </h3>
+                      <p className="text-[12px] leading-4 text-muted-foreground">
+                        {formatDate(report.requestedAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <Chip
+                    variant="assist"
+                    leadingIcon={statusIcon[report.status]}
+                  >
+                    <span className={statusColor[report.status]}>
+                      {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                    </span>
+                  </Chip>
                 </div>
-              )}
-              {report.status === "failed" && report.error && (
-                <p className="text-xs text-destructive">{report.error}</p>
-              )}
-            </div>
+
+                <Divider />
+
+                <div className="space-y-1">
+                  {report.completedAt && (
+                    <p className="text-[12px] leading-4 text-muted-foreground">
+                      Completed: {formatDate(report.completedAt)}
+                    </p>
+                  )}
+                  <p className="text-[12px] leading-4 text-muted-foreground">
+                    Requested by: {report.requestedBy}
+                  </p>
+                </div>
+
+                {report.status === "completed" && (
+                  <Button variant="secondary" className="w-full">
+                    <Icon name="download" size={18} />
+                    Download
+                  </Button>
+                )}
+                {(report.status === "processing" || report.status === "pending") && (
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/12">
+                    <div className="h-full w-2/3 animate-pulse rounded-full bg-primary" />
+                  </div>
+                )}
+                {report.status === "failed" && report.error && (
+                  <p className="text-[12px] leading-4 text-destructive">{report.error}</p>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -193,8 +259,8 @@ export default function ReportsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+            <div className="space-y-1">
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">
                 Report Type
               </label>
               <Select value={selectedType} onValueChange={(value) => setSelectedType(value as ReportType)}>
@@ -224,6 +290,6 @@ export default function ReportsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

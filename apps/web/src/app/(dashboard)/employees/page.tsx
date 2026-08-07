@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from "@/services";
 import type { Employee, CreateEmployeeRequest } from "@/services";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chips";
+import { TextField } from "@/components/ui/text-field";
+import { Tooltip } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -25,6 +30,7 @@ import {
   AnimatedDialogDescription,
 } from "@/components/ui/animated-dialog";
 import { toast } from "sonner";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 type EmployeeRow = Employee & Record<string, unknown>;
 
@@ -96,28 +102,32 @@ export default function EmployeesPage() {
       key: "actions",
       header: "Actions",
       render: (row) => (
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEdit(row as Employee);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeleteId(row.id);
-            }}
-          >
-            Delete
-          </Button>
+        <div className="flex gap-1">
+          <Tooltip content="Edit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEdit(row as Employee);
+              }}
+            >
+              <Icon name="edit" size={18} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Delete">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteId(row.id);
+              }}
+            >
+              <Icon name="delete" size={18} />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
@@ -199,37 +209,57 @@ export default function EmployeesPage() {
 
   if (isError) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Employees</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Employees</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               View and manage employee records with status tracking.
             </p>
           </div>
         </AppBar>
-        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
-          <p className="text-sm text-destructive mb-4">
-            {error?.message || "Failed to load employee data"}
-          </p>
-          <Button onClick={() => refetch()}>Retry</Button>
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              {error?.message || "Failed to load employee data"}
+            </p>
+            <Button variant="outline" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Employees</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Employees</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             View and manage employee records with status tracking.
           </p>
         </div>
-        <Button onClick={openAdd}>Add Employee</Button>
+        <Button onClick={openAdd}>
+          <Icon name="person_add" size={18} />
+          Add Employee
+        </Button>
       </AppBar>
 
+      {/* Search + Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchBar
           className="max-w-sm flex-1"
@@ -240,36 +270,38 @@ export default function EmployeesPage() {
           }}
           placeholder="Search employees..."
         />
-        <Select
-          value={statusFilter}
-          onValueChange={(value) => {
-            setStatusFilter(value);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[180px]" aria-label="Filter by status">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((opt) => (
-              <SelectItem key={opt} value={opt}>
-                {opt === "ALL" ? "All Statuses" : opt.replace("_", " ")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2 flex-wrap">
+          {statusOptions.map((opt) => (
+            <Chip
+              key={opt}
+              variant="filter"
+              selected={statusFilter === opt}
+              onClick={() => {
+                setStatusFilter(opt);
+                setPage(1);
+              }}
+            >
+              {opt === "ALL" ? "All" : opt.replace("_", " ")}
+            </Chip>
+          ))}
+        </div>
       </div>
 
-      <DataTable<EmployeeRow>
-        columns={columns}
-        data={employees as EmployeeRow[]}
-        isLoading={isLoading}
-        pageSize={limit}
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        emptyMessage="No employees found"
-      />
+      {/* DataTable */}
+      <Card variant="outlined">
+        <CardContent className="p-0">
+          <DataTable<EmployeeRow>
+            columns={columns}
+            data={employees as EmployeeRow[]}
+            isLoading={isLoading}
+            pageSize={limit}
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            emptyMessage="No employees found"
+          />
+        </CardContent>
+      </Card>
 
       {/* Add Employee Dialog */}
       <AnimatedDialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -280,63 +312,49 @@ export default function EmployeesPage() {
               Create a new employee record in your organization.
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
-          <form onSubmit={handleAdd} className="space-y-3">
+          <form onSubmit={handleAdd} className="space-y-4">
+            <TextField
+              variant="outlined"
+              label="UIN"
+              required
+              value={formData.uin}
+              onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Person ID"
+              required
+              value={formData.personId}
+              onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Organization ID"
+              required
+              value={formData.organizationId}
+              onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Department ID"
+              value={formData.departmentId ?? ""}
+              onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Start Date"
+              type="date"
+              required
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            />
             <div className="space-y-1">
-              <Label htmlFor="add-uin">UIN</Label>
-              <Input
-                id="add-uin"
-                type="text"
-                required
-                value={formData.uin}
-                onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-personId">Person ID</Label>
-              <Input
-                id="add-personId"
-                type="text"
-                required
-                value={formData.personId}
-                onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-orgId">Organization ID</Label>
-              <Input
-                id="add-orgId"
-                type="text"
-                required
-                value={formData.organizationId}
-                onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-deptId">Department ID</Label>
-              <Input
-                id="add-deptId"
-                type="text"
-                value={formData.departmentId ?? ""}
-                onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-startDate">Start Date</Label>
-              <Input
-                id="add-startDate"
-                type="date"
-                required
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-status">Status</Label>
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Status</label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
               >
-                <SelectTrigger id="add-status">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -372,63 +390,49 @@ export default function EmployeesPage() {
               Update the employee&apos;s information.
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
-          <form onSubmit={handleEdit} className="space-y-3">
+          <form onSubmit={handleEdit} className="space-y-4">
+            <TextField
+              variant="outlined"
+              label="UIN"
+              required
+              value={formData.uin}
+              onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Person ID"
+              required
+              value={formData.personId}
+              onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Organization ID"
+              required
+              value={formData.organizationId}
+              onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Department ID"
+              value={formData.departmentId ?? ""}
+              onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Start Date"
+              type="date"
+              required
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            />
             <div className="space-y-1">
-              <Label htmlFor="edit-uin">UIN</Label>
-              <Input
-                id="edit-uin"
-                type="text"
-                required
-                value={formData.uin}
-                onChange={(e) => setFormData({ ...formData, uin: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-personId">Person ID</Label>
-              <Input
-                id="edit-personId"
-                type="text"
-                required
-                value={formData.personId}
-                onChange={(e) => setFormData({ ...formData, personId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-orgId">Organization ID</Label>
-              <Input
-                id="edit-orgId"
-                type="text"
-                required
-                value={formData.organizationId}
-                onChange={(e) => setFormData({ ...formData, organizationId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-deptId">Department ID</Label>
-              <Input
-                id="edit-deptId"
-                type="text"
-                value={formData.departmentId ?? ""}
-                onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-startDate">Start Date</Label>
-              <Input
-                id="edit-startDate"
-                type="date"
-                required
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-status">Status</Label>
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Status</label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
               >
-                <SelectTrigger id="edit-status">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -481,6 +485,6 @@ export default function EmployeesPage() {
           </AnimatedDialogFooter>
         </AnimatedDialogContent>
       </AnimatedDialog>
-    </div>
+    </motion.div>
   );
 }

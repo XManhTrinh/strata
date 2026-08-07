@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Badge } from "@strata/ui";
+import { motion } from "motion/react";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chips";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TextField } from "@/components/ui/text-field";
 import {
   Select,
   SelectContent,
@@ -31,6 +35,7 @@ import {
   type OrganizationUnit,
 } from "@/services";
 import { useOrgUnitTypes, COMPANY_ID } from "@/services";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 interface OrgTreeNode {
   id: string;
@@ -45,7 +50,6 @@ interface OrgTreeNode {
 function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
   const nodeMap = new Map<string, OrgTreeNode>();
 
-  // Create all nodes first
   for (const unit of units) {
     nodeMap.set(unit.id, {
       id: unit.id,
@@ -58,7 +62,6 @@ function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
     });
   }
 
-  // Build parent-child relationships
   const roots: OrgTreeNode[] = [];
   for (const node of nodeMap.values()) {
     if (node.parentId && nodeMap.has(node.parentId)) {
@@ -102,56 +105,47 @@ function TreeNode({
   return (
     <div>
       <div
-        className="group flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/50 transition-colors"
+        className="group flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-foreground/8 transition-colors"
         style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         {hasChildren ? (
           <Button
             variant="ghost"
             size="icon"
-            className="h-5 w-5 text-muted-foreground"
+            className="h-8 w-8"
             onClick={() => setExpanded(!expanded)}
             aria-label={expanded ? "Collapse" : "Expand"}
           >
-            <span className="text-xs">{expanded ? "▼" : "▶"}</span>
+            <Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />
           </Button>
         ) : (
-          <span className="inline-block h-5 w-5" />
+          <span className="inline-flex items-center justify-center h-8 w-8">
+            <Icon name="remove" size={18} className="text-muted-foreground/40" />
+          </span>
         )}
 
         <div className="flex flex-1 items-center gap-3">
-          <span className="font-medium text-foreground">{unit.name}</span>
-          <Badge variant="default">
-            <span style={{ color: unit.typeColor }}>●</span>
-            <span className="ml-1">{unit.typeName}</span>
-          </Badge>
+          <Icon name="folder" size={18} className="text-primary" />
+          <span className="text-[14px] leading-5 font-medium text-foreground">{unit.name}</span>
+          <Chip variant="assist">{unit.typeName}</Chip>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => onEdit(unit)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => onAddChild(unit.id)}
-          >
-            Add Child
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => onArchive(unit.id)}
-          >
-            Archive
-          </Button>
+          <Tooltip content="Edit">
+            <Button variant="ghost" size="icon" onClick={() => onEdit(unit)}>
+              <Icon name="edit" size={18} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Add child">
+            <Button variant="ghost" size="icon" onClick={() => onAddChild(unit.id)}>
+              <Icon name="add" size={18} className="text-primary" />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Archive">
+            <Button variant="ghost" size="icon" onClick={() => onArchive(unit.id)}>
+              <Icon name="archive" size={18} />
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
@@ -257,36 +251,53 @@ export default function OrgStructurePage() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Organization Structure</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Structure</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Build and manage your organization&apos;s hierarchical structure.
             </p>
           </div>
         </AppBar>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          Failed to load organization structure. Please try again.
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              Failed to load organization structure. Please try again.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Organization Structure</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Structure</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Build and manage your organization&apos;s hierarchical structure.
           </p>
         </div>
         <Button onClick={() => openCreate()}>
+          <Icon name="add" size={18} />
           Create Unit
         </Button>
       </AppBar>
 
+      {/* Search */}
       <SearchBar
         className="max-w-sm"
         value={search}
@@ -294,34 +305,39 @@ export default function OrgStructurePage() {
         placeholder="Search units..."
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <span className="text-sm text-muted-foreground">Loading...</span>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-border bg-background">
-          <div className="border-b border-border px-4 py-3">
-            <span className="text-sm font-medium text-muted-foreground">Organization Hierarchy</span>
-          </div>
-          <div className="py-2">
-            {filteredTree.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+      {/* Tree */}
+      <Card variant="outlined">
+        <CardContent className="p-2">
+          {isLoading ? (
+            <div className="space-y-3 p-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3" style={{ paddingLeft: `${(i % 3) * 24}px` }}>
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-6 w-16 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          ) : filteredTree.length === 0 ? (
+            <div className="flex flex-col items-center py-12 text-center">
+              <Icon name="account_tree" size={40} className="text-muted-foreground/40 mb-2" />
+              <p className="text-[14px] leading-5 text-muted-foreground">
                 No organization units found
-              </div>
-            ) : (
-              filteredTree.map((unit) => (
-                <TreeNode
-                  key={unit.id}
-                  unit={unit}
-                  onEdit={openEdit}
-                  onArchive={handleArchive}
-                  onAddChild={(parentId) => openCreate(parentId)}
-                />
-              ))
-            )}
-          </div>
-        </div>
-      )}
+              </p>
+            </div>
+          ) : (
+            filteredTree.map((unit) => (
+              <TreeNode
+                key={unit.id}
+                unit={unit}
+                onEdit={openEdit}
+                onArchive={handleArchive}
+                onAddChild={(parentId) => openCreate(parentId)}
+              />
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {/* Create/Edit Modal */}
       <AnimatedDialog open={showModal} onOpenChange={setShowModal}>
@@ -337,23 +353,20 @@ export default function OrgStructurePage() {
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="unit-name">Name</Label>
-              <Input
-                id="unit-name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Engineering"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="unit-type">Type</Label>
+            <TextField
+              variant="outlined"
+              label="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Engineering"
+            />
+            <div className="space-y-1">
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Type</label>
               <Select
                 value={formData.typeId}
                 onValueChange={(value) => setFormData({ ...formData, typeId: value })}
               >
-                <SelectTrigger id="unit-type">
+                <SelectTrigger>
                   <SelectValue placeholder="Select a type..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -365,13 +378,13 @@ export default function OrgStructurePage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="unit-parent">Parent Unit</Label>
+            <div className="space-y-1">
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Parent Unit</label>
               <Select
                 value={formData.parentId || "none"}
                 onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
               >
-                <SelectTrigger id="unit-parent">
+                <SelectTrigger>
                   <SelectValue placeholder="None (root level)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -402,6 +415,6 @@ export default function OrgStructurePage() {
           </AnimatedDialogFooter>
         </AnimatedDialogContent>
       </AnimatedDialog>
-    </div>
+    </motion.div>
   );
 }

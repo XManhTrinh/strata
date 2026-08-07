@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
 import { Card, CardContent } from "@/components/ui/card";
+import { List, ListItem } from "@/components/ui/list";
+import { Icon } from "@/components/ui/icon";
+import { Divider } from "@/components/ui/divider";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 interface SettingsCard {
   title: string;
@@ -19,7 +24,7 @@ const settingsCards: SettingsCard[] = [
     title: "Organization Unit Types",
     description: "Define and manage the types of organizational units (departments, tribes, squads, etc.)",
     href: "/settings/org-unit-types",
-    icon: "🏷️",
+    icon: "label",
     feature: "authorization",
     permission: "manage_org_structure",
   },
@@ -27,7 +32,7 @@ const settingsCards: SettingsCard[] = [
     title: "Organization Structure",
     description: "Build and manage your organization's hierarchical structure",
     href: "/settings/org-structure",
-    icon: "🏢",
+    icon: "corporate_fare",
     feature: "authorization",
     permission: "manage_org_structure",
   },
@@ -35,7 +40,7 @@ const settingsCards: SettingsCard[] = [
     title: "Positions",
     description: "Configure positions with career levels and reporting capabilities",
     href: "/settings/positions",
-    icon: "💼",
+    icon: "work",
     feature: "authorization",
     permission: "manage_positions",
   },
@@ -43,7 +48,7 @@ const settingsCards: SettingsCard[] = [
     title: "Roles & Permissions",
     description: "Manage roles and assign feature-level permissions with scope control",
     href: "/settings/roles",
-    icon: "🔐",
+    icon: "admin_panel_settings",
     feature: "authorization",
     permission: "manage_roles",
   },
@@ -51,7 +56,7 @@ const settingsCards: SettingsCard[] = [
     title: "Features",
     description: "View registered features and control which are enabled for your organization",
     href: "/settings/features",
-    icon: "⚙️",
+    icon: "toggle_on",
     feature: "authorization",
     permission: "manage_features",
   },
@@ -65,37 +70,46 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar>
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Settings</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Settings</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Platform configuration and preferences.
           </p>
         </div>
       </AppBar>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {visibleCards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className="group"
-          >
-            <Card variant="outlined" className="h-full p-6 transition-colors hover:border-primary/50">
-              <CardContent className="p-0">
-                <div className="mb-3 text-2xl">{card.icon}</div>
-                <h2 className="text-base font-semibold text-foreground group-hover:text-primary">
-                  {card.title}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {card.description}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    </div>
+      {/* Settings List */}
+      <Card variant="elevated">
+        <CardContent className="p-0">
+          <List dividers>
+            {visibleCards.map((card) => (
+              <Link key={card.href} href={card.href}>
+                <ListItem
+                  lines={2}
+                  headline={card.title}
+                  supportingText={card.description}
+                  leadingContent={
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
+                      <Icon name={card.icon} size={24} className="text-primary" />
+                    </div>
+                  }
+                  trailingIcon="chevron_right"
+                />
+              </Link>
+            ))}
+          </List>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

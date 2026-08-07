@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
 import {
   useOrgUnits,
@@ -9,9 +10,12 @@ import {
 } from "@/services/organizations.service";
 import { COMPANY_ID } from "@/services/admin.service";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Chip } from "@/components/ui/chips";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TextField } from "@/components/ui/text-field";
 import {
   Select,
   SelectTrigger,
@@ -27,6 +31,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 // ─── Tree building ────────────────────────────────────────────────────────────
 
@@ -38,12 +43,10 @@ function buildTree(units: OrganizationUnit[]): OrgUnitNode[] {
   const map = new Map<string, OrgUnitNode>();
   const roots: OrgUnitNode[] = [];
 
-  // Initialize all nodes
   for (const unit of units) {
     map.set(unit.id, { ...unit, children: [] });
   }
 
-  // Build parent-child relationships
   for (const unit of units) {
     const node = map.get(unit.id)!;
     if (unit.parentId && map.has(unit.parentId)) {
@@ -56,24 +59,15 @@ function buildTree(units: OrganizationUnit[]): OrgUnitNode[] {
   return roots;
 }
 
-// ─── Type badge colors ────────────────────────────────────────────────────────
+// ─── Type icon mapping ────────────────────────────────────────────────────────
 
-const TYPE_COLORS: Record<string, string> = {
-  Division: "bg-blue-900/30 text-blue-400 border-blue-700",
-  Department: "bg-blue-500/20 text-blue-300 border-blue-600",
-  Tribe: "bg-purple-500/20 text-purple-300 border-purple-600",
-  Cluster: "bg-amber-500/20 text-amber-300 border-amber-600",
-  Squad: "bg-emerald-500/20 text-emerald-300 border-emerald-600",
+const TYPE_ICONS: Record<string, string> = {
+  Division: "domain",
+  Department: "apartment",
+  Tribe: "hub",
+  Cluster: "workspaces",
+  Squad: "group_work",
 };
-
-function TypeBadge({ typeName }: { typeName: string }) {
-  const colorClasses = TYPE_COLORS[typeName] ?? "bg-muted text-muted-foreground border-border";
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${colorClasses}`}>
-      {typeName}
-    </span>
-  );
-}
 
 // ─── Tree node component ──────────────────────────────────────────────────────
 
@@ -93,12 +87,13 @@ function OrgUnitTreeNode({
   const hasChildren = node.children.length > 0;
   const isExpanded = expanded.has(node.id);
   const typeName = node.type?.name ?? "";
+  const typeIcon = TYPE_ICONS[typeName] ?? "folder";
 
   return (
     <div>
       <div
-        className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/30 transition-colors group"
-        style={{ paddingLeft: `${depth * 20 + 12}px` }}
+        className="group flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-foreground/8 transition-colors"
+        style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         <div className="flex items-center gap-2">
           {hasChildren ? (
@@ -106,27 +101,33 @@ function OrgUnitTreeNode({
               variant="ghost"
               size="icon"
               onClick={() => onToggle(node.id)}
-              className="h-5 w-5 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 w-8"
               aria-expanded={isExpanded}
               aria-label={isExpanded ? `Collapse ${node.name}` : `Expand ${node.name}`}
             >
-              {isExpanded ? "▼" : "▶"}
+              <Icon name={isExpanded ? "expand_more" : "chevron_right"} size={20} />
             </Button>
           ) : (
-            <span className="w-5 text-center text-xs text-muted-foreground">•</span>
+            <span className="flex w-8 h-8 items-center justify-center">
+              <Icon name="remove" size={18} className="text-muted-foreground/40" />
+            </span>
           )}
-          <span className="text-sm font-medium text-foreground">{node.name}</span>
-          <TypeBadge typeName={typeName} />
+          <Icon name={typeIcon} size={20} className="text-primary" />
+          <span className="text-[14px] leading-5 font-medium text-foreground">{node.name}</span>
+          <Chip variant="assist">{typeName}</Chip>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onAdd(node.id)}
-          className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-all"
-          aria-label={`Add child unit under ${node.name}`}
-        >
-          + Add
-        </Button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <Tooltip content="Add child unit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onAdd(node.id)}
+              aria-label={`Add child unit under ${node.name}`}
+            >
+              <Icon name="add" size={18} className="text-primary" />
+            </Button>
+          </Tooltip>
+        </div>
       </div>
       {isExpanded && hasChildren && (
         <div>
@@ -170,7 +171,6 @@ export default function EngineeringPage() {
     return buildTree(orgUnits);
   }, [orgUnits]);
 
-  // Get available org unit types from the fetched data
   const orgUnitTypes = useMemo(() => {
     if (!orgUnits) return [];
     const typeMap = new Map<string, { id: string; name: string }>();
@@ -236,21 +236,27 @@ export default function EngineeringPage() {
 
   if (isError) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Engineering</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Organization structure — Departments, Tribes, Clusters, and Squads.
             </p>
           </div>
         </AppBar>
-        <Card variant="filled">
-          <CardContent className="flex flex-col items-center justify-center p-8">
-            <p className="text-sm text-destructive mb-4">
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
               {error?.message || "Failed to load organization data"}
             </p>
-            <Button onClick={() => refetch()}>Retry</Button>
+            <Button variant="outline" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -259,56 +265,72 @@ export default function EngineeringPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Engineering</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Organization structure — Departments, Tribes, Clusters, and Squads.
             </p>
           </div>
         </AppBar>
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-4">
-                <div className="h-5 w-48 rounded bg-muted mb-2" />
-                <div className="h-4 w-24 rounded bg-muted" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card variant="outlined">
+          <CardContent className="space-y-4 p-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3" style={{ paddingLeft: `${(i % 3) * 24}px` }}>
+                <Skeleton className="h-5 w-5 rounded" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-6 w-16 rounded-lg" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Engineering</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Organization structure — Departments, Tribes, Clusters, and Squads.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={expandAll}>
+          <Button variant="outline" onClick={expandAll}>
+            <Icon name="unfold_more" size={18} />
             Expand All
           </Button>
-          <Button variant="outline" size="sm" onClick={collapseAll}>
+          <Button variant="outline" onClick={collapseAll}>
+            <Icon name="unfold_less" size={18} />
             Collapse All
           </Button>
-          <Button size="sm" onClick={() => handleAdd(null)}>
+          <Button onClick={() => handleAdd(null)}>
+            <Icon name="add" size={18} />
             Add Root Unit
           </Button>
         </div>
       </AppBar>
 
-      <Card variant="outlined" className="py-2">
-        <CardContent className="p-0">
+      {/* Tree */}
+      <Card variant="outlined">
+        <CardContent className="p-2">
           {tree.length === 0 ? (
-            <div className="text-sm text-muted-foreground text-center p-8">
-              No organization units found. Create one to get started.
+            <div className="flex flex-col items-center py-12 text-center">
+              <Icon name="account_tree" size={40} className="text-muted-foreground/40 mb-2" />
+              <p className="text-[14px] leading-5 text-muted-foreground">
+                No organization units found. Create one to get started.
+              </p>
             </div>
           ) : (
             tree.map((node) => (
@@ -332,25 +354,22 @@ export default function EngineeringPage() {
               {addParentId ? "Add Child Unit" : "Add Root Unit"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmitAdd} className="space-y-3">
+          <form onSubmit={handleSubmitAdd} className="space-y-4">
+            <TextField
+              variant="outlined"
+              label="Name"
+              required
+              value={newUnitName}
+              onChange={(e) => setNewUnitName(e.target.value)}
+              placeholder="Enter unit name"
+            />
             <div className="space-y-1">
-              <Label htmlFor="unit-name">Name</Label>
-              <Input
-                id="unit-name"
-                type="text"
-                required
-                value={newUnitName}
-                onChange={(e) => setNewUnitName(e.target.value)}
-                placeholder="Enter unit name"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="unit-type">Type</Label>
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Type</label>
               <Select
                 value={newUnitTypeId}
                 onValueChange={setNewUnitTypeId}
               >
-                <SelectTrigger id="unit-type">
+                <SelectTrigger>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -377,6 +396,6 @@ export default function EngineeringPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

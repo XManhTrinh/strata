@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
+import { TextField } from "@/components/ui/text-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +29,7 @@ import {
   COMPANY_ID,
   type AdminOrgUnitType,
 } from "@/services";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 type OrgUnitTypeRow = AdminOrgUnitType & Record<string, unknown>;
 
@@ -32,7 +37,7 @@ export default function OrgUnitTypesPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingType, setEditingType] = useState<AdminOrgUnitType | null>(null);
-  const [formData, setFormData] = useState({ name: "", description: "", icon: "🏢", color: "#3B82F6" });
+  const [formData, setFormData] = useState({ name: "", description: "", icon: "corporate_fare", color: "#3B82F6" });
 
   const { data: orgUnitTypes = [], isLoading, error } = useOrgUnitTypes(COMPANY_ID);
   const createMutation = useCreateOrgUnitType();
@@ -48,7 +53,7 @@ export default function OrgUnitTypesPage() {
 
   const openCreate = () => {
     setEditingType(null);
-    setFormData({ name: "", description: "", icon: "🏢", color: "#3B82F6" });
+    setFormData({ name: "", description: "", icon: "corporate_fare", color: "#3B82F6" });
     setShowModal(true);
   };
 
@@ -57,7 +62,7 @@ export default function OrgUnitTypesPage() {
     setFormData({
       name: type.name,
       description: type.description || "",
-      icon: type.icon || "🏢",
+      icon: type.icon || "corporate_fare",
       color: type.color || "#3B82F6",
     });
     setShowModal(true);
@@ -119,23 +124,34 @@ export default function OrgUnitTypesPage() {
       header: "Name",
       sortable: true,
       render: (row) => (
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{row.icon || "🏢"}</span>
-          <span className="font-medium">{row.name}</span>
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center h-8 w-8 rounded-full"
+            style={{ backgroundColor: `${row.color || "#3B82F6"}20` }}
+          >
+            <span style={{ color: row.color || "#3B82F6" }}>
+              <Icon name={row.icon || "corporate_fare"} size={18} />
+            </span>
+          </div>
+          <span className="text-[14px] font-medium text-foreground">{row.name}</span>
         </div>
       ),
     },
-    { key: "description", header: "Description", render: (row) => <span>{row.description || "—"}</span> },
+    {
+      key: "description",
+      header: "Description",
+      render: (row) => <span className="text-[14px] text-muted-foreground">{row.description || "—"}</span>,
+    },
     {
       key: "color",
       header: "Color",
       render: (row) => (
         <div className="flex items-center gap-2">
           <span
-            className="inline-block h-4 w-4 rounded-full border border-border"
+            className="inline-block h-4 w-4 rounded-full border border-outline-variant"
             style={{ backgroundColor: row.color || "#3B82F6" }}
           />
-          <span className="text-xs text-muted-foreground">{row.color || "—"}</span>
+          <span className="text-[12px] text-muted-foreground">{row.color || "—"}</span>
         </div>
       ),
     },
@@ -154,32 +170,34 @@ export default function OrgUnitTypesPage() {
       header: "",
       render: (row) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEdit(row);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (row.archived) {
-                handleRestore(row.id);
-              } else {
-                handleArchive(row.id);
-              }
-            }}
-          >
-            {row.archived ? "Restore" : "Archive"}
-          </Button>
+          <Tooltip content="Edit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEdit(row);
+              }}
+            >
+              <Icon name="edit" size={18} />
+            </Button>
+          </Tooltip>
+          <Tooltip content={row.archived ? "Restore" : "Archive"}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (row.archived) {
+                  handleRestore(row.id);
+                } else {
+                  handleArchive(row.id);
+                }
+              }}
+            >
+              <Icon name={row.archived ? "unarchive" : "archive"} size={18} />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
@@ -187,36 +205,53 @@ export default function OrgUnitTypesPage() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Organization Unit Types</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Unit Types</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Define the types of organizational units used in your company structure.
             </p>
           </div>
         </AppBar>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          Failed to load org unit types. Please try again.
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              Failed to load org unit types. Please try again.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Organization Unit Types</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Unit Types</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Define the types of organizational units used in your company structure.
           </p>
         </div>
         <Button onClick={openCreate}>
+          <Icon name="add" size={18} />
           Create Type
         </Button>
       </AppBar>
 
+      {/* Search */}
       <SearchBar
         className="max-w-sm"
         value={search}
@@ -224,19 +259,26 @@ export default function OrgUnitTypesPage() {
         placeholder="Search types..."
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <span className="text-sm text-muted-foreground">Loading...</span>
-        </div>
-      ) : (
-        <DataTable<OrgUnitTypeRow>
-          columns={columns}
-          data={filteredTypes as OrgUnitTypeRow[]}
-          pageSize={10}
-          emptyMessage="No organization unit types found"
-          onRowClick={openEdit}
-        />
-      )}
+      {/* DataTable */}
+      <Card variant="outlined">
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <DataTable<OrgUnitTypeRow>
+              columns={columns}
+              data={filteredTypes as OrgUnitTypeRow[]}
+              pageSize={10}
+              emptyMessage="No organization unit types found"
+              onRowClick={openEdit}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Create/Edit Dialog */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
@@ -252,44 +294,34 @@ export default function OrgUnitTypesPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="type-name">Name</Label>
-              <Input
-                id="type-name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Department"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="type-description">Description</Label>
-              <Input
-                id="type-description"
-                type="text"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description"
-              />
-            </div>
+            <TextField
+              variant="outlined"
+              label="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Department"
+            />
+            <TextField
+              variant="outlined"
+              label="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Brief description"
+            />
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="type-icon">Icon</Label>
-                <Input
-                  id="type-icon"
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="type-color">Color</Label>
+              <TextField
+                variant="outlined"
+                label="Icon (Material Symbol)"
+                value={formData.icon}
+                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+              />
+              <div className="space-y-1">
+                <label className="text-[12px] leading-4 text-surface-variant-foreground">Color</label>
                 <input
-                  id="type-color"
                   type="color"
                   value={formData.color}
                   onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  className="h-10 w-full cursor-pointer rounded-xl border border-input bg-background"
+                  className="h-14 w-full cursor-pointer rounded-xl border border-outline bg-transparent"
                 />
               </div>
             </div>
@@ -311,6 +343,6 @@ export default function OrgUnitTypesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Divider } from "@/components/ui/divider";
 import {
   Table,
   TableHeader,
@@ -15,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useFeatures, useToggleFeature, COMPANY_ID, type CompanyFeature } from "@/services";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 interface FeatureRow {
   id: string;
@@ -86,9 +92,12 @@ export default function FeaturesPage() {
       header: "Feature",
       sortable: true,
       render: (row) => (
-        <div>
-          <span className="font-medium text-foreground">{row.displayName}</span>
-          <span className="ml-2 text-xs text-muted-foreground">({row.key})</span>
+        <div className="flex items-center gap-2">
+          <Icon name="extension" size={18} className="text-primary" />
+          <div>
+            <span className="text-[14px] font-medium text-foreground">{row.displayName}</span>
+            <span className="ml-2 text-[12px] text-muted-foreground">({row.key})</span>
+          </div>
         </div>
       ),
     },
@@ -98,7 +107,7 @@ export default function FeaturesPage() {
       header: "Permissions",
       sortable: true,
       render: (row) => (
-        <span className="text-muted-foreground">{row.permissionsCount}</span>
+        <span className="text-[14px] text-muted-foreground">{row.permissionsCount}</span>
       ),
     },
     {
@@ -121,53 +130,76 @@ export default function FeaturesPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Features</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Features</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               View registered features and control which are enabled for your organization.
             </p>
           </div>
         </AppBar>
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
+        <Card variant="outlined">
+          <CardContent className="p-6 space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-5 w-5 rounded" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 flex-1" />
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Features</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Features</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               View registered features and control which are enabled for your organization.
             </p>
           </div>
         </AppBar>
-        <div className="flex items-center justify-center py-20">
-          <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
-            Failed to load features. Please try again later.
-          </p>
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              Failed to load features. Please try again later.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar>
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Features</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Features</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             View registered features and control which are enabled for your organization.
           </p>
         </div>
       </AppBar>
 
+      {/* Search */}
       <SearchBar
         className="max-w-sm"
         value={search}
@@ -175,59 +207,70 @@ export default function FeaturesPage() {
         placeholder="Search features..."
       />
 
-      <DataTable<FeatureRow>
-        columns={columns}
-        data={filteredFeatures}
-        pageSize={10}
-        emptyMessage="No features found"
-        onRowClick={(row) =>
-          setExpandedFeatureId(expandedFeatureId === row.id ? null : row.id)
-        }
-      />
+      {/* DataTable */}
+      <Card variant="outlined">
+        <CardContent className="p-0">
+          <DataTable<FeatureRow>
+            columns={columns}
+            data={filteredFeatures}
+            pageSize={10}
+            emptyMessage="No features found"
+            onRowClick={(row) =>
+              setExpandedFeatureId(expandedFeatureId === row.id ? null : row.id)
+            }
+          />
+        </CardContent>
+      </Card>
 
       {/* Feature Detail Panel */}
       {expandedFeatureId && (
-        <div className="rounded-lg border border-border bg-background p-4">
-          {(() => {
-            const feature = features.find((f) => f.id === expandedFeatureId);
-            if (!feature) return null;
-            return (
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-semibold text-foreground">
-                    {feature.displayName} — Permissions
-                  </h3>
-                  <Badge variant={feature.enabled ? "success" : "default"}>
-                    {feature.enabled ? "Enabled" : "Disabled"}
-                  </Badge>
+        <Card variant="elevated">
+          <CardContent className="p-6">
+            {(() => {
+              const feature = features.find((f) => f.id === expandedFeatureId);
+              if (!feature) return null;
+              return (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[16px] leading-6 font-medium text-foreground flex items-center gap-2">
+                      <Icon name="key" size={20} className="text-primary" />
+                      {feature.displayName} — Permissions
+                    </h3>
+                    <Badge variant={feature.enabled ? "success" : "default"}>
+                      {feature.enabled ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <Divider />
+                  <Card variant="outlined">
+                    <CardContent className="p-0">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Key</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Description</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {feature.permissions.map((perm) => (
+                            <TableRow key={perm.key}>
+                              <TableCell className="font-mono text-[12px] text-muted-foreground">
+                                {feature.key}:{perm.key}
+                              </TableCell>
+                              <TableCell className="text-foreground">{perm.displayName}</TableCell>
+                              <TableCell className="text-muted-foreground">{perm.description}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
                 </div>
-                <div className="mt-3 rounded-md border border-border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Key</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Description</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {feature.permissions.map((perm) => (
-                        <TableRow key={perm.key}>
-                          <TableCell className="font-mono text-xs text-muted-foreground">
-                            {feature.key}:{perm.key}
-                          </TableCell>
-                          <TableCell className="text-foreground">{perm.displayName}</TableCell>
-                          <TableCell className="text-muted-foreground">{perm.description}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </motion.div>
   );
 }

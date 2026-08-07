@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DataTable, type Column } from "@strata/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { usePeople, useCreatePerson, useUpdatePerson, useDeletePerson } from "@/services";
 import type { Person, CreatePersonRequest } from "@/services";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
+import { TextField } from "@/components/ui/text-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   AnimatedDialog,
   AnimatedDialogContent,
@@ -18,6 +22,7 @@ import {
   AnimatedDialogDescription,
 } from "@/components/ui/animated-dialog";
 import { toast } from "sonner";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 type PersonRow = Person & Record<string, unknown>;
 
@@ -61,28 +66,32 @@ export default function PeoplePage() {
       key: "actions",
       header: "Actions",
       render: (row) => (
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEdit(row as Person);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeleteId(row.id);
-            }}
-          >
-            Delete
-          </Button>
+        <div className="flex gap-1">
+          <Tooltip content="Edit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEdit(row as Person);
+              }}
+            >
+              <Icon name="edit" size={18} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Delete">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteId(row.id);
+              }}
+            >
+              <Icon name="delete" size={18} />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
@@ -156,37 +165,57 @@ export default function PeoplePage() {
 
   if (isError) {
     return (
-      <div className="space-y-4">
-        <AppBar className="justify-between">
+      <div className="space-y-8">
+        <AppBar>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">People</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">People</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Manage people records across your organization.
             </p>
           </div>
         </AppBar>
-        <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-8">
-          <p className="text-sm text-destructive mb-4">
-            {error?.message || "Failed to load people data"}
-          </p>
-          <Button onClick={() => refetch()}>Retry</Button>
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              {error?.message || "Failed to load people data"}
+            </p>
+            <Button variant="outline" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">People</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">People</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Manage people records across your organization.
           </p>
         </div>
-        <Button onClick={openAdd}>Add Person</Button>
+        <Button onClick={openAdd}>
+          <Icon name="person_add" size={18} />
+          Add Person
+        </Button>
       </AppBar>
 
+      {/* Search */}
       <SearchBar
         className="max-w-sm"
         value={search}
@@ -197,16 +226,21 @@ export default function PeoplePage() {
         placeholder="Search people..."
       />
 
-      <DataTable<PersonRow>
-        columns={columns}
-        data={people as PersonRow[]}
-        isLoading={isLoading}
-        pageSize={pageSize}
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        emptyMessage="No people found"
-      />
+      {/* DataTable */}
+      <Card variant="outlined">
+        <CardContent className="p-0">
+          <DataTable<PersonRow>
+            columns={columns}
+            data={people as PersonRow[]}
+            isLoading={isLoading}
+            pageSize={pageSize}
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            emptyMessage="No people found"
+          />
+        </CardContent>
+      </Card>
 
       {/* Add Person Dialog */}
       <AnimatedDialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -217,55 +251,43 @@ export default function PeoplePage() {
               Create a new person record in your organization.
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
-          <form onSubmit={handleAdd} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="add-fullName">Full Name</Label>
-              <Input
-                id="add-fullName"
-                type="text"
-                required
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-email">Email</Label>
-              <Input
-                id="add-email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-phone">Phone</Label>
-              <Input
-                id="add-phone"
-                type="tel"
-                value={formData.phone ?? ""}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-address">Address</Label>
-              <Input
-                id="add-address"
-                type="text"
-                value={formData.address ?? ""}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="add-dob">Date of Birth</Label>
-              <Input
-                id="add-dob"
-                type="date"
-                required
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-              />
-            </div>
+          <form onSubmit={handleAdd} className="space-y-4">
+            <TextField
+              variant="outlined"
+              label="Full Name"
+              required
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Phone"
+              type="tel"
+              value={formData.phone ?? ""}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Address"
+              value={formData.address ?? ""}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Date of Birth"
+              type="date"
+              required
+              value={formData.dateOfBirth}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            />
             <AnimatedDialogFooter className="mt-4">
               <Button
                 type="button"
@@ -291,55 +313,43 @@ export default function PeoplePage() {
               Update the person&apos;s information.
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
-          <form onSubmit={handleEdit} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="edit-fullName">Full Name</Label>
-              <Input
-                id="edit-fullName"
-                type="text"
-                required
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-phone">Phone</Label>
-              <Input
-                id="edit-phone"
-                type="tel"
-                value={formData.phone ?? ""}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-address">Address</Label>
-              <Input
-                id="edit-address"
-                type="text"
-                value={formData.address ?? ""}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-dob">Date of Birth</Label>
-              <Input
-                id="edit-dob"
-                type="date"
-                required
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-              />
-            </div>
+          <form onSubmit={handleEdit} className="space-y-4">
+            <TextField
+              variant="outlined"
+              label="Full Name"
+              required
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Phone"
+              type="tel"
+              value={formData.phone ?? ""}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Address"
+              value={formData.address ?? ""}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+            <TextField
+              variant="outlined"
+              label="Date of Birth"
+              type="date"
+              required
+              value={formData.dateOfBirth}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+            />
             <AnimatedDialogFooter className="mt-4">
               <Button
                 type="button"
@@ -382,6 +392,6 @@ export default function PeoplePage() {
           </AnimatedDialogFooter>
         </AnimatedDialogContent>
       </AnimatedDialog>
-    </div>
+    </motion.div>
   );
 }

@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import { DataTable, Badge, type Column } from "@strata/ui";
 import { SearchBar } from "@/components/ui/search-bar";
 import { AppBar } from "@/components/layout/app-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Icon } from "@/components/ui/icon";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TextField } from "@/components/ui/text-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -33,6 +37,7 @@ import {
   COMPANY_ID,
   type AdminPosition,
 } from "@/services";
+import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 type PositionRow = AdminPosition & Record<string, unknown>;
 
@@ -141,19 +146,22 @@ export default function PositionsPage() {
       header: "Career Level",
       sortable: true,
       render: (row) => (
-        <span className="inline-flex items-center gap-1">
-          <span className="text-sm font-medium text-foreground">
-            {row.careerLevel != null ? `L${row.careerLevel}` : "—"}
-          </span>
+        <span className="text-[14px] font-medium text-foreground">
+          {row.careerLevel != null ? `L${row.careerLevel}` : "—"}
         </span>
       ),
     },
     {
       key: "canHaveDirectReports",
-      header: "Can Have Direct Reports",
+      header: "Direct Reports",
       render: (row) => (
-        <span className={`text-sm ${row.canHaveDirectReports ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
-          {row.canHaveDirectReports ? "✓ Yes" : "— No"}
+        <span className="flex items-center gap-1">
+          <Icon
+            name={row.canHaveDirectReports ? "check_circle" : "remove_circle_outline"}
+            size={18}
+            className={row.canHaveDirectReports ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}
+          />
+          <span className="text-[14px]">{row.canHaveDirectReports ? "Yes" : "No"}</span>
         </span>
       ),
     },
@@ -172,41 +180,45 @@ export default function PositionsPage() {
       header: "",
       render: (row) => (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              openEdit(row);
-            }}
-          >
-            Edit
-          </Button>
+          <Tooltip content="Edit">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEdit(row);
+              }}
+            >
+              <Icon name="edit" size={18} />
+            </Button>
+          </Tooltip>
           {row.archived ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(row.id);
-              }}
-            >
-              Delete
-            </Button>
+            <Tooltip content="Delete permanently">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(row.id);
+                }}
+              >
+                <Icon name="delete_forever" size={18} />
+              </Button>
+            </Tooltip>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleArchive(row.id);
-              }}
-            >
-              Archive
-            </Button>
+            <Tooltip content="Archive">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleArchive(row.id);
+                }}
+              >
+                <Icon name="archive" size={18} />
+              </Button>
+            </Tooltip>
           )}
         </div>
       ),
@@ -215,36 +227,53 @@ export default function PositionsPage() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-8">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Positions</h1>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-[22px] leading-7 font-normal text-foreground">Positions</h1>
+            <p className="text-[14px] leading-5 text-muted-foreground">
               Configure positions with career levels and reporting capabilities.
             </p>
           </div>
         </AppBar>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          Failed to load positions. Please try again.
-        </div>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-destructive" />
+            </div>
+            <p className="text-[14px] leading-5 text-destructive mb-6">
+              Failed to load positions. Please try again.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-8"
+      variants={pageTransitionVariants}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">Positions</h1>
-          <p className="text-xs text-muted-foreground">
+          <h1 className="text-[22px] leading-7 font-normal text-foreground">Positions</h1>
+          <p className="text-[14px] leading-5 text-muted-foreground">
             Configure positions with career levels and reporting capabilities.
           </p>
         </div>
         <Button onClick={openCreate}>
+          <Icon name="add" size={18} />
           Create Position
         </Button>
       </AppBar>
 
+      {/* Search */}
       <SearchBar
         className="max-w-sm"
         value={search}
@@ -252,19 +281,26 @@ export default function PositionsPage() {
         placeholder="Search positions..."
       />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <span className="text-sm text-muted-foreground">Loading...</span>
-        </div>
-      ) : (
-        <DataTable<PositionRow>
-          columns={columns}
-          data={filteredPositions as PositionRow[]}
-          pageSize={10}
-          emptyMessage="No positions found"
-          onRowClick={openEdit}
-        />
-      )}
+      {/* DataTable */}
+      <Card variant="outlined">
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <DataTable<PositionRow>
+              columns={columns}
+              data={filteredPositions as PositionRow[]}
+              pageSize={10}
+              emptyMessage="No positions found"
+              onRowClick={openEdit}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Create/Edit Position Dialog */}
       <AnimatedDialog open={showModal} onOpenChange={setShowModal}>
@@ -280,33 +316,27 @@ export default function PositionsPage() {
             </AnimatedDialogDescription>
           </AnimatedDialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="pos-name">Name</Label>
-              <Input
-                id="pos-name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Senior Engineer"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pos-description">Description</Label>
-              <Input
-                id="pos-description"
-                type="text"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Role description"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pos-level">Career Level</Label>
+            <TextField
+              variant="outlined"
+              label="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Senior Engineer"
+            />
+            <TextField
+              variant="outlined"
+              label="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Role description"
+            />
+            <div className="space-y-1">
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Career Level</label>
               <Select
                 value={String(formData.careerLevel)}
                 onValueChange={(value) => setFormData({ ...formData, careerLevel: Number(value) })}
               >
-                <SelectTrigger id="pos-level">
+                <SelectTrigger>
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -324,7 +354,9 @@ export default function PositionsPage() {
                 checked={formData.canHaveDirectReports}
                 onChange={(e) => setFormData({ ...formData, canHaveDirectReports: (e.target as HTMLInputElement).checked })}
               />
-              <Label htmlFor="pos-reports">Can have direct reports</Label>
+              <label htmlFor="pos-reports" className="text-[14px] leading-5 text-foreground cursor-pointer">
+                Can have direct reports
+              </label>
             </div>
           </div>
           <AnimatedDialogFooter>
@@ -344,6 +376,6 @@ export default function PositionsPage() {
           </AnimatedDialogFooter>
         </AnimatedDialogContent>
       </AnimatedDialog>
-    </div>
+    </motion.div>
   );
 }
