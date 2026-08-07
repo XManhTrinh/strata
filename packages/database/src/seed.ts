@@ -10,19 +10,32 @@ const IDS = {
   legacyOrg: "org_acme_legacy_001",
   // Org Unit Types
   orgUnitTypes: {
+    division: "out_division_001",
     department: "out_department_001",
     tribe: "out_tribe_001",
     squad: "out_squad_001",
   },
   // Org Units
   orgUnits: {
+    // Departments (root level)
     engineering: "ou_engineering_001",
     product: "ou_product_001",
     design: "ou_design_001",
+    finance: "ou_finance_001",
+    people: "ou_people_001",
+    // Tribes (under Engineering)
     platformTribe: "ou_platform_tribe_001",
     productTribe: "ou_product_tribe_001",
+    // Squads (under Platform Tribe)
     infraSquad: "ou_infra_squad_001",
     webSquad: "ou_web_squad_001",
+    // Squads (under Growth & Engagement Tribe)
+    feedSquad: "ou_feed_squad_001",
+    messagingSquad: "ou_messaging_squad_001",
+    // Squads (under Product)
+    coreProductSquad: "ou_core_prod_001",
+    // Squads (under Design)
+    productDesignSquad: "ou_prod_design_001",
   },
   // Positions
   positions: {
@@ -212,9 +225,10 @@ async function seedLegacyOrganization() {
 async function seedOrgUnitTypes(companyId: string) {
   logSection("Organization Unit Types");
   const types = [
-    { id: IDS.orgUnitTypes.department, name: "Department", description: "Top-level organizational division", icon: "building", color: "#3B82F6", displayOrder: 1 },
-    { id: IDS.orgUnitTypes.tribe, name: "Tribe", description: "Cross-functional group of squads", icon: "users", color: "#8B5CF6", displayOrder: 2 },
-    { id: IDS.orgUnitTypes.squad, name: "Squad", description: "Autonomous delivery team", icon: "user-group", color: "#10B981", displayOrder: 3 },
+    { id: IDS.orgUnitTypes.division, name: "Division", description: "Top-level strategic grouping", icon: "globe", color: "#1E40AF", displayOrder: 1 },
+    { id: IDS.orgUnitTypes.department, name: "Department", description: "Functional organizational unit", icon: "building", color: "#3B82F6", displayOrder: 2 },
+    { id: IDS.orgUnitTypes.tribe, name: "Tribe", description: "Cross-functional group of squads", icon: "users", color: "#8B5CF6", displayOrder: 3 },
+    { id: IDS.orgUnitTypes.squad, name: "Squad", description: "Autonomous delivery team", icon: "user-group", color: "#10B981", displayOrder: 4 },
   ];
 
   const results = [];
@@ -241,12 +255,21 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
     { id: IDS.orgUnits.engineering, typeId: deptType.id, name: "Engineering", code: "ENG", parentId: null, path: `/${IDS.orgUnits.engineering}`, sortOrder: 1 },
     { id: IDS.orgUnits.product, typeId: deptType.id, name: "Product & Strategy", code: "PROD", parentId: null, path: `/${IDS.orgUnits.product}`, sortOrder: 2 },
     { id: IDS.orgUnits.design, typeId: deptType.id, name: "Design & UX", code: "DSG", parentId: null, path: `/${IDS.orgUnits.design}`, sortOrder: 3 },
+    { id: IDS.orgUnits.finance, typeId: deptType.id, name: "Finance & Operations", code: "FIN", parentId: null, path: `/${IDS.orgUnits.finance}`, sortOrder: 4 },
+    { id: IDS.orgUnits.people, typeId: deptType.id, name: "People & Culture", code: "PPL", parentId: null, path: `/${IDS.orgUnits.people}`, sortOrder: 5 },
     // Level 2 — Tribes under Engineering
     { id: IDS.orgUnits.platformTribe, typeId: tribeType.id, name: "Platform Infrastructure", code: "PLAT", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}`, sortOrder: 1 },
     { id: IDS.orgUnits.productTribe, typeId: tribeType.id, name: "Growth & Engagement", code: "GRWTH", parentId: IDS.orgUnits.engineering, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}`, sortOrder: 2 },
-    // Level 3 — Squads under Platform Tribe
+    // Level 3 — Squads under Platform Infrastructure Tribe
     { id: IDS.orgUnits.infraSquad, typeId: squadType.id, name: "Cloud Services", code: "CLOUD", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.infraSquad}`, sortOrder: 1 },
-    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Feed & Discovery", code: "FEED", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.webSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.webSquad, typeId: squadType.id, name: "Developer Experience", code: "DEVX", parentId: IDS.orgUnits.platformTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.platformTribe}/${IDS.orgUnits.webSquad}`, sortOrder: 2 },
+    // Level 3 — Squads under Growth & Engagement Tribe
+    { id: IDS.orgUnits.feedSquad, typeId: squadType.id, name: "Feed & Discovery", code: "FEED", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.feedSquad}`, sortOrder: 1 },
+    { id: IDS.orgUnits.messagingSquad, typeId: squadType.id, name: "Messaging Platform", code: "MSG", parentId: IDS.orgUnits.productTribe, path: `/${IDS.orgUnits.engineering}/${IDS.orgUnits.productTribe}/${IDS.orgUnits.messagingSquad}`, sortOrder: 2 },
+    // Level 2 — Squads under Product & Strategy
+    { id: IDS.orgUnits.coreProductSquad, typeId: squadType.id, name: "Core Product", code: "CPROD", parentId: IDS.orgUnits.product, path: `/${IDS.orgUnits.product}/${IDS.orgUnits.coreProductSquad}`, sortOrder: 1 },
+    // Level 2 — Squads under Design & UX
+    { id: IDS.orgUnits.productDesignSquad, typeId: squadType.id, name: "Product Design", code: "PDSG", parentId: IDS.orgUnits.design, path: `/${IDS.orgUnits.design}/${IDS.orgUnits.productDesignSquad}`, sortOrder: 1 },
   ];
 
   const results = [];
@@ -379,20 +402,20 @@ async function seedUsers(
 
   const orgUnitMap: Record<string, string> = {
     CTO: IDS.orgUnits.engineering,
-    CFO: IDS.orgUnits.product,
+    CFO: IDS.orgUnits.finance,
     CPO: IDS.orgUnits.product,
     "VP Engineering": IDS.orgUnits.engineering,
     "VP Product": IDS.orgUnits.product,
     Director: IDS.orgUnits.engineering,
     "Senior Engineering Manager": IDS.orgUnits.platformTribe,
     "Engineering Manager": IDS.orgUnits.productTribe,
-    "Staff Engineer": IDS.orgUnits.platformTribe,
+    "Staff Engineer": IDS.orgUnits.infraSquad,
     "Senior Engineer": IDS.orgUnits.infraSquad,
-    "Senior Designer": IDS.orgUnits.design,
-    "Senior Product Manager": IDS.orgUnits.product,
-    "Product Manager": IDS.orgUnits.product,
+    "Senior Designer": IDS.orgUnits.productDesignSquad,
+    "Senior Product Manager": IDS.orgUnits.coreProductSquad,
+    "Product Manager": IDS.orgUnits.coreProductSquad,
     "Software Engineer": IDS.orgUnits.infraSquad,
-    Designer: IDS.orgUnits.design,
+    Designer: IDS.orgUnits.productDesignSquad,
   };
 
   const deptMap: Record<string, string> = {
@@ -482,8 +505,15 @@ async function seedUsers(
   }
 
   // ─── Additional Users (13–100) ──────────────────────────────────────────────
-  const orgUnitIds = [IDS.orgUnits.infraSquad, IDS.orgUnits.webSquad, IDS.orgUnits.engineering, IDS.orgUnits.platformTribe];
-  const deptIds = [engDept.id, engDept.id, engDept.id, desDept.id];
+  const orgUnitIds = [
+    IDS.orgUnits.infraSquad,
+    IDS.orgUnits.webSquad,
+    IDS.orgUnits.feedSquad,
+    IDS.orgUnits.messagingSquad,
+    IDS.orgUnits.coreProductSquad,
+    IDS.orgUnits.productDesignSquad,
+  ];
+  const deptIds = [engDept.id, engDept.id, engDept.id, engDept.id, prodDept.id, desDept.id];
 
   for (let i = 0; i < ADDITIONAL_USERS.length; i++) {
     const idx = i + 12; // 0-based index in the full 100 array (12..99)
