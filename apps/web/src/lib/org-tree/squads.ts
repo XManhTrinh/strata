@@ -5,20 +5,20 @@ export interface Tribe {
 
 export const TRIBES: Tribe[] = [
   {
-    name: "Discovery",
-    squads: ["PLP", "PDP", "Search"],
+    name: "Platform Infrastructure",
+    squads: ["Infrastructure", "Web Platform", "SRE"],
   },
   {
-    name: "Commerce",
-    squads: ["Checkout", "Basket", "Order Management"],
+    name: "Growth & Engagement",
+    squads: ["Feed", "Messaging", "Ads"],
   },
   {
-    name: "Growth",
-    squads: ["Navigation", "Learn", "Cross-sell"],
+    name: "Product & Strategy",
+    squads: ["Core Product", "Data & Analytics"],
   },
   {
-    name: "Platform",
-    squads: ["L2"],
+    name: "Design & UX",
+    squads: ["Product Design", "Brand"],
   },
 ];
 
