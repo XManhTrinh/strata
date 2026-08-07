@@ -965,6 +965,65 @@ async function logSummary() {
   console.log("═══════════════════════════════════════════════════════════════\n");
 }
 
+// ─── Super Admin Account ──────────────────────────────────────────────────────
+
+async function seedSuperAdmin(companyId: string, organizationId: string) {
+  logSection("Super Admin Account");
+  const passwordHash = await bcrypt.hash("admin", 10);
+
+  const person = await prisma.person.upsert({
+    where: { id: "per_admin_001" },
+    update: { fullName: "Super Admin", email: "admin@admin" },
+    create: {
+      id: "per_admin_001",
+      fullName: "Super Admin",
+      email: "admin@admin",
+      dateOfBirth: new Date(1990, 0, 1),
+    },
+  });
+
+  const user = await prisma.user.upsert({
+    where: { email: "admin@admin" },
+    update: { passwordHash },
+    create: {
+      id: "usr_admin_001",
+      email: "admin@admin",
+      passwordHash,
+      personId: person.id,
+    },
+  });
+
+  await prisma.employee.upsert({
+    where: { uin_organizationId: { uin: "ADMIN-001", organizationId } },
+    update: {},
+    create: {
+      id: "emp_admin_001",
+      uin: "ADMIN-001",
+      personId: person.id,
+      organizationId,
+      departmentId: null,
+      startDate: new Date(2020, 0, 1),
+      status: "ACTIVE",
+    },
+  });
+
+  await prisma.userCompanyMembership.upsert({
+    where: { userId_companyId: { userId: user.id, companyId } },
+    update: { isSuperAdmin: true },
+    create: {
+      userId: user.id,
+      companyId,
+      isSuperAdmin: true,
+    },
+  });
+
+  log(`Super Admin: admin@admin / admin (isSuperAdmin: true)`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Main entry point
+// ═══════════════════════════════════════════════════════════════════════════════
+
 async function main() {
   console.log("╔═══════════════════════════════════════════════════════════════╗");
   console.log("║          🌱 Strata Platform — Database Seed Script           ║");
@@ -979,6 +1038,7 @@ async function main() {
   // Users, Roles, and Reporting
   const positions = await seedPositions(company.id);
   const { users } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions);
+  await seedSuperAdmin(company.id, legacyOrg.id);
   await seedFeatures();
   const roles = await seedRoles(company.id);
   await seedRoleAssignments(company.id, users, roles);
