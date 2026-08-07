@@ -1,5 +1,3 @@
-import { useAuth } from "./auth";
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface ApiError {
@@ -27,54 +25,10 @@ export interface RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-// Token refresh state — module-level singleton to prevent parallel refresh calls
-let refreshPromise: Promise<string> | null = null;
-
-async function refreshAccessToken(): Promise<string> {
-  const refreshToken =
-    typeof window !== "undefined"
-      ? localStorage.getItem("strata-refresh-token")
-      : null;
-
-  if (!refreshToken) {
-    throw new Error("No refresh token available");
-  }
-
-  const response = await fetch(`${BASE_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Token refresh failed");
-  }
-
-  const data = await response.json();
-  const { accessToken, refreshToken: newRefreshToken } = data;
-
-  // Update the auth store with the new access token
-  useAuth.setState({ accessToken, isAuthenticated: true });
-
-  // Update refresh token in localStorage if a new one was returned
-  if (typeof window !== "undefined" && newRefreshToken) {
-    localStorage.setItem("strata-refresh-token", newRefreshToken);
-  }
-
-  return accessToken;
-}
-
-async function handleTokenRefresh(): Promise<string> {
-  // If a refresh is already in-flight, share the same promise
-  if (refreshPromise) {
-    return refreshPromise;
-  }
-
-  refreshPromise = refreshAccessToken().finally(() => {
-    refreshPromise = null;
-  });
-
-  return refreshPromise;
+function getCsrfToken(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : undefined;
 }
 
 async function parseErrorResponse(response: Response): Promise<ApiError> {
@@ -110,33 +64,6 @@ function buildUrl(endpoint: string, params?: RequestOptions["params"]): string {
   return url;
 }
 
-function buildFetchOptions(
-  method: string,
-  body: unknown | undefined,
-  headers: Record<string, string>,
-  accessToken: string | null
-): RequestInit {
-  const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...headers,
-  };
-
-  if (accessToken) {
-    requestHeaders["Authorization"] = `Bearer ${accessToken}`;
-  }
-
-  const fetchOptions: RequestInit = {
-    method,
-    headers: requestHeaders,
-  };
-
-  if (body && method !== "GET") {
-    fetchOptions.body = JSON.stringify(body);
-  }
-
-  return fetchOptions;
-}
-
 export async function apiClient<T>(
   endpoint: string,
   options: RequestOptions = {}
@@ -144,39 +71,61 @@ export async function apiClient<T>(
   const { method = "GET", body, headers = {}, params } = options;
 
   const url = buildUrl(endpoint, params);
-  const accessToken = useAuth.getState().getAccessToken();
-  const fetchOptions = buildFetchOptions(method, body, headers, accessToken);
+
+  const requestHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...headers,
+  };
+
+  // Add CSRF token for state-changing requests
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    const csrf = getCsrfToken();
+    if (csrf) {
+      requestHeaders["X-CSRF-Token"] = csrf;
+    }
+  }
+
+  const fetchOptions: RequestInit = {
+    method,
+    headers: requestHeaders,
+    credentials: "include",
+  };
+
+  if (body && method !== "GET") {
+    fetchOptions.body = JSON.stringify(body);
+  }
 
   let response: Response;
 
   try {
     response = await fetch(url, fetchOptions);
   } catch {
-    // Network error — no response received
     throw new ApiClientError({
       statusCode: 0,
       message: "Network error. Please check your connection.",
     });
   }
 
-  // Handle 401 — attempt token refresh and retry
+  // Handle 401 — attempt cookie-based refresh and retry
   if (response.status === 401) {
     try {
-      const newToken = await handleTokenRefresh();
-      // Retry the original request with the new token
-      const retryFetchOptions = buildFetchOptions(method, body, headers, newToken);
-
+      const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!refreshRes.ok) {
+        throw new Error("Refresh failed");
+      }
+      // Retry original request (cookies refreshed automatically by browser)
       try {
-        response = await fetch(url, retryFetchOptions);
+        response = await fetch(url, fetchOptions);
       } catch {
         throw new ApiClientError({
           statusCode: 0,
           message: "Network error. Please check your connection.",
         });
       }
-    } catch (refreshError) {
-      // Refresh failed — clear auth and redirect to login
-      useAuth.getState().logout();
+    } catch {
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
@@ -187,15 +136,36 @@ export async function apiClient<T>(
     }
   }
 
+  // Handle 403 CSRF — re-read cookie and retry once
+  if (response.status === 403) {
+    const csrf = getCsrfToken();
+    if (csrf && ["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+      requestHeaders["X-CSRF-Token"] = csrf;
+      const retryFetchOptions: RequestInit = {
+        method,
+        headers: requestHeaders,
+        credentials: "include",
+      };
+      if (body && method !== "GET") {
+        retryFetchOptions.body = JSON.stringify(body);
+      }
+      try {
+        response = await fetch(url, retryFetchOptions);
+      } catch {
+        throw new ApiClientError({
+          statusCode: 0,
+          message: "Network error. Please check your connection.",
+        });
+      }
+    }
+  }
+
   // Handle 5xx — retry once after 1 second delay
   if (response.status >= 500) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
-      // Re-read the token in case it was refreshed during the delay
-      const currentToken = useAuth.getState().getAccessToken();
-      const retryFetchOptions = buildFetchOptions(method, body, headers, currentToken);
-      response = await fetch(url, retryFetchOptions);
+      response = await fetch(url, fetchOptions);
     } catch {
       throw new ApiClientError({
         statusCode: 0,

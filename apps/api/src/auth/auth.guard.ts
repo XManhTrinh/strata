@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { verifyToken } from '@strata/auth';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { ApiKeysService } from './api-keys/api-keys.service';
+import { CookieService } from './cookie/cookie.service';
 
 const API_KEY_PREFIX = 'strata_';
 
@@ -17,6 +18,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private apiKeysService?: ApiKeysService,
+    private cookieService?: CookieService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,7 +32,14 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
-    const token = this.extractTokenFromHeader(request);
+
+    // Cookie-first: try to extract token from cookie
+    let token = this.cookieService?.getAccessToken(request);
+
+    // Fallback: extract from Authorization header
+    if (!token) {
+      token = this.extractTokenFromHeader(request);
+    }
 
     if (!token) {
       throw new UnauthorizedException('Missing authentication token');
@@ -39,17 +48,6 @@ export class AuthGuard implements CanActivate {
     // Check if token is an API key
     if (token.startsWith(API_KEY_PREFIX)) {
       return this.validateApiKey(request, token);
-    }
-
-    // Dev bypass — allow the mock token from frontend dev login
-    if (token === 'dev-mock-token') {
-      (request as any).user = {
-        sub: 'usr_001',
-        email: 'alice.johnson@acme.test',
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 86400,
-      };
-      return true;
     }
 
     // Default: validate as JWT

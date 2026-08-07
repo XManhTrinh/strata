@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
@@ -9,19 +9,20 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading, checkSession } = useAuth();
   const router = useRouter();
-  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login");
-    } else {
-      setChecked(true);
-    }
-  }, [isAuthenticated, router]);
+    checkSession();
+  }, [checkSession]);
 
-  if (!checked) {
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -31,6 +32,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
       </div>
     );
   }
+
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

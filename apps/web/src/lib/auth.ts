@@ -2,154 +2,127 @@
 
 import { create } from "zustand";
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  roles: string[];
+}
+
 interface AuthState {
-  accessToken: string | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  devLogin: () => void;
-  loginWithSSO: (organizationId: string) => void;
-  handleSSOCallback: (accessToken: string, refreshToken: string) => void;
-  logout: () => void;
-  getAccessToken: () => string | null;
-  refreshAccessToken: () => Promise<string>;
+  devLogin: () => Promise<void>;
+  loginWithGoogle: (returnUrl?: string) => void;
+  logout: () => Promise<void>;
+  checkSession: () => Promise<void>;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-export const useAuth = create<AuthState>((set, get) => ({
-  accessToken: typeof window !== "undefined" ? (localStorage.getItem("strata-access-token") || (localStorage.getItem("strata-refresh-token") ? "pending-refresh" : null)) : null,
-  isAuthenticated: typeof window !== "undefined" && !!(localStorage.getItem("strata-access-token") || localStorage.getItem("strata-refresh-token")),
-  isLoading: false,
+export const useAuth = create<AuthState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true, // starts true so auth guard shows loading
   error: null,
 
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const message =
-          errorData.message || (response.status === 401 ? "Invalid credentials" : "Login failed");
-        set({ isLoading: false, error: message });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        set({ isLoading: false, error: data.message || "Login failed" });
         return;
       }
-
-      const data = await response.json();
-      const { accessToken, refreshToken } = data;
-
-      // Store access token in memory and localStorage, refresh token in localStorage
-      set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
-      if (typeof window !== "undefined") {
-        localStorage.setItem("strata-access-token", accessToken);
-        if (refreshToken) {
-          localStorage.setItem("strata-refresh-token", refreshToken);
-        }
+      // Fetch user profile from session
+      const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+      if (meRes.ok) {
+        const user = await meRes.json();
+        set({ user, isAuthenticated: true, isLoading: false, error: null });
+      } else {
+        set({ isAuthenticated: true, isLoading: false, error: null });
       }
     } catch {
       set({ isLoading: false, error: "Network error. Please try again." });
     }
   },
 
-  devLogin: () => {
-    // Development-only bypass — sets a mock token without calling the backend
-    set({
-      accessToken: "dev-mock-token",
-      isAuthenticated: true,
-      isLoading: false,
-      error: null,
-    });
-    if (typeof window !== "undefined") {
-      localStorage.setItem("strata-access-token", "dev-mock-token");
-      localStorage.setItem("strata-refresh-token", "dev-mock-refresh-token");
-    }
-  },
-
-  loginWithSSO: (organizationId: string) => {
-    // Redirect to the backend SSO initiation endpoint
-    const returnUrl = typeof window !== "undefined" ? window.location.pathname : "/";
-    window.location.href = `${API_URL}/auth/sso/${organizationId}/login?returnUrl=${encodeURIComponent(returnUrl)}`;
-  },
-
-  handleSSOCallback: (accessToken: string, refreshToken: string) => {
-    set({ accessToken, isAuthenticated: true, isLoading: false, error: null });
-    if (typeof window !== "undefined") {
-      localStorage.setItem("strata-access-token", accessToken);
-      if (refreshToken) {
-        localStorage.setItem("strata-refresh-token", refreshToken);
-      }
-    }
-  },
-
-  logout: () => {
-    set({ accessToken: null, isAuthenticated: false, error: null });
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("strata-access-token");
-      localStorage.removeItem("strata-refresh-token");
-    }
-  },
-
-  getAccessToken: () => get().accessToken,
-
-  refreshAccessToken: async () => {
-    const refreshToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("strata-refresh-token")
-        : null;
-
-    if (!refreshToken) {
-      get().logout();
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-      throw new Error("No refresh token available");
-    }
-
+  devLogin: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
+      const res = await fetch(`${API_URL}/auth/dev-login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
+        credentials: "include",
       });
+      if (!res.ok) {
+        set({ isLoading: false, error: "Dev login failed" });
+        return;
+      }
+      const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+      if (meRes.ok) {
+        const user = await meRes.json();
+        set({ user, isAuthenticated: true, isLoading: false, error: null });
+      } else {
+        set({ isAuthenticated: true, isLoading: false, error: null });
+      }
+    } catch {
+      set({ isLoading: false, error: "Network error" });
+    }
+  },
 
-      if (!response.ok) {
-        get().logout();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+  loginWithGoogle: (returnUrl: string = "/") => {
+    window.location.href = `${API_URL}/auth/google/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+  },
+
+  logout: async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      /* ignore */
+    }
+    set({ user: null, isAuthenticated: false, error: null });
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  },
+
+  checkSession: async () => {
+    set({ isLoading: true });
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+      if (res.ok) {
+        const user = await res.json();
+        set({ user, isAuthenticated: true, isLoading: false });
+      } else {
+        // Try silent refresh
+        const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (refreshRes.ok) {
+          const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+          if (meRes.ok) {
+            const user = await meRes.json();
+            set({ user, isAuthenticated: true, isLoading: false });
+            return;
+          }
         }
-        throw new Error("Token refresh failed");
+        set({ user: null, isAuthenticated: false, isLoading: false });
       }
-
-      const data = await response.json();
-      const { accessToken, refreshToken: newRefreshToken } = data;
-
-      set({ accessToken, isAuthenticated: true });
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("strata-access-token", accessToken);
-        if (newRefreshToken) {
-          localStorage.setItem("strata-refresh-token", newRefreshToken);
-        }
-      }
-
-      return accessToken;
-    } catch (error) {
-      // If the error is from our own throw above, re-throw it
-      if (error instanceof Error && (error.message === "Token refresh failed" || error.message === "No refresh token available")) {
-        throw error;
-      }
-      // Network or unexpected error
-      get().logout();
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-      throw new Error("Token refresh failed");
+    } catch {
+      set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 }));

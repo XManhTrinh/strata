@@ -9,6 +9,9 @@ import { OidcModule } from './oidc/oidc.module';
 import { SsoAdminModule } from './sso-admin/sso-admin.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { ApiKeysService } from './api-keys/api-keys.service';
+import { CookieModule } from './cookie/cookie.module';
+import { CookieService } from './cookie/cookie.service';
+import { GoogleController } from './oidc/google.controller';
 
 const PrismaProvider = {
   provide: PrismaClient,
@@ -30,18 +33,19 @@ const RedisProvider = {
 };
 
 @Module({
-  imports: [OidcModule, SsoAdminModule, ApiKeysModule],
-  controllers: [AuthController],
+  imports: [OidcModule, SsoAdminModule, ApiKeysModule, CookieModule],
+  controllers: [AuthController, GoogleController],
   providers: [
     PrismaProvider,
     RedisProvider,
     AuthService,
     ApiKeysService,
+    CookieService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
   ],
-  exports: [PrismaClient, Redis, AuthService, ApiKeysService],
+  exports: [PrismaClient, Redis, AuthService, ApiKeysService, CookieService],
 })
 export class AuthModule {}

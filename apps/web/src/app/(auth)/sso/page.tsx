@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useAuth } from "@/lib/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function SSOLoginPage() {
   const [organizationId, setOrganizationId] = useState("");
   const [error, setError] = useState("");
-
-  const { loginWithSSO } = useAuth();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -18,7 +17,9 @@ export default function SSOLoginPage() {
     }
 
     setError("");
-    loginWithSSO(organizationId.trim());
+    // Redirect to the backend SSO initiation endpoint
+    const returnUrl = typeof window !== "undefined" ? window.location.pathname : "/";
+    window.location.href = `${API_URL}/auth/sso/${organizationId.trim()}/login?returnUrl=${encodeURIComponent(returnUrl)}`;
   };
 
   return (

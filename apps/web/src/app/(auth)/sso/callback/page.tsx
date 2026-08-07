@@ -5,13 +5,10 @@ import { useAuth } from "@/lib/auth";
 
 export default function SSOCallbackPage() {
   const [error, setError] = useState<string | null>(null);
-  const { handleSSOCallback } = useAuth();
+  const { checkSession } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get("accessToken");
-    const refreshToken = params.get("refreshToken");
-    const returnUrl = params.get("returnUrl") || "/";
     const errorParam = params.get("error");
 
     if (errorParam) {
@@ -19,16 +16,13 @@ export default function SSOCallbackPage() {
       return;
     }
 
-    if (accessToken && refreshToken) {
-      handleSSOCallback(accessToken, refreshToken);
-
-      // Clean the URL and redirect to the return URL
-      window.history.replaceState({}, "", "/sso/callback");
+    // With cookie-based auth, the backend sets cookies and redirects here.
+    // Check session to confirm authentication and then redirect.
+    checkSession().then(() => {
+      const returnUrl = params.get("returnUrl") || "/";
       window.location.href = returnUrl;
-    } else {
-      setError("Missing authentication tokens. Please try logging in again.");
-    }
-  }, [handleSSOCallback]);
+    });
+  }, [checkSession]);
 
   if (error) {
     return (

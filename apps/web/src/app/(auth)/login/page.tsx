@@ -12,13 +12,13 @@ export default function LoginPage() {
   const [showSSO, setShowSSO] = useState(false);
   const [ssoOrgId, setSsoOrgId] = useState("");
 
-  const { login, loginWithSSO, devLogin, isLoading, error, isAuthenticated } = useAuth();
+  const { login, loginWithGoogle, devLogin, isLoading, error, isAuthenticated } = useAuth();
   const router = useRouter();
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace("/dashboard");
+      router.push("/");
     }
   }, [isAuthenticated, router]);
 
@@ -61,7 +61,13 @@ export default function LoginPage() {
   const handleSSOLogin = (e: FormEvent) => {
     e.preventDefault();
     if (!ssoOrgId.trim()) return;
-    loginWithSSO(ssoOrgId.trim());
+    // SSO org-based login still redirects to backend SSO endpoint
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    window.location.href = `${API_URL}/auth/sso/${ssoOrgId.trim()}/login?returnUrl=${encodeURIComponent("/")}`;
+  };
+
+  const handleDevLogin = async () => {
+    await devLogin();
   };
 
   return (
@@ -159,6 +165,14 @@ export default function LoginPage() {
 
             <button
               type="button"
+              onClick={() => loginWithGoogle("/")}
+              className="h-10 w-full rounded-sm border border-border bg-background text-sm font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              Sign in with Google
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowSSO(true)}
               className="h-10 w-full rounded-sm border border-border bg-background text-sm font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
@@ -201,20 +215,19 @@ export default function LoginPage() {
         )}
 
         {/* Dev login */}
-        {(
-          <div className="pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={() => devLogin()}
-              className="h-10 w-full rounded-sm border border-dashed border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 text-sm font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50 transition-colors"
-            >
-              🚀 Dev Login (skip auth)
-            </button>
-            <p className="mt-1.5 text-[10px] text-center text-muted-foreground">
-              Development only — bypasses backend authentication
-            </p>
-          </div>
-        )}
+        <div className="pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={handleDevLogin}
+            disabled={isLoading}
+            className="h-10 w-full rounded-sm border border-dashed border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 text-sm font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            🚀 Dev Login (skip auth)
+          </button>
+          <p className="mt-1.5 text-[10px] text-center text-muted-foreground">
+            Development only — calls /auth/dev-login endpoint
+          </p>
+        </div>
       </div>
     </main>
   );
