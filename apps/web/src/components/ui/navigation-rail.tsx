@@ -137,14 +137,18 @@ export function NavigationRail({ items, topAction, className }: NavigationRailPr
             ref={flyoutRef}
             key="drawer"
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 256, opacity: 1 }}
+            animate={{ width: 280, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] as [number, number, number, number] }}
+            transition={{
+              duration: 0.35,
+              ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+              opacity: { duration: 0.2 },
+            }}
             className="fixed left-20 top-0 bottom-0 z-30 overflow-hidden"
             onMouseEnter={handleFlyoutEnter}
             onMouseLeave={handleFlyoutLeave}
           >
-            <div className="w-64 h-full bg-[hsl(var(--surface))] border-r border-outline-variant/30">
+            <div className="w-70 h-full">
               <NavigationDrawer
                 sections={[{ title: activeHoverItem.label, items: activeHoverItem.children! }]}
               />

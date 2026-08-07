@@ -36,22 +36,23 @@ export interface NavigationDrawerProps {
 /**
  * Material Design 3 Navigation Drawer
  *
- * Full navigation drawer showing all items grouped into sections.
- * Used inside a Sheet for the mobile modal variant.
- *
- * @see https://m3.material.io/components/navigation-drawer
+ * @see https://m3.material.io/components/navigation-drawer/specs
  *
  * Specs:
- * - Width: 360px (standard), full screen on mobile as modal
- * - Background: surface (surface-container-low)
+ * - Width: 360px (standard)
+ * - Container shape: 0 start, 16px end (rounded-r-2xl when from left)
+ * - Background: surface-container-low (mapped to surface)
+ * - Elevation: Level 1 (standard), Level 0 (modal)
  * - Header: 56px area for branding
  * - Nav item height: 56px
  * - Nav item shape: rounded-full (28px radius pill)
- * - Active: secondary-container fill, on-secondary-container text, filled icon
- * - Inactive: transparent, on-surface-variant, outlined icon
- * - Padding: 12px horizontal (items have 16px internal padding)
- * - Section headers: Title Small (14px), on-surface-variant
- * - Divider between sections
+ * - Nav item padding: 16px start, 24px end
+ * - Active indicator: secondary-container fill
+ * - Active text/icon: on-secondary-container, icon filled
+ * - Inactive text/icon: on-surface-variant, icon outlined
+ * - Section header: Label Small (14px), on-surface-variant, 36px height
+ * - Divider between sections: outline-variant, 16px margin
+ * - Content padding: 12px horizontal
  */
 export function NavigationDrawer({
   sections,
@@ -62,7 +63,12 @@ export function NavigationDrawer({
   const pathname = usePathname();
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full rounded-r-2xl bg-[hsl(var(--surface))]",
+        className
+      )}
+    >
       {/* Header */}
       {header && (
         <div className="flex items-center h-14 px-7 shrink-0">
@@ -71,23 +77,23 @@ export function NavigationDrawer({
       )}
 
       {/* Navigation sections */}
-      <nav className="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation drawer">
+      <nav className="flex-1 overflow-y-auto py-4 px-3" aria-label="Navigation drawer">
         {sections.map((section, sectionIndex) => (
           <div key={section.title}>
             {/* Section divider */}
             {sectionIndex > 0 && (
-              <div className="py-2 px-1">
+              <div className="py-4 px-4">
                 <Divider />
               </div>
             )}
 
             {/* Section header */}
-            <p className="px-4 pt-4 pb-1 text-[14px] leading-5 font-medium text-surface-variant-foreground">
+            <p className="px-4 pt-2 pb-2 text-[14px] leading-5 font-medium text-surface-variant-foreground">
               {section.title}
             </p>
 
             {/* Nav items */}
-            <ul className="space-y-0.5 mt-1">
+            <ul className="space-y-1 mt-1">
               {section.items.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -100,19 +106,28 @@ export function NavigationDrawer({
                       onClick={onNavigate}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-full h-14 px-4 transition-colors duration-200",
+                        "group flex items-center gap-3 rounded-full h-14 px-4 pr-6 transition-colors duration-200 relative",
                         isActive
                           ? "bg-secondary-container text-secondary-container-foreground font-medium"
-                          : "text-surface-variant-foreground hover:bg-surface-foreground/8"
+                          : "text-surface-variant-foreground"
                       )}
                     >
+                      {/* State layer */}
+                      <div
+                        className={cn(
+                          "absolute inset-0 rounded-full transition-colors duration-200",
+                          isActive
+                            ? "group-hover:bg-secondary-container-foreground/8 group-active:bg-secondary-container-foreground/12"
+                            : "group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12"
+                        )}
+                      />
                       <Icon
                         name={item.icon}
                         size={24}
                         filled={isActive}
-                        className="shrink-0"
+                        className="shrink-0 relative z-10"
                       />
-                      <span className="text-[14px] leading-5 whitespace-nowrap truncate">
+                      <span className="text-[14px] leading-5 whitespace-nowrap truncate relative z-10">
                         {item.label}
                       </span>
                     </Link>
