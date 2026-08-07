@@ -194,10 +194,15 @@ function RailItem({ item, isActive }: { item: NavigationRailItem; isActive: bool
           }}
           transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] as [number, number, number, number] }}
         />
-        {/* Hover/press state layer — only when inactive */}
-        {!isActive && (
-          <div className="absolute inset-0 rounded-full transition-colors duration-200 group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12" />
-        )}
+        {/* State layer — always present, different color for active vs inactive */}
+        <div
+          className={cn(
+            "absolute inset-0 rounded-full transition-colors duration-200",
+            isActive
+              ? "group-hover:bg-secondary-container-foreground/8 group-active:bg-secondary-container-foreground/12"
+              : "group-hover:bg-surface-foreground/8 group-active:bg-surface-foreground/12"
+          )}
+        />
         {/* Icon */}
         <Icon
           name={item.icon}
