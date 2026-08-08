@@ -27,10 +27,10 @@ export function AppShell({ children }: AppShellProps) {
         {/* Sidebar - handles its own responsive visibility (rail on desktop, Sheet on mobile) */}
         {hasAdminPermissions && <Sidebar />}
 
-        {/* Main content area — rail is always 80px (md:ml-20) */}
+        {/* Main content area — rail is 96dp (md:ml-24) per M3 Expressive */}
         <div
           className={`flex flex-col min-h-screen ${
-            hasAdminPermissions ? "md:ml-20" : ""
+            hasAdminPermissions ? "md:ml-24" : ""
           }`}
         >
           <Header />
