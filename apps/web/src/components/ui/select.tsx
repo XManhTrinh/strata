@@ -44,7 +44,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "group relative flex items-center w-full h-14 rounded-[4px] bg-transparent",
+      "group relative flex items-center w-full h-14 rounded-sm bg-transparent",
       // Border — outlined text field style
       "border border-outline",
       "hover:border-[hsl(var(--on-surface))]",
@@ -89,8 +89,7 @@ const SelectTrigger = React.forwardRef<
 ));
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
-export interface SelectContentProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> {}
+type SelectContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>;
 
 const SelectScrollUpButton = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitive.ScrollUpButton>,
@@ -135,13 +134,11 @@ const SelectContent = React.forwardRef<
       ref={ref}
       position={position}
       className={cn(
-        "relative z-50 min-w-[112px] max-w-[280px] overflow-hidden",
+        "relative z-50 min-w-28 max-w-70 overflow-hidden",
         // M3 menu surface
-        "rounded-[4px] bg-surface-container py-2 shadow-md",
-        // Enter animation: 150ms fade-in + scale, ease-out
-        "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:duration-150 data-[state=open]:ease-out",
-        // Exit animation: 75ms fade-out
-        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-75",
+        "rounded-sm bg-surface-container py-2 shadow-md",
+        // Animation via theme.css m3-animate-menu class
+        "m3-animate-menu",
         // Popper positioning
         position === "popper" && [
           "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
@@ -155,7 +152,7 @@ const SelectContent = React.forwardRef<
       <SelectPrimitive.Viewport
         className={cn(
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)"
         )}
       >
         {children}
@@ -181,8 +178,7 @@ const SelectLabel = React.forwardRef<
 ));
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
-export interface SelectItemProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> {}
+type SelectItemProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>;
 
 const SelectItem = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Item>,
@@ -193,11 +189,11 @@ const SelectItem = React.forwardRef<
     className={cn(
       "relative flex items-center w-full h-12 px-3 text-[14px] leading-5 font-medium text-surface-foreground cursor-pointer select-none outline-none",
       // State layers
-      "focus:bg-surface-foreground/[0.08] active:bg-surface-foreground/[0.10]",
+      "focus:bg-surface-foreground/8 active:bg-surface-foreground/10",
       // Selected state
       "data-[state=checked]:bg-surface-container-highest",
       // Disabled
-      "data-[disabled]:pointer-events-none data-[disabled]:opacity-38",
+      "data-disabled:pointer-events-none data-disabled:opacity-[0.38]",
       className
     )}
     {...props}

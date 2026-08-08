@@ -206,7 +206,7 @@ export default function AuditPage() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar name={record.userName ?? record.userId} size="s" />
-                              <span className="text-[14px] font-medium truncate max-w-[160px]">
+                              <span className="text-[14px] font-medium truncate max-w-40">
                                 {record.userName ?? record.userId}
                               </span>
                             </div>

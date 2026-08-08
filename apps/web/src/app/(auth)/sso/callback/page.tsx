@@ -29,7 +29,7 @@ export default function SSOCallbackPage() {
   if (error) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-        <Card variant="elevated" className="w-full max-w-[400px]">
+        <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-4 py-10 px-6 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12">
               <Icon name="error" size={24} className="text-error" />

@@ -84,7 +84,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
       {/* Loading skeleton while checking session */}
       {isLoading && !email && !password ? (
-        <Card variant="elevated" className="w-full max-w-[400px]">
+        <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-6 py-10">
             <Skeleton className="h-12 w-12 rounded-full" />
             <Skeleton className="h-6 w-48" />
@@ -97,7 +97,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card variant="elevated" className="w-full max-w-[400px]">
+        <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
             {/* Brand logo */}
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
