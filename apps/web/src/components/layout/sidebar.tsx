@@ -126,11 +126,11 @@ export function Sidebar() {
         }
       />
       {/* Theme toggle — positioned at bottom of rail */}
-      <div className="fixed left-0 bottom-0 z-40 w-20 hidden md:flex items-center justify-center pb-4">
+      <div className="fixed left-0 bottom-0 z-40 w-24 hidden md:flex items-center justify-center pb-4">
         <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} side="right">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/8 active:bg-surface-foreground/12 transition-colors"
+            className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/[0.08] active:bg-surface-foreground/[0.12] transition-colors"
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
           >
             <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} className="text-surface-variant-foreground" />
