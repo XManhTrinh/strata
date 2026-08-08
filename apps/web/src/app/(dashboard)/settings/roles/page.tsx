@@ -693,9 +693,9 @@ function PermissionMatrix({
                 </span>
               </div>
               {assignedCount > 0 && (
-                <Chip variant="filter" selected className="h-6 text-[11px] px-2">
+                <span className="inline-flex items-center justify-center h-6 px-2 rounded-full bg-secondary-container text-secondary-container-foreground text-[11px] font-medium">
                   {assignedCount}/{feature.permissions.length}
-                </Chip>
+                </span>
               )}
               <Icon
                 name={isExpanded ? "expand_less" : "expand_more"}
