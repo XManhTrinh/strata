@@ -2,15 +2,16 @@
 
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
-import { SearchBar } from "@/components/ui/search-bar";
+import { Search } from "@strata/mui";
 import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Card, CardContent } from "@/components/ui/card";
-import { Chip } from "@/components/ui/chips";
+import { Button } from "@strata/mui/buttons";
+import { IconButton } from "@strata/mui/buttons";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Chip } from "@strata/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@/components/ui/tooltip";
-import { TextField } from "@/components/ui/text-field";
+import { Tooltip } from "@strata/mui";
+import { TextField } from "@strata/mui";
 import {
   Select,
   SelectContent,
@@ -19,13 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AnimatedDialog,
-  AnimatedDialogContent,
-  AnimatedDialogHeader,
-  AnimatedDialogTitle,
-  AnimatedDialogDescription,
-  AnimatedDialogFooter,
-} from "@/components/ui/animated-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@strata/mui";
 import { toast } from "sonner";
 import {
   useOrgUnits,
@@ -109,42 +110,41 @@ function TreeNode({
         style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         {hasChildren ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+          <IconButton
+            variant="standard"
+            size="xs"
             onClick={() => setExpanded(!expanded)}
             aria-label={expanded ? "Collapse" : "Expand"}
           >
             <Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />
-          </Button>
+          </IconButton>
         ) : (
           <span className="inline-flex items-center justify-center h-8 w-8">
-            <Icon name="remove" size={18} className="text-muted-foreground/40" />
+            <Icon name="remove" size={18} className="text-surface-variant-foreground/40" />
           </span>
         )}
 
         <div className="flex flex-1 items-center gap-3">
           <Icon name="folder" size={18} className="text-primary" />
-          <span className="text-[14px] leading-5 font-medium text-foreground">{unit.name}</span>
+          <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
           <Chip variant="assist">{unit.typeName}</Chip>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Tooltip content="Edit">
-            <Button variant="ghost" size="icon" onClick={() => onEdit(unit)}>
+            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(unit)}>
               <Icon name="edit" size={18} />
-            </Button>
+            </IconButton>
           </Tooltip>
           <Tooltip content="Add child">
-            <Button variant="ghost" size="icon" onClick={() => onAddChild(unit.id)}>
+            <IconButton variant="standard" size="xs" aria-label="Add child" onClick={() => onAddChild(unit.id)}>
               <Icon name="add" size={18} className="text-primary" />
-            </Button>
+            </IconButton>
           </Tooltip>
           <Tooltip content="Archive">
-            <Button variant="ghost" size="icon" onClick={() => onArchive(unit.id)}>
+            <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(unit.id)}>
               <Icon name="archive" size={18} />
-            </Button>
+            </IconButton>
           </Tooltip>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default function OrgStructurePage() {
   const [editingUnit, setEditingUnit] = useState<OrgTreeNode | null>(null);
   const [formData, setFormData] = useState({ name: "", typeId: "", parentId: "" });
 
-  const { data: orgUnits = [], isLoading, error } = useOrgUnits(COMPANY_ID);
+  const { data: orgUnits = [], isLoading, error, refetch } = useOrgUnits(COMPANY_ID);
   const { data: orgUnitTypes = [] } = useOrgUnitTypes(COMPANY_ID);
   const createMutation = useCreateOrgUnit();
   const updateMutation = useUpdateOrgUnit();
@@ -251,23 +251,30 @@ export default function OrgStructurePage() {
 
   if (error) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Structure</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Structure</h1>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Build and manage your organization&apos;s hierarchical structure.
             </p>
           </div>
         </AppBar>
-        <Card variant="filled" className="max-w-lg mx-auto">
+        <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-error" />
             </div>
-            <p className="text-[14px] leading-5 text-destructive mb-6">
+            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+              Unable to load structure
+            </h2>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
               Failed to load organization structure. Please try again.
             </p>
+            <Button variant="tonal" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -276,7 +283,7 @@ export default function OrgStructurePage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -286,8 +293,8 @@ export default function OrgStructurePage() {
       {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Structure</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Structure</h1>
+          <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Build and manage your organization&apos;s hierarchical structure.
           </p>
         </div>
@@ -298,7 +305,7 @@ export default function OrgStructurePage() {
       </AppBar>
 
       {/* Search */}
-      <SearchBar
+      <Search
         className="max-w-sm"
         value={search}
         onValueChange={setSearch}
@@ -306,7 +313,7 @@ export default function OrgStructurePage() {
       />
 
       {/* Tree */}
-      <Card variant="outlined">
+      <Card variant="elevated">
         <CardContent className="p-2">
           {isLoading ? (
             <div className="space-y-3 p-4">
@@ -320,10 +327,19 @@ export default function OrgStructurePage() {
             </div>
           ) : filteredTree.length === 0 ? (
             <div className="flex flex-col items-center py-12 text-center">
-              <Icon name="account_tree" size={40} className="text-muted-foreground/40 mb-2" />
-              <p className="text-[14px] leading-5 text-muted-foreground">
-                No organization units found
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+                <Icon name="account_tree" size={24} className="text-surface-variant-foreground" />
+              </div>
+              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+                No units found
+              </h2>
+              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+                No organization units found. Create one to get started.
               </p>
+              <Button onClick={() => openCreate()}>
+                <Icon name="add" size={18} />
+                Create Unit
+              </Button>
             </div>
           ) : (
             filteredTree.map((unit) => (
@@ -340,18 +356,18 @@ export default function OrgStructurePage() {
       </Card>
 
       {/* Create/Edit Modal */}
-      <AnimatedDialog open={showModal} onOpenChange={setShowModal}>
-        <AnimatedDialogContent className="sm:max-w-md">
-          <AnimatedDialogHeader>
-            <AnimatedDialogTitle>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
               {editingUnit ? "Edit Organization Unit" : "Create Organization Unit"}
-            </AnimatedDialogTitle>
-            <AnimatedDialogDescription>
+            </DialogTitle>
+            <DialogDescription>
               {editingUnit
                 ? "Update the details for this organization unit."
                 : "Add a new unit to your organization hierarchy."}
-            </AnimatedDialogDescription>
-          </AnimatedDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
           <div className="space-y-4">
             <TextField
               variant="outlined"
@@ -398,11 +414,12 @@ export default function OrgStructurePage() {
               </Select>
             </div>
           </div>
-          <AnimatedDialogFooter>
-            <Button variant="outline" onClick={() => setShowModal(false)}>
+          <DialogFooter>
+            <Button variant="text" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
             <Button
+              variant="text"
               onClick={handleSubmit}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
@@ -412,9 +429,9 @@ export default function OrgStructurePage() {
                   ? "Save Changes"
                   : "Create"}
             </Button>
-          </AnimatedDialogFooter>
-        </AnimatedDialogContent>
-      </AnimatedDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

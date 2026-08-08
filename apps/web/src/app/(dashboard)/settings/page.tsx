@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
-import { Card, CardContent } from "@/components/ui/card";
-import { List, ListItem } from "@/components/ui/list";
-import { Icon } from "@/components/ui/icon";
-import { Divider } from "@/components/ui/divider";
+import { Card, CardContent } from "@strata/mui";
+import { List, ListItem } from "@strata/mui";
+import { Icon } from "@strata/mui";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -71,7 +70,7 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -81,8 +80,8 @@ export default function SettingsPage() {
       {/* Header */}
       <AppBar>
         <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">Settings</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1>
+          <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Platform configuration and preferences.
           </p>
         </div>
@@ -91,20 +90,22 @@ export default function SettingsPage() {
       {/* Settings List */}
       <Card variant="elevated">
         <CardContent className="p-0">
-          <List dividers>
+          <List>
             {visibleCards.map((card) => (
               <Link key={card.href} href={card.href}>
                 <ListItem
                   lines={2}
-                  headline={card.title}
-                  supportingText={card.description}
-                  leadingContent={
+                  interactive
+                  leading={
                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
                       <Icon name={card.icon} size={24} className="text-primary" />
                     </div>
                   }
-                  trailingIcon="chevron_right"
-                />
+                  supporting={card.description}
+                  trailing={<Icon name="chevron_right" size={24} className="text-surface-variant-foreground" />}
+                >
+                  {card.title}
+                </ListItem>
               </Link>
             ))}
           </List>

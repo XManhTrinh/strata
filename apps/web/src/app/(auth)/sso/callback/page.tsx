@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { Icon } from "@strata/mui";
+import { Button } from "@strata/mui/buttons";
+import { Card, CardContent } from "@strata/mui";
+import { CircularProgress } from "@strata/mui/indicators";
 
 export default function SSOCallbackPage() {
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +20,6 @@ export default function SSOCallbackPage() {
       return;
     }
 
-    // With cookie-based auth, the backend sets cookies and redirects here.
-    // Check session to confirm authentication and then redirect.
     checkSession().then(() => {
       const returnUrl = params.get("returnUrl") || "/";
       window.location.href = returnUrl;
@@ -26,30 +28,41 @@ export default function SSOCallbackPage() {
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-sm space-y-6 p-8 text-center">
-          <div className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <h2 className="text-sm font-medium text-red-800 dark:text-red-300">
-              SSO Authentication Failed
-            </h2>
-            <p className="mt-2 text-sm text-red-700 dark:text-red-400">{error}</p>
-          </div>
-          <a
-            href="/login"
-            className="inline-block text-sm text-primary hover:underline"
-          >
-            Return to login
-          </a>
-        </div>
+      <main className="flex min-h-screen items-center justify-center bg-surface p-4">
+        <Card variant="elevated" className="w-full max-w-[400px]">
+          <CardContent className="flex flex-col items-center gap-4 py-10 px-6 text-center">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12">
+              <Icon name="error" size={24} className="text-error" />
+            </div>
+            <h1 className="text-[22px] leading-7 font-normal text-surface-foreground">
+              Authentication Failed
+            </h1>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground max-w-xs">
+              {error}
+            </p>
+            <Button variant="text" asChild className="mt-2">
+              <a href="/login">
+                <Icon name="arrow_back" size={18} />
+                Return to login
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-4 p-8 text-center">
-        <div className="animate-pulse">
-          <p className="text-sm text-muted-foreground">Completing SSO sign-in...</p>
+    <main className="flex min-h-screen items-center justify-center bg-surface p-4">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <CircularProgress aria-label="Signing in" />
+        <div>
+          <p className="text-[16px] leading-6 text-surface-foreground font-medium">
+            Completing sign-in
+          </p>
+          <p className="text-[14px] leading-5 text-surface-variant-foreground mt-1">
+            Please wait while we verify your credentials...
+          </p>
         </div>
       </div>
     </main>

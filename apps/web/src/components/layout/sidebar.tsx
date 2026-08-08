@@ -1,26 +1,32 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "@/lib/theme";
-import { Icon } from "@/components/ui/icon";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Icon } from "@strata/mui";
+import { Tooltip } from "@strata/mui";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import {
   NavigationRail,
   type NavigationRailItem,
-} from "@/components/ui/navigation-rail";
+} from "@strata/mui/navigation";
+
+interface SidebarNavItem extends NavigationRailItem {
+  href: string;
+  feature?: string;
+}
 
 /**
  * Super Admin sees only Dashboard + Settings (platform configuration).
  * They configure the business — they don't operate it.
  */
-const superAdminRailItems: NavigationRailItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
-  { label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
-  { label: "Positions", href: "/settings/positions", icon: "work" },
-  { label: "Roles", href: "/settings/roles", icon: "admin_panel_settings" },
-  { label: "Features", href: "/settings/features", icon: "extension" },
+const superAdminRailItems: SidebarNavItem[] = [
+  { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard" },
+  { value: "org-structure", label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
+  { value: "unit-types", label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
+  { value: "positions", label: "Positions", href: "/settings/positions", icon: "work" },
+  { value: "roles", label: "Roles", href: "/settings/roles", icon: "admin_panel_settings" },
+  { value: "features", label: "Features", href: "/settings/features", icon: "extension" },
 ];
 
 /**
@@ -28,32 +34,14 @@ const superAdminRailItems: NavigationRailItem[] = [
  * Each item has a required `feature` — shown only if the user has
  * any permission in that feature (via backend roles & permissions).
  */
-const permissionBasedItems: (NavigationRailItem & { feature: string })[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
-  {
-    label: "People",
-    href: "/people",
-    icon: "person",
-    feature: "people",
-    children: [
-      { label: "People", href: "/people", icon: "person" },
-      { label: "Employees", href: "/employees", icon: "group" },
-    ],
-  },
-  { label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
-  {
-    label: "Engineering",
-    href: "/engineering",
-    icon: "engineering",
-    feature: "capacity",
-    children: [
-      { label: "Teams", href: "/engineering", icon: "engineering" },
-      { label: "Capacity", href: "/capacity", icon: "trending_up" },
-    ],
-  },
-  { label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
-  { label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
-  { label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
+const permissionBasedItems: SidebarNavItem[] = [
+  { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
+  { value: "people", label: "People", href: "/people", icon: "person", feature: "people" },
+  { value: "org-chart", label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
+  { value: "engineering", label: "Engineering", href: "/engineering", icon: "engineering", feature: "capacity" },
+  { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
+  { value: "reports", label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
+  { value: "calendar", label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
 ];
 
 /** Simple Strata logo SVG */
@@ -80,43 +68,65 @@ function StrataLogo() {
 }
 
 /**
- * Sidebar — M3 Navigation Rail with hover drawer
+ * Sidebar — M3 Navigation Rail
  *
  * - Super Admin: hardcoded Dashboard + Settings
  * - Manager/User: items filtered by backend permissions (hasFeatureAccess)
  */
 export function Sidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const { role } = useUserRole();
   const { hasFeatureAccess } = useUserPermissions();
   const { theme, setTheme } = useTheme();
 
   // Determine rail items based on role
-  let railItems: NavigationRailItem[];
+  let sidebarItems: SidebarNavItem[];
 
   if (role === "super_admin") {
-    // Super admin always sees Dashboard + Settings — hardcoded
-    railItems = superAdminRailItems;
+    sidebarItems = superAdminRailItems;
   } else {
-    // Manager/user: filter by backend permissions
-    // Always show Dashboard, filter the rest by feature access
-    railItems = permissionBasedItems
-      .filter((item) => item.feature === "dashboard" || hasFeatureAccess(item.feature))
-      .map(({ feature: _feature, ...item }) => item);
+    sidebarItems = permissionBasedItems.filter(
+      (item) => item.feature === "dashboard" || hasFeatureAccess(item.feature!)
+    );
   }
 
-  if (railItems.length === 0) return null;
+  if (sidebarItems.length === 0) return null;
+
+  // Derive active value from current pathname
+  const activeValue =
+    sidebarItems.find(
+      (item) =>
+        pathname === item.href || pathname.startsWith(item.href + "/")
+    )?.value ?? sidebarItems[0]?.value;
+
+  // Navigate on value change
+  const handleValueChange = (value: string) => {
+    const target = sidebarItems.find((item) => item.value === value);
+    if (target) router.push(target.href);
+  };
+
+  // Strip href/feature from items to match NavigationRailItem type
+  const railItems: NavigationRailItem[] = sidebarItems.map(
+    ({ href: _href, feature: _feature, ...item }) => item
+  );
 
   return (
-    <NavigationRail
-      items={railItems}
-      topAction={
-        <Tooltip content="Strata" side="right">
-          <div className="flex items-center justify-center w-12 h-12">
-            <StrataLogo />
-          </div>
-        </Tooltip>
-      }
-      bottomAction={
+    <div className="hidden md:block">
+      <NavigationRail
+        items={railItems}
+        activeValue={activeValue}
+        onValueChange={handleValueChange}
+        header={
+          <Tooltip content="Strata" side="right">
+            <div className="flex items-center justify-center w-12 h-12">
+              <StrataLogo />
+            </div>
+          </Tooltip>
+        }
+      />
+      {/* Theme toggle — positioned at bottom of rail */}
+      <div className="fixed left-0 bottom-0 z-40 w-20 hidden md:flex items-center justify-center pb-4">
         <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} side="right">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -126,7 +136,7 @@ export function Sidebar() {
             <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} className="text-surface-variant-foreground" />
           </button>
         </Tooltip>
-      }
-    />
+      </div>
+    </div>
   );
 }

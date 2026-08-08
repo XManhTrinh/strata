@@ -9,13 +9,14 @@ import {
   OrganizationUnit,
 } from "@/services/organizations.service";
 import { COMPANY_ID } from "@/services/admin.service";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Card, CardContent } from "@/components/ui/card";
-import { Chip } from "@/components/ui/chips";
+import { Button } from "@strata/mui/buttons";
+import { IconButton } from "@strata/mui/buttons";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Chip } from "@strata/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@/components/ui/tooltip";
-import { TextField } from "@/components/ui/text-field";
+import { Tooltip } from "@strata/mui";
+import { TextField } from "@strata/mui";
 import {
   Select,
   SelectTrigger,
@@ -29,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@strata/mui";
 import { toast } from "sonner";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -97,35 +98,33 @@ function OrgUnitTreeNode({
       >
         <div className="flex items-center gap-2">
           {hasChildren ? (
-            <Button
-              variant="ghost"
-              size="icon"
+            <IconButton
+              variant="standard"
+              size="xs"
               onClick={() => onToggle(node.id)}
-              className="h-8 w-8"
-              aria-expanded={isExpanded}
               aria-label={isExpanded ? `Collapse ${node.name}` : `Expand ${node.name}`}
             >
               <Icon name={isExpanded ? "expand_more" : "chevron_right"} size={20} />
-            </Button>
+            </IconButton>
           ) : (
             <span className="flex w-8 h-8 items-center justify-center">
-              <Icon name="remove" size={18} className="text-muted-foreground/40" />
+              <Icon name="remove" size={18} className="text-surface-variant-foreground/40" />
             </span>
           )}
           <Icon name={typeIcon} size={20} className="text-primary" />
-          <span className="text-[14px] leading-5 font-medium text-foreground">{node.name}</span>
+          <span className="text-[14px] leading-5 font-medium text-surface-foreground">{node.name}</span>
           <Chip variant="assist">{typeName}</Chip>
         </div>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
           <Tooltip content="Add child unit">
-            <Button
-              variant="ghost"
-              size="icon"
+            <IconButton
+              variant="standard"
+              size="xs"
               onClick={() => onAdd(node.id)}
               aria-label={`Add child unit under ${node.name}`}
             >
               <Icon name="add" size={18} className="text-primary" />
-            </Button>
+            </IconButton>
           </Tooltip>
         </div>
       </div>
@@ -236,24 +235,27 @@ export default function EngineeringPage() {
 
   if (isError) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <AppBar>
           <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Engineering</h1>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Organization structure — Departments, Tribes, Clusters, and Squads.
             </p>
           </div>
         </AppBar>
-        <Card variant="filled" className="max-w-lg mx-auto">
+        <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-error" />
             </div>
-            <p className="text-[14px] leading-5 text-destructive mb-6">
+            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+              Unable to load data
+            </h2>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
               {error?.message || "Failed to load organization data"}
             </p>
-            <Button variant="outline" onClick={() => refetch()}>
+            <Button variant="tonal" onClick={() => refetch()}>
               <Icon name="refresh" size={18} />
               Retry
             </Button>
@@ -265,16 +267,16 @@ export default function EngineeringPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <AppBar>
           <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Engineering</h1>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Organization structure — Departments, Tribes, Clusters, and Squads.
             </p>
           </div>
         </AppBar>
-        <Card variant="outlined">
+        <Card variant="elevated">
           <CardContent className="space-y-4 p-6">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3" style={{ paddingLeft: `${(i % 3) * 24}px` }}>
@@ -291,7 +293,7 @@ export default function EngineeringPage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -301,17 +303,17 @@ export default function EngineeringPage() {
       {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">Engineering</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Engineering</h1>
+          <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Organization structure — Departments, Tribes, Clusters, and Squads.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={expandAll}>
+          <Button variant="outlined" onClick={expandAll}>
             <Icon name="unfold_more" size={18} />
             Expand All
           </Button>
-          <Button variant="outline" onClick={collapseAll}>
+          <Button variant="outlined" onClick={collapseAll}>
             <Icon name="unfold_less" size={18} />
             Collapse All
           </Button>
@@ -323,14 +325,23 @@ export default function EngineeringPage() {
       </AppBar>
 
       {/* Tree */}
-      <Card variant="outlined">
+      <Card variant="elevated">
         <CardContent className="p-2">
           {tree.length === 0 ? (
             <div className="flex flex-col items-center py-12 text-center">
-              <Icon name="account_tree" size={40} className="text-muted-foreground/40 mb-2" />
-              <p className="text-[14px] leading-5 text-muted-foreground">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+                <Icon name="account_tree" size={24} className="text-surface-variant-foreground" />
+              </div>
+              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+                No units yet
+              </h2>
+              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
                 No organization units found. Create one to get started.
               </p>
+              <Button onClick={() => handleAdd(null)}>
+                <Icon name="add" size={18} />
+                Add Root Unit
+              </Button>
             </div>
           ) : (
             tree.map((node) => (
@@ -348,7 +359,7 @@ export default function EngineeringPage() {
 
       {/* Add Org Unit Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {addParentId ? "Add Child Unit" : "Add Root Unit"}
@@ -384,12 +395,12 @@ export default function EngineeringPage() {
             <DialogFooter className="mt-4">
               <Button
                 type="button"
-                variant="outline"
+                variant="text"
                 onClick={() => setShowAddDialog(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={createOrgUnit.isPending}>
+              <Button type="submit" variant="text" disabled={createOrgUnit.isPending}>
                 {createOrgUnit.isPending ? "Saving..." : "Save"}
               </Button>
             </DialogFooter>

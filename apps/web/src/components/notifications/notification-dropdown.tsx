@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip } from "@/components/ui/tooltip";
-import { Divider } from "@/components/ui/divider";
+import { IconButton } from "@strata/mui/buttons";
+import { Button } from "@strata/mui/buttons";
+import { Icon } from "@strata/mui";
+import { Badge } from "@strata/mui";
+import { Tooltip } from "@strata/mui";
+import { Divider } from "@strata/mui";
 
 interface Notification {
   id: string;
@@ -42,22 +43,17 @@ export function NotificationDropdown() {
   return (
     <div className="relative">
       <Tooltip content={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`} side="bottom">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
-          aria-expanded={isOpen}
-          aria-haspopup="true"
-          className="relative"
-        >
-          <Icon name="notifications" size={24} />
-          {unreadCount > 0 && (
-            <span className="absolute top-1 right-1">
-              <Badge variant="count" count={unreadCount} />
-            </span>
-          )}
-        </Button>
+        <Badge variant="count" count={unreadCount} visible={unreadCount > 0}>
+          <IconButton
+            variant="standard"
+            size="s"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
+            aria-expanded={isOpen}
+          >
+            <Icon name="notifications" size={24} />
+          </IconButton>
+        </Badge>
       </Tooltip>
 
       {isOpen && (
@@ -75,8 +71,8 @@ export function NotificationDropdown() {
               <h3 className="text-[14px] leading-5 font-medium text-foreground">Notifications</h3>
               {unreadCount > 0 && (
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant="text"
+                  size="s"
                   onClick={markAllAsRead}
                   className="text-[12px] text-primary"
                 >
@@ -123,15 +119,15 @@ export function NotificationDropdown() {
                     </div>
                     {!notification.isRead && (
                       <Tooltip content="Mark as read" side="left">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 shrink-0"
+                        <IconButton
+                          variant="standard"
+                          size="xs"
+                          compact
                           onClick={() => markAsRead(notification.id)}
                           aria-label="Mark as read"
                         >
                           <Icon name="done" size={18} className="text-primary" />
-                        </Button>
+                        </IconButton>
                       </Tooltip>
                     )}
                   </div>

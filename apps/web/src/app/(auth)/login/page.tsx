@@ -3,9 +3,12 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { TextField } from "@/components/ui/text-field";
-import { Divider } from "@/components/ui/divider";
+import { Button } from "@strata/mui/buttons";
+import { TextField } from "@strata/mui";
+import { Divider } from "@strata/mui";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -69,7 +72,6 @@ export default function LoginPage() {
   const handleSSOLogin = (e: FormEvent) => {
     e.preventDefault();
     if (!ssoOrgId.trim()) return;
-    // SSO org-based login still redirects to backend SSO endpoint
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     window.location.href = `${API_URL}/auth/sso/${ssoOrgId.trim()}/login?returnUrl=${encodeURIComponent("/")}`;
   };
@@ -79,160 +81,194 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      {/* Show loading spinner while checking existing session */}
+    <main className="flex min-h-screen items-center justify-center bg-surface p-4">
+      {/* Loading skeleton while checking session */}
       {isLoading && !email && !password ? (
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground">Checking session...</p>
-        </div>
+        <Card variant="elevated" className="w-full max-w-[400px]">
+          <CardContent className="flex flex-col items-center gap-6 py-10">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64" />
+            <div className="w-full space-y-4 pt-4">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-12 w-full rounded-full" />
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-      <div className="w-full max-w-sm space-y-6 p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Sign in to Strata</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Enter your credentials to access the platform.
-          </p>
-        </div>
-
-        {!showSSO ? (
-          <>
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              {error && (
-                <div className="rounded-md border border-error/30 bg-error/10 p-3">
-                  <p className="text-sm text-error">{error}</p>
-                </div>
-              )}
-
-              <TextField
-                id="email"
-                type="email"
-                variant="outlined"
-                label="Email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (emailError) validateEmail(e.target.value);
-                }}
-                onBlur={() => validateEmail(email)}
-                placeholder="you@company.com"
-                error={!!emailError}
-                errorText={emailError}
-                autoComplete="email"
-                aria-invalid={!!emailError}
-                aria-describedby={emailError ? "email-error" : undefined}
-              />
-
-              <TextField
-                id="password"
-                type="password"
-                variant="outlined"
-                label="Password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (passwordError) validatePassword(e.target.value);
-                }}
-                onBlur={() => validatePassword(password)}
-                placeholder="••••••••"
-                error={!!passwordError}
-                errorText={passwordError}
-                autoComplete="current-password"
-                aria-invalid={!!passwordError}
-                aria-describedby={passwordError ? "password-error" : undefined}
-              />
-
-              <Button
-                type="submit"
-                disabled={isLoading}
-                size="lg"
-                className="w-full"
-              >
-                {isLoading ? "Signing in..." : "Sign in"}
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Divider />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or</span>
-              </div>
+        <Card variant="elevated" className="w-full max-w-[400px]">
+          <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
+            {/* Brand logo */}
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Icon name="shield" size={40} className="text-primary" filled />
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => loginWithGoogle("/")}
-            >
-              Sign in with Google
-            </Button>
+            {/* Title & description */}
+            <div className="text-center space-y-1">
+              <h1 className="text-[24px] font-normal leading-[32px] text-surface-foreground">
+                Sign in to Strata
+              </h1>
+              <p className="text-[16px] leading-[24px] tracking-[0.5px] text-surface-variant-foreground">
+                Enter your credentials to continue
+              </p>
+            </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => setShowSSO(true)}
-            >
-              Sign in with SSO
-            </Button>
-          </>
-        ) : (
-          <form onSubmit={handleSSOLogin} className="space-y-4">
-            <TextField
-              id="sso-org"
-              type="text"
-              variant="outlined"
-              label="Organization ID"
-              value={ssoOrgId}
-              onChange={(e) => setSsoOrgId(e.target.value)}
-              placeholder="Enter your organization ID"
-              autoFocus
-            />
+            {!showSSO ? (
+              <div className="w-full space-y-5">
+                {/* Credential form */}
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                  {error && (
+                    <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
+                      <Icon name="error" size={20} className="text-error shrink-0" />
+                      <p className="text-[14px] leading-[20px] text-error">{error}</p>
+                    </div>
+                  )}
 
-            <Button
-              type="submit"
-              disabled={!ssoOrgId.trim()}
-              size="lg"
-              className="w-full"
-            >
-              Continue with SSO
-            </Button>
+                  <TextField
+                    id="email"
+                    type="email"
+                    variant="outlined"
+                    label="Email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) validateEmail(e.target.value);
+                    }}
+                    onBlur={() => validateEmail(email)}
+                    placeholder="you@company.com"
+                    error={!!emailError}
+                    errorText={emailError}
+                    autoComplete="email"
+                    leadingIcon={<Icon name="mail" size={20} />}
+                    aria-invalid={!!emailError}
+                    aria-describedby={emailError ? "email-error" : undefined}
+                  />
 
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => setShowSSO(false)}
-            >
-              Back to email login
-            </Button>
-          </form>
-        )}
+                  <TextField
+                    id="password"
+                    type="password"
+                    variant="outlined"
+                    label="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (passwordError) validatePassword(e.target.value);
+                    }}
+                    onBlur={() => validatePassword(password)}
+                    placeholder="••••••••"
+                    error={!!passwordError}
+                    errorText={passwordError}
+                    autoComplete="current-password"
+                    leadingIcon={<Icon name="lock" size={20} />}
+                    aria-invalid={!!passwordError}
+                    aria-describedby={passwordError ? "password-error" : undefined}
+                  />
 
-        {/* Dev login */}
-        <div className="pt-4">
-          <Divider className="mb-4" />
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="w-full border-dashed border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/50"
-            onClick={handleDevLogin}
-            disabled={isLoading}
-          >
-            🚀 Dev Login (skip auth)
-          </Button>
-          <p className="mt-1.5 text-[10px] text-center text-muted-foreground">
-            Development only — calls /auth/dev-login endpoint
-          </p>
-        </div>
-      </div>
+                  <Button
+                    type="submit"
+                    variant="filled"
+                    disabled={isLoading}
+                    loading={isLoading}
+                    size="l"
+                    className="w-full"
+                  >
+                    {isLoading ? "Signing in..." : "Sign in"}
+                  </Button>
+                </form>
+
+                {/* Divider */}
+                <div className="relative flex items-center gap-4">
+                  <Divider className="flex-1" />
+                  <span className="text-[12px] leading-[16px] tracking-[0.5px] text-surface-variant-foreground uppercase">
+                    Or continue with
+                  </span>
+                  <Divider className="flex-1" />
+                </div>
+
+                {/* Social / SSO buttons */}
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="tonal"
+                    size="l"
+                    className="w-full"
+                    icon={<Icon name="public" size={20} />}
+                    onClick={() => loginWithGoogle("/")}
+                  >
+                    Sign in with Google
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    size="l"
+                    className="w-full"
+                    icon={<Icon name="domain" size={20} />}
+                    onClick={() => setShowSSO(true)}
+                  >
+                    Sign in with SSO
+                  </Button>
+                </div>
+
+                {/* Dev login */}
+                <div className="pt-2">
+                  <Divider className="mb-4" />
+                  <Button
+                    type="button"
+                    variant="text"
+                    size="s"
+                    className="w-full text-warning"
+                    icon={<Icon name="rocket_launch" size={20} />}
+                    onClick={handleDevLogin}
+                    disabled={isLoading}
+                  >
+                    Dev Login (skip auth)
+                  </Button>
+                  <p className="mt-1 text-[11px] text-center text-surface-variant-foreground">
+                    Development only — calls /auth/dev-login endpoint
+                  </p>
+                </div>
+              </div>
+            ) : (
+              /* SSO org input form */
+              <form onSubmit={handleSSOLogin} className="w-full space-y-4" noValidate>
+                <TextField
+                  id="sso-org"
+                  type="text"
+                  variant="outlined"
+                  label="Organization ID"
+                  value={ssoOrgId}
+                  onChange={(e) => setSsoOrgId(e.target.value)}
+                  placeholder="Enter your organization ID"
+                  leadingIcon={<Icon name="corporate_fare" size={20} />}
+                  autoFocus
+                />
+
+                <Button
+                  type="submit"
+                  variant="filled"
+                  disabled={!ssoOrgId.trim()}
+                  size="l"
+                  className="w-full"
+                >
+                  Continue with SSO
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="text"
+                  size="s"
+                  className="w-full"
+                  icon={<Icon name="arrow_back" size={20} />}
+                  onClick={() => setShowSSO(false)}
+                >
+                  Back to email login
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       )}
     </main>
   );

@@ -5,7 +5,7 @@ import { ApiPersonRepository } from "@/lib/org-tree/ApiPersonRepository";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
 import { buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
-import { Button } from "@/components/ui/button";
+import { Button } from "@strata/mui/buttons";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnits } from "@/services";
 import OrgFlow from "@/components/flow-org/OrgFlow";
@@ -307,7 +307,7 @@ export default function OrgChartPage() {
                 Confirm
               </Button>
               <Button
-                variant="ghost"
+                variant="text"
                 onClick={() => setPendingGroupMove(null)}
               >
                 Cancel

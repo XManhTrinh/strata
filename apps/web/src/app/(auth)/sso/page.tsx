@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@strata/mui/buttons";
+import { TextField } from "@strata/mui";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Divider } from "@strata/mui";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -24,61 +28,76 @@ export default function SSOLoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-6 p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Sign in with SSO</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Enter your organization ID to continue with Single Sign-On.
-          </p>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-surface p-4">
+      <Card variant="elevated" className="w-full max-w-[400px]">
+        <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
+          {/* Brand icon */}
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <Icon name="domain" size={40} className="text-primary" filled />
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
-            </div>
-          )}
+          {/* Title & description */}
+          <div className="text-center space-y-1">
+            <h1 className="text-[24px] font-normal leading-[32px] text-surface-foreground">
+              Enterprise SSO
+            </h1>
+            <p className="text-[16px] leading-[24px] tracking-[0.5px] text-surface-variant-foreground">
+              Enter your organization ID to continue with Single Sign-On
+            </p>
+          </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="org-id" className="text-sm font-medium text-foreground">
-              Organization ID
-            </label>
-            <input
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="w-full space-y-4" noValidate>
+            {error && (
+              <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
+                <Icon name="error" size={20} className="text-error shrink-0" />
+                <p className="text-[14px] leading-[20px] text-error">{error}</p>
+              </div>
+            )}
+
+            <TextField
               id="org-id"
               type="text"
+              variant="outlined"
+              label="Organization ID"
               value={organizationId}
               onChange={(e) => {
                 setOrganizationId(e.target.value);
                 if (error) setError("");
               }}
               placeholder="your-organization-id"
-              className="h-10 w-full rounded-sm border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              error={!!error}
+              errorText={error}
+              leadingIcon={<Icon name="corporate_fare" size={20} />}
               autoFocus
               aria-invalid={!!error}
               aria-describedby={error ? "org-error" : undefined}
             />
-            {error && (
-              <p id="org-error" className="text-xs text-red-600 dark:text-red-400">
-                {error}
-              </p>
-            )}
-          </div>
 
-          <Button type="submit" size="lg" className="w-full">
-            Continue with SSO
-          </Button>
+            <Button
+              type="submit"
+              variant="filled"
+              size="l"
+              className="w-full"
+            >
+              Continue with SSO
+            </Button>
 
-          <div className="text-center">
-            <a
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            <Divider className="my-2" />
+
+            <Button
+              type="button"
+              variant="text"
+              size="s"
+              className="w-full"
+              icon={<Icon name="arrow_back" size={20} />}
+              onClick={() => window.location.href = "/login"}
             >
               Back to email login
-            </a>
-          </div>
-        </form>
-      </div>
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

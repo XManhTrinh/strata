@@ -1,24 +1,18 @@
 @import "tailwindcss";
+@import "@strata/mui/theme.css";
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   App-specific theme extensions (shadcn compatibility layer)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 @theme {
+  /* shadcn/ui compatibility aliases */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--on-primary));
-  --color-primary-container: hsl(var(--primary-container));
-  --color-primary-container-foreground: hsl(var(--on-primary-container));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--on-secondary));
-  --color-secondary-container: hsl(var(--secondary-container));
-  --color-secondary-container-foreground: hsl(var(--on-secondary-container));
-  --color-tertiary: hsl(var(--tertiary));
-  --color-tertiary-foreground: hsl(var(--on-tertiary));
-  --color-tertiary-container: hsl(var(--tertiary-container));
-  --color-tertiary-container-foreground: hsl(var(--on-tertiary-container));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-accent: hsl(var(--accent));
@@ -28,20 +22,14 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --color-surface: hsl(var(--surface));
-  --color-surface-foreground: hsl(var(--on-surface));
-  --color-surface-variant: hsl(var(--surface-variant));
-  --color-surface-variant-foreground: hsl(var(--on-surface-variant));
-  --color-outline: hsl(var(--outline));
-  --color-outline-variant: hsl(var(--outline-variant));
-  --color-error: hsl(var(--error));
-  --color-error-foreground: hsl(var(--on-error));
 
+  /* Spacing scale */
   --spacing-page: 32px;
   --spacing-section: 24px;
   --spacing-card: 16px;
   --spacing-compact: 8px;
 
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,46 +38,7 @@
 }
 
 :root {
-  /* Facebook Blue Primary */
-  --primary: 214 89% 52%;
-  --on-primary: 0 0% 100%;
-  --primary-container: 214 100% 93%;
-  --on-primary-container: 214 100% 20%;
-
-  /* Secondary — muted blue-gray */
-  --secondary: 214 15% 46%;
-  --on-secondary: 0 0% 100%;
-  --secondary-container: 214 20% 92%;
-  --on-secondary-container: 214 20% 18%;
-
-  /* Tertiary — green accent (like Messenger) */
-  --tertiary: 160 60% 42%;
-  --on-tertiary: 0 0% 100%;
-  --tertiary-container: 160 60% 92%;
-  --on-tertiary-container: 160 60% 16%;
-
-  /* Surface — clean white with subtle cool undertone */
-  --surface: 210 20% 99%;
-  --on-surface: 210 20% 10%;
-  --surface-variant: 210 14% 94%;
-  --on-surface-variant: 210 10% 34%;
-
-  /* Outline */
-  --outline: 210 8% 56%;
-  --outline-variant: 210 12% 82%;
-
-  /* Error */
-  --error: 0 75% 42%;
-  --on-error: 0 0% 100%;
-
-  /* Elevation */
-  --elevation-1: 0 0% 0% / 0.04;
-  --elevation-2: 0 0% 0% / 0.06;
-  --elevation-3: 0 0% 0% / 0.08;
-  --elevation-4: 0 0% 0% / 0.10;
-  --elevation-5: 0 0% 0% / 0.12;
-
-  /* shadcn mappings */
+  /* shadcn aliases pointing to M3 tokens */
   --background: var(--surface);
   --foreground: var(--on-surface);
   --card: 0 0% 100%;
@@ -106,54 +55,9 @@
   --input: var(--outline-variant);
   --ring: var(--primary);
   --radius: 0.75rem;
-
-  /* State layers */
-  --state-hover: 0.08;
-  --state-focus: 0.12;
-  --state-press: 0.12;
 }
 
 .dark {
-  /* Facebook Blue Primary — lighter for dark bg */
-  --primary: 214 100% 66%;
-  --on-primary: 214 100% 16%;
-  --primary-container: 214 80% 28%;
-  --on-primary-container: 214 100% 90%;
-
-  /* Secondary */
-  --secondary: 214 20% 72%;
-  --on-secondary: 214 20% 18%;
-  --secondary-container: 214 15% 26%;
-  --on-secondary-container: 214 20% 90%;
-
-  /* Tertiary */
-  --tertiary: 160 50% 68%;
-  --on-tertiary: 160 60% 14%;
-  --tertiary-container: 160 50% 24%;
-  --on-tertiary-container: 160 60% 90%;
-
-  /* Surface — Facebook dark mode charcoal */
-  --surface: 214 14% 11%;
-  --on-surface: 210 10% 90%;
-  --surface-variant: 214 12% 18%;
-  --on-surface-variant: 210 8% 68%;
-
-  /* Outline */
-  --outline: 210 8% 44%;
-  --outline-variant: 214 10% 24%;
-
-  /* Error */
-  --error: 0 80% 72%;
-  --on-error: 0 100% 18%;
-
-  /* Elevation */
-  --elevation-1: 0 0% 100% / 0.04;
-  --elevation-2: 0 0% 100% / 0.06;
-  --elevation-3: 0 0% 100% / 0.08;
-  --elevation-4: 0 0% 100% / 0.10;
-  --elevation-5: 0 0% 100% / 0.12;
-
-  /* shadcn mappings */
   --background: var(--surface);
   --foreground: var(--on-surface);
   --card: 214 14% 14%;
@@ -170,6 +74,10 @@
   --input: var(--outline-variant);
   --ring: var(--primary);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Base styles
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 body {
   background-color: hsl(var(--background));
@@ -205,61 +113,6 @@ summary {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
-
-/* Reduced motion: disable all animations when user prefers */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* M3 Ripple animation */
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0;
-  }
-}
-
-/* M3 Ripple effect — CSS-only, no React re-renders */
-@keyframes ripple {
-  to {
-    transform: translate(-50%, -50%) scale(4);
-    opacity: 0;
-  }
-}
-.ripple-effect {
-  position: relative;
-  overflow: hidden;
-}
-.ripple-effect::after {
-  content: '';
-  display: block;
-  position: absolute;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
-  background: currentColor;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-}
-.ripple-effect:active::after {
-  opacity: 0.12;
-  transform: translate(-50%, -50%) scale(0);
-  animation: ripple 0.5s ease-out;
 }
 
 /* Mobile nav padding for content */

@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
 import { AppBar } from "@/components/layout/app-bar";
-import { Icon } from "@/components/ui/icon";
-import { Chip } from "@/components/ui/chips";
-import { SearchBar } from "@/components/ui/search-bar";
+import { Icon } from "@strata/mui";
+import { Chip } from "@strata/mui";
+import { Search } from "@strata/mui";
 import type { OrganizationUnit } from "@/services";
 
 interface FlowOrgHeaderProps {
@@ -110,7 +110,7 @@ export default function FlowOrgHeader({
         </div>
 
         {/* Search */}
-        <SearchBar
+        <Search
           className="flex-1 max-w-xs"
           value={search}
           onValueChange={onSearchChange}
@@ -247,10 +247,10 @@ export default function FlowOrgHeader({
       {pathToRoot && pathToRoot.length > 0 && (
         <div className="px-6 py-2 border-b border-outline-variant">
           <div className="text-[12px] text-muted-foreground flex items-center gap-1 flex-wrap">
-            <Icon name="route" size={16} className="text-primary mr-1" />
+            <Icon name="route" size={18} className="text-primary mr-1" />
             {pathToRoot.map((name, i) => (
               <span key={i} className="flex items-center gap-1">
-                {i > 0 && <Icon name="chevron_right" size={14} className="text-muted-foreground" />}
+                {i > 0 && <Icon name="chevron_right" size={18} className="text-muted-foreground" />}
                 <span className={i === pathToRoot.length - 1 ? "font-medium text-primary" : ""}>
                   {name}
                 </span>

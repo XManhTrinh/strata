@@ -5,13 +5,13 @@ import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees } from "@/services";
 import { useLeaveRequests } from "@/services";
 import { useCalendarEvents } from "@/services";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@strata/mui/buttons";
+import { Card, CardContent, CardHeader, CardTitle } from "@strata/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@/components/ui/icon";
-import { List, ListItem } from "@/components/ui/list";
-import { Divider } from "@/components/ui/divider";
-import { Chip } from "@/components/ui/chips";
+import { Icon } from "@strata/mui";
+import { List, ListItem } from "@strata/mui";
+import { Divider } from "@strata/mui";
+import { Chip } from "@strata/mui";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 const COMPANY_ID = "cm_acme_corp_001";
@@ -24,32 +24,55 @@ interface StatCardData {
   iconColor: string;
 }
 
+/* ─── Loading Skeletons ────────────────────────────────────────────────────── */
+
 function StatCardSkeleton() {
   return (
-    <Card variant="outlined">
-      <CardContent className="flex items-center gap-4 p-6">
-        <Skeleton className="h-12 w-12 rounded-2xl" />
-        <div className="flex-1">
-          <Skeleton className="h-9 w-16 mb-1" />
-          <Skeleton className="h-5 w-24" />
+    <Card variant="elevated">
+      <CardContent className="flex flex-col gap-3 p-6">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-4 w-28" />
         </div>
       </CardContent>
     </Card>
   );
 }
 
+function ActivitySkeleton() {
+  return (
+    <div className="px-4 space-y-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 py-3">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-3.5 w-28" />
+          </div>
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Stat Card ────────────────────────────────────────────────────────────── */
+
 function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData) {
   return (
-    <Card variant="outlined">
-      <CardContent className="flex items-center gap-4 p-6">
-        <div className={`flex items-center justify-center h-12 w-12 rounded-2xl ${tint}`}>
-          <Icon name={icon} size={24} className={iconColor} />
+    <Card variant="elevated">
+      <CardContent className="flex flex-col gap-3 p-6">
+        <div
+          className={`flex items-center justify-center h-10 w-10 rounded-full ${tint}`}
+        >
+          <Icon name={icon} size={20} className={iconColor} />
         </div>
         <div>
-          <p className="text-[36px] leading-11 font-normal text-foreground">
+          <p className="text-[32px] leading-10 font-normal tracking-tight text-surface-foreground">
             {value}
           </p>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <p className="text-[14px] leading-5 font-normal text-surface-variant-foreground mt-1">
             {label}
           </p>
         </div>
@@ -57,6 +80,8 @@ function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData
     </Card>
   );
 }
+
+/* ─── Main Page ────────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
   const {
@@ -127,32 +152,34 @@ export default function DashboardPage() {
     },
   ];
 
+  /* ─── Error State ──────────────────────────────────────────────────────── */
+
   if (hasError) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         <AppBar>
           <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
               Dashboard
             </h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
-              Overview of your organization&apos;s key metrics
-            </p>
           </div>
         </AppBar>
         <Card variant="filled" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-destructive" />
             </div>
-            <p className="text-[14px] leading-5 text-destructive mb-6">
+            <p className="text-[16px] leading-6 font-medium text-surface-foreground mb-2">
+              Something went wrong
+            </p>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
               {employeesErr?.message ||
                 leaveErr?.message ||
                 eventsErr?.message ||
-                "Failed to load dashboard data"}
+                "Failed to load dashboard data. Please try again."}
             </p>
             <Button
-              variant="outline"
+              variant="filled"
               onClick={() => {
                 refetchEmployees();
                 refetchLeave();
@@ -168,140 +195,151 @@ export default function DashboardPage() {
     );
   }
 
+  /* ─── Main Dashboard ───────────────────────────────────────────────────── */
+
   return (
     <motion.div
-      className="space-y-8"
+      className="flex flex-col gap-6"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
       exit="exit"
       transition={defaultTransition}
     >
-      {/* Header */}
+      {/* ─── Page Header ─────────────────────────────────────────────────── */}
       <AppBar>
-        <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
             Dashboard
           </h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Overview of your organization&apos;s key metrics
           </p>
         </div>
       </AppBar>
 
-      {/* Stat Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {isLoading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <StatCardSkeleton key={i} />
-            ))
-          : stats.map((stat) => (
-              <DashboardStatCard key={stat.label} {...stat} />
-            ))}
-      </div>
+      {/* ─── KPI Stats Grid ──────────────────────────────────────────────── */}
+      <section aria-label="Key metrics">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <StatCardSkeleton key={i} />
+              ))
+            : stats.map((stat) => (
+                <DashboardStatCard key={stat.label} {...stat} />
+              ))}
+        </div>
+      </section>
 
       <Divider />
 
-      {/* Two-column layout */}
+      {/* ─── Content Grid: Activity + Quick Actions ──────────────────────── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left: Upcoming Events */}
-        <Card variant="elevated" className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-[16px] leading-6 font-medium">
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-0 pt-0">
-            {isLoading ? (
-              <div className="px-4 space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4 py-2">
-                    <Skeleton className="h-6 w-6 rounded-md" />
-                    <div className="flex-1">
-                      <Skeleton className="h-5 w-48 mb-1" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                    <Skeleton className="h-8 w-16 rounded-lg" />
+        {/* ─── Recent Activity / Upcoming Events ─────────────────────────── */}
+        <section className="lg:col-span-2" aria-label="Upcoming events">
+          <Card variant="elevated">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-[16px] leading-6 font-medium text-surface-foreground">
+                Upcoming Events
+              </CardTitle>
+              <Chip variant="assist" leadingIcon="calendar_month">
+                Next 30 days
+              </Chip>
+            </CardHeader>
+            <CardContent className="px-0 pt-0 pb-2">
+              {isLoading ? (
+                <ActivitySkeleton />
+              ) : (eventsData ?? []).length === 0 ? (
+                <div className="flex flex-col items-center py-12 text-center">
+                  <div className="flex items-center justify-center h-14 w-14 rounded-full bg-surface-variant mb-3">
+                    <Icon
+                      name="event_available"
+                      size={24}
+                      className="text-surface-variant-foreground"
+                    />
                   </div>
-                ))}
-              </div>
-            ) : (eventsData ?? []).length === 0 ? (
-              <div className="flex flex-col items-center py-8 text-center">
-                <Icon
-                  name="event_available"
-                  size={40}
-                  className="text-muted-foreground/40 mb-2"
-                />
-                <p className="text-[14px] leading-5 text-muted-foreground">
-                  No upcoming events
-                </p>
-              </div>
-            ) : (
-              <List dividers>
-                {(eventsData ?? []).slice(0, 5).map((event) => (
-                  <ListItem
-                    key={event.id}
-                    lines={2}
-                    headline={event.title}
-                    supportingText={new Date(
-                      event.startDate
-                    ).toLocaleDateString(undefined, {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                    leadingIcon="calendar_today"
-                    trailingContent={
-                      <Chip variant="assist" leadingIcon={event.allDay ? "sunny" : "schedule"}>
-                        {event.allDay ? "All day" : "Timed"}
-                      </Chip>
-                    }
-                    interactive={false}
-                  />
-                ))}
-              </List>
-            )}
-          </CardContent>
-        </Card>
+                  <p className="text-[16px] leading-6 font-medium text-surface-foreground mb-1">
+                    All clear
+                  </p>
+                  <p className="text-[14px] leading-5 text-surface-variant-foreground">
+                    No upcoming events in the next 30 days
+                  </p>
+                </div>
+              ) : (
+                <List>
+                  {(eventsData ?? []).slice(0, 5).map((event) => (
+                    <ListItem
+                      key={event.id}
+                      lines={2}
+                      leading={
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
+                          <Icon
+                            name="calendar_today"
+                            size={20}
+                            className="text-primary"
+                          />
+                        </div>
+                      }
+                      supporting={new Date(
+                        event.startDate
+                      ).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                      trailing={
+                        <Chip
+                          variant="assist"
+                          leadingIcon={event.allDay ? "sunny" : "schedule"}
+                        >
+                          {event.allDay ? "All day" : "Timed"}
+                        </Chip>
+                      }
+                    >
+                      {event.title}
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </section>
 
-        {/* Right: Quick Actions */}
-        <Card variant="elevated">
-          <CardHeader>
-            <CardTitle className="text-[16px] leading-6 font-medium">
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button
-              variant="secondary"
-              className="w-full justify-start"
-            >
-              <Icon name="person_add" size={20} />
-              Add Employee
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full justify-start"
-            >
-              <Icon name="account_tree" size={20} />
-              View Org Chart
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full justify-start"
-            >
-              <Icon name="event_available" size={20} />
-              Submit Leave
-            </Button>
-            <Button
-              variant="secondary"
-              className="w-full justify-start"
-            >
-              <Icon name="description" size={20} />
-              Generate Report
-            </Button>
-          </CardContent>
-        </Card>
+        {/* ─── Quick Actions ─────────────────────────────────────────────── */}
+        <section aria-label="Quick actions">
+          <Card variant="elevated" className="h-full">
+            <CardHeader>
+              <CardTitle className="text-[16px] leading-6 font-medium text-surface-foreground">
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 pt-0">
+              <Button variant="tonal" className="w-full justify-start gap-3">
+                <Icon name="person_add" size={20} />
+                Add Employee
+              </Button>
+              <Button variant="tonal" className="w-full justify-start gap-3">
+                <Icon name="account_tree" size={20} />
+                View Org Chart
+              </Button>
+              <Button variant="tonal" className="w-full justify-start gap-3">
+                <Icon name="event_available" size={20} />
+                Submit Leave
+              </Button>
+              <Button variant="tonal" className="w-full justify-start gap-3">
+                <Icon name="description" size={20} />
+                Generate Report
+              </Button>
+
+              <Divider className="my-2" />
+
+              <Button variant="filled" className="w-full justify-start gap-3">
+                <Icon name="add" size={20} />
+                New Request
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </motion.div>
   );

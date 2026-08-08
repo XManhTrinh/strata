@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion } from "motion/react";
-import { Badge } from "@strata/ui";
-import { SearchBar } from "@/components/ui/search-bar";
-import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { TextField } from "@/components/ui/text-field";
+import { motion, AnimatePresence } from "motion/react";
+import { Search } from "@strata/mui";
+import { Chip } from "@strata/mui";
+import { Button } from "@strata/mui/buttons";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Checkbox } from "@strata/mui";
+import { TextField } from "@strata/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Divider } from "@/components/ui/divider";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Divider } from "@strata/mui";
+import { Tooltip } from "@strata/mui";
+import { List, ListItem } from "@strata/mui";
 import {
   Select,
   SelectContent,
@@ -21,13 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AnimatedDialog,
-  AnimatedDialogContent,
-  AnimatedDialogHeader,
-  AnimatedDialogTitle,
-  AnimatedDialogDescription,
-  AnimatedDialogFooter,
-} from "@/components/ui/animated-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@strata/mui";
 import { toast } from "sonner";
 import {
   useRoles,
@@ -47,13 +47,13 @@ type Scope = "OWN" | "DIRECT_REPORTS" | "ORGANIZATION_UNIT" | "BRANCH" | "COMPAN
 
 const scopeOptions: Scope[] = ["OWN", "DIRECT_REPORTS", "ORGANIZATION_UNIT", "BRANCH", "COMPANY", "GLOBAL"];
 
-const scopeColors: Record<Scope, string> = {
-  OWN: "text-blue-600 dark:text-blue-400",
-  DIRECT_REPORTS: "text-purple-600 dark:text-purple-400",
-  ORGANIZATION_UNIT: "text-amber-600 dark:text-amber-400",
-  BRANCH: "text-green-600 dark:text-green-400",
-  COMPANY: "text-red-600 dark:text-red-400",
-  GLOBAL: "text-pink-600 dark:text-pink-400",
+const scopeLabels: Record<Scope, string> = {
+  OWN: "Own",
+  DIRECT_REPORTS: "Direct Reports",
+  ORGANIZATION_UNIT: "Org Unit",
+  BRANCH: "Branch",
+  COMPANY: "Company",
+  GLOBAL: "Global",
 };
 
 export default function RolesPage() {
@@ -68,6 +68,8 @@ export default function RolesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleDescription, setNewRoleDescription] = useState("");
+  const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
+  const [mobileShowPermissions, setMobileShowPermissions] = useState(false);
 
   const roles: AdminRole[] = backendRoles ?? [];
   const effectiveSelectedId = selectedRoleId ?? roles[0]?.id ?? null;
@@ -83,6 +85,27 @@ export default function RolesPage() {
     data: rolePermissionDetail,
     isLoading: permissionsLoading,
   } = useRolePermissions(COMPANY_ID, effectiveSelectedId ?? "");
+
+  const toggleFeatureExpanded = (featureId: string) => {
+    setExpandedFeatures((prev) => {
+      const next = new Set(prev);
+      if (next.has(featureId)) {
+        next.delete(featureId);
+      } else {
+        next.add(featureId);
+      }
+      return next;
+    });
+  };
+
+  const expandAll = () => {
+    const featureCatalog: AdminFeature[] = allFeatures ?? [];
+    setExpandedFeatures(new Set(featureCatalog.map((f) => f.id)));
+  };
+
+  const collapseAll = () => {
+    setExpandedFeatures(new Set());
+  };
 
   const handleCreateRole = () => {
     if (!newRoleName.trim()) return;
@@ -200,59 +223,116 @@ export default function RolesPage() {
     [effectiveSelectedId, addPermissionMutation, removePermissionMutation]
   );
 
+  // ─── Loading State ────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <AppBar className="justify-between">
-          <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Roles & Permissions</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
-              Manage roles and assign feature-level permissions with scope control.
-            </p>
-          </div>
-        </AppBar>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-          <Card variant="outlined">
-            <CardContent className="p-4 space-y-3">
+      <motion.div
+        className="flex flex-col h-full"
+        variants={pageTransitionVariants}
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        transition={defaultTransition}
+      >
+        <PageHeader onCreateClick={() => {}} />
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-0 mt-6 min-h-0">
+          {/* Skeleton: Role List */}
+          <div className="border-r border-outline-variant p-4 space-y-3">
+            <Skeleton className="h-14 w-full rounded-full" />
+            <div className="space-y-2 mt-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full rounded-lg" />
+                <Skeleton key={i} className="h-18 w-full rounded-lg" />
               ))}
-            </CardContent>
-          </Card>
-          <Card variant="outlined">
-            <CardContent className="p-4 space-y-4">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-64" />
-              <Skeleton className="h-40 w-full" />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+          {/* Skeleton: Permission Matrix */}
+          <div className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-72" />
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-48 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
+  // ─── Error State ──────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="space-y-8">
-        <AppBar className="justify-between">
-          <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Roles & Permissions</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
-              Manage roles and assign feature-level permissions with scope control.
-            </p>
-          </div>
-        </AppBar>
-        <Card variant="filled" className="max-w-lg mx-auto">
-          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+      <motion.div
+        className="flex flex-col h-full"
+        variants={pageTransitionVariants}
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        transition={defaultTransition}
+      >
+        <PageHeader onCreateClick={() => {}} />
+        <div className="flex-1 flex items-center justify-center">
+          <Card variant="outlined" className="max-w-sm w-full">
+            <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+              <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
+                <Icon name="error" size={24} className="text-destructive" />
+              </div>
+              <p className="text-[16px] leading-6 font-medium text-foreground mb-1">
+                Unable to load roles
+              </p>
+              <p className="text-[14px] leading-5 text-muted-foreground">
+                Something went wrong. Please try again later.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // ─── Empty State (No Roles) ───────────────────────────────────────────────────
+  if (roles.length === 0) {
+    return (
+      <motion.div
+        className="flex flex-col h-full"
+        variants={pageTransitionVariants}
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        transition={defaultTransition}
+      >
+        <PageHeader onCreateClick={() => setShowCreateModal(true)} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center text-center max-w-sm">
+            <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
+              <Icon name="shield" size={40} className="text-primary" />
             </div>
-            <p className="text-[14px] leading-5 text-destructive mb-6">
-              Failed to load roles. Please try again later.
+            <h2 className="text-[22px] leading-7 font-normal text-foreground mb-2">
+              No roles yet
+            </h2>
+            <p className="text-[14px] leading-5 text-muted-foreground mb-6">
+              Create your first role to start managing permissions and access control for your team.
             </p>
-          </CardContent>
-        </Card>
-      </div>
+            <Button onClick={() => setShowCreateModal(true)}>
+              <Icon name="add" size={18} />
+              Create your first role
+            </Button>
+          </div>
+        </div>
+        <CreateRoleDialog
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+          name={newRoleName}
+          onNameChange={setNewRoleName}
+          description={newRoleDescription}
+          onDescriptionChange={setNewRoleDescription}
+          onSubmit={handleCreateRole}
+          isPending={createRoleMutation.isPending}
+        />
+      </motion.div>
     );
   }
 
@@ -260,155 +340,275 @@ export default function RolesPage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="flex flex-col h-full"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
       exit="exit"
       transition={defaultTransition}
     >
-      {/* Header */}
-      <AppBar className="justify-between">
-        <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">Roles & Permissions</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
-            Manage roles and assign feature-level permissions with scope control.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleDuplicateRole}
-            disabled={createRoleMutation.isPending}
-          >
-            <Icon name="content_copy" size={18} />
-            Duplicate Role
-          </Button>
-          <Button onClick={() => setShowCreateModal(true)}>
-            <Icon name="add" size={18} />
-            Create Role
-          </Button>
-        </div>
-      </AppBar>
+      {/* Page Header */}
+      <PageHeader onCreateClick={() => setShowCreateModal(true)} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-        {/* Left Panel: Role List */}
-        <Card variant="outlined" className="overflow-hidden">
-          <div className="p-3 border-b border-outline-variant">
-            <SearchBar
+      {/* Master-Detail Layout */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
+        {/* Left Panel: Role Sidebar */}
+        <div className="border-b lg:border-b-0 lg:border-r border-outline-variant flex flex-col min-h-0">
+          {/* Search */}
+          <div className="p-3 shrink-0">
+            <Search
               value={roleSearch}
               onValueChange={setRoleSearch}
               placeholder="Search roles..."
+              className="min-w-0 w-full max-w-none mx-0"
             />
           </div>
-          <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
-            {filteredRoles.map((role) => (
-              <button
-                key={role.id}
-                type="button"
-                onClick={() => setSelectedRoleId(role.id)}
-                className={`w-full border-b border-outline-variant px-4 py-3 text-left transition-colors hover:bg-surface-foreground/8 ${
-                  role.id === effectiveSelectedId ? "bg-primary/8" : ""
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Icon name="shield" size={18} className={role.id === effectiveSelectedId ? "text-primary" : "text-muted-foreground"} />
-                  <span className="text-[14px] leading-5 font-medium text-foreground">{role.name}</span>
-                  {role.isSystem && (
-                    <Badge variant="info">System</Badge>
-                  )}
-                </div>
-                <p className="mt-0.5 text-[12px] leading-4 text-muted-foreground line-clamp-1 pl-[26px]">
-                  {role.description}
+          <Divider />
+
+          {/* Role List */}
+          <div className="flex-1 overflow-y-auto">
+            <List className="py-0">
+              {filteredRoles.map((role) => {
+                const isSelected = role.id === effectiveSelectedId;
+                return (
+                  <ListItem
+                    key={role.id}
+                    interactive
+                    selected={isSelected}
+                    lines={2}
+                    leading={
+                      <Icon
+                        name={isSelected ? "shield" : "shield"}
+                        size={24}
+                        className={isSelected ? "text-primary" : "text-surface-variant-foreground"}
+                      />
+                    }
+                    trailing={
+                      role.isSystem ? (
+                        <Chip variant="filter" selected className="text-[11px] h-6 px-2">
+                          System
+                        </Chip>
+                      ) : undefined
+                    }
+                    supporting={role.description ?? undefined}
+                    onClick={() => {
+                      setSelectedRoleId(role.id);
+                      setMobileShowPermissions(true);
+                    }}
+                  >
+                    {role.name}
+                  </ListItem>
+                );
+              })}
+            </List>
+            {filteredRoles.length === 0 && roleSearch && (
+              <div className="flex flex-col items-center py-8 text-center px-4">
+                <Icon name="search_off" size={24} className="text-muted-foreground/40 mb-2" />
+                <p className="text-[14px] leading-5 text-muted-foreground">
+                  No roles matching &ldquo;{roleSearch}&rdquo;
                 </p>
-              </button>
-            ))}
+              </div>
+            )}
           </div>
-        </Card>
+        </div>
 
         {/* Right Panel: Permission Matrix */}
-        {selectedRole && (
-          <Card variant="outlined" className="overflow-hidden">
-            <div className="border-b border-outline-variant px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-[16px] leading-6 font-medium text-foreground">{selectedRole.name}</h2>
-                  <p className="text-[12px] leading-4 text-muted-foreground">{selectedRole.description}</p>
+        <div className={`flex flex-col min-h-0 ${!mobileShowPermissions ? "hidden lg:flex" : "flex"}`}>
+          {selectedRole ? (
+            <>
+              {/* Role Detail Header */}
+              <div className="shrink-0 px-6 py-4 border-b border-outline-variant bg-surface-container-low/50">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      {/* Back button for mobile */}
+                      <button
+                        type="button"
+                        onClick={() => setMobileShowPermissions(false)}
+                        className="lg:hidden flex items-center justify-center h-10 w-10 -ml-2 rounded-full hover:bg-surface-foreground/8 transition-colors"
+                        aria-label="Back to roles"
+                      >
+                        <Icon name="arrow_back" size={20} />
+                      </button>
+                      <h2 className="text-[22px] leading-7 font-normal text-foreground truncate">
+                        {selectedRole.name}
+                      </h2>
+                      {selectedRole.isSystem && (
+                        <Chip variant="filter" selected className="shrink-0">
+                          System
+                        </Chip>
+                      )}
+                    </div>
+                    {selectedRole.description && (
+                      <p className="text-[14px] leading-5 text-muted-foreground lg:pl-0 pl-10">
+                        {selectedRole.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Tooltip content="Duplicate this role" side="bottom">
+                      <Button
+                        variant="tonal"
+                        onClick={handleDuplicateRole}
+                        disabled={createRoleMutation.isPending}
+                      >
+                        <Icon name="content_copy" size={18} />
+                        Duplicate
+                      </Button>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="max-h-[calc(100vh-320px)] overflow-y-auto p-4">
-              {(permissionsLoading || featuresLoading) ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <Skeleton className="h-5 w-32" />
-                      <Skeleton className="h-32 w-full rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <PermissionMatrix
-                  features={featureCatalog}
-                  rolePermissions={rolePermissionDetail}
-                  onToggle={handleTogglePermission}
-                  onScopeChange={handleScopeChange}
-                  isMutating={addPermissionMutation.isPending || removePermissionMutation.isPending}
-                />
-              )}
+              {/* Permission Matrix Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {(permissionsLoading || featuresLoading) ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="space-y-3">
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-40 w-full rounded-xl" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <PermissionMatrix
+                    features={featureCatalog}
+                    rolePermissions={rolePermissionDetail}
+                    onToggle={handleTogglePermission}
+                    onScopeChange={handleScopeChange}
+                    isMutating={addPermissionMutation.isPending || removePermissionMutation.isPending}
+                    expandedFeatures={expandedFeatures}
+                    onToggleFeature={toggleFeatureExpanded}
+                    onExpandAll={expandAll}
+                    onCollapseAll={collapseAll}
+                  />
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center text-center px-4">
+                <Icon name="shield" size={48} className="text-muted-foreground/30 mb-3" />
+                <p className="text-[14px] leading-5 text-muted-foreground">
+                  Select a role to view permissions
+                </p>
+              </div>
             </div>
-          </Card>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Create Role Modal */}
-      <AnimatedDialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <AnimatedDialogContent className="sm:max-w-md">
-          <AnimatedDialogHeader>
-            <AnimatedDialogTitle>Create Role</AnimatedDialogTitle>
-            <AnimatedDialogDescription>
-              Create a new role. You can assign permissions after creation.
-            </AnimatedDialogDescription>
-          </AnimatedDialogHeader>
-          <div className="space-y-4">
-            <TextField
-              variant="outlined"
-              label="Name"
-              value={newRoleName}
-              onChange={(e) => setNewRoleName(e.target.value)}
-              placeholder="e.g., Finance Administrator"
-              onKeyDown={(e) => { if (e.key === "Enter") handleCreateRole(); }}
-            />
-            <TextField
-              variant="outlined"
-              label="Description"
-              value={newRoleDescription}
-              onChange={(e) => setNewRoleDescription(e.target.value)}
-              placeholder="Brief description of this role's responsibilities"
-            />
-          </div>
-          <AnimatedDialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => { setShowCreateModal(false); setNewRoleName(""); setNewRoleDescription(""); }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateRole}
-              disabled={!newRoleName.trim() || createRoleMutation.isPending}
-            >
-              {createRoleMutation.isPending ? "Creating..." : "Create"}
-            </Button>
-          </AnimatedDialogFooter>
-        </AnimatedDialogContent>
-      </AnimatedDialog>
+      {/* Create Role Dialog */}
+      <CreateRoleDialog
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        name={newRoleName}
+        onNameChange={setNewRoleName}
+        description={newRoleDescription}
+        onDescriptionChange={setNewRoleDescription}
+        onSubmit={handleCreateRole}
+        isPending={createRoleMutation.isPending}
+      />
     </motion.div>
   );
 }
 
-// ─── Permission Matrix Component ──────────────────────────────────────────────
+// ─── Page Header ────────────────────────────────────────────────────────────────
+
+function PageHeader({ onCreateClick }: { onCreateClick: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-4 shrink-0">
+      <div>
+        <h1 className="text-[24px] leading-8 font-normal text-foreground">
+          Roles & Permissions
+        </h1>
+        <p className="text-[14px] leading-5 text-muted-foreground mt-1">
+          Define roles and manage feature-level access with granular scope control.
+        </p>
+      </div>
+      <Button onClick={onCreateClick} className="shrink-0">
+        <Icon name="add" size={18} />
+        Create Role
+      </Button>
+    </div>
+  );
+}
+
+// ─── Create Role Dialog ─────────────────────────────────────────────────────────
+
+interface CreateRoleDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  name: string;
+  onNameChange: (value: string) => void;
+  description: string;
+  onDescriptionChange: (value: string) => void;
+  onSubmit: () => void;
+  isPending: boolean;
+}
+
+function CreateRoleDialog({
+  open,
+  onOpenChange,
+  name,
+  onNameChange,
+  description,
+  onDescriptionChange,
+  onSubmit,
+  isPending,
+}: CreateRoleDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent icon="shield">
+        <DialogHeader centered>
+          <DialogTitle>Create Role</DialogTitle>
+          <DialogDescription>
+            Create a new role to assign feature permissions and scope access.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          <TextField
+            variant="outlined"
+            label="Role Name"
+            value={name}
+            onChange={(e) => onNameChange(e.target.value)}
+            placeholder="e.g., Finance Administrator"
+            onKeyDown={(e) => { if (e.key === "Enter") onSubmit(); }}
+          />
+          <TextField
+            variant="outlined"
+            label="Description"
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            placeholder="Brief description of responsibilities"
+          />
+        </div>
+        <DialogFooter>
+          <Button
+            variant="text"
+            onClick={() => {
+              onOpenChange(false);
+              onNameChange("");
+              onDescriptionChange("");
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="text"
+            onClick={onSubmit}
+            disabled={!name.trim() || isPending}
+          >
+            {isPending ? "Creating..." : "Create"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Permission Matrix Component ────────────────────────────────────────────────
 
 interface PermissionMatrixProps {
   features: AdminFeature[];
@@ -416,95 +616,166 @@ interface PermissionMatrixProps {
   onToggle: (featurePermissionId: string, checked: boolean, existingPermId?: string) => void;
   onScopeChange: (featurePermissionId: string, newScope: Scope, existingPermId?: string) => void;
   isMutating: boolean;
+  expandedFeatures: Set<string>;
+  onToggleFeature: (featureId: string) => void;
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
 }
 
-function PermissionMatrix({ features, rolePermissions, onToggle, onScopeChange, isMutating }: PermissionMatrixProps) {
+function PermissionMatrix({
+  features,
+  rolePermissions,
+  onToggle,
+  onScopeChange,
+  isMutating,
+  expandedFeatures,
+  onToggleFeature,
+  onExpandAll,
+  onCollapseAll,
+}: PermissionMatrixProps) {
   if (!features.length) {
     return (
-      <div className="flex flex-col items-center py-8 text-center">
-        <Icon name="lock" size={40} className="text-muted-foreground/40 mb-2" />
-        <p className="text-[14px] leading-5 text-muted-foreground">No features available.</p>
+      <div className="flex flex-col items-center py-16 text-center">
+        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/50 mb-4">
+          <Icon name="lock" size={24} className="text-muted-foreground/60" />
+        </div>
+        <p className="text-[16px] leading-6 font-medium text-foreground mb-1">
+          No features available
+        </p>
+        <p className="text-[14px] leading-5 text-muted-foreground">
+          Features will appear here once configured.
+        </p>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {features.map((feature) => (
-        <div key={feature.id}>
-          <h3 className="text-[14px] leading-5 font-medium text-foreground mb-2 flex items-center gap-2">
-            <Icon name="extension" size={18} className="text-primary" />
-            {feature.displayName}
-          </h3>
-          <Card variant="outlined">
-            <CardContent className="p-0">
-              <table className="w-full text-[14px]">
-                <thead>
-                  <tr className="border-b border-outline-variant bg-surface-variant/50">
-                    <th className="w-12 px-3 py-2"></th>
-                    <th className="px-3 py-2 text-left text-[12px] leading-4 font-medium text-muted-foreground">
-                      Permission
-                    </th>
-                    <th className="px-3 py-2 text-left text-[12px] leading-4 font-medium text-muted-foreground">
-                      Scope
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {feature.permissions.map((fp) => {
-                    const assigned = rolePermissions?.permissions.find(
-                      (rp) => rp.featurePermissionId === fp.id
-                    );
-                    const isEnabled = !!assigned;
-                    const currentScope = (assigned?.scope as Scope) ?? "OWN";
+  const allExpanded = expandedFeatures.size === features.length;
 
-                    return (
-                      <tr key={fp.id} className="border-t border-outline-variant">
-                        <td className="px-3 py-2 text-center">
+  return (
+    <div className="space-y-4">
+      {/* Expand/Collapse controls */}
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] leading-4 font-medium text-muted-foreground uppercase tracking-wide">
+          {features.length} {features.length === 1 ? "feature" : "features"}
+        </p>
+        <Button
+          variant="text"
+          onClick={allExpanded ? onCollapseAll : onExpandAll}
+          className="text-[12px] h-8"
+        >
+          {allExpanded ? "Collapse all" : "Expand all"}
+        </Button>
+      </div>
+
+      {/* Feature Groups */}
+      {features.map((feature) => {
+        const isExpanded = expandedFeatures.has(feature.id);
+        const assignedCount = feature.permissions.filter((fp) =>
+          rolePermissions?.permissions.some((rp) => rp.featurePermissionId === fp.id)
+        ).length;
+
+        return (
+          <Card key={feature.id} variant="outlined" className="overflow-hidden">
+            {/* Feature Header (Collapsible) */}
+            <button
+              type="button"
+              onClick={() => onToggleFeature(feature.id)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-foreground/4 transition-colors text-left"
+            >
+              <Icon
+                name="extension"
+                size={20}
+                className="text-primary shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <span className="text-[14px] leading-5 font-medium text-foreground">
+                  {feature.displayName}
+                </span>
+              </div>
+              {assignedCount > 0 && (
+                <Chip variant="filter" selected className="h-6 text-[11px] px-2">
+                  {assignedCount}/{feature.permissions.length}
+                </Chip>
+              )}
+              <Icon
+                name={isExpanded ? "expand_less" : "expand_more"}
+                size={20}
+                className="text-muted-foreground shrink-0"
+              />
+            </button>
+
+            {/* Permission Rows */}
+            <AnimatePresence initial={false}>
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+                  className="overflow-hidden"
+                >
+                  <Divider />
+                  <div className="divide-y divide-outline-variant">
+                    {feature.permissions.map((fp) => {
+                      const assigned = rolePermissions?.permissions.find(
+                        (rp) => rp.featurePermissionId === fp.id
+                      );
+                      const isEnabled = !!assigned;
+                      const currentScope = (assigned?.scope as Scope) ?? "OWN";
+
+                      return (
+                        <div
+                          key={fp.id}
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-foreground/4 transition-colors"
+                        >
                           <Checkbox
                             checked={isEnabled}
                             disabled={isMutating}
-                            onChange={(e) => {
-                              onToggle(fp.id, (e.target as HTMLInputElement).checked, assigned?.id);
+                            onCheckedChange={(checked) => {
+                              onToggle(fp.id, checked === true, assigned?.id);
                             }}
-                            className="w-10 h-10"
                           />
-                        </td>
-                        <td className={`px-3 py-2 ${isEnabled ? "text-foreground" : "text-muted-foreground"}`}>
-                          {fp.displayName}
-                        </td>
-                        <td className="px-3 py-2">
+                          <span
+                            className={`flex-1 text-[14px] leading-5 min-w-0 truncate ${
+                              isEnabled ? "text-foreground" : "text-muted-foreground"
+                            }`}
+                          >
+                            {fp.displayName}
+                          </span>
                           <Select
                             value={currentScope}
                             disabled={!isEnabled || isMutating}
                             onValueChange={(value) => {
-                              const newScope = value as Scope;
-                              onScopeChange(fp.id, newScope, assigned?.id);
+                              onScopeChange(fp.id, value as Scope, assigned?.id);
                             }}
                           >
                             <SelectTrigger
-                              className={`h-8 w-40 text-[12px] font-medium ${isEnabled ? scopeColors[currentScope] : "text-muted-foreground"}`}
+                              className={`h-8 w-35 text-[12px] border-outline-variant ${
+                                !isEnabled ? "opacity-40" : ""
+                              }`}
                             >
-                              <SelectValue />
+                              <SelectValue>
+                                {scopeLabels[currentScope]}
+                              </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               {scopeOptions.map((s) => (
                                 <SelectItem key={s} value={s}>
-                                  {s.replace(/_/g, " ")}
+                                  {scopeLabels[s]}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </CardContent>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Card>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

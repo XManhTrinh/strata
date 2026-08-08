@@ -2,15 +2,24 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { DataTable, Badge, type Column } from "@strata/ui";
-import { SearchBar } from "@/components/ui/search-bar";
+import { Search } from "@strata/mui";
 import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Card, CardContent } from "@/components/ui/card";
-import { TextField } from "@/components/ui/text-field";
+import { Button } from "@strata/mui/buttons";
+import { IconButton } from "@strata/mui/buttons";
+import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@strata/mui";
+import { Chip } from "@strata/mui";
+import { TextField } from "@strata/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip } from "@strata/mui";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +27,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@strata/mui";
 import { toast } from "sonner";
 import {
   useOrgUnitTypes,
@@ -31,15 +40,13 @@ import {
 } from "@/services";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
-type OrgUnitTypeRow = AdminOrgUnitType & Record<string, unknown>;
-
 export default function OrgUnitTypesPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingType, setEditingType] = useState<AdminOrgUnitType | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "", icon: "corporate_fare", color: "#3B82F6" });
 
-  const { data: orgUnitTypes = [], isLoading, error } = useOrgUnitTypes(COMPANY_ID);
+  const { data: orgUnitTypes = [], isLoading, error, refetch } = useOrgUnitTypes(COMPANY_ID);
   const createMutation = useCreateOrgUnitType();
   const updateMutation = useUpdateOrgUnitType();
   const archiveMutation = useArchiveOrgUnitType();
@@ -57,7 +64,7 @@ export default function OrgUnitTypesPage() {
     setShowModal(true);
   };
 
-  const openEdit = (type: OrgUnitTypeRow) => {
+  const openEdit = (type: AdminOrgUnitType) => {
     setEditingType(type);
     setFormData({
       name: type.name,
@@ -118,110 +125,32 @@ export default function OrgUnitTypesPage() {
     );
   };
 
-  const columns: Column<OrgUnitTypeRow>[] = [
-    {
-      key: "name",
-      header: "Name",
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="flex items-center justify-center h-8 w-8 rounded-full"
-            style={{ backgroundColor: `${row.color || "#3B82F6"}20` }}
-          >
-            <span style={{ color: row.color || "#3B82F6" }}>
-              <Icon name={row.icon || "corporate_fare"} size={18} />
-            </span>
-          </div>
-          <span className="text-[14px] font-medium text-foreground">{row.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: "description",
-      header: "Description",
-      render: (row) => <span className="text-[14px] text-muted-foreground">{row.description || "—"}</span>,
-    },
-    {
-      key: "color",
-      header: "Color",
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-block h-4 w-4 rounded-full border border-outline-variant"
-            style={{ backgroundColor: row.color || "#3B82F6" }}
-          />
-          <span className="text-[12px] text-muted-foreground">{row.color || "—"}</span>
-        </div>
-      ),
-    },
-    {
-      key: "archived",
-      header: "Status",
-      sortable: true,
-      render: (row) => (
-        <Badge variant={!row.archived ? "success" : "default"}>
-          {row.archived ? "Archived" : "Active"}
-        </Badge>
-      ),
-    },
-    {
-      key: "actions",
-      header: "",
-      render: (row) => (
-        <div className="flex items-center gap-1">
-          <Tooltip content="Edit">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                openEdit(row);
-              }}
-            >
-              <Icon name="edit" size={18} />
-            </Button>
-          </Tooltip>
-          <Tooltip content={row.archived ? "Restore" : "Archive"}>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (row.archived) {
-                  handleRestore(row.id);
-                } else {
-                  handleArchive(row.id);
-                }
-              }}
-            >
-              <Icon name={row.archived ? "unarchive" : "archive"} size={18} />
-            </Button>
-          </Tooltip>
-        </div>
-      ),
-    },
-  ];
-
   if (error) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Unit Types</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Unit Types</h1>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Define the types of organizational units used in your company structure.
             </p>
           </div>
         </AppBar>
-        <Card variant="filled" className="max-w-lg mx-auto">
+        <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-error" />
             </div>
-            <p className="text-[14px] leading-5 text-destructive mb-6">
+            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+              Unable to load types
+            </h2>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
               Failed to load org unit types. Please try again.
             </p>
+            <Button variant="tonal" onClick={() => refetch()}>
+              <Icon name="refresh" size={18} />
+              Retry
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -230,7 +159,7 @@ export default function OrgUnitTypesPage() {
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -240,8 +169,8 @@ export default function OrgUnitTypesPage() {
       {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-[22px] leading-7 font-normal text-foreground">Organization Unit Types</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Unit Types</h1>
+          <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Define the types of organizational units used in your company structure.
           </p>
         </div>
@@ -252,15 +181,15 @@ export default function OrgUnitTypesPage() {
       </AppBar>
 
       {/* Search */}
-      <SearchBar
+      <Search
         className="max-w-sm"
         value={search}
         onValueChange={setSearch}
         placeholder="Search types..."
       />
 
-      {/* DataTable */}
-      <Card variant="outlined">
+      {/* Desktop Table */}
+      <Card variant="elevated" className="hidden md:block">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-6 space-y-3">
@@ -268,21 +197,165 @@ export default function OrgUnitTypesPage() {
                 <Skeleton key={i} className="h-12 w-full rounded-lg" />
               ))}
             </div>
+          ) : filteredTypes.length === 0 ? (
+            <div className="flex flex-col items-center py-12 text-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+                <Icon name="label" size={24} className="text-surface-variant-foreground" />
+              </div>
+              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+                No types found
+              </h2>
+              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+                {search ? "Try adjusting your search." : "Create your first organization unit type."}
+              </p>
+              {!search && (
+                <Button onClick={openCreate}>
+                  <Icon name="add" size={18} />
+                  Create Type
+                </Button>
+              )}
+            </div>
           ) : (
-            <DataTable<OrgUnitTypeRow>
-              columns={columns}
-              data={filteredTypes as OrgUnitTypeRow[]}
-              pageSize={10}
-              emptyMessage="No organization unit types found"
-              onRowClick={openEdit}
-            />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Color</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTypes.map((row) => (
+                  <TableRow key={row.id} className="cursor-pointer" onClick={() => openEdit(row)}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex items-center justify-center h-8 w-8 rounded-full"
+                          style={{ backgroundColor: `${row.color || "#3B82F6"}20` }}
+                        >
+                          <span style={{ color: row.color || "#3B82F6" }}>
+                            <Icon name={row.icon || "corporate_fare"} size={18} />
+                          </span>
+                        </div>
+                        <span className="text-[14px] font-medium text-surface-foreground">{row.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-[14px] text-surface-variant-foreground">
+                      {row.description || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-4 w-4 rounded-full border border-outline-variant"
+                          style={{ backgroundColor: row.color || "#3B82F6" }}
+                        />
+                        <span className="text-[12px] text-surface-variant-foreground">{row.color || "—"}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Chip variant="filter" selected={!row.archived}>
+                        {row.archived ? "Archived" : "Active"}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
+                        <Tooltip content="Edit">
+                          <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => openEdit(row)}>
+                            <Icon name="edit" size={18} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip content={row.archived ? "Restore" : "Archive"}>
+                          <IconButton
+                            variant="standard"
+                            size="xs"
+                            aria-label={row.archived ? "Restore" : "Archive"}
+                            onClick={() => {
+                              if (row.archived) {
+                                handleRestore(row.id);
+                              } else {
+                                handleArchive(row.id);
+                              }
+                            }}
+                          >
+                            <Icon name={row.archived ? "unarchive" : "archive"} size={18} />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
 
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} variant="elevated">
+              <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-6 w-16 rounded-lg" />
+              </CardContent>
+            </Card>
+          ))
+        ) : filteredTypes.length === 0 ? (
+          <Card variant="elevated">
+            <CardContent className="flex flex-col items-center py-12 text-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+                <Icon name="label" size={24} className="text-surface-variant-foreground" />
+              </div>
+              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+                No types found
+              </h2>
+              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+                {search ? "Try adjusting your search." : "Create your first organization unit type."}
+              </p>
+              {!search && (
+                <Button onClick={openCreate}>
+                  <Icon name="add" size={18} />
+                  Create Type
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredTypes.map((row) => (
+            <Card key={row.id} variant="elevated" className="cursor-pointer" onClick={() => openEdit(row)}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex items-center justify-center h-10 w-10 rounded-full"
+                      style={{ backgroundColor: `${row.color || "#3B82F6"}20` }}
+                    >
+                      <span style={{ color: row.color || "#3B82F6" }}>
+                        <Icon name={row.icon || "corporate_fare"} size={20} />
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[14px] font-medium text-surface-foreground">{row.name}</p>
+                      <p className="text-[12px] text-surface-variant-foreground">{row.description || "No description"}</p>
+                    </div>
+                  </div>
+                  <Chip variant="filter" selected={!row.archived}>
+                    {row.archived ? "Archived" : "Active"}
+                  </Chip>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
       {/* Create/Edit Dialog */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {editingType ? "Edit Type" : "Create Type"}
@@ -327,10 +400,11 @@ export default function OrgUnitTypesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowModal(false)}>
+            <Button variant="text" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
             <Button
+              variant="text"
               onClick={handleSubmit}
               disabled={createMutation.isPending || updateMutation.isPending}
             >
