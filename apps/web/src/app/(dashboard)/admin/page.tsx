@@ -22,7 +22,7 @@ const settingsCards: SettingsCard[] = [
   {
     title: "Organization Unit Types",
     description: "Define and manage the types of organizational units (departments, tribes, squads, etc.)",
-    href: "/settings/org-unit-types",
+    href: "/admin/org-unit-types",
     icon: "label",
     feature: "authorization",
     permission: "manage_org_structure",
@@ -30,7 +30,7 @@ const settingsCards: SettingsCard[] = [
   {
     title: "Organization Structure",
     description: "Build and manage your organization's hierarchical structure",
-    href: "/settings/org-structure",
+    href: "/admin/org-structure",
     icon: "corporate_fare",
     feature: "authorization",
     permission: "manage_org_structure",
@@ -38,7 +38,7 @@ const settingsCards: SettingsCard[] = [
   {
     title: "Positions",
     description: "Configure positions with career levels and reporting capabilities",
-    href: "/settings/positions",
+    href: "/admin/positions",
     icon: "work",
     feature: "authorization",
     permission: "manage_positions",
@@ -46,7 +46,7 @@ const settingsCards: SettingsCard[] = [
   {
     title: "Roles & Permissions",
     description: "Manage roles and assign feature-level permissions with scope control",
-    href: "/settings/roles",
+    href: "/admin/roles",
     icon: "admin_panel_settings",
     feature: "authorization",
     permission: "manage_roles",
@@ -54,7 +54,7 @@ const settingsCards: SettingsCard[] = [
   {
     title: "Features",
     description: "View registered features and control which are enabled for your organization",
-    href: "/settings/features",
+    href: "/admin/features",
     icon: "toggle_on",
     feature: "authorization",
     permission: "manage_features",

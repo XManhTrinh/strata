@@ -22,11 +22,11 @@ interface SidebarNavItem extends NavigationRailItem {
  */
 const superAdminRailItems: SidebarNavItem[] = [
   { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { value: "org-structure", label: "Org Structure", href: "/settings/org-structure", icon: "lan" },
-  { value: "unit-types", label: "Unit Types", href: "/settings/org-unit-types", icon: "label" },
-  { value: "positions", label: "Positions", href: "/settings/positions", icon: "work" },
-  { value: "roles", label: "Roles", href: "/settings/roles", icon: "admin_panel_settings" },
-  { value: "features", label: "Features", href: "/settings/features", icon: "extension" },
+  { value: "org-structure", label: "Org Structure", href: "/admin/org-structure", icon: "lan" },
+  { value: "unit-types", label: "Unit Types", href: "/admin/org-unit-types", icon: "label" },
+  { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
+  { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
+  { value: "features", label: "Features", href: "/admin/features", icon: "extension" },
 ];
 
 /**
