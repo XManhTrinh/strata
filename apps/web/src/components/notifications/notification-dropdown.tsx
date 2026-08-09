@@ -107,7 +107,7 @@ export function NotificationDropdown() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-[13px] leading-[18px] ${
+                        className={`text-[13px] leading-4.5 ${
                           !notification.isRead ? "font-medium text-foreground" : "text-muted-foreground"
                         }`}
                       >

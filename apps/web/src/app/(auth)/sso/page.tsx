@@ -38,10 +38,10 @@ export default function SSOLoginPage() {
 
           {/* Title & description */}
           <div className="text-center space-y-1">
-            <h1 className="text-[24px] font-normal leading-[32px] text-surface-foreground">
+            <h1 className="text-[24px] font-normal leading-8 text-surface-foreground">
               Enterprise SSO
             </h1>
-            <p className="text-[16px] leading-[24px] tracking-[0.5px] text-surface-variant-foreground">
+            <p className="text-[16px] leading-6 tracking-[0.5px] text-surface-variant-foreground">
               Enter your organization ID to continue with Single Sign-On
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function SSOLoginPage() {
             {error && (
               <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
                 <Icon name="error" size={20} className="text-error shrink-0" />
-                <p className="text-[14px] leading-[20px] text-error">{error}</p>
+                <p className="text-[14px] leading-5 text-error">{error}</p>
               </div>
             )}
 
