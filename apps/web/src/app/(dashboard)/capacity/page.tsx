@@ -3,11 +3,11 @@
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
 import { useCapacityAllocations } from "@/services";
-import { Button } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Chip } from "@strata/mui";
+import { Chip } from "@vkieu/mui";
 import {
   Table,
   TableHeader,

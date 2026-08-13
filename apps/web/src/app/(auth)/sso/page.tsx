@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Button } from "@strata/mui/buttons";
-import { TextField } from "@strata/mui";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
-import { Divider } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { TextField } from "@vkieu/mui";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Divider } from "@vkieu/mui";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 

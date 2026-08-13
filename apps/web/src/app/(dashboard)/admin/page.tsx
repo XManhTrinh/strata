@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
-import { Card, CardContent } from "@strata/mui";
-import { List, ListItem } from "@strata/mui";
-import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { List, ListItem } from "@vkieu/mui";
+import { Icon } from "@vkieu/mui";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 

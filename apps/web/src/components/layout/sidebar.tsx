@@ -1,18 +1,19 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useTheme } from "@/lib/theme";
-import { Icon } from "@strata/mui";
-import { Tooltip } from "@strata/mui";
+import { Icon } from "@vkieu/mui";
+import { Tooltip } from "@vkieu/mui";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
-import {
-  NavigationRail,
-  type NavigationRailItem,
-} from "@strata/mui/navigation";
+import { NavigationRail } from "@vkieu/mui/navigation";
 
-interface SidebarNavItem extends NavigationRailItem {
+interface SidebarNavItem {
+  value: string;
+  label: string;
   href: string;
+  icon: string;
   feature?: string;
 }
 
@@ -68,14 +69,13 @@ function StrataLogo() {
 }
 
 /**
- * Sidebar — M3 Navigation Rail
+ * Sidebar — M3 Navigation Rail (Composable API)
  *
  * - Super Admin: hardcoded Dashboard + Settings
  * - Manager/User: items filtered by backend permissions (hasFeatureAccess)
  */
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { role } = useUserRole();
   const { hasFeatureAccess } = useUserPermissions();
   const { theme, setTheme } = useTheme();
@@ -100,43 +100,41 @@ export function Sidebar() {
         pathname === item.href || pathname.startsWith(item.href + "/")
     )?.value ?? sidebarItems[0]?.value;
 
-  // Navigate on value change
-  const handleValueChange = (value: string) => {
-    const target = sidebarItems.find((item) => item.value === value);
-    if (target) router.push(target.href);
-  };
-
-  // Strip href/feature from items to match NavigationRailItem type
-  const railItems: NavigationRailItem[] = sidebarItems.map(
-    ({ href: _href, feature: _feature, ...item }) => item
-  );
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   return (
     <div className="hidden md:block">
-      <NavigationRail
-        items={railItems}
-        activeValue={activeValue}
-        onValueChange={handleValueChange}
-        header={
+      <NavigationRail expanded={false} className="fixed left-0 top-0 bottom-0">
+        <NavigationRail.Header>
           <Tooltip content="Strata" side="right">
             <div className="flex items-center justify-center w-12 h-12">
               <StrataLogo />
             </div>
           </Tooltip>
-        }
-      />
-      {/* Theme toggle — positioned at bottom of rail */}
-      <div className="fixed left-0 bottom-0 z-40 w-24 hidden md:flex items-center justify-center pb-4">
-        <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} side="right">
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/8 active:bg-surface-foreground/12 transition-colors"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-          >
-            <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} className="text-surface-variant-foreground" />
-          </button>
-        </Tooltip>
-      </div>
+        </NavigationRail.Header>
+        <NavigationRail.Content>
+          {sidebarItems.map((item) => (
+            <Link key={item.value} href={item.href}>
+              <NavigationRail.Item
+                icon={item.icon}
+                label={item.label}
+                active={activeValue === item.value}
+              />
+            </Link>
+          ))}
+        </NavigationRail.Content>
+        <NavigationRail.Footer>
+          <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} side="right">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/8 active:bg-surface-foreground/12 transition-colors"
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            >
+              <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} size={24} className="text-surface-variant-foreground" />
+            </button>
+          </Tooltip>
+        </NavigationRail.Footer>
+      </NavigationRail>
     </div>
   );
 }

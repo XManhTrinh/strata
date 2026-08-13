@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { Icon } from "@strata/mui";
-import { Button } from "@strata/mui/buttons";
-import { Card, CardContent } from "@strata/mui";
-import { CircularProgress } from "@strata/mui/indicators";
+import { Icon } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Card, CardContent } from "@vkieu/mui";
+import { CircularProgress } from "@vkieu/mui/indicators";
 
 export default function SSOCallbackPage() {
   const [error, setError] = useState<string | null>(null);

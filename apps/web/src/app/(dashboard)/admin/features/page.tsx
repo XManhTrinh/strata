@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Search } from "@strata/mui";
+import { Search } from "@vkieu/mui";
 import { AppBar } from "@/components/layout/app-bar";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { Switch } from "@strata/mui";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { Switch } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Divider } from "@strata/mui";
-import { Button } from "@strata/mui/buttons";
+import { Divider } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import {
   Table,
   TableHeader,

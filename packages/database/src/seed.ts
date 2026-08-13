@@ -462,7 +462,7 @@ async function seedUsers(
         companyId,
         positionId: posMap[u.role],
         orgUnitId: orgUnitMap[u.role],
-        isSuperAdmin: u.role === "CTO" || u.role === "CFO" || u.role === "CPO",
+        isSuperAdmin: false,
       },
     });
 
@@ -1132,59 +1132,95 @@ async function logSummary() {
   console.log("═══════════════════════════════════════════════════════════════\n");
 }
 
-// ─── Super Admin Account ──────────────────────────────────────────────────────
+// ─── Test Accounts ────────────────────────────────────────────────────────────
 
-async function seedSuperAdmin(companyId: string, organizationId: string) {
-  logSection("Super Admin Account");
-  const passwordHash = await bcrypt.hash("superadmin", 10);
+async function seedTestAccounts(companyId: string, organizationId: string) {
+  logSection("Test Accounts");
 
-  const person = await prisma.person.upsert({
-    where: { id: "per_admin_001" },
-    update: { fullName: "Super Admin", email: "admin@admin.com" },
-    create: {
-      id: "per_admin_001",
+  const accounts = [
+    {
+      id: "per_superadmin_001",
+      userId: "usr_superadmin_001",
+      empId: "emp_superadmin_001",
+      uin: "SA-001",
       fullName: "Super Admin",
-      email: "admin@admin.com",
-      dateOfBirth: new Date(1990, 0, 1),
-    },
-  });
-
-  const user = await prisma.user.upsert({
-    where: { email: "admin@admin.com" },
-    update: { passwordHash },
-    create: {
-      id: "usr_admin_001",
-      email: "admin@admin.com",
-      passwordHash,
-      personId: person.id,
-    },
-  });
-
-  await prisma.employee.upsert({
-    where: { uin_organizationId: { uin: "ADMIN-001", organizationId } },
-    update: {},
-    create: {
-      id: "emp_admin_001",
-      uin: "ADMIN-001",
-      personId: person.id,
-      organizationId,
-      departmentId: null,
-      startDate: new Date(2020, 0, 1),
-      status: "ACTIVE",
-    },
-  });
-
-  await prisma.userCompanyMembership.upsert({
-    where: { userId_companyId: { userId: user.id, companyId } },
-    update: { isSuperAdmin: true },
-    create: {
-      userId: user.id,
-      companyId,
+      email: "superadmin@bt.com",
+      password: "superadmin",
       isSuperAdmin: true,
     },
-  });
+    {
+      id: "per_manager_001",
+      userId: "usr_manager_001",
+      empId: "emp_manager_001",
+      uin: "MGR-001",
+      fullName: "Manager User",
+      email: "manager@bt.com",
+      password: "manager",
+      isSuperAdmin: false,
+    },
+    {
+      id: "per_employee_001",
+      userId: "usr_employee_001",
+      empId: "emp_employee_001",
+      uin: "EMP-001",
+      fullName: "Employee User",
+      email: "employee@bt.com",
+      password: "employee",
+      isSuperAdmin: false,
+    },
+  ];
 
-  log(`Super Admin: admin@admin.com / superadmin (isSuperAdmin: true)`);
+  for (const acct of accounts) {
+    const passwordHash = await bcrypt.hash(acct.password, 10);
+
+    const person = await prisma.person.upsert({
+      where: { id: acct.id },
+      update: { fullName: acct.fullName, email: acct.email },
+      create: {
+        id: acct.id,
+        fullName: acct.fullName,
+        email: acct.email,
+        dateOfBirth: new Date(1990, 0, 1),
+      },
+    });
+
+    const user = await prisma.user.upsert({
+      where: { email: acct.email },
+      update: { passwordHash },
+      create: {
+        id: acct.userId,
+        email: acct.email,
+        passwordHash,
+        personId: person.id,
+      },
+    });
+
+    await prisma.employee.upsert({
+      where: { uin_organizationId: { uin: acct.uin, organizationId } },
+      update: {},
+      create: {
+        id: acct.empId,
+        uin: acct.uin,
+        personId: person.id,
+        organizationId,
+        departmentId: null,
+        startDate: new Date(2020, 0, 1),
+        status: "ACTIVE",
+      },
+    });
+
+    await prisma.userCompanyMembership.upsert({
+      where: { userId_companyId: { userId: user.id, companyId } },
+      update: { isSuperAdmin: acct.isSuperAdmin },
+      create: {
+        userId: user.id,
+        companyId,
+        isSuperAdmin: acct.isSuperAdmin,
+      },
+    });
+
+    log(`${acct.fullName}: ${acct.email} / ${acct.password} (superAdmin: ${acct.isSuperAdmin})`);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1205,7 +1241,7 @@ async function main() {
   // Users, Roles, and Reporting
   const positions = await seedPositions(company.id);
   const { users } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions);
-  await seedSuperAdmin(company.id, legacyOrg.id);
+  await seedTestAccounts(company.id, legacyOrg.id);
   await seedFeatures();
   const roles = await seedRoles(company.id);
   await seedRoleAssignments(company.id, users, roles);

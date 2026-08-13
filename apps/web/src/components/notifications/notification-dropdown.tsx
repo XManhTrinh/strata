@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { IconButton } from "@strata/mui/buttons";
-import { Button } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Badge } from "@strata/mui";
-import { Tooltip } from "@strata/mui";
-import { Divider } from "@strata/mui";
+import { IconButton } from "@vkieu/mui/buttons";
+import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Badge } from "@vkieu/mui";
+import { Tooltip } from "@vkieu/mui";
+import { Divider } from "@vkieu/mui";
 
 interface Notification {
   id: string;

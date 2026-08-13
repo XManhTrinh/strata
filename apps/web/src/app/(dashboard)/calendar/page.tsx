@@ -2,9 +2,9 @@
 
 import { motion } from "motion/react";
 import { CalendarView } from "@/features/calendar/CalendarView";
-import { Button } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCalendarEvents,

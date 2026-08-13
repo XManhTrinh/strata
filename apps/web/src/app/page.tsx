@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Card, CardContent } from "@strata/mui";
-import { Icon } from "@strata/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Icon } from "@vkieu/mui";
 
 export default function LandingPage() {
   return (

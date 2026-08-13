@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { cn } from "@/lib/utils";
-import { Icon } from "@strata/mui";
+import { Icon } from "@vkieu/mui";
 
 /**
  * Material Design 3 Select (Exposed Dropdown Menu)

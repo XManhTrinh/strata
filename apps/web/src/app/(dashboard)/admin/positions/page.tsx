@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Search } from "@strata/mui";
+import { Search } from "@vkieu/mui";
 import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@strata/mui/buttons";
-import { IconButton } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { Checkbox } from "@strata/mui";
-import { TextField } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { IconButton } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { Checkbox } from "@vkieu/mui";
+import { TextField } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@strata/mui";
+import { Tooltip } from "@vkieu/mui";
 import {
   Table,
   TableHeader,
@@ -35,7 +35,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@strata/mui";
+} from "@vkieu/mui";
 import { toast } from "sonner";
 import {
   usePositions,

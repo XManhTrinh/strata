@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
 import { AppBar } from "@/components/layout/app-bar";
-import { Icon } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { Search } from "@strata/mui";
+import { Icon } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { Search } from "@vkieu/mui";
 import type { OrganizationUnit } from "@/services";
 
 interface FlowOrgHeaderProps {

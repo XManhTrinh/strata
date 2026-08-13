@@ -3,10 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useSidebar } from "@/hooks/use-sidebar";
-import {
-  NavigationBar,
-  type NavigationBarItem,
-} from "@strata/mui/navigation";
+import { NavigationBar } from "@vkieu/mui/navigation";
 
 /**
  * Mobile bottom navigation using M3 Navigation Bar.
@@ -18,14 +15,6 @@ export function MobileNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { setMobileOpen } = useSidebar();
-
-  const items: NavigationBarItem[] = [
-    { value: "dashboard", label: "Dashboard", icon: "dashboard" },
-    { value: "people", label: "People", icon: "person" },
-    { value: "engineering", label: "Engineering", icon: "engineering" },
-    { value: "calendar", label: "Calendar", icon: "calendar_month" },
-    { value: "more", label: "More", icon: "more_horiz" },
-  ];
 
   // Map values to routes
   const routes: Record<string, string> = {
@@ -52,11 +41,13 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden">
-      <NavigationBar
-        items={items}
-        activeValue={activeValue}
-        onValueChange={handleValueChange}
-      />
+      <NavigationBar value={activeValue} onValueChange={handleValueChange}>
+        <NavigationBar.Item value="dashboard" icon="dashboard" label="Dashboard" />
+        <NavigationBar.Item value="people" icon="person" label="People" />
+        <NavigationBar.Item value="engineering" icon="engineering" label="Engineering" />
+        <NavigationBar.Item value="calendar" icon="calendar_month" label="Calendar" />
+        <NavigationBar.Item value="more" icon="more_horiz" label="More" />
+      </NavigationBar>
     </div>
   );
 }

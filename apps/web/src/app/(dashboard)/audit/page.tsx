@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@strata/mui/buttons";
-import { IconButton } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent, CardHeader, CardTitle } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { Search } from "@strata/mui";
-import { Divider } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { IconButton } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent, CardHeader, CardTitle } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { Search } from "@vkieu/mui";
+import { Divider } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import {

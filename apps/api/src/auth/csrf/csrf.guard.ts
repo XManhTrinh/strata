@@ -5,6 +5,11 @@ import * as crypto from 'crypto';
 @Injectable()
 export class CsrfGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
+    // Skip CSRF in development
+    if (process.env.NODE_ENV !== 'production') {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
     const method = request.method.toUpperCase();
 

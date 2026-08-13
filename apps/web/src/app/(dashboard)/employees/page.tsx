@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Search } from "@strata/mui";
+import { Search } from "@vkieu/mui";
 import { AppBar } from "@/components/layout/app-bar";
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee } from "@/services";
 import type { Employee, CreateEmployeeRequest } from "@/services";
-import { Button } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { TextField } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { TextField } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import {
@@ -35,7 +35,7 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from "@strata/mui";
+} from "@vkieu/mui";
 import { toast } from "sonner";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 

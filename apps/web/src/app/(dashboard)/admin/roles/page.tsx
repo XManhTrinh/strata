@@ -2,17 +2,17 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search } from "@strata/mui";
-import { Chip } from "@strata/mui";
-import { Button } from "@strata/mui/buttons";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
-import { Checkbox } from "@strata/mui";
-import { TextField } from "@strata/mui";
+import { Search } from "@vkieu/mui";
+import { Chip } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
+import { Checkbox } from "@vkieu/mui";
+import { TextField } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Divider } from "@strata/mui";
-import { Tooltip } from "@strata/mui";
-import { List, ListItem } from "@strata/mui";
+import { Divider } from "@vkieu/mui";
+import { Tooltip } from "@vkieu/mui";
+import { List, ListItem } from "@vkieu/mui";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@strata/mui";
+} from "@vkieu/mui";
 import { toast } from "sonner";
 import {
   useRoles,
@@ -235,7 +235,7 @@ export default function RolesPage() {
         transition={defaultTransition}
       >
         <PageHeader onCreateClick={() => {}} />
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-0 mt-6 min-h-0">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-0 mt-6 min-h-0">
           {/* Skeleton: Role List */}
           <div className="border-r border-outline-variant p-4 space-y-3">
             <Skeleton className="h-14 w-full rounded-full" />
@@ -351,7 +351,7 @@ export default function RolesPage() {
       <PageHeader onCreateClick={() => setShowCreateModal(true)} />
 
       {/* Master-Detail Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[300px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
         {/* Left Panel: Role Sidebar */}
         <div className="border-b lg:border-b-0 lg:border-r border-outline-variant flex flex-col min-h-0">
           {/* Search */}

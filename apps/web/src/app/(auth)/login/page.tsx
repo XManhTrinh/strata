@@ -3,11 +3,11 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@strata/mui/buttons";
-import { TextField } from "@strata/mui";
-import { Divider } from "@strata/mui";
-import { Icon } from "@strata/mui";
-import { Card, CardContent } from "@strata/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { TextField } from "@vkieu/mui";
+import { Divider } from "@vkieu/mui";
+import { Icon } from "@vkieu/mui";
+import { Card, CardContent } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
