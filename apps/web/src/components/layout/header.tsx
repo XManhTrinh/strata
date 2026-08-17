@@ -2,24 +2,15 @@
 
 import { Breadcrumbs } from "./breadcrumbs";
 import { AppBar } from "@vkieu/mui";
-import { useUserRole, type UserRoleView } from "@/hooks/use-user-role";
 import { useAuth } from "@/lib/auth";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { IconButton } from "@vkieu/mui/buttons";
 import { Icon } from "@vkieu/mui";
 import { Tooltip } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
 import { Menu, MenuItem, MenuDivider } from "@vkieu/mui";
 import { Avatar } from "@/components/ui/avatar";
 
-const roleLabels: Record<UserRoleView, string> = {
-  super_admin: "Super Admin",
-  manager: "Manager / HR",
-  user: "Employee",
-};
-
 export function Header() {
-  const { role, setRole } = useUserRole();
   const { logout } = useAuth();
 
   return (
@@ -28,21 +19,6 @@ export function Header() {
         <Breadcrumbs />
       </AppBar.Headline>
       <AppBar.Trailing>
-        {/* Role switcher — dev only */}
-        <div className="hidden lg:flex items-center gap-1 mr-2">
-          {(["super_admin", "manager", "user"] as UserRoleView[]).map((r) => (
-            <Tooltip key={r} content={`Switch to ${roleLabels[r]} view`} side="bottom">
-              <Chip
-                variant="filter"
-                selected={role === r}
-                onClick={() => setRole(r)}
-              >
-                {roleLabels[r]}
-              </Chip>
-            </Tooltip>
-          ))}
-        </div>
-
         {/* Notifications */}
         <NotificationDropdown />
 
