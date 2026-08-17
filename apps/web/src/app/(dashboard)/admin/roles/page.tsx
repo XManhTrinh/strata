@@ -13,13 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Divider } from "@vkieu/mui";
 import { Tooltip } from "@vkieu/mui";
 import { List, ListItem } from "@vkieu/mui";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -748,24 +742,15 @@ function PermissionMatrix({
                             onValueChange={(value) => {
                               onScopeChange(fp.id, value as Scope, assigned?.id);
                             }}
-                          >
-                            <SelectTrigger
-                              className={`h-8 w-35 text-[12px] border-outline-variant ${
-                                !isEnabled ? "opacity-40" : ""
-                              }`}
-                            >
-                              <SelectValue>
-                                {scopeLabels[currentScope]}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {scopeOptions.map((s) => (
-                                <SelectItem key={s} value={s}>
-                                  {scopeLabels[s]}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            className={`h-8 w-35 text-[12px] border-outline-variant ${
+                              !isEnabled ? "opacity-40" : ""
+                            }`}
+                            variant="outlined"
+                            options={scopeOptions.map((s) => ({
+                              value: s,
+                              label: scopeLabels[s],
+                            }))}
+                          />
                         </div>
                       );
                     })}

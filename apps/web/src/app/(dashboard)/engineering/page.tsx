@@ -17,13 +17,7 @@ import { Chip } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -379,18 +373,13 @@ export default function EngineeringPage() {
               <Select
                 value={newUnitTypeId}
                 onValueChange={setNewUnitTypeId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {orgUnitTypes.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Select type"
+                variant="outlined"
+                options={orgUnitTypes.map((t) => ({
+                  value: t.id,
+                  label: t.name,
+                }))}
+              />
             </div>
             <DialogFooter className="mt-4">
               <Button

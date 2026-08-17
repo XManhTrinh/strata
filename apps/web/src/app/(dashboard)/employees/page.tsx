@@ -21,13 +21,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -506,17 +500,14 @@ export default function EmployeesPage() {
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="ON_LEAVE">On Leave</SelectItem>
-                  <SelectItem value="TERMINATED">Terminated</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
+                variant="outlined"
+                options={[
+                  { value: "ACTIVE", label: "Active" },
+                  { value: "ON_LEAVE", label: "On Leave" },
+                  { value: "TERMINATED", label: "Terminated" },
+                  { value: "SUSPENDED", label: "Suspended" },
+                ]}
+              />
             </div>
             <DialogFooter className="mt-4">
               <Button
@@ -584,17 +575,14 @@ export default function EmployeesPage() {
               <Select
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="ON_LEAVE">On Leave</SelectItem>
-                  <SelectItem value="TERMINATED">Terminated</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
+                variant="outlined"
+                options={[
+                  { value: "ACTIVE", label: "Active" },
+                  { value: "ON_LEAVE", label: "On Leave" },
+                  { value: "TERMINATED", label: "Terminated" },
+                  { value: "SUSPENDED", label: "Suspended" },
+                ]}
+              />
             </div>
             <DialogFooter className="mt-4">
               <Button

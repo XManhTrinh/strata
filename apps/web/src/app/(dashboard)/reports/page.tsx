@@ -10,13 +10,7 @@ import { Card, CardContent } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Divider } from "@vkieu/mui";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -342,18 +336,13 @@ export default function ReportsPage() {
               <label className="text-[12px] leading-4 text-surface-variant-foreground">
                 Report Type
               </label>
-              <Select value={selectedType} onValueChange={(value) => setSelectedType(value as ReportType)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select report type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {reportTypeOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Select
+                value={selectedType}
+                onValueChange={(value) => setSelectedType(value as ReportType)}
+                placeholder="Select report type"
+                variant="outlined"
+                options={reportTypeOptions}
+              />
             </div>
           </div>
           <DialogFooter>

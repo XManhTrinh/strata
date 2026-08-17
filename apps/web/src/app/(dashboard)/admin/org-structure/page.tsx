@@ -12,13 +12,7 @@ import { Chip } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -381,37 +375,29 @@ export default function OrgStructurePage() {
               <Select
                 value={formData.typeId}
                 onValueChange={(value) => setFormData({ ...formData, typeId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {orgUnitTypes.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Select a type..."
+                variant="outlined"
+                options={orgUnitTypes.map((t) => ({
+                  value: t.id,
+                  label: t.name,
+                }))}
+              />
             </div>
             <div className="space-y-1">
               <label className="text-[12px] leading-4 text-surface-variant-foreground">Parent Unit</label>
               <Select
                 value={formData.parentId || "none"}
                 onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None (root level)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None (root level)</SelectItem>
-                  {orgUnits.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="None (root level)"
+                variant="outlined"
+                options={[
+                  { value: "none", label: "None (root level)" },
+                  ...orgUnits.map((u) => ({
+                    value: u.id,
+                    label: u.name,
+                  })),
+                ]}
+              />
             </div>
           </div>
           <DialogFooter>

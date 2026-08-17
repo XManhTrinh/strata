@@ -21,13 +21,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@vkieu/mui";
 import {
   Dialog,
   DialogContent,
@@ -445,47 +439,37 @@ export default function PositionsPage() {
                     const shouldClearMax = minLevel && maxLevel && maxLevel.rank < minLevel.rank;
                     setFormData({ ...formData, minLevelId: newMin, ...(shouldClearMax ? { maxLevelId: "" } : {}) });
                   }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select min level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {careerLevelsData
-                      .slice()
-                      .sort((a, b) => a.rank - b.rank)
-                      .map((level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.label} — {level.displayName || level.label}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select min level"
+                  variant="outlined"
+                  options={careerLevelsData
+                    .slice()
+                    .sort((a, b) => a.rank - b.rank)
+                    .map((level) => ({
+                      value: level.id,
+                      label: `${level.label} — ${level.displayName || level.label}`,
+                    }))}
+                />
               </div>
               <div className="space-y-1">
                 <label className="text-[12px] leading-4 text-surface-variant-foreground">Max Level</label>
                 <Select
                   value={formData.maxLevelId || ""}
                   onValueChange={(value) => setFormData({ ...formData, maxLevelId: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select max level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {careerLevelsData
-                      .slice()
-                      .sort((a, b) => a.rank - b.rank)
-                      .filter((level) => {
-                        if (!formData.minLevelId) return true;
-                        const minLevel = careerLevelsData.find((l) => l.id === formData.minLevelId);
-                        return minLevel ? level.rank >= minLevel.rank : true;
-                      })
-                      .map((level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.label} — {level.displayName || level.label}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select max level"
+                  variant="outlined"
+                  options={careerLevelsData
+                    .slice()
+                    .sort((a, b) => a.rank - b.rank)
+                    .filter((level) => {
+                      if (!formData.minLevelId) return true;
+                      const minLevel = careerLevelsData.find((l) => l.id === formData.minLevelId);
+                      return minLevel ? level.rank >= minLevel.rank : true;
+                    })
+                    .map((level) => ({
+                      value: level.id,
+                      label: `${level.label} — ${level.displayName || level.label}`,
+                    }))}
+                />
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -558,15 +542,13 @@ export default function PositionsPage() {
                 <Select
                   value={levelFormData.track}
                   onValueChange={(value) => setLevelFormData({ ...levelFormData, track: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Track (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IC">IC</SelectItem>
-                    <SelectItem value="Management">Management</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder="Track (optional)"
+                  variant="outlined"
+                  options={[
+                    { value: "IC", label: "IC" },
+                    { value: "Management", label: "Management" },
+                  ]}
+                />
               </div>
             </div>
           </div>
