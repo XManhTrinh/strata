@@ -206,25 +206,6 @@ export default function LoginPage() {
                     Sign in with SSO
                   </Button>
                 </div>
-
-                {/* Dev login */}
-                <div className="pt-2">
-                  <Divider className="mb-4" />
-                  <Button
-                    type="button"
-                    variant="text"
-                    size="s"
-                    className="w-full text-warning"
-                    icon={<Icon name="rocket_launch" size={20} />}
-                    onClick={handleDevLogin}
-                    disabled={isLoading}
-                  >
-                    Dev Login (skip auth)
-                  </Button>
-                  <p className="mt-1 text-[11px] text-center text-surface-variant-foreground">
-                    Development only — calls /auth/dev-login endpoint
-                  </p>
-                </div>
               </div>
             ) : (
               /* SSO org input form */
