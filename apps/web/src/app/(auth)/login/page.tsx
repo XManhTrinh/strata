@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [showSSO, setShowSSO] = useState(false);
   const [ssoOrgId, setSsoOrgId] = useState("");
 
-  const { login, loginWithGoogle, devLogin, isLoading, error, isAuthenticated, checkSession } = useAuth();
+  const { login, loginWithGoogle, isLoading, error, isAuthenticated, checkSession } = useAuth();
   const router = useRouter();
 
   // Check if already authenticated on mount
@@ -74,10 +74,6 @@ export default function LoginPage() {
     if (!ssoOrgId.trim()) return;
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     window.location.href = `${API_URL}/auth/sso/${ssoOrgId.trim()}/login?returnUrl=${encodeURIComponent("/")}`;
-  };
-
-  const handleDevLogin = async () => {
-    await devLogin();
   };
 
   return (
