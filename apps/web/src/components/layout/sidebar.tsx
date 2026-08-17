@@ -26,7 +26,6 @@ const superAdminRailItems: SidebarNavItem[] = [
   { value: "org-structure", label: "Org Structure", href: "/admin/org-structure", icon: "lan" },
   { value: "unit-types", label: "Unit Types", href: "/admin/org-unit-types", icon: "label" },
   { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
-  { value: "career-levels", label: "Levels", href: "/admin/career-levels", icon: "trending_up" },
   { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
   { value: "features", label: "Features", href: "/admin/features", icon: "extension" },
 ];

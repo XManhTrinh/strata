@@ -44,6 +44,7 @@ import {
   useArchivePosition,
   useDeletePosition,
   useCareerLevels,
+  useCreateCareerLevel,
   COMPANY_ID,
   type AdminPosition,
 } from "@/services";
@@ -52,6 +53,7 @@ import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 export default function PositionsPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showLevelModal, setShowLevelModal] = useState(false);
   const [editingPosition, setEditingPosition] = useState<AdminPosition | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -59,6 +61,12 @@ export default function PositionsPage() {
     minLevelId: "",
     maxLevelId: "",
     canHaveDirectReports: false,
+  });
+  const [levelFormData, setLevelFormData] = useState({
+    label: "",
+    displayName: "",
+    rank: 1,
+    track: "",
   });
 
   const { data: positions = [], isLoading, error, refetch } = usePositions(COMPANY_ID);
@@ -68,6 +76,7 @@ export default function PositionsPage() {
   const updateMutation = useUpdatePosition();
   const archiveMutation = useArchivePosition();
   const deleteMutation = useDeletePosition();
+  const createLevelMutation = useCreateCareerLevel();
 
   const filteredPositions = positions.filter(
     (p) =>
@@ -200,10 +209,20 @@ export default function PositionsPage() {
             Configure positions with career levels and reporting capabilities.
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Icon name="add" size={18} />
-          Create Position
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="tonal" onClick={() => {
+            const nextRank = careerLevelsData.length > 0 ? Math.max(...careerLevelsData.map(l => l.rank)) + 1 : 1;
+            setLevelFormData({ label: "", displayName: "", rank: nextRank, track: "" });
+            setShowLevelModal(true);
+          }}>
+            <Icon name="trending_up" size={18} />
+            Add Level
+          </Button>
+          <Button onClick={openCreate}>
+            <Icon name="add" size={18} />
+            Create Position
+          </Button>
+        </div>
       </AppBar>
 
       {/* Search */}
@@ -414,59 +433,60 @@ export default function PositionsPage() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Role description"
             />
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Min Level</label>
-              <Select
-                value={formData.minLevelId || ""}
-                onValueChange={(value) => {
-                  const newMin = value;
-                  // If max is set and its rank is below the new min's rank, clear max
-                  const minLevel = careerLevelsData.find((l) => l.id === newMin);
-                  const maxLevel = careerLevelsData.find((l) => l.id === formData.maxLevelId);
-                  const shouldClearMax = minLevel && maxLevel && maxLevel.rank < minLevel.rank;
-                  setFormData({ ...formData, minLevelId: newMin, ...(shouldClearMax ? { maxLevelId: "" } : {}) });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select min level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {careerLevelsData
-                    .slice()
-                    .sort((a, b) => a.rank - b.rank)
-                    .map((level) => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.label} — {level.displayName || level.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Max Level</label>
-              <Select
-                value={formData.maxLevelId || ""}
-                onValueChange={(value) => setFormData({ ...formData, maxLevelId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select max level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {careerLevelsData
-                    .slice()
-                    .sort((a, b) => a.rank - b.rank)
-                    .filter((level) => {
-                      if (!formData.minLevelId) return true;
-                      const minLevel = careerLevelsData.find((l) => l.id === formData.minLevelId);
-                      return minLevel ? level.rank >= minLevel.rank : true;
-                    })
-                    .map((level) => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.label} — {level.displayName || level.label}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[12px] leading-4 text-surface-variant-foreground">Min Level</label>
+                <Select
+                  value={formData.minLevelId || ""}
+                  onValueChange={(value) => {
+                    const newMin = value;
+                    const minLevel = careerLevelsData.find((l) => l.id === newMin);
+                    const maxLevel = careerLevelsData.find((l) => l.id === formData.maxLevelId);
+                    const shouldClearMax = minLevel && maxLevel && maxLevel.rank < minLevel.rank;
+                    setFormData({ ...formData, minLevelId: newMin, ...(shouldClearMax ? { maxLevelId: "" } : {}) });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select min level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {careerLevelsData
+                      .slice()
+                      .sort((a, b) => a.rank - b.rank)
+                      .map((level) => (
+                        <SelectItem key={level.id} value={level.id}>
+                          {level.label} — {level.displayName || level.label}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[12px] leading-4 text-surface-variant-foreground">Max Level</label>
+                <Select
+                  value={formData.maxLevelId || ""}
+                  onValueChange={(value) => setFormData({ ...formData, maxLevelId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select max level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {careerLevelsData
+                      .slice()
+                      .sort((a, b) => a.rank - b.rank)
+                      .filter((level) => {
+                        if (!formData.minLevelId) return true;
+                        const minLevel = careerLevelsData.find((l) => l.id === formData.minLevelId);
+                        return minLevel ? level.rank >= minLevel.rank : true;
+                      })
+                      .map((level) => (
+                        <SelectItem key={level.id} value={level.id}>
+                          {level.label} — {level.displayName || level.label}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
@@ -493,6 +513,92 @@ export default function PositionsPage() {
                 : editingPosition
                   ? "Save Changes"
                   : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Career Level Dialog */}
+      <Dialog open={showLevelModal} onOpenChange={setShowLevelModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Career Level</DialogTitle>
+            <DialogDescription>
+              Define a new career level in your company's leveling scheme.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                variant="outlined"
+                label="Label"
+                value={levelFormData.label}
+                onChange={(e) => setLevelFormData({ ...levelFormData, label: e.target.value })}
+                placeholder="e.g., L3, M2"
+              />
+              <TextField
+                variant="outlined"
+                label="Display Name"
+                value={levelFormData.displayName}
+                onChange={(e) => setLevelFormData({ ...levelFormData, displayName: e.target.value })}
+                placeholder="e.g., Senior"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                variant="outlined"
+                label="Rank"
+                type="number"
+                value={String(levelFormData.rank)}
+                onChange={(e) => setLevelFormData({ ...levelFormData, rank: Number(e.target.value) })}
+                placeholder="Sort order"
+              />
+              <div className="space-y-1">
+                <label className="text-[12px] leading-4 text-surface-variant-foreground">Track</label>
+                <Select
+                  value={levelFormData.track}
+                  onValueChange={(value) => setLevelFormData({ ...levelFormData, track: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Track (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IC">IC</SelectItem>
+                    <SelectItem value="Management">Management</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="text" onClick={() => setShowLevelModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => {
+                createLevelMutation.mutate(
+                  {
+                    companyId: COMPANY_ID,
+                    label: levelFormData.label,
+                    displayName: levelFormData.displayName || undefined,
+                    rank: levelFormData.rank,
+                    track: levelFormData.track || undefined,
+                  },
+                  {
+                    onSuccess: () => {
+                      toast.success("Career level created");
+                      setShowLevelModal(false);
+                    },
+                    onError: (err) => {
+                      toast.error(err.message || "Failed to create career level");
+                    },
+                  }
+                );
+              }}
+              disabled={!levelFormData.label || createLevelMutation.isPending}
+            >
+              {createLevelMutation.isPending ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
