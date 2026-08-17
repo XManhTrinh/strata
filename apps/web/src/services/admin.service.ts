@@ -29,7 +29,10 @@ export interface AdminPosition {
   companyId: string;
   name: string;
   description: string | null;
-  careerLevel: number | null;
+  minLevelId: string | null;
+  maxLevelId: string | null;
+  careerLevelId: string | null;  // deprecated
+  careerLevel: number | null;     // deprecated
   canHaveDirectReports: boolean;
   archived: boolean;
   createdAt: string;
@@ -146,7 +149,7 @@ export function usePositions(companyId: string) {
 export function useCreatePosition() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { companyId: string; name: string; description?: string; careerLevel?: number; canHaveDirectReports?: boolean }) =>
+    mutationFn: (data: { companyId: string; name: string; description?: string; minLevelId?: string; maxLevelId?: string; canHaveDirectReports?: boolean }) =>
       apiClient<AdminPosition>(
         `/api/v2/companies/${data.companyId}/positions`,
         { method: "POST", body: data }
@@ -160,7 +163,7 @@ export function useCreatePosition() {
 export function useUpdatePosition() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ companyId, id, ...data }: { companyId: string; id: string; name?: string; description?: string; careerLevel?: number; canHaveDirectReports?: boolean }) =>
+    mutationFn: ({ companyId, id, ...data }: { companyId: string; id: string; name?: string; description?: string; minLevelId?: string; maxLevelId?: string; canHaveDirectReports?: boolean }) =>
       apiClient<AdminPosition>(
         `/api/v2/companies/${companyId}/positions/${id}`,
         { method: "PATCH", body: data }
@@ -195,6 +198,73 @@ export function useDeletePosition() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["positions"] });
+    },
+  });
+}
+
+// ─── Career Levels ────────────────────────────────────────────────────────────
+
+export interface CareerLevel {
+  id: string;
+  schemeId: string;
+  rank: number;
+  label: string;
+  displayName: string | null;
+  track: string | null;
+}
+
+export interface CareerLevelScheme {
+  id: string;
+  companyId: string;
+  type: string;
+  levels: CareerLevel[];
+}
+
+export function useCareerLevels(companyId: string) {
+  return useQuery({
+    queryKey: ["career-levels", companyId],
+    queryFn: () => apiClient<CareerLevelScheme>(`/api/v2/companies/${companyId}/career-levels`),
+    enabled: !!companyId,
+  });
+}
+
+export function useCreateCareerLevel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { companyId: string; label: string; displayName?: string; rank: number; track?: string }) =>
+      apiClient<CareerLevel>(`/api/v2/companies/${data.companyId}/career-levels`, {
+        method: "POST",
+        body: data,
+      }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["career-levels", vars.companyId] });
+    },
+  });
+}
+
+export function useUpdateCareerLevel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { companyId: string; levelId: string; label?: string; displayName?: string; rank?: number; track?: string }) =>
+      apiClient<CareerLevel>(`/api/v2/companies/${data.companyId}/career-levels/${data.levelId}`, {
+        method: "PATCH",
+        body: data,
+      }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["career-levels", vars.companyId] });
+    },
+  });
+}
+
+export function useDeleteCareerLevel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { companyId: string; levelId: string }) =>
+      apiClient<void>(`/api/v2/companies/${data.companyId}/career-levels/${data.levelId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["career-levels", vars.companyId] });
     },
   });
 }

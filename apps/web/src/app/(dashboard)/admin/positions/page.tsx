@@ -43,6 +43,7 @@ import {
   useUpdatePosition,
   useArchivePosition,
   useDeletePosition,
+  useCareerLevels,
   COMPANY_ID,
   type AdminPosition,
 } from "@/services";
@@ -55,11 +56,14 @@ export default function PositionsPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    careerLevel: 1,
+    minLevelId: "",
+    maxLevelId: "",
     canHaveDirectReports: false,
   });
 
   const { data: positions = [], isLoading, error, refetch } = usePositions(COMPANY_ID);
+  const { data: careerLevelScheme } = useCareerLevels(COMPANY_ID);
+  const careerLevelsData = careerLevelScheme?.levels ?? [];
   const createMutation = useCreatePosition();
   const updateMutation = useUpdatePosition();
   const archiveMutation = useArchivePosition();
@@ -73,7 +77,7 @@ export default function PositionsPage() {
 
   const openCreate = () => {
     setEditingPosition(null);
-    setFormData({ name: "", description: "", careerLevel: 1, canHaveDirectReports: false });
+    setFormData({ name: "", description: "", minLevelId: "", maxLevelId: "", canHaveDirectReports: false });
     setShowModal(true);
   };
 
@@ -82,7 +86,8 @@ export default function PositionsPage() {
     setFormData({
       name: position.name,
       description: position.description || "",
-      careerLevel: position.careerLevel || 1,
+      minLevelId: position.minLevelId || "",
+      maxLevelId: position.maxLevelId || "",
       canHaveDirectReports: position.canHaveDirectReports,
     });
     setShowModal(true);
@@ -241,7 +246,7 @@ export default function PositionsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Career Level</TableHead>
+                  <TableHead>Level Range</TableHead>
                   <TableHead>Direct Reports</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -254,7 +259,17 @@ export default function PositionsPage() {
                       {row.name}
                     </TableCell>
                     <TableCell className="text-[14px] text-surface-foreground">
-                      {row.careerLevel != null ? `L${row.careerLevel}` : "—"}
+                      {(() => {
+                        const minLevel = careerLevelsData.find((l) => l.id === row.minLevelId);
+                        const maxLevel = careerLevelsData.find((l) => l.id === row.maxLevelId);
+                        if (minLevel && maxLevel) {
+                          if (minLevel.id === maxLevel.id) return minLevel.label;
+                          return `${minLevel.label} — ${maxLevel.label}`;
+                        }
+                        if (minLevel) return `${minLevel.label}+`;
+                        if (maxLevel) return `≤ ${maxLevel.label}`;
+                        return row.careerLevel != null ? `L${row.careerLevel}` : "—";
+                      })()}
                     </TableCell>
                     <TableCell>
                       <span className="flex items-center gap-1">
@@ -347,7 +362,18 @@ export default function PositionsPage() {
                   <div>
                     <p className="text-[14px] font-medium text-surface-foreground">{row.name}</p>
                     <p className="text-[12px] text-surface-variant-foreground">
-                      Level {row.careerLevel || "—"} · {row.canHaveDirectReports ? "Can manage" : "Individual contributor"}
+                      {(() => {
+                        const minLevel = careerLevelsData.find((l) => l.id === row.minLevelId);
+                        const maxLevel = careerLevelsData.find((l) => l.id === row.maxLevelId);
+                        if (minLevel && maxLevel) {
+                          if (minLevel.id === maxLevel.id) return minLevel.label;
+                          return `${minLevel.label} — ${maxLevel.label}`;
+                        }
+                        if (minLevel) return `${minLevel.label}+`;
+                        if (maxLevel) return `≤ ${maxLevel.label}`;
+                        return row.careerLevel ? `Level ${row.careerLevel}` : "—";
+                      })()}{" "}
+                      · {row.canHaveDirectReports ? "Can manage" : "Individual contributor"}
                     </p>
                   </div>
                   <Chip variant="filter" selected={!row.archived}>
@@ -389,20 +415,56 @@ export default function PositionsPage() {
               placeholder="Role description"
             />
             <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Career Level</label>
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Min Level</label>
               <Select
-                value={String(formData.careerLevel)}
-                onValueChange={(value) => setFormData({ ...formData, careerLevel: Number(value) })}
+                value={formData.minLevelId || ""}
+                onValueChange={(value) => {
+                  const newMin = value;
+                  // If max is set and its rank is below the new min's rank, clear max
+                  const minLevel = careerLevelsData.find((l) => l.id === newMin);
+                  const maxLevel = careerLevelsData.find((l) => l.id === formData.maxLevelId);
+                  const shouldClearMax = minLevel && maxLevel && maxLevel.rank < minLevel.rank;
+                  setFormData({ ...formData, minLevelId: newMin, ...(shouldClearMax ? { maxLevelId: "" } : {}) });
+                }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
+                  <SelectValue placeholder="Select min level" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7].map((l) => (
-                    <SelectItem key={l} value={String(l)}>
-                      Level {l}
-                    </SelectItem>
-                  ))}
+                  {careerLevelsData
+                    .slice()
+                    .sort((a, b) => a.rank - b.rank)
+                    .map((level) => (
+                      <SelectItem key={level.id} value={level.id}>
+                        {level.label} — {level.displayName || level.label}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[12px] leading-4 text-surface-variant-foreground">Max Level</label>
+              <Select
+                value={formData.maxLevelId || ""}
+                onValueChange={(value) => setFormData({ ...formData, maxLevelId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select max level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {careerLevelsData
+                    .slice()
+                    .sort((a, b) => a.rank - b.rank)
+                    .filter((level) => {
+                      if (!formData.minLevelId) return true;
+                      const minLevel = careerLevelsData.find((l) => l.id === formData.minLevelId);
+                      return minLevel ? level.rank >= minLevel.rank : true;
+                    })
+                    .map((level) => (
+                      <SelectItem key={level.id} value={level.id}>
+                        {level.label} — {level.displayName || level.label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

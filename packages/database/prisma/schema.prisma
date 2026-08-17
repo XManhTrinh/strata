@@ -420,6 +420,7 @@ model Company {
   users                  UserCompanyMembership[]
   features               CompanyFeature[]
   reportingRelationships ReportingRelationship[]
+  careerLevelScheme      CareerLevelScheme?
 
   // Calendar & Leave relations
   eventTypes         EventType[]
@@ -482,6 +483,39 @@ model OrganizationUnit {
   @@index([managerId])
 }
 
+// ─── Career Level Scheme (company-configurable leveling system) ──────────────────
+
+model CareerLevelScheme {
+  id          String   @id @default(cuid())
+  companyId   String   @unique
+  type        String   @default("numeric") // "numeric" | "alphabetic" | "custom"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company       @relation(fields: [companyId], references: [id])
+  levels  CareerLevel[]
+}
+
+model CareerLevel {
+  id          String   @id @default(cuid())
+  schemeId    String
+  rank        Int      // sort order / numeric rank for comparisons
+  label       String   // "L1", "A", "IC3", "M2", etc.
+  displayName String?  // "Junior", "Senior", "Staff", etc.
+  track       String?  // "IC" | "Management" | null (for dual-track)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scheme    CareerLevelScheme      @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  positions PositionV2[]           @relation("PositionLevel")
+  positionsMin PositionV2[]        @relation("PositionMinLevel")
+  positionsMax PositionV2[]        @relation("PositionMaxLevel")
+  users     UserCompanyMembership[]
+
+  @@unique([schemeId, label])
+  @@index([schemeId])
+}
+
 // ─── Positions (replaces existing Position, company-scoped) ─────────────────────
 
 model PositionV2 {
@@ -489,17 +523,25 @@ model PositionV2 {
   companyId            String
   name                 String
   description          String?
-  careerLevel          Int?
+  minLevelId           String?   // minimum career level for this position
+  maxLevelId           String?   // maximum career level for this position
+  careerLevelId        String?   // @deprecated — use minLevelId/maxLevelId
+  careerLevel          Int?      // @deprecated — use career level scheme
   canHaveDirectReports Boolean   @default(false)
   archivedAt           DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  company Company                @relation(fields: [companyId], references: [id])
-  users   UserCompanyMembership[]
+  company      Company       @relation(fields: [companyId], references: [id])
+  minLevel     CareerLevel?  @relation("PositionMinLevel", fields: [minLevelId], references: [id])
+  maxLevel     CareerLevel?  @relation("PositionMaxLevel", fields: [maxLevelId], references: [id])
+  level        CareerLevel?  @relation("PositionLevel", fields: [careerLevelId], references: [id])
+  users        UserCompanyMembership[]
 
   @@unique([companyId, name])
   @@index([companyId, archivedAt])
+  @@index([minLevelId])
+  @@index([maxLevelId])
 }
 
 // ─── Reporting Relationships (independent of org unit) ──────────────────────────
@@ -521,23 +563,26 @@ model ReportingRelationship {
 // ─── User-Company Membership (multi-tenant user context) ────────────────────────
 
 model UserCompanyMembership {
-  id           String   @id @default(cuid())
-  userId       String
-  companyId    String
-  positionId   String?
-  orgUnitId    String?
-  isSuperAdmin Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String
+  companyId      String
+  positionId     String?
+  orgUnitId      String?
+  careerLevelId  String?  // person's actual career level within position range
+  isSuperAdmin   Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   company         Company           @relation(fields: [companyId], references: [id])
   position        PositionV2?       @relation(fields: [positionId], references: [id])
   orgUnit         OrganizationUnit? @relation("UserOrgUnit", fields: [orgUnitId], references: [id])
+  careerLevel     CareerLevel?      @relation(fields: [careerLevelId], references: [id])
   roleAssignments RoleAssignmentV2[]
 
   @@unique([userId, companyId])
   @@index([companyId, orgUnitId])
   @@index([companyId, isSuperAdmin])
+  @@index([careerLevelId])
 }
 
 // ─── Roles (replaces existing Role, company-scoped) ─────────────────────────────

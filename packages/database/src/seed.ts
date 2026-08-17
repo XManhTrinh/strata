@@ -322,36 +322,97 @@ async function seedOrgUnits(companyId: string, types: Awaited<ReturnType<typeof 
 // Users, Roles, and Reporting
 // ═══════════════════════════════════════════════════════════════════════════════
 
-async function seedPositions(companyId: string) {
+async function seedCareerLevels(companyId: string) {
+  logSection("Career Level Scheme");
+
+  const scheme = await prisma.careerLevelScheme.upsert({
+    where: { companyId },
+    update: { type: "numeric" },
+    create: {
+      id: "cls_acme_001",
+      companyId,
+      type: "numeric",
+    },
+  });
+
+  const levels = [
+    { id: "cl_l1", rank: 1, label: "L1", displayName: "Junior", track: "IC" },
+    { id: "cl_l2", rank: 2, label: "L2", displayName: "Mid", track: "IC" },
+    { id: "cl_l3", rank: 3, label: "L3", displayName: "Senior", track: "IC" },
+    { id: "cl_l4", rank: 4, label: "L4", displayName: "Staff", track: "IC" },
+    { id: "cl_l5", rank: 5, label: "L5", displayName: "Principal", track: "IC" },
+    { id: "cl_m3", rank: 6, label: "M3", displayName: "Manager", track: "Management" },
+    { id: "cl_m4", rank: 7, label: "M4", displayName: "Senior Manager", track: "Management" },
+    { id: "cl_m5", rank: 8, label: "M5", displayName: "Director", track: "Management" },
+    { id: "cl_m6", rank: 9, label: "M6", displayName: "VP", track: "Management" },
+    { id: "cl_m7", rank: 10, label: "M7", displayName: "C-Suite", track: "Management" },
+  ];
+
+  const results: Record<string, string> = {};
+  for (const level of levels) {
+    const result = await prisma.careerLevel.upsert({
+      where: { schemeId_label: { schemeId: scheme.id, label: level.label } },
+      update: { displayName: level.displayName, track: level.track },
+      create: { id: level.id, schemeId: scheme.id, rank: level.rank, label: level.label, displayName: level.displayName, track: level.track },
+    });
+    results[level.label] = result.id;
+    log(`CareerLevel: ${level.label} — ${level.displayName} (${level.track})`);
+  }
+  return results;
+}
+
+async function seedPositions(companyId: string, careerLevels: Record<string, string>) {
   logSection("Positions (V2)");
+
+  // Map positions to career level ranges
+  const levelRangeMap: Record<string, { min: string; max: string }> = {
+    CTO: { min: careerLevels["M7"], max: careerLevels["M7"] },
+    CFO: { min: careerLevels["M7"], max: careerLevels["M7"] },
+    CPO: { min: careerLevels["M7"], max: careerLevels["M7"] },
+    "VP Engineering": { min: careerLevels["M6"], max: careerLevels["M6"] },
+    "VP Product": { min: careerLevels["M6"], max: careerLevels["M6"] },
+    "VP Design": { min: careerLevels["M6"], max: careerLevels["M6"] },
+    "Director of Engineering": { min: careerLevels["M5"], max: careerLevels["M5"] },
+    "Senior Engineering Manager": { min: careerLevels["M4"], max: careerLevels["M4"] },
+    "Engineering Manager": { min: careerLevels["M3"], max: careerLevels["M4"] },
+    "Staff Engineer": { min: careerLevels["L4"], max: careerLevels["L5"] },
+    "Senior Engineer": { min: careerLevels["L3"], max: careerLevels["L4"] },
+    "Senior Product Manager": { min: careerLevels["L3"], max: careerLevels["L4"] },
+    "Senior Designer": { min: careerLevels["L3"], max: careerLevels["L4"] },
+    "Product Manager": { min: careerLevels["L2"], max: careerLevels["L3"] },
+    "Software Engineer": { min: careerLevels["L1"], max: careerLevels["L3"] },
+    Designer: { min: careerLevels["L1"], max: careerLevels["L3"] },
+  };
+
   const positions = [
-    { id: IDS.positions.cto, name: "CTO", careerLevel: 8, canHaveDirectReports: true },
-    { id: IDS.positions.cfo, name: "CFO", careerLevel: 8, canHaveDirectReports: true },
-    { id: IDS.positions.cpo, name: "CPO", careerLevel: 8, canHaveDirectReports: true },
-    { id: IDS.positions.vpEngineering, name: "VP Engineering", careerLevel: 7, canHaveDirectReports: true },
-    { id: IDS.positions.vpProduct, name: "VP Product", careerLevel: 7, canHaveDirectReports: true },
-    { id: IDS.positions.vpDesign, name: "VP Design", careerLevel: 7, canHaveDirectReports: true },
-    { id: IDS.positions.director, name: "Director of Engineering", careerLevel: 6, canHaveDirectReports: true },
-    { id: IDS.positions.seniorEngineeringManager, name: "Senior Engineering Manager", careerLevel: 5, canHaveDirectReports: true },
-    { id: IDS.positions.engineeringManager, name: "Engineering Manager", careerLevel: 5, canHaveDirectReports: true },
-    { id: IDS.positions.staffEngineer, name: "Staff Engineer", careerLevel: 5, canHaveDirectReports: false },
-    { id: IDS.positions.seniorEngineer, name: "Senior Engineer", careerLevel: 4, canHaveDirectReports: false },
-    { id: IDS.positions.seniorProductManager, name: "Senior Product Manager", careerLevel: 4, canHaveDirectReports: false },
-    { id: IDS.positions.seniorDesigner, name: "Senior Designer", careerLevel: 4, canHaveDirectReports: false },
-    { id: IDS.positions.productManager, name: "Product Manager", careerLevel: 3, canHaveDirectReports: false },
-    { id: IDS.positions.softwareEngineer, name: "Software Engineer", careerLevel: 3, canHaveDirectReports: false },
-    { id: IDS.positions.designer, name: "Designer", careerLevel: 3, canHaveDirectReports: false },
+    { id: IDS.positions.cto, name: "CTO", canHaveDirectReports: true },
+    { id: IDS.positions.cfo, name: "CFO", canHaveDirectReports: true },
+    { id: IDS.positions.cpo, name: "CPO", canHaveDirectReports: true },
+    { id: IDS.positions.vpEngineering, name: "VP Engineering", canHaveDirectReports: true },
+    { id: IDS.positions.vpProduct, name: "VP Product", canHaveDirectReports: true },
+    { id: IDS.positions.vpDesign, name: "VP Design", canHaveDirectReports: true },
+    { id: IDS.positions.director, name: "Director of Engineering", canHaveDirectReports: true },
+    { id: IDS.positions.seniorEngineeringManager, name: "Senior Engineering Manager", canHaveDirectReports: true },
+    { id: IDS.positions.engineeringManager, name: "Engineering Manager", canHaveDirectReports: true },
+    { id: IDS.positions.staffEngineer, name: "Staff Engineer", canHaveDirectReports: false },
+    { id: IDS.positions.seniorEngineer, name: "Senior Engineer", canHaveDirectReports: false },
+    { id: IDS.positions.seniorProductManager, name: "Senior Product Manager", canHaveDirectReports: false },
+    { id: IDS.positions.seniorDesigner, name: "Senior Designer", canHaveDirectReports: false },
+    { id: IDS.positions.productManager, name: "Product Manager", canHaveDirectReports: false },
+    { id: IDS.positions.softwareEngineer, name: "Software Engineer", canHaveDirectReports: false },
+    { id: IDS.positions.designer, name: "Designer", canHaveDirectReports: false },
   ];
 
   const results = [];
   for (const pos of positions) {
+    const range = levelRangeMap[pos.name];
     const result = await prisma.positionV2.upsert({
       where: { companyId_name: { companyId, name: pos.name } },
-      update: { careerLevel: pos.careerLevel, canHaveDirectReports: pos.canHaveDirectReports },
-      create: { id: pos.id, companyId, name: pos.name, careerLevel: pos.careerLevel, canHaveDirectReports: pos.canHaveDirectReports },
+      update: { canHaveDirectReports: pos.canHaveDirectReports, minLevelId: range?.min, maxLevelId: range?.max },
+      create: { id: pos.id, companyId, name: pos.name, canHaveDirectReports: pos.canHaveDirectReports, minLevelId: range?.min, maxLevelId: range?.max },
     });
     results.push(result);
-    log(`PositionV2: ${result.name}`);
+    log(`PositionV2: ${result.name} → range [${range?.min ? "set" : "—"}, ${range?.max ? "set" : "—"}]`);
   }
   return results;
 }
@@ -1239,7 +1300,8 @@ async function main() {
   const orgUnits = await seedOrgUnits(company.id, orgUnitTypes);
 
   // Users, Roles, and Reporting
-  const positions = await seedPositions(company.id);
+  const careerLevels = await seedCareerLevels(company.id);
+  const positions = await seedPositions(company.id, careerLevels);
   const { users } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions);
   await seedTestAccounts(company.id, legacyOrg.id);
   await seedFeatures();

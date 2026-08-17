@@ -15,7 +15,6 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  devLogin: () => Promise<void>;
   loginWithGoogle: (returnUrl?: string) => void;
   logout: () => Promise<void>;
   checkSession: () => Promise<void>;
@@ -56,29 +55,6 @@ export const useAuth = create<AuthState>((set) => ({
     }
   },
 
-  devLogin: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch(`${API_URL}/auth/dev-login`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        set({ isLoading: false, error: "Dev login failed" });
-        return;
-      }
-      const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
-      if (meRes.ok) {
-        const user = await meRes.json();
-        set({ user, isAuthenticated: true, isLoading: false, error: null });
-      } else {
-        set({ isAuthenticated: true, isLoading: false, error: null });
-      }
-    } catch {
-      set({ isLoading: false, error: "Network error" });
-    }
-  },
-
   loginWithGoogle: (returnUrl: string = "/") => {
     window.location.href = `${API_URL}/auth/google/login?returnUrl=${encodeURIComponent(returnUrl)}`;
   },
@@ -94,7 +70,7 @@ export const useAuth = create<AuthState>((set) => ({
     }
     set({ user: null, isAuthenticated: false, error: null });
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   },
 
