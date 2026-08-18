@@ -6,6 +6,14 @@ import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
 import { buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
 import { Button } from "@vkieu/mui/buttons";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "@vkieu/mui";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnits } from "@/services";
 import OrgFlow from "@/components/flow-org/OrgFlow";
@@ -279,23 +287,25 @@ export default function OrgChartPage() {
       )}
 
       {pendingGroupMove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setPendingGroupMove(null)}
-          />
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Move {pendingGroupMove.persons.length} people
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
-              Move all {pendingGroupMove.persons.length} direct reports{" "}
-              {pendingGroupMove.targetId
-                ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
-                : "to unallocated"}
-              ?
-            </p>
-            <div className="flex flex-col gap-2">
+        <Dialog open={!!pendingGroupMove} onOpenChange={() => {}}>
+          <DialogContent alert>
+            <DialogHeader>
+              <DialogTitle>Move {pendingGroupMove.persons.length} people</DialogTitle>
+              <DialogDescription>
+                Move all {pendingGroupMove.persons.length} direct reports{" "}
+                {pendingGroupMove.targetId
+                  ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
+                  : "to unallocated"}
+                ?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="text"
+                onClick={() => setPendingGroupMove(null)}
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={() => {
                   for (const p of pendingGroupMove.persons) {
@@ -306,15 +316,9 @@ export default function OrgChartPage() {
               >
                 Confirm
               </Button>
-              <Button
-                variant="text"
-                onClick={() => setPendingGroupMove(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

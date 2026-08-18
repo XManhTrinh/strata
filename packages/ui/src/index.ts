@@ -25,8 +25,5 @@ export type { SkeletonProps } from "./skeleton";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
 
-export { ConfirmDialog } from "./confirm-dialog";
-export type { ConfirmDialogProps } from "./confirm-dialog";
-
 export { Drawer } from "./drawer";
 export type { DrawerProps } from "./drawer";

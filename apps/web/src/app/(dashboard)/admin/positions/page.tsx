@@ -401,7 +401,7 @@ export default function PositionsPage() {
 
       {/* Create/Edit Position Dialog */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
+        <DialogContent fullScreen>
           <DialogHeader>
             <DialogTitle>
               {editingPosition ? "Edit Position" : "Create Position"}

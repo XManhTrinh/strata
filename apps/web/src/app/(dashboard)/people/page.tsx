@@ -382,7 +382,7 @@ export default function PeoplePage() {
 
       {/* Add Person Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent fullScreen>
           <DialogHeader>
             <DialogTitle>Add Person</DialogTitle>
             <DialogDescription>
@@ -444,7 +444,7 @@ export default function PeoplePage() {
 
       {/* Edit Person Dialog */}
       <Dialog open={!!editPerson} onOpenChange={(open) => !open && setEditPerson(null)}>
-        <DialogContent>
+        <DialogContent fullScreen>
           <DialogHeader>
             <DialogTitle>Edit Person</DialogTitle>
             <DialogDescription>
@@ -505,8 +505,8 @@ export default function PeoplePage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <DialogContent icon="delete">
+      <Dialog open={!!deleteId} onOpenChange={() => {}}>
+        <DialogContent alert icon="delete">
           <DialogHeader centered>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>

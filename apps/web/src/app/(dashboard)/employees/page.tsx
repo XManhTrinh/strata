@@ -452,7 +452,7 @@ export default function EmployeesPage() {
 
       {/* Add Employee Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent fullScreen>
           <DialogHeader>
             <DialogTitle>Add Employee</DialogTitle>
             <DialogDescription>
@@ -527,7 +527,7 @@ export default function EmployeesPage() {
 
       {/* Edit Employee Dialog */}
       <Dialog open={!!editEmployee} onOpenChange={(open) => !open && setEditEmployee(null)}>
-        <DialogContent>
+        <DialogContent fullScreen>
           <DialogHeader>
             <DialogTitle>Edit Employee</DialogTitle>
             <DialogDescription>
@@ -601,8 +601,8 @@ export default function EmployeesPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <DialogContent icon="delete">
+      <Dialog open={!!deleteId} onOpenChange={() => {}}>
+        <DialogContent alert icon="delete">
           <DialogHeader centered>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>

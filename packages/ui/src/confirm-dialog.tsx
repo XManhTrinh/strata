@@ -3,6 +3,10 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
+/**
+ * @deprecated Use the `@vkieu/mui` Dialog component with the `alert` prop instead.
+ * This component will be removed in a future release.
+ */
 export interface ConfirmDialogProps {
   open: boolean;
   onClose: () => void;
@@ -13,6 +17,25 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
 }
 
+/**
+ * @deprecated Use the `@vkieu/mui` Dialog component with the `alert` prop instead.
+ * This component will be removed in a future release.
+ *
+ * @example
+ * // Replace with:
+ * // <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+ * //   <DialogContent alert>
+ * //     <DialogHeader>
+ * //       <DialogTitle>Title</DialogTitle>
+ * //       <DialogDescription>Description</DialogDescription>
+ * //     </DialogHeader>
+ * //     <DialogFooter>
+ * //       <Button variant="text" onClick={handleClose}>Cancel</Button>
+ * //       <Button variant="filled" onClick={handleConfirm}>Confirm</Button>
+ * //     </DialogFooter>
+ * //   </DialogContent>
+ * // </Dialog>
+ */
 export function ConfirmDialog({
   open,
   onClose,
