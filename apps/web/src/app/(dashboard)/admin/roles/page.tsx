@@ -561,7 +561,7 @@ function CreateRoleDialog({
             Create a new role to assign feature permissions and scope access.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Role Name"

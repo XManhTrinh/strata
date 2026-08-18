@@ -7,11 +7,21 @@ import { NotificationDropdown } from "@/components/notifications/notification-dr
 import { IconButton } from "@vkieu/mui/buttons";
 import { Icon } from "@vkieu/mui";
 import { Tooltip } from "@vkieu/mui";
+import { Select } from "@vkieu/mui";
 import { Menu, MenuItem, MenuDivider } from "@vkieu/mui";
 import { Avatar } from "@/components/ui/avatar";
+import { useRoles, COMPANY_ID } from "@/services";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export function Header() {
   const { logout } = useAuth();
+  const { data: roles = [] } = useRoles(COMPANY_ID);
+  const { role, setRole } = useUserRole();
+
+  const roleOptions = [
+    { value: "super_admin", label: "Super Admin" },
+    ...roles.map((r) => ({ value: r.id, label: r.name })),
+  ];
 
   return (
     <AppBar>
@@ -19,6 +29,18 @@ export function Header() {
         <Breadcrumbs />
       </AppBar.Headline>
       <AppBar.Trailing>
+        {/* Role switcher (dev) */}
+        <div className="hidden lg:block w-48">
+          <Select
+            value={role}
+            onValueChange={setRole}
+            placeholder="Select role"
+            variant="outlined"
+            options={roleOptions}
+            className="h-10"
+          />
+        </div>
+
         {/* Notifications */}
         <NotificationDropdown />
 

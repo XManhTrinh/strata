@@ -381,7 +381,7 @@ export default function EngineeringPage() {
                 }))}
               />
             </div>
-            <DialogFooter className="mt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="text"

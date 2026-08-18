@@ -509,7 +509,7 @@ export default function EmployeesPage() {
                 ]}
               />
             </div>
-            <DialogFooter className="mt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="text"
@@ -584,7 +584,7 @@ export default function EmployeesPage() {
                 ]}
               />
             </div>
-            <DialogFooter className="mt-4">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="text"
