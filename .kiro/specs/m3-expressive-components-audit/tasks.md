@@ -241,11 +241,11 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - Test max-width constraint is present
     - _Requirements: 9.1, 9.3, 9.4_
 
-- [-] 9. Checkpoint — MEDIUM priority fixes verified
+- [x] 9. Checkpoint — MEDIUM priority fixes verified
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. LOWER PRIORITY — Chip audit (believed compliant)
-  - [ ] 10.1 Verify Chip component against M3 spec
+- [x] 10. LOWER PRIORITY — Chip audit (believed compliant)
+  - [x] 10.1 Verify Chip component against M3 spec
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/chip.tsx`
     - Verify height 32dp (`h-8`), shape `rounded-lg` (8dp)
     - Verify Label Large typography (14px/20px/500/0.1px)
@@ -265,7 +265,7 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - _Requirements: 3.1, 3.6, 3.11_
 
 - [ ] 11. LOWER PRIORITY — Remaining components audit
-  - [ ] 11.1 Audit and fix Slider component
+  - [x] 11.1 Audit and fix Slider component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/slider.tsx`
     - Verify active track `bg-primary`, inactive track `bg-secondary-container`
     - Verify handle: 44dp height × 4dp width, `primary` color
@@ -274,35 +274,35 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - Fix any discrepancies
     - _Requirements: 10.1, 10.2_
 
-  - [ ] 11.2 Audit and fix Badge component
+  - [x] 11.2 Audit and fix Badge component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/badge.tsx`
     - Verify dot variant: 6dp × 6dp (`size-1.5`), `bg-error`
     - Verify count variant: 16dp height, min-width 16dp, Label Small (11px/16px/500)
     - Fix any discrepancies
     - _Requirements: 10.3_
 
-  - [ ] 11.3 Audit and fix Tooltip component
+  - [x] 11.3 Audit and fix Tooltip component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/tooltip.tsx`
     - Verify plain variant: `inverse-surface` bg, 24dp height (`h-6`), 4dp radius (`rounded-sm`), Body Small typography (12px/16px/400/0.4px), 500ms show delay
     - Verify rich variant: `surface-container` bg, 12dp radius (`rounded-xl`), max-width 320dp, Level 2 shadow
     - Fix any discrepancies
     - _Requirements: 10.4, 10.5_
 
-  - [ ] 11.4 Audit and fix List component
+  - [x] 11.4 Audit and fix List component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/list.tsx`
     - Verify item heights: 1-line 56dp (`h-14`), 2-line 72dp (`h-18`), 3-line 88dp (`h-22`)
     - Verify 16dp horizontal padding, Body Large typography for primary text
     - Fix any discrepancies
     - _Requirements: 10.6_
 
-  - [ ] 11.5 Audit and fix Divider component
+  - [x] 11.5 Audit and fix Divider component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/divider.tsx`
     - Verify 1dp height (`h-px`), full-width, `outline-variant` color
     - Verify inset variant uses 16dp left margin
     - Fix any discrepancies
     - _Requirements: 10.7_
 
-  - [ ] 11.6 Audit and fix Progress Indicators
+  - [x] 11.6 Audit and fix Progress Indicators
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/indicators/` directory
     - Verify CircularProgress: 48dp default (`size-12`), 4dp stroke width, `primary` color
     - Verify LinearProgress: 4dp height (`h-1`), `primary` active track, `surface-container-highest` inactive track
@@ -310,14 +310,14 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - Fix any discrepancies
     - _Requirements: 10.8, 10.9_
 
-  - [ ] 11.7 Audit and fix Search component
+  - [x] 11.7 Audit and fix Search component
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/search.tsx`
     - Verify height 56dp (`h-14`), corner-full shape (`rounded-full`), search icon 24dp in leading position
     - Verify matches TextField outlined specs where applicable
     - Fix any discrepancies
     - _Requirements: 10.11_
 
-  - [ ] 11.8 Verify consumer-friendliness across all remaining components
+  - [x] 11.8 Verify consumer-friendliness across all remaining components
     - Spot-check that no remaining component root forces `position: fixed/absolute` or explicit `width`
     - Check that `className` prop is accepted on all component roots
     - Check that components using internal z-index apply `isolate` class
@@ -333,8 +333,8 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - Test Progress indicators render with correct sizes
     - _Requirements: 10.1, 10.3, 10.4, 10.6, 10.7, 10.8_
 
-- [ ] 12. LOWER PRIORITY — Verify theme.css token completeness
-  - [ ] 12.1 Audit theme.css for missing M3 tokens
+- [x] 12. LOWER PRIORITY — Verify theme.css token completeness
+  - [x] 12.1 Audit theme.css for missing M3 tokens
     - Read `/Users/xuan-manh.trinh/workplace/web/mui/src/theme.css`
     - Verify all color tokens exist: `--primary`, `--on-primary`, `--secondary-container`, `--on-secondary-container`, `--surface-container-*` (low, default, high, highest), `--outline`, `--outline-variant`, `--inverse-surface`, `--inverse-on-surface`, `--inverse-primary`, `--error`
     - Verify elevation tokens: `--elevation-1` through `--elevation-5`
@@ -344,7 +344,7 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
     - Add any missing tokens
     - _Requirements: 1.9, 2.11, 3.10, 4.5, 5.5, 6.8, 8.5_
 
-- [ ] 13. Final checkpoint — Ensure all tests pass
+- [x] 13. Final checkpoint — Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
