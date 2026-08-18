@@ -495,9 +495,8 @@ export default function EmployeesPage() {
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
             />
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Status</label>
-              <Select
+            <Select
+                label="Status"
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
                 variant="outlined"
@@ -508,7 +507,6 @@ export default function EmployeesPage() {
                   { value: "SUSPENDED", label: "Suspended" },
                 ]}
               />
-            </div>
             <DialogFooter>
               <Button
                 type="button"
@@ -570,9 +568,8 @@ export default function EmployeesPage() {
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
             />
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Status</label>
-              <Select
+            <Select
+                label="Status"
                 value={formData.status}
                 onValueChange={(value) => setFormData({ ...formData, status: value as Employee["status"] })}
                 variant="outlined"
@@ -583,7 +580,6 @@ export default function EmployeesPage() {
                   { value: "SUSPENDED", label: "Suspended" },
                 ]}
               />
-            </div>
             <DialogFooter>
               <Button
                 type="button"

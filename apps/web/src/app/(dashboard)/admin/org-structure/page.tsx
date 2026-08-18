@@ -362,7 +362,7 @@ export default function OrgStructurePage() {
                 : "Add a new unit to your organization hierarchy."}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 pt-2">
             <TextField
               variant="outlined"
               label="Name"
@@ -370,35 +370,31 @@ export default function OrgStructurePage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Engineering"
             />
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Type</label>
-              <Select
-                value={formData.typeId}
-                onValueChange={(value) => setFormData({ ...formData, typeId: value })}
-                placeholder="Select a type..."
-                variant="outlined"
-                options={orgUnitTypes.map((t) => ({
-                  value: t.id,
-                  label: t.name,
-                }))}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Parent Unit</label>
-              <Select
-                value={formData.parentId || "none"}
-                onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
-                placeholder="None (root level)"
-                variant="outlined"
-                options={[
-                  { value: "none", label: "None (root level)" },
-                  ...orgUnits.map((u) => ({
-                    value: u.id,
-                    label: u.name,
-                  })),
-                ]}
-              />
-            </div>
+            <Select
+              label="Type"
+              value={formData.typeId}
+              onValueChange={(value) => setFormData({ ...formData, typeId: value })}
+              placeholder="Select a type..."
+              variant="outlined"
+              options={orgUnitTypes.map((t) => ({
+                value: t.id,
+                label: t.name,
+              }))}
+            />
+            <Select
+              label="Parent Unit"
+              value={formData.parentId || "none"}
+              onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
+              placeholder="None (root level)"
+              variant="outlined"
+              options={[
+                { value: "none", label: "None (root level)" },
+                ...orgUnits.map((u) => ({
+                  value: u.id,
+                  label: u.name,
+                })),
+              ]}
+            />
           </div>
           <DialogFooter>
             <Button variant="text" onClick={() => setShowModal(false)}>

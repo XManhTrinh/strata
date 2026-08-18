@@ -428,9 +428,8 @@ export default function PositionsPage() {
               placeholder="Role description"
             />
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-[12px] leading-4 text-surface-variant-foreground">Min Level</label>
-                <Select
+              <Select
+                  label="Min Level"
                   value={formData.minLevelId || ""}
                   onValueChange={(value) => {
                     const newMin = value;
@@ -449,10 +448,8 @@ export default function PositionsPage() {
                       label: `${level.label} — ${level.displayName || level.label}`,
                     }))}
                 />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[12px] leading-4 text-surface-variant-foreground">Max Level</label>
-                <Select
+              <Select
+                  label="Max Level"
                   value={formData.maxLevelId || ""}
                   onValueChange={(value) => setFormData({ ...formData, maxLevelId: value })}
                   placeholder="Select max level"
@@ -470,7 +467,6 @@ export default function PositionsPage() {
                       label: `${level.label} — ${level.displayName || level.label}`,
                     }))}
                 />
-              </div>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
@@ -537,9 +533,8 @@ export default function PositionsPage() {
                 onChange={(e) => setLevelFormData({ ...levelFormData, rank: Number(e.target.value) })}
                 placeholder="Sort order"
               />
-              <div className="space-y-1">
-                <label className="text-[12px] leading-4 text-surface-variant-foreground">Track</label>
-                <Select
+              <Select
+                  label="Track"
                   value={levelFormData.track}
                   onValueChange={(value) => setLevelFormData({ ...levelFormData, track: value })}
                   placeholder="Track (optional)"
@@ -549,7 +544,6 @@ export default function PositionsPage() {
                     { value: "Management", label: "Management" },
                   ]}
                 />
-              </div>
             </div>
           </div>
           <DialogFooter>

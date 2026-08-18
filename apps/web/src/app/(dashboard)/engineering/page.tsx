@@ -368,9 +368,8 @@ export default function EngineeringPage() {
               onChange={(e) => setNewUnitName(e.target.value)}
               placeholder="Enter unit name"
             />
-            <div className="space-y-1">
-              <label className="text-[12px] leading-4 text-surface-variant-foreground">Type</label>
-              <Select
+            <Select
+                label="Type"
                 value={newUnitTypeId}
                 onValueChange={setNewUnitTypeId}
                 placeholder="Select type"
@@ -380,7 +379,6 @@ export default function EngineeringPage() {
                   label: t.name,
                 }))}
               />
-            </div>
             <DialogFooter>
               <Button
                 type="button"
