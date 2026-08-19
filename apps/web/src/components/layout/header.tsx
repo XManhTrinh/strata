@@ -33,7 +33,7 @@ export function Header() {
         <div className="hidden lg:block w-48">
           <Select
             value={role}
-            onValueChange={setRole}
+            onValueChange={(value) => setRole(value as import("@/hooks/use-user-role").UserRoleView)}
             placeholder="Select role"
             variant="outlined"
             options={roleOptions}
