@@ -70,7 +70,7 @@ export const useAuth = create<AuthState>((set) => ({
     }
     set({ user: null, isAuthenticated: false, error: null });
     if (typeof window !== "undefined") {
-      window.location.href = "/";
+      window.location.href = "/login";
     }
   },
 
