@@ -64,4 +64,13 @@ export const BUILT_IN_FEATURES: FeatureDefinition[] = [
       { key: 'view', displayName: 'View Dashboard', description: 'View dashboard data' },
     ],
   },
+  {
+    key: 'capacity',
+    displayName: 'Capacity Planning',
+    description: 'Team capacity allocation and resource planning',
+    permissions: [
+      { key: 'view', displayName: 'View Capacity', description: 'View capacity allocations' },
+      { key: 'manage', displayName: 'Manage Capacity', description: 'Manage capacity allocations' },
+    ],
+  },
 ];

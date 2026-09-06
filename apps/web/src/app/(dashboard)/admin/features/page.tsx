@@ -24,6 +24,7 @@ const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> 
   org_chart:     { icon: "lan",                  color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
   budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
   dashboard:     { icon: "dashboard",            color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
+  capacity:      { icon: "stacked_bar_chart",    color: "text-cyan-600",    bg: "bg-cyan-100 dark:bg-cyan-900/30" },
 };
 
 const DEFAULT_META = { icon: "extension", color: "text-primary", bg: "bg-primary/10" };
@@ -69,7 +70,7 @@ export default function FeaturesPage() {
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
   // Only show features that have active modules — hide core (authorization) and legacy DB records
-  const ACTIVE_FEATURES = new Set(["people", "org_chart", "budgeting", "calendar", "dashboard"]);
+  const ACTIVE_FEATURES = new Set(["people", "org_chart", "budgeting", "calendar", "dashboard", "capacity"]);
   const features: FeatureRow[] = (companyFeatures ?? [])
     .map(toFeatureRow)
     .filter((r): r is FeatureRow => r !== null && ACTIVE_FEATURES.has(r.key));

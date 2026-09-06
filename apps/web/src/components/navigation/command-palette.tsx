@@ -19,6 +19,7 @@ const commandItems: CommandItem[] = [
   { id: "people", label: "Members", section: "Navigation", href: "/people", icon: "👤" },
   { id: "org-chart", label: "Org Chart", section: "Navigation", href: "/org-chart", icon: "🏢" },
   { id: "budgets", label: "Budgets", section: "Navigation", href: "/budgets", icon: "💰" },
+  { id: "capacity", label: "Capacity", section: "Navigation", href: "/capacity", icon: "📈" },
   { id: "calendar", label: "Calendar", section: "Navigation", href: "/calendar", icon: "📅" },
   { id: "settings", label: "Admin", section: "Navigation", href: "/admin", icon: "⚙️" },
 ];
