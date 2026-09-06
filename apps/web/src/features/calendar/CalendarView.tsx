@@ -12,6 +12,7 @@ import { LeaveBalancePanel } from "./components/LeaveBalancePanel";
 import { LeaveRequestForm } from "./components/LeaveRequestForm";
 import { EventForm } from "./components/EventForm";
 import { ApprovalActions } from "./components/ApprovalActions";
+import { useUserPermissions } from "@/hooks/use-user-permissions";
 
 /** Mock accessible scope data */
 const MOCK_ORG_UNITS: OrgUnit[] = [
@@ -66,6 +67,8 @@ export function CalendarView() {
 
   const { events, addEvent, updateEventStatus } = useCalendarEvents(filters);
   const { balances } = useLeaveBalances();
+  const { hasPermission } = useUserPermissions();
+  const canManageCalendar = hasPermission("calendar", "manage");
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -215,8 +218,8 @@ export function CalendarView() {
         <aside className="hidden w-64 shrink-0 overflow-y-auto lg:block">
           <LeaveBalancePanel balances={balances} onRequestLeave={() => setShowLeaveForm(true)} />
 
-          {/* Pending requests needing approval */}
-          {pendingRequests.length > 0 && (
+          {/* Pending requests needing approval — only for managers */}
+          {canManageCalendar && pendingRequests.length > 0 && (
             <div className="mt-6">
               <h3 className="text-sm font-semibold text-foreground mb-3">Pending Approvals</h3>
               <div className="space-y-2">
@@ -294,7 +297,7 @@ export function CalendarView() {
                 </p>
               )}
             </div>
-            {selectedEvent.leaveRequest?.status === "PENDING" && (
+            {canManageCalendar && selectedEvent.leaveRequest?.status === "PENDING" && (
               <div className="mt-4 border-t border-border pt-3">
                 <ApprovalActions
                   eventId={selectedEvent.id}
