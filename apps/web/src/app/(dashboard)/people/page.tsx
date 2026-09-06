@@ -10,7 +10,6 @@ import {
   TextField,
   Chip,
   Select,
-  Switch,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -41,7 +40,6 @@ import type {
   Person,
   CreatePersonRequest,
   ImportMemberRow,
-  TableView,
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -843,7 +841,7 @@ export default function PeoplePage() {
               { value: "", label: "Default" },
               ...tableViews.map((v) => ({ value: v.id, label: v.name })),
             ]}
-            className="min-w-[140px]"
+            className="min-w-35"
           />
 
           {/* Delete selected view */}
@@ -1492,7 +1490,7 @@ export default function PeoplePage() {
                         {mapping.csvHeader}
                       </span>
                       {csvRows.length > 0 && csvRows[0][idx] && (
-                        <span className="text-[12px] text-muted-foreground truncate max-w-[120px]">
+                        <span className="text-[12px] text-muted-foreground truncate max-w-30">
                           (e.g. {csvRows[0][idx]})
                         </span>
                       )}
@@ -1575,7 +1573,21 @@ export default function PeoplePage() {
 
           {/* Step 3: Preview */}
           {importStep === "preview" && importPreview && (
-            <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto relative">
+              {bulkImportMutation.isPending && (
+                <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 rounded-xl">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-[16px] font-medium text-surface-foreground">
+                    Importing members...
+                  </p>
+                  <p className="text-[13px] text-surface-variant-foreground">
+                    Creating {importPreview.rows.length} members with org structure, positions, and roles
+                  </p>
+                  <div className="w-48 h-1.5 bg-surface-variant/30 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '60%' }} />
+                  </div>
+                </div>
+              )}
               {importPreview.rows.length > 0 && (
                 <div>
                   <p className="text-[14px] font-medium text-surface-foreground mb-2">
@@ -1659,9 +1671,14 @@ export default function PeoplePage() {
                 >
                   {bulkImportMutation.isPending
                     ? "Importing..."
+                  {bulkImportMutation.isPending
+                    ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        Importing {importPreview?.rows.length ?? 0} records...
+                      </span>
+                    )
                     : `Import ${importPreview?.rows.length ?? 0} records`}
-                </Button>
-              </>
             )}
           </DialogFooter>
         </DialogContent>
