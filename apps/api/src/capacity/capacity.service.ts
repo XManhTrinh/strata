@@ -149,6 +149,7 @@ export class CapacityService {
     membershipId: string,
     orgUnitId: string,
     fiscalYear?: number,
+    fte: number = 1,
   ) {
     const year = fiscalYear ?? new Date().getFullYear();
     try {
@@ -166,9 +167,9 @@ export class CapacityService {
           membershipId,
           orgUnitId,
           fiscalYear: year,
-          p1: 1, p2: 1, p3: 1, p4: 1,
-          p5: 1, p6: 1, p7: 1, p8: 1,
-          p9: 1, p10: 1, p11: 1, p12: 1,
+          p1: fte, p2: fte, p3: fte, p4: fte,
+          p5: fte, p6: fte, p7: fte, p8: fte,
+          p9: fte, p10: fte, p11: fte, p12: fte,
         },
         update: {}, // Don't overwrite existing allocations
       });

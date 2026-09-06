@@ -319,9 +319,28 @@ export class CompanyPeopleService {
         const isSecondarySquad = orgUnitId && existing.orgUnitId && orgUnitId !== existing.orgUnitId;
 
         if (isSecondarySquad) {
-          // Just add a capacity allocation for the additional squad
-          await this.capacityService.createDefaultAllocation(companyId, existing.id, orgUnitId!);
-          return { status: 'updated', email: dto.email, note: 'additional squad allocation' };
+          // Count existing allocations to compute split FTE
+          const existingAllocations = await this.prisma.capacityAllocation.count({
+            where: { companyId, membershipId: existing.id, fiscalYear: new Date().getFullYear() },
+          });
+          const splitFTE = parseFloat((1 / (existingAllocations + 1)).toFixed(2));
+
+          // Create allocation for the new squad at split FTE
+          await this.capacityService.createDefaultAllocation(
+            companyId, existing.id, orgUnitId!, undefined, splitFTE,
+          );
+
+          // Update existing allocations to the same split FTE
+          await this.prisma.capacityAllocation.updateMany({
+            where: { companyId, membershipId: existing.id, fiscalYear: new Date().getFullYear() },
+            data: {
+              p1: splitFTE, p2: splitFTE, p3: splitFTE, p4: splitFTE,
+              p5: splitFTE, p6: splitFTE, p7: splitFTE, p8: splitFTE,
+              p9: splitFTE, p10: splitFTE, p11: splitFTE, p12: splitFTE,
+            },
+          });
+
+          return { status: 'updated', email: dto.email, note: `split ${splitFTE} FTE across ${existingAllocations + 1} squads` };
         }
 
         // Update metadata for existing member (primary squad)
