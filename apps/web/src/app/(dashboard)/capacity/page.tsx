@@ -120,7 +120,8 @@ export default function CapacityPage() {
   const companyId = useCompanyId();
   const currentYear = new Date().getFullYear();
   const [fiscalYear, setFiscalYear] = useState(currentYear);
-  const [selectedSquadId, setSelectedSquadId] = useState<string>("all");
+  const [selectedSquadIds, setSelectedSquadIds] = useState<Set<string>>(new Set());
+  const [employmentFilter, setEmploymentFilter] = useState<"all" | "Perm" | "SubCon">("all");
   const [activeTab, setActiveTab] = useState<"phasing" | "rate-cards">("phasing");
   const [showRateCardDialog, setShowRateCardDialog] = useState(false);
   const [rateCardForm, setRateCardForm] = useState({ division: "", location: "", grade: "", annualCost: "" });
@@ -162,9 +163,22 @@ export default function CapacityPage() {
 
   const filteredSquads = useMemo(() => {
     if (!squads) return [];
-    if (selectedSquadId === "all") return squads;
-    return squads.filter((s) => s.orgUnitId === selectedSquadId);
-  }, [squads, selectedSquadId]);
+    let result = squads;
+    // Filter by selected squads (empty set = all)
+    if (selectedSquadIds.size > 0) {
+      result = result.filter((s) => selectedSquadIds.has(s.orgUnitId));
+    }
+    // Filter members by employment type
+    if (employmentFilter !== "all") {
+      result = result.map((sq) => ({
+        ...sq,
+        members: sq.members.filter((m) => m.employmentType === employmentFilter),
+        permCount: employmentFilter === "Perm" ? sq.permCount : 0,
+        subConCount: employmentFilter === "SubCon" ? sq.subConCount : 0,
+      })).filter((sq) => sq.members.length > 0);
+    }
+    return result;
+  }, [squads, selectedSquadIds, employmentFilter]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
@@ -267,10 +281,14 @@ export default function CapacityPage() {
     return { value: String(y), label: `FY ${y}` };
   });
 
-  const squadFilterOptions = [
-    { value: "all", label: "All Squads" },
-    ...(squads ?? []).map((s) => ({ value: s.orgUnitId, label: s.orgUnitName })),
-  ];
+  const toggleSquadFilter = useCallback((squadId: string) => {
+    setSelectedSquadIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(squadId)) next.delete(squadId);
+      else next.add(squadId);
+      return next;
+    });
+  }, []);
 
   // ─── Loading ────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -317,9 +335,33 @@ export default function CapacityPage() {
         </div>
         <div className="flex items-center gap-3">
           <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
-          <Select value={selectedSquadId} onValueChange={setSelectedSquadId} variant="outlined" options={squadFilterOptions} className="w-48" />
         </div>
       </AppBar>
+
+      {/* Filters Row */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Employment type filter */}
+        <Chip variant="filter" selected={employmentFilter === "all"} onClick={() => setEmploymentFilter("all")}>All</Chip>
+        <Chip variant="filter" selected={employmentFilter === "Perm"} onClick={() => setEmploymentFilter(employmentFilter === "Perm" ? "all" : "Perm")} leadingIcon="badge">Perm</Chip>
+        <Chip variant="filter" selected={employmentFilter === "SubCon"} onClick={() => setEmploymentFilter(employmentFilter === "SubCon" ? "all" : "SubCon")} leadingIcon="engineering">Contractors</Chip>
+
+        <div className="w-px h-6 bg-outline-variant mx-1" />
+
+        {/* Squad multi-select chips */}
+        {selectedSquadIds.size > 0 && (
+          <Chip variant="filter" selected={false} onClick={() => setSelectedSquadIds(new Set())} leadingIcon="close">Clear squads</Chip>
+        )}
+        {(squads ?? []).map((s) => (
+          <Chip
+            key={s.orgUnitId}
+            variant="filter"
+            selected={selectedSquadIds.has(s.orgUnitId)}
+            onClick={() => toggleSquadFilter(s.orgUnitId)}
+          >
+            {s.orgUnitName}
+          </Chip>
+        ))}
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
