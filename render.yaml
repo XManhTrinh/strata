@@ -5,7 +5,7 @@ services:
     region: eu-west-1
     plan: free
     rootDir: .
-    buildCommand: pnpm install && cd packages/database && npx prisma generate --schema=prisma/schema.prisma && cd ../../apps/api && npx nest build
+    buildCommand: NPM_CONFIG_PRODUCTION=false pnpm install && pnpm --filter @strata/database build && pnpm --filter @strata/api build
     startCommand: cd apps/api && node dist/main.js
     envVars:
       - key: PORT

@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient, AuditOperation } from '@strata/database';
-import type { PaginationMeta } from '@strata/shared-types';
+
+interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
 
 export interface AuditFilters {
   entityType?: string;

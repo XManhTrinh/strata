@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "nest build",
+    "build": "npx nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "start:debug": "nest start --debug --watch",
@@ -31,7 +31,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.9",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.15",
     "@types/bcrypt": "^5.0.2",
@@ -42,6 +41,7 @@
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@nestjs/cli": "^10.4.9"
   }
 }
