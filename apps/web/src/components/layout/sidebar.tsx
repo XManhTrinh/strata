@@ -18,21 +18,15 @@ interface SidebarNavItem {
 }
 
 /**
- * Super Admin sees only Dashboard + Settings (platform configuration).
- * They configure the business — they don't operate it.
+ * Admin-only pages — platform configuration & management.
+ * Only visible to Super Admin users.
  */
 const superAdminRailItems: SidebarNavItem[] = [
-  { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { value: "members", label: "Members", href: "/people", icon: "group" },
-  { value: "org-chart", label: "Org Chart", href: "/org-chart", icon: "account_tree" },
   { value: "org-structure", label: "Org Structure", href: "/admin/org-structure", icon: "lan" },
   { value: "unit-types", label: "Unit Types", href: "/admin/org-unit-types", icon: "label" },
   { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
   { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
   { value: "features", label: "Features", href: "/admin/features", icon: "extension" },
-  { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments" },
-  { value: "calendar", label: "Calendar", href: "/calendar", icon: "calendar_month" },
-  { value: "reports", label: "Reports", href: "/reports", icon: "summarize" },
   { value: "audit", label: "Audit", href: "/audit", icon: "history" },
 ];
 
