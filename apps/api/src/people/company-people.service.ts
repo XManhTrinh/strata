@@ -648,6 +648,20 @@ export class CompanyPeopleService {
         },
       });
     }
+
+    // Auto-set canHaveDirectReports on the manager's position
+    if (managerMembership) {
+      const membership = await this.prisma.userCompanyMembership.findFirst({
+        where: { userId: managerUser.id, companyId },
+        select: { positionId: true },
+      });
+      if (membership?.positionId) {
+        await this.prisma.position.update({
+          where: { id: membership.positionId },
+          data: { canHaveDirectReports: true },
+        });
+      }
+    }
   }
 
   private async resolveOrgHierarchy(
