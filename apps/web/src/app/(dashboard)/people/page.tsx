@@ -22,6 +22,7 @@ import {
 } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { AppBar } from "@/components/layout/app-bar";
+import { apiClient } from "@/lib/api-client";
 import {
   usePeople,
   useCreatePerson,
@@ -548,30 +549,31 @@ export default function PeoplePage() {
   const handleImportConfirm = () => {
     if (!importPreview?.rows.length) return;
 
-    // Show a persistent loading toast that survives page navigation
     const toastId = toast.loading(
       `Importing ${importPreview.rows.length} members...`,
       { duration: Infinity },
     );
 
-    // Close the dialog immediately so user can navigate
     const rows = importPreview.rows;
     resetImportDialog();
 
-    // Fire the import — toast callbacks work even after navigation
-    bulkImportMutation.mutate(rows, {
-      onSuccess: (result) => {
+    // Use plain apiClient instead of React Query mutation
+    // so the request survives component unmount
+    apiClient<{ total: number; created: number; updated: number; errors: any[] }>(
+      `/companies/${companyId}/members/import`,
+      { method: "POST", body: { rows } },
+    )
+      .then((result) => {
         const msg = `Imported ${result.created} new, updated ${result.updated}`;
         if (result.errors.length > 0) {
           toast.success(`${msg} (${result.errors.length} errors)`, { id: toastId });
         } else {
           toast.success(msg, { id: toastId });
         }
-      },
-      onError: (err) => {
+      })
+      .catch((err) => {
         toast.error(err.message || "Import failed", { id: toastId });
-      },
-    });
+      });
   };
 
   const resetImportDialog = () => {
