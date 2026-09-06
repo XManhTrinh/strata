@@ -548,18 +548,28 @@ export default function PeoplePage() {
   const handleImportConfirm = () => {
     if (!importPreview?.rows.length) return;
 
-    bulkImportMutation.mutate(importPreview.rows, {
+    // Show a persistent loading toast that survives page navigation
+    const toastId = toast.loading(
+      `Importing ${importPreview.rows.length} members...`,
+      { duration: Infinity },
+    );
+
+    // Close the dialog immediately so user can navigate
+    const rows = importPreview.rows;
+    resetImportDialog();
+
+    // Fire the import — toast callbacks work even after navigation
+    bulkImportMutation.mutate(rows, {
       onSuccess: (result) => {
         const msg = `Imported ${result.created} new, updated ${result.updated}`;
         if (result.errors.length > 0) {
-          toast.success(`${msg} (${result.errors.length} errors)`);
+          toast.success(`${msg} (${result.errors.length} errors)`, { id: toastId });
         } else {
-          toast.success(msg);
+          toast.success(msg, { id: toastId });
         }
-        resetImportDialog();
       },
       onError: (err) => {
-        toast.error(err.message || "Import failed");
+        toast.error(err.message || "Import failed", { id: toastId });
       },
     });
   };
