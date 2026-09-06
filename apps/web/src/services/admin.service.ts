@@ -397,46 +397,23 @@ export function useRolePermissions(companyId: string, roleId: string) {
   });
 }
 
-// Add a permission to a role
-export function useAddRolePermission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ companyId, roleId, featurePermissionId, scope }: { companyId: string; roleId: string; featurePermissionId: string; scope: string }) =>
-      apiClient(`/companies/${companyId}/roles/${roleId}/permissions`, {
-        method: "POST",
-        body: { featurePermissionId, scope },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
-    },
-  });
-}
-
-// Remove a permission from a role
-export function useRemoveRolePermission() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ companyId, roleId, permId }: { companyId: string; roleId: string; permId: string }) =>
-      apiClient(`/companies/${companyId}/roles/${roleId}/permissions/${permId}`, {
-        method: "DELETE",
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
-    },
-  });
-}
-
-// Bulk set permissions for a role
+// Bulk add/remove permissions for a role (single API call)
 export function useBulkRolePermissions() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ companyId, roleId, permissions }: { companyId: string; roleId: string; permissions: Array<{ featurePermissionId: string; scope: string }> }) =>
+    mutationFn: ({ companyId, roleId, add, remove }: {
+      companyId: string;
+      roleId: string;
+      add?: Array<{ featureKey: string; permissionKey: string; scope: string }>;
+      remove?: Array<{ featureKey: string; permissionKey: string; scope: string }>;
+    }) =>
       apiClient(`/companies/${companyId}/roles/${roleId}/permissions/bulk`, {
         method: "POST",
-        body: { permissions },
+        body: { add: add ?? [], remove: remove ?? [] },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
     },
   });
 }
