@@ -314,7 +314,17 @@ export class CompanyPeopleService {
         where: { userId: existingUser.id, companyId },
       });
       if (existing) {
-        // Update metadata for existing member
+        // For duplicate emails with a different org unit, create additional
+        // capacity allocation without overwriting the primary membership.
+        const isSecondarySquad = orgUnitId && existing.orgUnitId && orgUnitId !== existing.orgUnitId;
+
+        if (isSecondarySquad) {
+          // Just add a capacity allocation for the additional squad
+          await this.capacityService.createDefaultAllocation(companyId, existing.id, orgUnitId!);
+          return { status: 'updated', email: dto.email, note: 'additional squad allocation' };
+        }
+
+        // Update metadata for existing member (primary squad)
         await this.prisma.userCompanyMembership.update({
           where: { id: existing.id },
           data: {

@@ -99,3 +99,11 @@ UIN,Full Name,Email,Division,Cluster,Tribe,Squad,Employment Type,Grade,Location,
 200098,David Brown,david.brown@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L4,London,,32563,Junior Search Engineer,chris.taylor@stratacorp.com
 200099,Olivia Wright,olivia.wright@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,Perm,L4,Bangalore,,36631,Junior Cloud Engineer,charlotte.harris@stratacorp.com
 200100,William Turner,william.turner@stratacorp.com,Technology,Data,AI & ML,ML Platform,Perm,L4,London,,39662,Junior ML Engineer,poppy.reed@stratacorp.com
+200001,Sarah Mitchell,sarah.mitchell@stratacorp.com,Digital,Commerce,Online Marketplace,Product Listings,Perm,L7,London,,77049,Engineering Manager,
+200009,Sophie Turner,sophie.turner@stratacorp.com,Digital,Commerce,Payments,Fraud Detection,Perm,L7,London,,77994,Tech Lead,
+200005,Priya Nair,priya.nair@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L6,Bangalore,,62934,Senior Full Stack Engineer,sarah.mitchell@stratacorp.com
+200037,Charlotte Harris,charlotte.harris@stratacorp.com,Technology,Platform,Core Infrastructure,Kubernetes,Perm,L7,London,,72184,Platform Architect,
+200045,Chris Taylor,chris.taylor@stratacorp.com,Digital,Experience,Search & Personalisation,Recommendations,Perm,L7,London,,74803,Search Architect,
+200061,Harsh Verma,harsh.verma@stratacorp.com,Corporate,People Tech,HR Platform,Talent & Learning,Perm,L6,Bangalore,,61420,HR Tech Lead,
+200073,Poppy Reed,poppy.reed@stratacorp.com,Technology,Data,AI & ML,NLP & Computer Vision,Perm,L7,London,,78340,ML Architect,
+200085,Rachel King,rachel.king@stratacorp.com,Operations,Logistics,Fulfilment,Route Optimisation,Perm,L6,Manchester,,58756,Logistics Tech Lead,
