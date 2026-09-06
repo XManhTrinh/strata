@@ -76,7 +76,11 @@ export default function FeaturesPage() {
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  const features: FeatureRow[] = (companyFeatures ?? []).map(toFeatureRow).filter((r): r is FeatureRow => r !== null);
+  // Core features (always on, cannot be toggled) are hidden from this page
+  const CORE_FEATURES = new Set(["authorization"]);
+  const features: FeatureRow[] = (companyFeatures ?? [])
+    .map(toFeatureRow)
+    .filter((r): r is FeatureRow => r !== null && !CORE_FEATURES.has(r.key));
 
   const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
     toggleFeatureMutation.mutate(
@@ -214,16 +218,12 @@ export default function FeaturesPage() {
                       <Icon name={meta.icon} size={28} className={meta.color} />
                     </div>
                     <div onClick={(e) => e.stopPropagation()}>
-                      {feature.key === "authorization" ? (
-                        <Chip variant="filter" selected>Always on</Chip>
-                      ) : (
-                        <Switch
-                          checked={feature.enabled}
-                          onCheckedChange={() => toggleEnabled(feature.featureId, feature.enabled, feature.displayName)}
-                          disabled={toggleFeatureMutation.isPending}
-                          aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
-                        />
-                      )}
+                      <Switch
+                        checked={feature.enabled}
+                        onCheckedChange={() => toggleEnabled(feature.featureId, feature.enabled, feature.displayName)}
+                        disabled={toggleFeatureMutation.isPending}
+                        aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
+                      />
                     </div>
                   </div>
 

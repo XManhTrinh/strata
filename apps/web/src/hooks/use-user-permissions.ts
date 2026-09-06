@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useUserRole } from "./use-user-role";
 import { useCompanyId } from "./use-company";
-import { useRolePermissions, type RolePermissionDetail } from "@/services";
+import { useRolePermissions, useFeatures } from "@/services";
 
 export interface EffectivePermission {
   feature: string;
@@ -14,8 +15,11 @@ export interface EffectivePermission {
  * Hook that provides the current user's effective permissions
  * based on the selected role in the role switcher.
  *
- * - "super_admin": all permissions (full access)
- * - Any company role ID: fetches that role's permissions from the API
+ * Checks both:
+ * 1. Role-level permissions (does the role have access to this feature?)
+ * 2. Company-level feature toggles (is the feature enabled for this workspace?)
+ *
+ * A sidebar item only shows if BOTH conditions are met.
  */
 export function useUserPermissions() {
   const { role } = useUserRole();
@@ -27,6 +31,22 @@ export function useUserPermissions() {
     companyId,
     isSuperAdmin ? "" : role,
   );
+
+  // Fetch company feature toggles (enabled/disabled per company)
+  const { data: companyFeatures } = useFeatures(companyId);
+
+  // Build a set of disabled feature keys for fast lookup
+  const disabledFeatures = useMemo(() => {
+    const disabled = new Set<string>();
+    if (companyFeatures) {
+      for (const cf of companyFeatures) {
+        if (!cf.enabled && cf.feature?.key) {
+          disabled.add(cf.feature.key);
+        }
+      }
+    }
+    return disabled;
+  }, [companyFeatures]);
 
   // Map role permissions to EffectivePermission format
   const permissions: EffectivePermission[] = isSuperAdmin
@@ -47,10 +67,17 @@ export function useUserPermissions() {
     );
   }
 
+  /**
+   * Returns true if the user's role has any permission in this feature
+   * AND the feature is enabled at the company level.
+   */
   function hasFeatureAccess(feature: string): boolean {
     if (isSuperAdmin) return true;
+    // Feature must be enabled at the company level
+    if (disabledFeatures.has(feature)) return false;
+    // Role must have at least one permission in this feature
     return permissions.some((p) => p.feature === feature);
   }
 
-  return { permissions, isSuperAdmin, hasPermission, hasFeatureAccess };
+  return { permissions, isSuperAdmin, hasPermission, hasFeatureAccess, disabledFeatures };
 }
