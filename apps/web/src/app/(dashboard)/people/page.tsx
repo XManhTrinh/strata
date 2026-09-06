@@ -227,6 +227,7 @@ export default function PeoplePage() {
     address: "",
     dateOfBirth: "",
   });
+  const [formMetadata, setFormMetadata] = useState<Record<string, string>>({});
 
   // ── CSV Import state ──────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -404,6 +405,7 @@ export default function PeoplePage() {
       dateOfBirth: "",
       roleId: undefined,
     });
+    setFormMetadata({});
   }, []);
 
   const openAdd = () => {
@@ -419,6 +421,7 @@ export default function PeoplePage() {
       address: person.address ?? "",
       dateOfBirth: person.dateOfBirth ? person.dateOfBirth.split("T")[0] : "",
     });
+    setFormMetadata(person.metadata ?? {});
     setEditPerson(person);
   };
 
@@ -438,7 +441,7 @@ export default function PeoplePage() {
     e.preventDefault();
     if (!editPerson) return;
     updateMutation.mutate(
-      { id: editPerson.id, ...formData },
+      { id: editPerson.id, ...formData, metadata: formMetadata },
       {
         onSuccess: () => {
           toast.success("Member updated successfully");
@@ -1300,6 +1303,28 @@ export default function PeoplePage() {
                 setFormData({ ...formData, dateOfBirth: e.target.value })
               }
             />
+
+            {/* Dynamic metadata fields (Edit only) */}
+            {editPerson && metadataKeys.length > 0 && (
+              <>
+                <Divider />
+                <p className="text-[13px] font-medium text-surface-variant-foreground uppercase tracking-wide">
+                  Additional Fields
+                </p>
+                {metadataKeys.map((key) => (
+                  <TextField
+                    key={key}
+                    variant="outlined"
+                    label={key}
+                    value={formMetadata[key] ?? ""}
+                    onChange={(e) =>
+                      setFormMetadata({ ...formMetadata, [key]: e.target.value })
+                    }
+                  />
+                ))}
+              </>
+            )}
+
             <DialogFooter>
               <Button
                 type="button"
@@ -1670,8 +1695,6 @@ export default function PeoplePage() {
                   }
                 >
                   {bulkImportMutation.isPending
-                    ? "Importing..."
-                  {bulkImportMutation.isPending
                     ? (
                       <span className="flex items-center gap-2">
                         <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -1679,6 +1702,8 @@ export default function PeoplePage() {
                       </span>
                     )
                     : `Import ${importPreview?.rows.length ?? 0} records`}
+                </Button>
+              </>
             )}
           </DialogFooter>
         </DialogContent>
