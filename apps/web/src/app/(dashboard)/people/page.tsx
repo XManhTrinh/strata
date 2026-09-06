@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   Search,
@@ -186,8 +186,18 @@ export default function PeoplePage() {
 
   // ── Data queries (always called) ──────────────────────────────────────────
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
+
+  // Debounce search — only fires API call after 300ms of no typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const {
     data,
@@ -195,7 +205,7 @@ export default function PeoplePage() {
     isError,
     error,
     refetch,
-  } = usePeople({ companyId, page, pageSize, search: search || undefined });
+  } = usePeople({ companyId, page, pageSize, search: debouncedSearch || undefined });
 
   const { data: metadataKeys = [] } = useMetadataKeys(companyId);
   const { data: roles = [] } = useRoles(companyId);
@@ -836,7 +846,6 @@ export default function PeoplePage() {
             value={search}
             onValueChange={(val) => {
               setSearch(val);
-              setPage(1);
             }}
             placeholder="Search by name or email..."
           />
