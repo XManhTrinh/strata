@@ -97,6 +97,10 @@ model Company {
 
   // Table views
   tableViews             TableView[]
+
+  // Capacity planning
+  capacityAllocations    CapacityAllocation[]
+  rateCards              RateCard[]
 }
 
 // ─── Table Views (saved column configurations per company) ──────────────────────
@@ -161,6 +165,7 @@ model OrganizationUnit {
   children OrganizationUnit[]   @relation("OrgUnitHierarchy")
 
   members UserCompanyMembership[] @relation("UserOrgUnit")
+  capacityAllocations CapacityAllocation[]
 
   @@index([companyId, parentId])
   @@index([companyId, typeId])
@@ -267,6 +272,7 @@ model UserCompanyMembership {
   orgUnit         OrganizationUnit? @relation("UserOrgUnit", fields: [orgUnitId], references: [id])
   careerLevel     CareerLevel?      @relation(fields: [careerLevelId], references: [id])
   roleAssignments RoleAssignment[]
+  capacityAllocations CapacityAllocation[]
 
   @@unique([userId, companyId])
   @@index([companyId, orgUnitId])
@@ -538,4 +544,66 @@ model AccrualPolicy {
 
   @@unique([companyId, leaveTypeId])
   @@index([companyId, isActive])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Capacity Planning Module
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Capacity Allocation (per-person FTE phasing) ───────────────────────────────
+// One row per person × org unit × fiscal year.
+// p1–p12 represent FTE allocation (0.0 to 1.0) per period.
+// A person can appear in multiple squads (split allocation).
+
+model CapacityAllocation {
+  id          String   @id @default(cuid())
+  companyId   String
+  membershipId String  // UserCompanyMembership ID
+  orgUnitId   String   // Squad / org unit this allocation is for
+  fiscalYear  Int      // e.g. 2025, 2026
+
+  // Monthly FTE allocation (0.0 = not present, 0.5 = half, 1.0 = full)
+  p1  Decimal @db.Decimal(3, 2) @default(0)
+  p2  Decimal @db.Decimal(3, 2) @default(0)
+  p3  Decimal @db.Decimal(3, 2) @default(0)
+  p4  Decimal @db.Decimal(3, 2) @default(0)
+  p5  Decimal @db.Decimal(3, 2) @default(0)
+  p6  Decimal @db.Decimal(3, 2) @default(0)
+  p7  Decimal @db.Decimal(3, 2) @default(0)
+  p8  Decimal @db.Decimal(3, 2) @default(0)
+  p9  Decimal @db.Decimal(3, 2) @default(0)
+  p10 Decimal @db.Decimal(3, 2) @default(0)
+  p11 Decimal @db.Decimal(3, 2) @default(0)
+  p12 Decimal @db.Decimal(3, 2) @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company    Company           @relation(fields: [companyId], references: [id])
+  membership UserCompanyMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  orgUnit    OrganizationUnit  @relation(fields: [orgUnitId], references: [id])
+
+  @@unique([companyId, membershipId, orgUnitId, fiscalYear])
+  @@index([companyId, orgUnitId, fiscalYear])
+  @@index([companyId, fiscalYear])
+}
+
+// ─── Rate Card (Perm cost lookup: Division × Location × Grade) ──────────────────
+// Used to compute annual cost for permanent staff based on their attributes.
+// SubCon cost is always: dayRate × 228 (from membership).
+
+model RateCard {
+  id         String   @id @default(cuid())
+  companyId  String
+  division   String   // e.g. "Digital", "Operations"
+  location   String   // e.g. "UK", "AMEA", "US"
+  grade      String   // e.g. "L4", "L5", "L6"
+  annualCost Decimal  @db.Decimal(12, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, division, location, grade])
+  @@index([companyId])
 }

@@ -6,6 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaClient } from '@strata/database';
+import { CapacityService } from '../capacity/capacity.service';
 
 export interface CreateMemberDto {
   fullName: string;
@@ -66,7 +67,10 @@ export interface MemberResponse {
 
 @Injectable()
 export class CompanyPeopleService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly capacityService: CapacityService,
+  ) {}
 
   /**
    * List all members with metadata.
@@ -350,6 +354,12 @@ export class CompanyPeopleService {
           }
         }
 
+        // Ensure capacity allocation exists for this member's org unit
+        const effectiveOrgUnitId = orgUnitId ?? existing.orgUnitId;
+        if (effectiveOrgUnitId) {
+          await this.capacityService.createDefaultAllocation(companyId, existing.id, effectiveOrgUnitId);
+        }
+
         return { status: 'updated', email: dto.email };
       }
     }
@@ -370,7 +380,7 @@ export class CompanyPeopleService {
       });
     }
 
-    await this.prisma.userCompanyMembership.create({
+    const newMembership = await this.prisma.userCompanyMembership.create({
       data: {
         userId: user.id,
         companyId,
@@ -385,18 +395,18 @@ export class CompanyPeopleService {
       },
     });
 
+    // Create default capacity allocation (1.0 FTE all periods)
+    if (orgUnitId) {
+      await this.capacityService.createDefaultAllocation(companyId, newMembership.id, orgUnitId);
+    }
+
     // Assign role if specified
     if (dto.roleId) {
-      const membership = await this.prisma.userCompanyMembership.findFirst({
-        where: { userId: user.id, companyId },
-      });
-      if (membership) {
-        const role = await this.prisma.role.findFirst({ where: { id: dto.roleId, companyId } });
-        if (role) {
-          await this.prisma.roleAssignment.create({
-            data: { membershipId: membership.id, roleId: dto.roleId },
-          });
-        }
+      const role = await this.prisma.role.findFirst({ where: { id: dto.roleId, companyId } });
+      if (role) {
+        await this.prisma.roleAssignment.create({
+          data: { membershipId: newMembership.id, roleId: dto.roleId },
+        });
       }
     }
 
