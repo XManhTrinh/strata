@@ -291,16 +291,16 @@ export class CompanyPeopleService {
       orgUnitId = await this.resolveOrgHierarchy(companyId, dto.orgStructure, dto.orgLevelTypes);
     }
 
-    // Resolve position
-    let positionId: string | null = null;
-    if (dto.position) {
-      positionId = await this.resolvePosition(companyId, dto.position);
-    }
-
-    // Resolve career level / grade
+    // Resolve career level / grade (before position, so we can set level range)
     let careerLevelId: string | null = null;
     if (dto.grade) {
       careerLevelId = await this.resolveCareerLevel(companyId, dto.grade);
+    }
+
+    // Resolve position (auto-expands min/max level range based on grade)
+    let positionId: string | null = null;
+    if (dto.position) {
+      positionId = await this.resolvePosition(companyId, dto.position, careerLevelId);
     }
 
     // Check for existing user
@@ -733,16 +733,55 @@ export class CompanyPeopleService {
 
   /**
    * Resolves a position name to a position ID, creating if needed.
+   * If a careerLevelId is provided, auto-expands the position's min/max level range.
    */
-  private async resolvePosition(companyId: string, name: string): Promise<string> {
+  private async resolvePosition(
+    companyId: string,
+    name: string,
+    careerLevelId?: string | null,
+  ): Promise<string> {
     let position = await this.prisma.position.findFirst({
       where: { companyId, name },
+      include: { minLevel: true, maxLevel: true },
     });
 
     if (!position) {
       position = await this.prisma.position.create({
-        data: { companyId, name },
+        data: {
+          companyId,
+          name,
+          minLevelId: careerLevelId ?? undefined,
+          maxLevelId: careerLevelId ?? undefined,
+        },
+        include: { minLevel: true, maxLevel: true },
       });
+      return position.id;
+    }
+
+    // Auto-expand the level range if needed
+    if (careerLevelId) {
+      const level = await this.prisma.careerLevel.findUnique({
+        where: { id: careerLevelId },
+      });
+      if (level) {
+        const updates: Record<string, string> = {};
+
+        // Expand min if new level is lower
+        if (!position.minLevel || level.rank < position.minLevel.rank) {
+          updates.minLevelId = careerLevelId;
+        }
+        // Expand max if new level is higher
+        if (!position.maxLevel || level.rank > position.maxLevel.rank) {
+          updates.maxLevelId = careerLevelId;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await this.prisma.position.update({
+            where: { id: position.id },
+            data: updates,
+          });
+        }
+      }
     }
 
     return position.id;
