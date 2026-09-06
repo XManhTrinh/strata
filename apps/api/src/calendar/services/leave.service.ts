@@ -139,15 +139,6 @@ export class LeaveService {
       { requestId: leaveRequest.id, userId: actorUserId, companyId },
     );
 
-    // Audit
-    await this.createAuditRecord(actorUserId, 'CalendarLeaveRequest', leaveRequest.id, 'CREATE', {
-      status: initialStatus,
-      leaveTypeId: dto.leaveTypeId,
-      workingDays,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
-    });
-
     return leaveRequest;
   }
 
@@ -188,13 +179,6 @@ export class LeaveService {
       companyId,
     });
 
-    // Audit
-    await this.createAuditRecord(actorUserId, 'CalendarLeaveRequest', requestId, 'UPDATE', {
-      previousStatus: request.status,
-      newStatus: 'APPROVED',
-      reviewNotes: notes,
-    });
-
     return updated;
   }
 
@@ -224,13 +208,6 @@ export class LeaveService {
       userId: request.calendarEvent.ownerUserId,
       reviewerId: actorUserId,
       companyId,
-    });
-
-    // Audit
-    await this.createAuditRecord(actorUserId, 'CalendarLeaveRequest', requestId, 'UPDATE', {
-      previousStatus: request.status,
-      newStatus: 'REJECTED',
-      reviewNotes: notes,
     });
 
     return updated;
@@ -272,12 +249,6 @@ export class LeaveService {
       companyId,
     });
 
-    // Audit
-    await this.createAuditRecord(actorUserId, 'CalendarLeaveRequest', requestId, 'UPDATE', {
-      previousStatus: request.status,
-      newStatus: 'CANCELLED',
-    });
-
     return updated;
   }
 
@@ -306,7 +277,6 @@ export class LeaveService {
         maxCarryOverDays: dto.maxCarryOverDays,
       });
 
-      await this.createAuditRecord('system', 'LeaveTypeConfig', result.id, 'CREATE', { name: dto.name });
       return result;
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -324,7 +294,6 @@ export class LeaveService {
 
     try {
       const updated = await this.repository.updateLeaveType(leaveTypeId, dto);
-      await this.createAuditRecord('system', 'LeaveTypeConfig', leaveTypeId, 'UPDATE', { changes: dto });
       return updated;
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -341,7 +310,6 @@ export class LeaveService {
     }
 
     await this.repository.updateLeaveType(leaveTypeId, { archivedAt: new Date() });
-    await this.createAuditRecord('system', 'LeaveTypeConfig', leaveTypeId, 'UPDATE', { archived: true });
   }
 
   // ─── Helpers ────────────────────────────────────────────────────────────
@@ -360,28 +328,6 @@ export class LeaveService {
       );
     } catch (error) {
       this.logger.warn(`Failed to enqueue notification: ${error}`);
-    }
-  }
-
-  private async createAuditRecord(
-    userId: string,
-    entityType: string,
-    entityId: string,
-    operation: string,
-    diff: Record<string, unknown>,
-  ) {
-    try {
-      await this.prisma.auditRecord.create({
-        data: {
-          userId,
-          entityType,
-          entityId,
-          operation: operation as any,
-          diff: JSON.parse(JSON.stringify(diff)),
-        },
-      });
-    } catch (error) {
-      this.logger.warn(`Failed to create audit record: ${error}`);
     }
   }
 }

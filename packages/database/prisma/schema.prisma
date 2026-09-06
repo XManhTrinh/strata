@@ -9,28 +9,6 @@ datasource db {
 
 // ─── Enums ──────────────────────────────────────────────────────────────────────
 
-enum NotificationType {
-  LEAVE_REQUEST
-  LEAVE_APPROVED
-  LEAVE_REJECTED
-  REPORT_READY
-  SYSTEM_ALERT
-  JOB_FAILED
-}
-
-enum NotificationPriority {
-  LOW
-  NORMAL
-  HIGH
-  URGENT
-}
-
-enum AuditOperation {
-  CREATE
-  UPDATE
-  DELETE
-}
-
 // ─── API Key Model ──────────────────────────────────────────────────────────────
 
 model ApiKey {
@@ -73,42 +51,7 @@ model User {
   updatedAt       DateTime         @updatedAt
 
   person          Person           @relation(fields: [personId], references: [id])
-  notifications   Notification[]
-  auditRecords    AuditRecord[]
   apiKeys         ApiKey[]
-}
-
-// ─── Notification Model ─────────────────────────────────────────────────────────
-
-model Notification {
-  id        String               @id @default(cuid())
-  userId    String
-  message   String
-  type      NotificationType
-  priority  NotificationPriority @default(NORMAL)
-  isRead    Boolean              @default(false)
-  createdAt DateTime             @default(now())
-  readAt    DateTime?
-
-  user      User                 @relation(fields: [userId], references: [id])
-}
-
-// ─── Audit Model ────────────────────────────────────────────────────────────────
-
-model AuditRecord {
-  id         String         @id @default(cuid())
-  userId     String
-  entityType String
-  entityId   String
-  operation  AuditOperation
-  diff       Json
-  timestamp  DateTime       @default(now())
-
-  user       User           @relation(fields: [userId], references: [id])
-
-  @@index([entityType, entityId])
-  @@index([userId])
-  @@index([timestamp])
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

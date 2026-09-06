@@ -27,7 +27,6 @@ const superAdminRailItems: SidebarNavItem[] = [
   { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
   { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
   { value: "features", label: "Features", href: "/admin/features", icon: "extension" },
-  { value: "audit", label: "Audit", href: "/audit", icon: "history" },
 ];
 
 /**
@@ -40,7 +39,6 @@ const permissionBasedItems: SidebarNavItem[] = [
   { value: "people", label: "Members", href: "/people", icon: "group", feature: "people" },
   { value: "org-chart", label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
   { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
-  { value: "reports", label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
   { value: "calendar", label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
 ];
 

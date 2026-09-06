@@ -23,11 +23,8 @@ const commandItems: CommandItem[] = [
   { id: "capacity", label: "Capacity", section: "Navigation", href: "/capacity", icon: "📈" },
   { id: "budgets", label: "Budgets", section: "Navigation", href: "/budgets", icon: "💰" },
   { id: "leave", label: "Leave", section: "Navigation", href: "/leave", icon: "🏖️" },
-  { id: "reports", label: "Reports", section: "Navigation", href: "/reports", icon: "📋" },
-  { id: "audit", label: "Audit Log", section: "Navigation", href: "/audit", icon: "🔍" },
   { id: "settings", label: "Admin", section: "Navigation", href: "/admin", icon: "⚙️" },
   { id: "create-employee", label: "Create Employee", section: "Quick Actions", href: "/employees", icon: "➕" },
-  { id: "generate-report", label: "Generate Report", section: "Quick Actions", href: "/reports", icon: "📄" },
 ];
 
 function fuzzyMatch(query: string, text: string): boolean {

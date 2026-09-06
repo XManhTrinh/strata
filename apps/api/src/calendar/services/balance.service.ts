@@ -91,15 +91,6 @@ export class BalanceService {
       include: { leaveType: true },
     });
 
-    // Create audit record
-    await this.createAuditRecord(adminUserId, 'LeaveBalance', balance.id, 'UPDATE', {
-      previousAdjustment: Number(balance.adjustment),
-      newAdjustment,
-      delta: dto.adjustment,
-      reason: dto.reason,
-      targetUserId,
-    });
-
     return this.formatBalance(updated);
   }
 
@@ -138,28 +129,5 @@ export class BalanceService {
         Number(balance.used),
       ),
     };
-  }
-
-  private async createAuditRecord(
-    userId: string,
-    entityType: string,
-    entityId: string,
-    operation: string,
-    diff: Record<string, unknown>,
-  ) {
-    try {
-      await this.prisma.auditRecord.create({
-        data: {
-          userId,
-          entityType,
-          entityId,
-          operation: operation as any,
-          diff: JSON.parse(JSON.stringify(diff)),
-        },
-      });
-    } catch (error) {
-      // Audit trail never blocks the request
-      this.logger.warn(`Failed to create audit record: ${error}`);
-    }
   }
 }

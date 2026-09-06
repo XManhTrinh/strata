@@ -29,9 +29,6 @@ const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> 
   budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
   authorization: { icon: "admin_panel_settings", color: "text-amber-600",   bg: "bg-amber-100 dark:bg-amber-900/30" },
   notifications: { icon: "notifications",        color: "text-rose-600",    bg: "bg-rose-100 dark:bg-rose-900/30" },
-  reports:       { icon: "bar_chart",            color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
-  search:        { icon: "search",               color: "text-gray-600",    bg: "bg-gray-100 dark:bg-gray-900/30" },
-  audit:         { icon: "history",              color: "text-slate-600",   bg: "bg-slate-100 dark:bg-slate-900/30" },
 };
 
 const DEFAULT_META = { icon: "extension", color: "text-primary", bg: "bg-primary/10" };
@@ -76,11 +73,11 @@ export default function FeaturesPage() {
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  // Core features (always on, cannot be toggled) are hidden from this page
-  const CORE_FEATURES = new Set(["authorization"]);
+  // Core features (always on, cannot be toggled) and removed features are hidden from this page
+  const HIDDEN_FEATURES = new Set(["authorization", "audit", "reports", "search"]);
   const features: FeatureRow[] = (companyFeatures ?? [])
     .map(toFeatureRow)
-    .filter((r): r is FeatureRow => r !== null && !CORE_FEATURES.has(r.key));
+    .filter((r): r is FeatureRow => r !== null && !HIDDEN_FEATURES.has(r.key));
 
   const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
     toggleFeatureMutation.mutate(

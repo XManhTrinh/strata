@@ -149,13 +149,6 @@ export class CalendarService {
       }
     }
 
-    // Audit
-    await this.createAuditRecord(actorUserId, 'CalendarEvent', event.id, 'CREATE', {
-      title: dto.title,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
-    });
-
     return event;
   }
 
@@ -195,10 +188,6 @@ export class CalendarService {
 
     const updated = await this.repository.updateEvent(eventId, dto);
 
-    await this.createAuditRecord(actorUserId, 'CalendarEvent', eventId, 'UPDATE', {
-      changes: dto,
-    });
-
     return updated;
   }
 
@@ -228,8 +217,6 @@ export class CalendarService {
     } else {
       await this.repository.deleteEvent(eventId);
     }
-
-    await this.createAuditRecord(actorUserId, 'CalendarEvent', eventId, 'DELETE', { deleteMode });
   }
 
   // ─── Event Types ────────────────────────────────────────────────────────
@@ -248,7 +235,6 @@ export class CalendarService {
         description: dto.description ?? undefined,
       });
 
-      await this.createAuditRecord('system', 'EventType', result.id, 'CREATE', { name: dto.name });
       return result;
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -266,7 +252,6 @@ export class CalendarService {
 
     try {
       const updated = await this.repository.updateEventType(eventTypeId, dto);
-      await this.createAuditRecord('system', 'EventType', eventTypeId, 'UPDATE', { changes: dto });
       return updated;
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -283,7 +268,6 @@ export class CalendarService {
     }
 
     await this.repository.updateEventType(eventTypeId, { archivedAt: new Date() });
-    await this.createAuditRecord('system', 'EventType', eventTypeId, 'UPDATE', { archived: true });
   }
 
   // ─── Team Availability ──────────────────────────────────────────────────
@@ -335,29 +319,5 @@ export class CalendarService {
     }
 
     return availability;
-  }
-
-  // ─── Audit Helper ───────────────────────────────────────────────────────
-
-  private async createAuditRecord(
-    userId: string,
-    entityType: string,
-    entityId: string,
-    operation: string,
-    diff: Record<string, unknown>,
-  ) {
-    try {
-      await this.prisma.auditRecord.create({
-        data: {
-          userId,
-          entityType,
-          entityId,
-          operation: operation as any,
-          diff: JSON.parse(JSON.stringify(diff)),
-        },
-      });
-    } catch (error) {
-      this.logger.warn(`Failed to create audit record: ${error}`);
-    }
   }
 }

@@ -177,11 +177,6 @@ export class AccrualService {
         isActive: dto.isActive,
       });
 
-      await this.createAuditRecord('system', 'AccrualPolicy', result.id, 'CREATE', {
-        leaveTypeId: dto.leaveTypeId,
-        monthlyAccrual: dto.monthlyAccrual,
-      });
-
       return result;
     } catch (error: any) {
       if (error.code === 'P2002') {
@@ -199,7 +194,6 @@ export class AccrualService {
 
     const updated = await this.repository.updateAccrualPolicy(policyId, dto);
 
-    await this.createAuditRecord('system', 'AccrualPolicy', policyId, 'UPDATE', { changes: dto });
     return updated;
   }
 
@@ -210,30 +204,5 @@ export class AccrualService {
     }
 
     await this.repository.deleteAccrualPolicy(policyId);
-    await this.createAuditRecord('system', 'AccrualPolicy', policyId, 'DELETE', {});
-  }
-
-  // ─── Audit Helper ───────────────────────────────────────────────────────
-
-  private async createAuditRecord(
-    userId: string,
-    entityType: string,
-    entityId: string,
-    operation: string,
-    diff: Record<string, unknown>,
-  ) {
-    try {
-      await this.prisma.auditRecord.create({
-        data: {
-          userId,
-          entityType,
-          entityId,
-          operation: operation as any,
-          diff: JSON.parse(JSON.stringify(diff)),
-        },
-      });
-    } catch (error) {
-      this.logger.warn(`Failed to create audit record: ${error}`);
-    }
   }
 }
