@@ -28,7 +28,7 @@ const settingsCards: SettingsCard[] = [
     permission: "manage_org_structure",
   },
   {
-    title: "Organization Structure",
+    title: "Hierarchy",
     description: "Build and manage your organization's hierarchical structure",
     href: "/admin/org-structure",
     icon: "corporate_fare",

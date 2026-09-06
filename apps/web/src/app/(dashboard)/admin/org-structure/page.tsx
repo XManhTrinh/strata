@@ -250,7 +250,7 @@ export default function OrgStructurePage() {
       <div className="space-y-6">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Structure</h1>
+            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
             <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Build and manage your organization&apos;s hierarchical structure.
             </p>
@@ -265,7 +265,7 @@ export default function OrgStructurePage() {
               Unable to load structure
             </h2>
             <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
-              Failed to load organization structure. Please try again.
+              Failed to load hierarchy. Please try again.
             </p>
             <Button variant="tonal" onClick={() => refetch()}>
               <Icon name="refresh" size={18} />
@@ -289,7 +289,7 @@ export default function OrgStructurePage() {
       {/* Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Organization Structure</h1>
+          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Build and manage your organization&apos;s hierarchical structure.
           </p>

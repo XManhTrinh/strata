@@ -22,7 +22,7 @@ interface SidebarNavItem {
  * Only visible to Super Admin users.
  */
 const superAdminRailItems: SidebarNavItem[] = [
-  { value: "org-structure", label: "Org Structure", href: "/admin/org-structure", icon: "lan" },
+  { value: "hierarchy", label: "Hierarchy", href: "/admin/org-structure", icon: "lan" },
   { value: "unit-types", label: "Unit Types", href: "/admin/org-unit-types", icon: "label" },
   { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
   { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
