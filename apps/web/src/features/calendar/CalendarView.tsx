@@ -118,6 +118,11 @@ export function CalendarView() {
     setSelectedEvent(null);
   }
 
+  function handleCancel(eventId: string) {
+    updateEventStatus(eventId, "CANCELLED");
+    setSelectedEvent(null);
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -218,10 +223,12 @@ export function CalendarView() {
         <aside className="hidden w-64 shrink-0 overflow-y-auto lg:block">
           <LeaveBalancePanel balances={balances} onRequestLeave={() => setShowLeaveForm(true)} />
 
-          {/* Pending requests needing approval — only for managers */}
-          {canManageCalendar && pendingRequests.length > 0 && (
+          {/* Pending requests */}
+          {pendingRequests.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Pending Approvals</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                {canManageCalendar ? "Pending Approvals" : "Pending Requests"}
+              </h3>
               <div className="space-y-2">
                 {pendingRequests.map((event) => (
                   <div key={event.id} className="rounded-md border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2">
@@ -230,11 +237,21 @@ export function CalendarView() {
                       {event.leaveRequest?.workingDays} days
                     </p>
                     <div className="mt-1.5">
-                      <ApprovalActions
-                        eventId={event.id}
-                        onApprove={handleApprove}
-                        onReject={handleReject}
-                      />
+                      {canManageCalendar ? (
+                        <ApprovalActions
+                          eventId={event.id}
+                          onApprove={handleApprove}
+                          onReject={handleReject}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleCancel(event.id)}
+                          className="text-[11px] font-medium text-red-600 dark:text-red-400 hover:underline"
+                        >
+                          Cancel Request
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -297,13 +314,23 @@ export function CalendarView() {
                 </p>
               )}
             </div>
-            {canManageCalendar && selectedEvent.leaveRequest?.status === "PENDING" && (
+            {selectedEvent.leaveRequest?.status === "PENDING" && (
               <div className="mt-4 border-t border-border pt-3">
-                <ApprovalActions
-                  eventId={selectedEvent.id}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                />
+                {canManageCalendar ? (
+                  <ApprovalActions
+                    eventId={selectedEvent.id}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleCancel(selectedEvent.id)}
+                    className="text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    Cancel Request
+                  </button>
+                )}
               </div>
             )}
           </div>
