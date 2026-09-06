@@ -218,6 +218,21 @@ export default function CapacityPage() {
 
   // ─── Aggregations ─────────────────────────────────────────────────────────
 
+  // Cross-squad FTE totals per person (for overallocation detection)
+  const personTotalFTE = useMemo(() => {
+    const map = new Map<string, PeriodValues>();
+    const allSquads = squads ?? [];
+    for (const sq of allSquads) {
+      for (const m of sq.members) {
+        const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
+        const existing = map.get(m.membershipId) ?? zeroPeriods();
+        for (const pk of PERIODS) existing[pk] += alloc[pk];
+        map.set(m.membershipId, existing);
+      }
+    }
+    return map;
+  }, [squads, localDraft]);
+
   const totalFTE = useMemo(() => {
     const t = zeroPeriods();
     for (const sq of filteredSquads) {
@@ -410,15 +425,26 @@ export default function CapacityPage() {
                                 <TableCell className="text-center text-[12px] text-muted-foreground">{member.grade ?? "—"}</TableCell>
                                 {PERIODS.map((pk) => (
                                   <TableCell key={pk} className="text-center p-1">
-                                    <select
-                                      value={String(alloc[pk])}
-                                      onChange={(e) => handleFTEChange(member.membershipId, squad.orgUnitId, pk, parseFloat(e.target.value))}
-                                      className="w-14 h-7 text-[12px] text-center bg-transparent border border-outline-variant/50 rounded focus:border-primary focus:outline-none cursor-pointer"
-                                    >
-                                      {FTE_OPTIONS.map((o) => (
-                                        <option key={o.value} value={o.value}>{o.label}</option>
-                                      ))}
-                                    </select>
+                                    {(() => {
+                                      const personTotal = personTotalFTE.get(member.membershipId);
+                                      const isOver = personTotal ? personTotal[pk] > 1 : false;
+                                      return (
+                                        <select
+                                          value={String(alloc[pk])}
+                                          onChange={(e) => handleFTEChange(member.membershipId, squad.orgUnitId, pk, parseFloat(e.target.value))}
+                                          className={`w-14 h-7 text-[12px] text-center bg-transparent border rounded focus:border-primary focus:outline-none cursor-pointer ${
+                                            isOver
+                                              ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold"
+                                              : "border-outline-variant/50"
+                                          }`}
+                                          title={isOver ? `Overallocated: ${personTotal![pk].toFixed(2)} FTE total across squads` : undefined}
+                                        >
+                                          {FTE_OPTIONS.map((o) => (
+                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                          ))}
+                                        </select>
+                                      );
+                                    })()}
                                   </TableCell>
                                 ))}
                                 <TableCell className="text-right text-[12px] font-medium">
