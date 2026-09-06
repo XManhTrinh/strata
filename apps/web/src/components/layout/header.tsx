@@ -26,7 +26,7 @@ export function Header() {
   ];
 
   return (
-    <AppBar className="bg-surface-container">
+    <AppBar className="bg-transparent">
       <AppBar.Headline>
         <Breadcrumbs />
       </AppBar.Headline>
