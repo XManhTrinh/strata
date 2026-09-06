@@ -38,7 +38,7 @@ const permissionBasedItems: SidebarNavItem[] = [
   { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
   { value: "people", label: "Members", href: "/people", icon: "group", feature: "people" },
   { value: "org-chart", label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
-  { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
+  { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments", feature: "budgeting" },
   { value: "calendar", label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
 ];
 
