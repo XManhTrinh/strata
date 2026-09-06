@@ -170,7 +170,48 @@ export default function CapacityPage() {
 
   const filteredSquads = useMemo(() => {
     if (!squads) return [];
-    let result = squads;
+
+    // Build a lookup of all known members across all squads
+    const memberLookup = new Map<string, MemberAllocation>();
+    for (const sq of squads) {
+      for (const m of sq.members) {
+        memberLookup.set(m.membershipId, m);
+      }
+    }
+
+    // Find draft entries that don't exist in server data (newly added allocations)
+    const draftAdditions = new Map<string, MemberAllocation[]>(); // orgUnitId → new members
+    for (const [key] of localDraft) {
+      if (serverDraft.has(key)) continue; // exists on server, not new
+      const [membershipId, orgUnitId] = key.split("|");
+      const existsInSquad = squads.some(
+        (sq) => sq.orgUnitId === orgUnitId && sq.members.some((m) => m.membershipId === membershipId),
+      );
+      if (existsInSquad) continue; // already rendered
+
+      const sourceMember = memberLookup.get(membershipId);
+      if (!sourceMember) continue;
+
+      if (!draftAdditions.has(orgUnitId)) draftAdditions.set(orgUnitId, []);
+      draftAdditions.get(orgUnitId)!.push({
+        ...sourceMember,
+        allocations: localDraft.get(key)!,
+        monthlyCost: zeroPeriods(), // will be recomputed in rendering
+      });
+    }
+
+    // Merge draft additions into squad data
+    let result = squads.map((sq) => {
+      const additions = draftAdditions.get(sq.orgUnitId);
+      if (!additions || additions.length === 0) return sq;
+      return {
+        ...sq,
+        members: [...sq.members, ...additions],
+      };
+    });
+
+    // Also create squad entries for org units that only exist in draft (shouldn't happen normally)
+
     // Filter by selected squads (empty set = all)
     if (selectedSquadIds.size > 0) {
       result = result.filter((s) => selectedSquadIds.has(s.orgUnitId));
@@ -185,7 +226,7 @@ export default function CapacityPage() {
       })).filter((sq) => sq.members.length > 0);
     }
     return result;
-  }, [squads, selectedSquadIds, employmentFilter]);
+  }, [squads, selectedSquadIds, employmentFilter, localDraft, serverDraft]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
