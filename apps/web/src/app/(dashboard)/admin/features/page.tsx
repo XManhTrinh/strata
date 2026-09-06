@@ -68,11 +68,11 @@ export default function FeaturesPage() {
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  // Core features (always on) are hidden — only toggleable features shown
-  const HIDDEN_FEATURES = new Set(["authorization"]);
+  // Only show features that have active modules — hide core (authorization) and legacy DB records
+  const ACTIVE_FEATURES = new Set(["people", "org_chart", "budgeting", "calendar", "dashboard"]);
   const features: FeatureRow[] = (companyFeatures ?? [])
     .map(toFeatureRow)
-    .filter((r): r is FeatureRow => r !== null && !HIDDEN_FEATURES.has(r.key));
+    .filter((r): r is FeatureRow => r !== null && ACTIVE_FEATURES.has(r.key));
 
   const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
     toggleFeatureMutation.mutate(
