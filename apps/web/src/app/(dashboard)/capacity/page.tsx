@@ -126,6 +126,13 @@ export default function CapacityPage() {
   const [showRateCardDialog, setShowRateCardDialog] = useState(false);
   const [rateCardForm, setRateCardForm] = useState({ division: "", location: "", grade: "", annualCost: "" });
 
+  // Context menu for allocating member to another squad
+  const [contextMenu, setContextMenu] = useState<{
+    x: number; y: number;
+    membershipId: string; fullName: string;
+    currentSquadId: string;
+  } | null>(null);
+
   const { data: squads, isLoading, isError, error } = useCapacitySummary(companyId, fiscalYear);
   const { data: orgUnits = [] } = useOrgUnits(companyId);
   const { data: rateCards = [] } = useRateCards(companyId);
@@ -195,6 +202,20 @@ export default function CapacityPage() {
   const handleDiscard = () => {
     setLocalDraft(new Map(serverDraft.entries()));
   };
+
+  const handleAllocateToSquad = useCallback((membershipId: string, targetSquadId: string) => {
+    setLocalDraft((prev) => {
+      const next = new Map(prev);
+      const key = draftKey(membershipId, targetSquadId);
+      if (!next.has(key)) {
+        // Default 0.5 FTE for secondary squad allocation
+        next.set(key, { p1:0.5,p2:0.5,p3:0.5,p4:0.5,p5:0.5,p6:0.5,p7:0.5,p8:0.5,p9:0.5,p10:0.5,p11:0.5,p12:0.5 });
+      }
+      return next;
+    });
+    setContextMenu(null);
+    toast.success("Added squad allocation — adjust FTE and save");
+  }, []);
 
   const handleSave = () => {
     if (!isDirty) return;
@@ -454,7 +475,18 @@ export default function CapacityPage() {
                             return (
                               <TableRow key={member.membershipId}>
                                 <TableCell className="sticky left-0 z-10 bg-surface">
-                                  <div>
+                                  <div
+                                    onContextMenu={(e) => {
+                                      e.preventDefault();
+                                      setContextMenu({
+                                        x: e.clientX, y: e.clientY,
+                                        membershipId: member.membershipId,
+                                        fullName: member.fullName,
+                                        currentSquadId: squad.orgUnitId,
+                                      });
+                                    }}
+                                    className="cursor-context-menu"
+                                  >
                                     <p className="text-[13px] font-medium text-foreground truncate max-w-[180px]">{member.fullName}</p>
                                     <p className="text-[11px] text-muted-foreground">{member.position ?? ""}</p>
                                   </div>
@@ -673,6 +705,44 @@ export default function CapacityPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Context Menu: Allocate to Squad */}
+      {contextMenu && (
+        <>
+          <div className="fixed inset-0 z-50" onClick={() => setContextMenu(null)} />
+          <div
+            className="fixed z-50 min-w-[200px] rounded-lg border border-outline-variant bg-surface shadow-xl py-1"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <div className="px-3 py-2 border-b border-outline-variant">
+              <p className="text-[12px] font-medium text-surface-variant-foreground">Allocate to squad</p>
+              <p className="text-[13px] text-foreground truncate">{contextMenu.fullName}</p>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto py-1">
+              {(squads ?? [])
+                .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
+                .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
+                .map((s) => (
+                  <button
+                    key={s.orgUnitId}
+                    type="button"
+                    onClick={() => handleAllocateToSquad(contextMenu.membershipId, s.orgUnitId)}
+                    className="w-full text-left px-3 py-2 text-[13px] hover:bg-surface-foreground/8 transition-colors flex items-center gap-2"
+                  >
+                    <Icon name="add" size={16} className="text-primary" />
+                    {s.orgUnitName}
+                  </button>
+                ))}
+              {(squads ?? [])
+                .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
+                .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
+                .length === 0 && (
+                <p className="px-3 py-2 text-[12px] text-muted-foreground">Already in all squads</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </motion.div>
   );
 }
