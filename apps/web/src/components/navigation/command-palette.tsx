@@ -15,16 +15,12 @@ interface CommandItem {
 }
 
 const commandItems: CommandItem[] = [
-  { id: "dashboard", label: "Dashboard", section: "Navigation", href: "/", icon: "📊" },
-  { id: "people", label: "People", section: "Navigation", href: "/people", icon: "👤" },
-  { id: "employees", label: "Employees", section: "Navigation", href: "/employees", icon: "👥" },
+  { id: "dashboard", label: "Dashboard", section: "Navigation", href: "/dashboard", icon: "📊" },
+  { id: "people", label: "Members", section: "Navigation", href: "/people", icon: "👤" },
   { id: "org-chart", label: "Org Chart", section: "Navigation", href: "/org-chart", icon: "🏢" },
-  { id: "engineering", label: "Engineering Teams", section: "Navigation", href: "/engineering", icon: "⚙️" },
-  { id: "capacity", label: "Capacity", section: "Navigation", href: "/capacity", icon: "📈" },
   { id: "budgets", label: "Budgets", section: "Navigation", href: "/budgets", icon: "💰" },
-  { id: "leave", label: "Leave", section: "Navigation", href: "/leave", icon: "🏖️" },
+  { id: "calendar", label: "Calendar", section: "Navigation", href: "/calendar", icon: "📅" },
   { id: "settings", label: "Admin", section: "Navigation", href: "/admin", icon: "⚙️" },
-  { id: "create-employee", label: "Create Employee", section: "Quick Actions", href: "/employees", icon: "➕" },
 ];
 
 function fuzzyMatch(query: string, text: string): boolean {

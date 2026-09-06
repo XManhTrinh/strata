@@ -20,15 +20,10 @@ import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> = {
   calendar:      { icon: "calendar_month",       color: "text-blue-600",    bg: "bg-blue-100 dark:bg-blue-900/30" },
-  employees:     { icon: "badge",                color: "text-indigo-600",  bg: "bg-indigo-100 dark:bg-indigo-900/30" },
   people:        { icon: "group",                color: "text-violet-600",  bg: "bg-violet-100 dark:bg-violet-900/30" },
-  organizations: { icon: "account_tree",         color: "text-teal-600",    bg: "bg-teal-100 dark:bg-teal-900/30" },
   org_chart:     { icon: "lan",                  color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
-  engineering:   { icon: "engineering",          color: "text-orange-600",  bg: "bg-orange-100 dark:bg-orange-900/30" },
-  capacity:      { icon: "stacked_bar_chart",    color: "text-cyan-600",    bg: "bg-cyan-100 dark:bg-cyan-900/30" },
   budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
-  authorization: { icon: "admin_panel_settings", color: "text-amber-600",   bg: "bg-amber-100 dark:bg-amber-900/30" },
-  notifications: { icon: "notifications",        color: "text-rose-600",    bg: "bg-rose-100 dark:bg-rose-900/30" },
+  dashboard:     { icon: "dashboard",            color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
 };
 
 const DEFAULT_META = { icon: "extension", color: "text-primary", bg: "bg-primary/10" };
@@ -73,8 +68,8 @@ export default function FeaturesPage() {
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  // Core features (always on, cannot be toggled) and removed features are hidden from this page
-  const HIDDEN_FEATURES = new Set(["authorization", "audit", "reports", "search"]);
+  // Core features (always on) are hidden — only toggleable features shown
+  const HIDDEN_FEATURES = new Set(["authorization"]);
   const features: FeatureRow[] = (companyFeatures ?? [])
     .map(toFeatureRow)
     .filter((r): r is FeatureRow => r !== null && !HIDDEN_FEATURES.has(r.key));

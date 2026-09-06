@@ -38,8 +38,6 @@ model Person {
   user        User?
 }
 
-// ─── Engineering Hierarchy Models ───────────────────────────────────────────────
-
 // ─── Auth & Access Control Models ───────────────────────────────────────────────
 
 model User {

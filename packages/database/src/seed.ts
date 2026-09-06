@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 
 const IDS = {
   company: "cm_acme_corp_001",
-  legacyOrg: "org_acme_legacy_001",
   // Org Unit Types
   orgUnitTypes: {
     division: "out_division_001",
@@ -83,7 +82,6 @@ const IDS = {
   features: {
     people: "feat_people_001",
     calendar: "feat_calendar_001",
-    engineering: "feat_engineering_001",
   },
   // Feature Permissions
   featurePermissions: {
@@ -91,13 +89,11 @@ const IDS = {
     peopleWrite: "fp_people_write_001",
     calendarRead: "fp_calendar_read_001",
     calendarWrite: "fp_calendar_write_001",
-    engineeringRead: "fp_engineering_read_001",
-    engineeringWrite: "fp_engineering_write_001",
   },
-  // Users (Person, User, Employee share index) — first 12 hardcoded, rest generated
+  // Users (Person, User share index) — first 12 hardcoded, rest generated
   persons: Array.from({ length: 500 }, (_, i) => `per_${String(i + 1).padStart(3, "0")}`),
   users: Array.from({ length: 500 }, (_, i) => `usr_${String(i + 1).padStart(3, "0")}`),
-  employees: Array.from({ length: 500 }, (_, i) => `emp_${String(i + 1).padStart(3, "0")}`),
+  memberships: Array.from({ length: 500 }, (_, i) => `mem_${String(i + 1).padStart(3, "0")}`),
   // Event Types
   eventTypes: {
     meeting: "evt_meeting_001",
@@ -197,11 +193,6 @@ async function seedCompany() {
   return company;
 }
 
-async function seedLegacyOrganization() {
-  logSection("Organization (legacy — skipped, model removed)");
-  log(`Skipping legacy organization seed (Organization model removed)`);
-  return { id: IDS.legacyOrg, name: "Strata Technologies" };
-}
 
 async function seedOrgUnitTypes(companyId: string) {
   logSection("Organization Unit Types");
@@ -410,7 +401,6 @@ async function seedPositions(companyId: string, careerLevels: Record<string, str
 
 async function seedUsers(
   companyId: string,
-  organizationId: string,
   _orgUnits: Awaited<ReturnType<typeof seedOrgUnits>>,
   _positions: Awaited<ReturnType<typeof seedPositions>>,
 ) {
@@ -458,7 +448,6 @@ async function seedUsers(
     const u = USER_DATA[i];
     const personId = IDS.persons[i];
     const userId = IDS.users[i];
-    const employeeId = IDS.employees[i];
 
     // Upsert Person
     const person = await prisma.person.upsert({
@@ -527,7 +516,6 @@ async function seedUsers(
     const u = ADDITIONAL_USERS[i];
     const personId = IDS.persons[idx];
     const userId = IDS.users[idx];
-    const employeeId = IDS.employees[idx];
 
     const person = await prisma.person.upsert({
       where: { id: personId },
@@ -598,15 +586,6 @@ async function seedFeatures() {
         { id: IDS.featurePermissions.calendarWrite, key: "write", displayName: "Manage Calendar" },
       ],
     },
-    {
-      id: IDS.features.engineering,
-      key: "engineering",
-      displayName: "Engineering",
-      permissions: [
-        { id: IDS.featurePermissions.engineeringRead, key: "read", displayName: "View Engineering" },
-        { id: IDS.featurePermissions.engineeringWrite, key: "write", displayName: "Manage Engineering" },
-      ],
-    },
   ];
 
   for (const f of features) {
@@ -661,8 +640,6 @@ async function seedRoles(companyId: string) {
     { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.peopleWrite, scope: "COMPANY" },
     { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.calendarRead, scope: "GLOBAL" },
     { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.calendarWrite, scope: "COMPANY" },
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.engineeringRead, scope: "GLOBAL" },
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.engineeringWrite, scope: "COMPANY" },
     // Manager gets DIRECT_REPORTS + ORGANIZATION_UNIT + BRANCH
     { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.peopleRead, scope: "BRANCH" },
     { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.peopleWrite, scope: "DIRECT_REPORTS" },
@@ -1151,15 +1128,13 @@ async function logSummary() {
 
 // ─── Test Accounts ────────────────────────────────────────────────────────────
 
-async function seedTestAccounts(companyId: string, organizationId: string) {
+async function seedTestAccounts(companyId: string) {
   logSection("Test Accounts");
 
   const accounts = [
     {
       id: "per_superadmin_001",
       userId: "usr_superadmin_001",
-      empId: "emp_superadmin_001",
-      uin: "SA-001",
       fullName: "Super Admin",
       email: "superadmin@bt.com",
       password: "superadmin",
@@ -1168,8 +1143,6 @@ async function seedTestAccounts(companyId: string, organizationId: string) {
     {
       id: "per_manager_001",
       userId: "usr_manager_001",
-      empId: "emp_manager_001",
-      uin: "MGR-001",
       fullName: "Manager User",
       email: "manager@bt.com",
       password: "manager",
@@ -1178,8 +1151,6 @@ async function seedTestAccounts(companyId: string, organizationId: string) {
     {
       id: "per_employee_001",
       userId: "usr_employee_001",
-      empId: "emp_employee_001",
-      uin: "EMP-001",
       fullName: "Employee User",
       email: "employee@bt.com",
       password: "employee",
@@ -1209,20 +1180,6 @@ async function seedTestAccounts(companyId: string, organizationId: string) {
       },
     });
 
-    await prisma.employee.upsert({
-      where: { uin_organizationId: { uin: acct.uin, organizationId } },
-      update: {},
-      create: {
-        id: acct.empId,
-        uin: acct.uin,
-        personId: person.id,
-        organizationId,
-        departmentId: null,
-        startDate: new Date(2020, 0, 1),
-        status: "ACTIVE",
-      },
-    });
-
     await prisma.userCompanyMembership.upsert({
       where: { userId_companyId: { userId: user.id, companyId } },
       update: { isSuperAdmin: acct.isSuperAdmin },
@@ -1248,15 +1205,14 @@ async function main() {
 
   // Company & Organization Structure
   const company = await seedCompany();
-  const legacyOrg = await seedLegacyOrganization();
   const orgUnitTypes = await seedOrgUnitTypes(company.id);
   const orgUnits = await seedOrgUnits(company.id, orgUnitTypes);
 
   // Users, Roles, and Reporting
   const careerLevels = await seedCareerLevels(company.id);
   const positions = await seedPositions(company.id, careerLevels);
-  const { users } = await seedUsers(company.id, legacyOrg.id, orgUnits, positions);
-  await seedTestAccounts(company.id, legacyOrg.id);
+  const { users } = await seedUsers(company.id, orgUnits, positions);
+  await seedTestAccounts(company.id);
   await seedFeatures();
   const roles = await seedRoles(company.id);
   await seedRoleAssignments(company.id, users, roles);
