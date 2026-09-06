@@ -1,12 +1,13 @@
 "use client";
 
 import { create } from "zustand";
+import { createClient } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface User {
   id: string;
   email: string;
   name: string;
-  roles: string[];
 }
 
 interface AuthState {
@@ -20,81 +21,89 @@ interface AuthState {
   checkSession: () => Promise<void>;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+function mapSupabaseUser(supabaseUser: SupabaseUser): User {
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email ?? "",
+    name:
+      supabaseUser.user_metadata?.full_name ??
+      supabaseUser.user_metadata?.name ??
+      supabaseUser.email?.split("@")[0] ??
+      "",
+  };
+}
 
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: true, // starts true so auth guard shows loading
+  isLoading: true,
   error: null,
 
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        set({ isLoading: false, error: data.message || "Login failed" });
+
+      if (error) {
+        set({ isLoading: false, error: error.message });
         return;
       }
-      // Fetch user profile from session
-      const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
-      if (meRes.ok) {
-        const user = await meRes.json();
-        set({ user, isAuthenticated: true, isLoading: false, error: null });
-      } else {
-        set({ isAuthenticated: true, isLoading: false, error: null });
-      }
+
+      set({
+        user: mapSupabaseUser(data.user),
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
     } catch {
       set({ isLoading: false, error: "Network error. Please try again." });
     }
   },
 
-  loginWithGoogle: (returnUrl: string = "/") => {
-    window.location.href = `${API_URL}/auth/google/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+  loginWithGoogle: (returnUrl: string = "/dashboard") => {
+    const supabase = createClient();
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`,
+      },
+    });
   },
 
   logout: async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const supabase = createClient();
+      await supabase.auth.signOut();
     } catch {
       /* ignore */
     }
-    set({ user: null, isAuthenticated: false, error: null });
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
+    set({ user: null, isAuthenticated: false, isLoading: false, error: null });
+    // Don't redirect here — let the caller or AuthGuard handle navigation
   },
 
   checkSession: async () => {
+    // Avoid redundant checks if already authenticated
+    if (get().isAuthenticated && get().user) {
+      set({ isLoading: false });
+      return;
+    }
+
     set({ isLoading: true });
     try {
-      const res = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
-      if (res.ok) {
-        const user = await res.json();
-        set({ user, isAuthenticated: true, isLoading: false });
-      } else {
-        // Try silent refresh
-        const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session?.user) {
+        set({
+          user: mapSupabaseUser(data.session.user),
+          isAuthenticated: true,
+          isLoading: false,
         });
-        if (refreshRes.ok) {
-          const meRes = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
-          if (meRes.ok) {
-            const user = await meRes.json();
-            set({ user, isAuthenticated: true, isLoading: false });
-            return;
-          }
-        }
+      } else {
         set({ user: null, isAuthenticated: false, isLoading: false });
       }
     } catch {

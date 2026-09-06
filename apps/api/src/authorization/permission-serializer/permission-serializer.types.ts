@@ -1,4 +1,4 @@
-import { PermissionScopeV2 } from '../scope-resolver/scope-resolver.types';
+import { PermissionScope } from '../scope-resolver/scope-resolver.types';
 
 /**
  * Represents a parsed permission tuple from the canonical string format.
@@ -6,7 +6,7 @@ import { PermissionScopeV2 } from '../scope-resolver/scope-resolver.types';
 export interface ParsedPermission {
   feature: string;
   permission: string;
-  scope: PermissionScopeV2;
+  scope: PermissionScope;
 }
 
 /**

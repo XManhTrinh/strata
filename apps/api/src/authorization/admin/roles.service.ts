@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaClient, PermissionScopeV2 } from '@strata/database';
+import { PrismaClient, PermissionScope } from '@strata/database';
 import { PermissionCacheService } from '../permission-cache/permission-cache.service';
 import { FeatureRegistryService } from '../feature-registry/feature-registry.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -24,14 +24,14 @@ export class RolesService {
   // ─── Role CRUD ──────────────────────────────────────────────────────────────
 
   async create(companyId: string, dto: CreateRoleDto) {
-    const existing = await this.prisma.roleV2.findUnique({
+    const existing = await this.prisma.role.findUnique({
       where: { companyId_name: { companyId, name: dto.name } },
     });
     if (existing) {
       throw new ConflictException(`Role with name "${dto.name}" already exists`);
     }
 
-    return this.prisma.roleV2.create({
+    return this.prisma.role.create({
       data: {
         companyId,
         name: dto.name,
@@ -41,7 +41,7 @@ export class RolesService {
   }
 
   async findAll(companyId: string) {
-    return this.prisma.roleV2.findMany({
+    return this.prisma.role.findMany({
       where: { companyId, archivedAt: null },
       include: { _count: { select: { assignments: true, permissions: true } } },
       orderBy: { name: 'asc' },
@@ -49,7 +49,7 @@ export class RolesService {
   }
 
   async findOne(companyId: string, id: string) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id, companyId },
       include: {
         permissions: {
@@ -64,7 +64,7 @@ export class RolesService {
   }
 
   async update(companyId: string, id: string, dto: UpdateRoleDto) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id, companyId },
     });
     if (!role) {
@@ -72,7 +72,7 @@ export class RolesService {
     }
 
     if (dto.name) {
-      const existing = await this.prisma.roleV2.findFirst({
+      const existing = await this.prisma.role.findFirst({
         where: { companyId, name: dto.name, id: { not: id } },
       });
       if (existing) {
@@ -82,14 +82,14 @@ export class RolesService {
       }
     }
 
-    return this.prisma.roleV2.update({
+    return this.prisma.role.update({
       where: { id },
       data: dto,
     });
   }
 
   async duplicate(companyId: string, id: string) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id, companyId },
       include: { permissions: true },
     });
@@ -101,7 +101,7 @@ export class RolesService {
     let newName = `${role.name} (Copy)`;
     let counter = 1;
     while (
-      await this.prisma.roleV2.findUnique({
+      await this.prisma.role.findUnique({
         where: { companyId_name: { companyId, name: newName } },
       })
     ) {
@@ -109,7 +109,7 @@ export class RolesService {
       newName = `${role.name} (Copy ${counter})`;
     }
 
-    const newRole = await this.prisma.roleV2.create({
+    const newRole = await this.prisma.role.create({
       data: {
         companyId,
         name: newName,
@@ -119,7 +119,7 @@ export class RolesService {
 
     // Copy all permission assignments
     if (role.permissions.length > 0) {
-      await this.prisma.rolePermissionAssignment.createMany({
+      await this.prisma.rolePermission.createMany({
         data: role.permissions.map((p) => ({
           roleId: newRole.id,
           featurePermissionId: p.featurePermissionId,
@@ -132,7 +132,7 @@ export class RolesService {
   }
 
   async archive(companyId: string, id: string) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id, companyId },
     });
     if (!role) {
@@ -141,14 +141,14 @@ export class RolesService {
     if (role.archivedAt) {
       throw new BadRequestException('Role is already archived');
     }
-    return this.prisma.roleV2.update({
+    return this.prisma.role.update({
       where: { id },
       data: { archivedAt: new Date() },
     });
   }
 
   async delete(companyId: string, id: string) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id, companyId },
     });
     if (!role) {
@@ -156,7 +156,7 @@ export class RolesService {
     }
 
     // Check if role is assigned to any user
-    const assignedCount = await this.prisma.roleAssignmentV2.count({
+    const assignedCount = await this.prisma.roleAssignment.count({
       where: { roleId: id },
     });
     if (assignedCount > 0) {
@@ -166,55 +166,68 @@ export class RolesService {
     }
 
     // Delete permission assignments first
-    await this.prisma.rolePermissionAssignment.deleteMany({
+    await this.prisma.rolePermission.deleteMany({
       where: { roleId: id },
     });
 
-    await this.prisma.roleV2.delete({ where: { id } });
+    await this.prisma.role.delete({ where: { id } });
     return { deleted: true };
   }
 
   // ─── Permission Assignment ──────────────────────────────────────────────────
 
   async addPermission(companyId: string, roleId: string, dto: AssignPermissionDto) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id: roleId, companyId },
     });
     if (!role) {
       throw new NotFoundException('Role not found');
     }
 
-    // Validate feature and permission exist
-    const isValid = await this.featureRegistry.isValidAction(
-      dto.featureKey,
-      dto.permissionKey,
-    );
-    if (!isValid) {
-      throw new BadRequestException(
-        `Invalid feature permission: ${dto.featureKey}:${dto.permissionKey}`,
-      );
-    }
+    let featurePermissionId: string;
 
-    // Find the feature permission record
-    const featurePermission = await this.prisma.featurePermission.findFirst({
-      where: {
-        key: dto.permissionKey,
-        feature: { key: dto.featureKey },
-      },
-    });
-    if (!featurePermission) {
-      throw new BadRequestException(
-        `Feature permission not found: ${dto.featureKey}:${dto.permissionKey}`,
+    if ('featurePermissionId' in dto) {
+      // New format: direct featurePermissionId
+      const fp = await this.prisma.featurePermission.findUnique({
+        where: { id: dto.featurePermissionId },
+      });
+      if (!fp) {
+        throw new BadRequestException('Feature permission not found');
+      }
+      featurePermissionId = fp.id;
+    } else {
+      // Legacy format: featureKey + permissionKey
+      const isValid = await this.featureRegistry.isValidAction(
+        dto.featureKey,
+        dto.permissionKey,
       );
+      if (!isValid) {
+        throw new BadRequestException(
+          `Invalid feature permission: ${dto.featureKey}:${dto.permissionKey}`,
+        );
+      }
+
+      const featurePermission = await this.prisma.featurePermission.findFirst({
+        where: {
+          key: dto.permissionKey,
+          feature: { key: dto.featureKey },
+        },
+      });
+      if (!featurePermission) {
+        throw new BadRequestException(
+          `Feature permission not found: ${dto.featureKey}:${dto.permissionKey}`,
+        );
+      }
+      featurePermissionId = featurePermission.id;
     }
 
     // Check for duplicate
-    const existing = await this.prisma.rolePermissionAssignment.findUnique({
+    const existing = await this.prisma.rolePermission.findUnique({
       where: {
         roleId_featurePermissionId_scope: {
           roleId,
-          featurePermissionId: featurePermission.id,
-          scope: dto.scope as PermissionScopeV2,
+          featurePermissionId,
+          scope: dto.scope as PermissionScope,
         },
       },
     });
@@ -224,11 +237,11 @@ export class RolesService {
       );
     }
 
-    const assignment = await this.prisma.rolePermissionAssignment.create({
+    const assignment = await this.prisma.rolePermission.create({
       data: {
         roleId,
-        featurePermissionId: featurePermission.id,
-        scope: dto.scope as PermissionScopeV2,
+        featurePermissionId,
+        scope: dto.scope as PermissionScope,
       },
       include: { featurePermission: { include: { feature: true } } },
     });
@@ -244,21 +257,21 @@ export class RolesService {
     roleId: string,
     permissionAssignmentId: string,
   ) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id: roleId, companyId },
     });
     if (!role) {
       throw new NotFoundException('Role not found');
     }
 
-    const assignment = await this.prisma.rolePermissionAssignment.findFirst({
+    const assignment = await this.prisma.rolePermission.findFirst({
       where: { id: permissionAssignmentId, roleId },
     });
     if (!assignment) {
       throw new NotFoundException('Permission assignment not found');
     }
 
-    await this.prisma.rolePermissionAssignment.delete({
+    await this.prisma.rolePermission.delete({
       where: { id: permissionAssignmentId },
     });
 
@@ -268,7 +281,7 @@ export class RolesService {
   }
 
   async bulkPermissions(companyId: string, roleId: string, dto: BulkPermissionsDto) {
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id: roleId, companyId },
     });
     if (!role) {
@@ -289,11 +302,11 @@ export class RolesService {
       if (!featurePermission) continue;
 
       try {
-        await this.prisma.rolePermissionAssignment.create({
+        await this.prisma.rolePermission.create({
           data: {
             roleId,
             featurePermissionId: featurePermission.id,
-            scope: entry.scope as PermissionScopeV2,
+            scope: entry.scope as PermissionScope,
           },
         });
         added++;
@@ -312,11 +325,11 @@ export class RolesService {
       });
       if (!featurePermission) continue;
 
-      const result = await this.prisma.rolePermissionAssignment.deleteMany({
+      const result = await this.prisma.rolePermission.deleteMany({
         where: {
           roleId,
           featurePermissionId: featurePermission.id,
-          scope: entry.scope as PermissionScopeV2,
+          scope: entry.scope as PermissionScope,
         },
       });
       removed += result.count;
@@ -339,7 +352,7 @@ export class RolesService {
     }
 
     // Verify role exists
-    const role = await this.prisma.roleV2.findFirst({
+    const role = await this.prisma.role.findFirst({
       where: { id: dto.roleId, companyId },
     });
     if (!role) {
@@ -347,7 +360,7 @@ export class RolesService {
     }
 
     // Check for duplicate assignment
-    const existing = await this.prisma.roleAssignmentV2.findUnique({
+    const existing = await this.prisma.roleAssignment.findUnique({
       where: {
         membershipId_roleId: { membershipId: membership.id, roleId: dto.roleId },
       },
@@ -356,7 +369,7 @@ export class RolesService {
       throw new ConflictException('Role is already assigned to this user');
     }
 
-    const assignment = await this.prisma.roleAssignmentV2.create({
+    const assignment = await this.prisma.roleAssignment.create({
       data: {
         membershipId: membership.id,
         roleId: dto.roleId,
@@ -377,7 +390,7 @@ export class RolesService {
       throw new NotFoundException('User is not a member of this company');
     }
 
-    return this.prisma.roleAssignmentV2.findMany({
+    return this.prisma.roleAssignment.findMany({
       where: { membershipId: membership.id },
       include: { role: true },
     });
@@ -399,7 +412,7 @@ export class RolesService {
       if (superAdminCount <= 1) {
         // Check if this role removal would effectively remove super admin status
         // For safety, we prevent removing any role from the last super admin
-        const assignmentCount = await this.prisma.roleAssignmentV2.count({
+        const assignmentCount = await this.prisma.roleAssignment.count({
           where: { membershipId: membership.id },
         });
         if (assignmentCount <= 1) {
@@ -410,7 +423,7 @@ export class RolesService {
       }
     }
 
-    const assignment = await this.prisma.roleAssignmentV2.findUnique({
+    const assignment = await this.prisma.roleAssignment.findUnique({
       where: {
         membershipId_roleId: { membershipId: membership.id, roleId },
       },
@@ -419,7 +432,7 @@ export class RolesService {
       throw new NotFoundException('Role assignment not found');
     }
 
-    await this.prisma.roleAssignmentV2.delete({
+    await this.prisma.roleAssignment.delete({
       where: { id: assignment.id },
     });
 
@@ -437,7 +450,7 @@ export class RolesService {
     }
 
     // Get all role assignments for this user
-    const roleAssignments = await this.prisma.roleAssignmentV2.findMany({
+    const roleAssignments = await this.prisma.roleAssignment.findMany({
       where: { membershipId: membership.id },
       include: {
         role: {
@@ -455,7 +468,7 @@ export class RolesService {
     // Resolve: union permissions, compute broadest scope per feature:permission
     const permissionMap = new Map<
       string,
-      { feature: string; permission: string; scope: PermissionScopeV2; displayName: string; featureDisplayName: string }
+      { feature: string; permission: string; scope: PermissionScope; displayName: string; featureDisplayName: string }
     >();
 
     const scopeOrder: Record<string, number> = {

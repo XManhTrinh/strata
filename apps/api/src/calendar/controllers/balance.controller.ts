@@ -16,7 +16,7 @@ import { RequireFeaturePermission } from '../../authorization/authorization.deco
 import { BalanceService } from '../services/balance.service';
 import { AdjustBalanceSchema } from '../dto/adjust-balance.dto';
 
-@Controller('api/v2/companies/:companyId/calendar/balances')
+@Controller('companies/:companyId/calendar/balances')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class BalanceController {
   constructor(private readonly balanceService: BalanceService) {}

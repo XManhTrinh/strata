@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const PermissionScopeV2Values = [
+const PermissionScopeValues = [
   'OWN',
   'DIRECT_REPORTS',
   'ORGANIZATION_UNIT',
@@ -12,7 +12,7 @@ const PermissionScopeV2Values = [
 const PermissionEntrySchema = z.object({
   featureKey: z.string().min(1),
   permissionKey: z.string().min(1),
-  scope: z.enum(PermissionScopeV2Values),
+  scope: z.enum(PermissionScopeValues),
 });
 
 export const BulkPermissionsSchema = z.object({

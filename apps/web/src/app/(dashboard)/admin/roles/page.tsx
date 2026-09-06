@@ -30,11 +30,12 @@ import {
   useAddRolePermission,
   useRemoveRolePermission,
   useAllFeatures,
-  COMPANY_ID,
+  useFeatures,
   type AdminRole,
   type AdminFeature,
   type RolePermissionDetail,
 } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 type Scope = "OWN" | "DIRECT_REPORTS" | "ORGANIZATION_UNIT" | "BRANCH" | "COMPANY" | "GLOBAL";
@@ -51,7 +52,8 @@ const scopeLabels: Record<Scope, string> = {
 };
 
 export default function RolesPage() {
-  const { data: backendRoles, isLoading, error } = useRoles(COMPANY_ID);
+  const companyId = useCompanyId();
+  const { data: backendRoles, isLoading, error } = useRoles(companyId);
   const { data: allFeatures, isLoading: featuresLoading } = useAllFeatures();
   const createRoleMutation = useCreateRole();
   const addPermissionMutation = useAddRolePermission();
@@ -78,7 +80,16 @@ export default function RolesPage() {
   const {
     data: rolePermissionDetail,
     isLoading: permissionsLoading,
-  } = useRolePermissions(COMPANY_ID, effectiveSelectedId ?? "");
+  } = useRolePermissions(companyId, effectiveSelectedId ?? "");
+
+  // Get company feature toggles to know which features are disabled
+  const { data: companyFeatures } = useFeatures(companyId);
+  const disabledFeatureKeys = new Set(
+    (companyFeatures ?? [])
+      .filter((cf) => !cf.enabled)
+      .map((cf) => cf.feature?.key)
+      .filter(Boolean),
+  );
 
   const toggleFeatureExpanded = (featureId: string) => {
     setExpandedFeatures((prev) => {
@@ -104,7 +115,7 @@ export default function RolesPage() {
   const handleCreateRole = () => {
     if (!newRoleName.trim()) return;
     createRoleMutation.mutate(
-      { companyId: COMPANY_ID, name: newRoleName.trim(), description: newRoleDescription.trim() || undefined },
+      { companyId: companyId, name: newRoleName.trim(), description: newRoleDescription.trim() || undefined },
       {
         onSuccess: (newRole) => {
           toast.success("Role created successfully");
@@ -124,7 +135,7 @@ export default function RolesPage() {
     if (!selectedRole) return;
     const duplicateName = `${selectedRole.name} (Copy)`;
     createRoleMutation.mutate(
-      { companyId: COMPANY_ID, name: duplicateName, description: selectedRole.description || undefined },
+      { companyId: companyId, name: duplicateName, description: selectedRole.description || undefined },
       {
         onSuccess: (newRole) => {
           toast.success("Role duplicated successfully");
@@ -143,7 +154,7 @@ export default function RolesPage() {
       if (checked) {
         addPermissionMutation.mutate(
           {
-            companyId: COMPANY_ID,
+            companyId: companyId,
             roleId: effectiveSelectedId,
             featurePermissionId,
             scope: "OWN",
@@ -160,7 +171,7 @@ export default function RolesPage() {
       } else if (existingPermId) {
         removePermissionMutation.mutate(
           {
-            companyId: COMPANY_ID,
+            companyId: companyId,
             roleId: effectiveSelectedId,
             permId: existingPermId,
           },
@@ -184,7 +195,7 @@ export default function RolesPage() {
       if (existingPermId) {
         removePermissionMutation.mutate(
           {
-            companyId: COMPANY_ID,
+            companyId: companyId,
             roleId: effectiveSelectedId,
             permId: existingPermId,
           },
@@ -192,7 +203,7 @@ export default function RolesPage() {
             onSuccess: () => {
               addPermissionMutation.mutate(
                 {
-                  companyId: COMPANY_ID,
+                  companyId: companyId,
                   roleId: effectiveSelectedId,
                   featurePermissionId,
                   scope: newScope,
@@ -467,7 +478,7 @@ export default function RolesPage() {
                   </div>
                 ) : (
                   <PermissionMatrix
-                    features={featureCatalog}
+                    features={featureCatalog.filter((f) => !disabledFeatureKeys.has(f.key))}
                     rolePermissions={rolePermissionDetail}
                     onToggle={handleTogglePermission}
                     onScopeChange={handleScopeChange}
@@ -710,6 +721,40 @@ function PermissionMatrix({
                 >
                   <Divider />
                   <div className="divide-y divide-outline-variant">
+                    {/* Select All / Deselect All row */}
+                    <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low/50">
+                      <Checkbox
+                        checked={assignedCount === feature.permissions.length && assignedCount > 0}
+                        indeterminate={assignedCount > 0 && assignedCount < feature.permissions.length}
+                        disabled={isMutating}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            // Add all unassigned permissions
+                            feature.permissions.forEach((fp) => {
+                              const existing = rolePermissions?.permissions.find(
+                                (rp) => rp.featurePermissionId === fp.id
+                              );
+                              if (!existing) {
+                                onToggle(fp.id, true);
+                              }
+                            });
+                          } else {
+                            // Remove all assigned permissions
+                            feature.permissions.forEach((fp) => {
+                              const existing = rolePermissions?.permissions.find(
+                                (rp) => rp.featurePermissionId === fp.id
+                              );
+                              if (existing) {
+                                onToggle(fp.id, false, existing.id);
+                              }
+                            });
+                          }
+                        }}
+                      />
+                      <span className="text-[13px] font-medium text-surface-variant-foreground">
+                        {assignedCount === feature.permissions.length ? "Deselect all" : "Select all"}
+                      </span>
+                    </div>
                     {feature.permissions.map((fp) => {
                       const assigned = rolePermissions?.permissions.find(
                         (rp) => rp.featurePermissionId === fp.id

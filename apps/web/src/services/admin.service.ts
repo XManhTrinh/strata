@@ -5,10 +5,6 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-export const COMPANY_ID = "cm_acme_corp_001";
-
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface AdminOrgUnitType {
@@ -71,7 +67,7 @@ export function useOrgUnitTypes(companyId: string) {
     queryKey: ["org-unit-types", companyId],
     queryFn: () =>
       apiClient<AdminOrgUnitType[]>(
-        `/api/v2/companies/${companyId}/org-unit-types`
+        `/companies/${companyId}/org-unit-types`
       ),
     enabled: !!companyId,
   });
@@ -82,7 +78,7 @@ export function useCreateOrgUnitType() {
   return useMutation({
     mutationFn: (data: { companyId: string; name: string; description?: string; icon?: string; color?: string; displayOrder?: number }) =>
       apiClient<AdminOrgUnitType>(
-        `/api/v2/companies/${data.companyId}/org-unit-types`,
+        `/companies/${data.companyId}/org-unit-types`,
         { method: "POST", body: data }
       ),
     onSuccess: () => {
@@ -96,7 +92,7 @@ export function useUpdateOrgUnitType() {
   return useMutation({
     mutationFn: ({ companyId, id, ...data }: { companyId: string; id: string; name?: string; description?: string; icon?: string; color?: string; displayOrder?: number }) =>
       apiClient<AdminOrgUnitType>(
-        `/api/v2/companies/${companyId}/org-unit-types/${id}`,
+        `/companies/${companyId}/org-unit-types/${id}`,
         { method: "PATCH", body: data }
       ),
     onSuccess: () => {
@@ -110,7 +106,7 @@ export function useArchiveOrgUnitType() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<AdminOrgUnitType>(
-        `/api/v2/companies/${companyId}/org-unit-types/${id}/archive`,
+        `/companies/${companyId}/org-unit-types/${id}/archive`,
         { method: "POST" }
       ),
     onSuccess: () => {
@@ -124,7 +120,7 @@ export function useRestoreOrgUnitType() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<AdminOrgUnitType>(
-        `/api/v2/companies/${companyId}/org-unit-types/${id}/restore`,
+        `/companies/${companyId}/org-unit-types/${id}/restore`,
         { method: "POST" }
       ),
     onSuccess: () => {
@@ -140,7 +136,7 @@ export function usePositions(companyId: string) {
     queryKey: ["positions", companyId],
     queryFn: () =>
       apiClient<AdminPosition[]>(
-        `/api/v2/companies/${companyId}/positions`
+        `/companies/${companyId}/positions`
       ),
     enabled: !!companyId,
   });
@@ -151,7 +147,7 @@ export function useCreatePosition() {
   return useMutation({
     mutationFn: (data: { companyId: string; name: string; description?: string; minLevelId?: string; maxLevelId?: string; canHaveDirectReports?: boolean }) =>
       apiClient<AdminPosition>(
-        `/api/v2/companies/${data.companyId}/positions`,
+        `/companies/${data.companyId}/positions`,
         { method: "POST", body: data }
       ),
     onSuccess: () => {
@@ -165,7 +161,7 @@ export function useUpdatePosition() {
   return useMutation({
     mutationFn: ({ companyId, id, ...data }: { companyId: string; id: string; name?: string; description?: string; minLevelId?: string; maxLevelId?: string; canHaveDirectReports?: boolean }) =>
       apiClient<AdminPosition>(
-        `/api/v2/companies/${companyId}/positions/${id}`,
+        `/companies/${companyId}/positions/${id}`,
         { method: "PATCH", body: data }
       ),
     onSuccess: () => {
@@ -179,7 +175,7 @@ export function useArchivePosition() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<AdminPosition>(
-        `/api/v2/companies/${companyId}/positions/${id}/archive`,
+        `/companies/${companyId}/positions/${id}/archive`,
         { method: "POST" }
       ),
     onSuccess: () => {
@@ -193,7 +189,7 @@ export function useDeletePosition() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<void>(
-        `/api/v2/companies/${companyId}/positions/${id}`,
+        `/companies/${companyId}/positions/${id}`,
         { method: "DELETE" }
       ),
     onSuccess: () => {
@@ -223,7 +219,7 @@ export interface CareerLevelScheme {
 export function useCareerLevels(companyId: string) {
   return useQuery({
     queryKey: ["career-levels", companyId],
-    queryFn: () => apiClient<CareerLevelScheme>(`/api/v2/companies/${companyId}/career-levels`),
+    queryFn: () => apiClient<CareerLevelScheme>(`/companies/${companyId}/career-levels`),
     enabled: !!companyId,
   });
 }
@@ -232,7 +228,7 @@ export function useCreateCareerLevel() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { companyId: string; label: string; displayName?: string; rank: number; track?: string }) =>
-      apiClient<CareerLevel>(`/api/v2/companies/${data.companyId}/career-levels`, {
+      apiClient<CareerLevel>(`/companies/${data.companyId}/career-levels`, {
         method: "POST",
         body: data,
       }),
@@ -246,7 +242,7 @@ export function useUpdateCareerLevel() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { companyId: string; levelId: string; label?: string; displayName?: string; rank?: number; track?: string }) =>
-      apiClient<CareerLevel>(`/api/v2/companies/${data.companyId}/career-levels/${data.levelId}`, {
+      apiClient<CareerLevel>(`/companies/${data.companyId}/career-levels/${data.levelId}`, {
         method: "PATCH",
         body: data,
       }),
@@ -260,7 +256,7 @@ export function useDeleteCareerLevel() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { companyId: string; levelId: string }) =>
-      apiClient<void>(`/api/v2/companies/${data.companyId}/career-levels/${data.levelId}`, {
+      apiClient<void>(`/companies/${data.companyId}/career-levels/${data.levelId}`, {
         method: "DELETE",
       }),
     onSuccess: (_, vars) => {
@@ -276,7 +272,7 @@ export function useRoles(companyId: string) {
     queryKey: ["roles", companyId],
     queryFn: () =>
       apiClient<AdminRole[]>(
-        `/api/v2/companies/${companyId}/roles`
+        `/companies/${companyId}/roles`
       ),
     enabled: !!companyId,
   });
@@ -287,7 +283,7 @@ export function useCreateRole() {
   return useMutation({
     mutationFn: (data: { companyId: string; name: string; description?: string }) =>
       apiClient<AdminRole>(
-        `/api/v2/companies/${data.companyId}/roles`,
+        `/companies/${data.companyId}/roles`,
         { method: "POST", body: data }
       ),
     onSuccess: () => {
@@ -301,7 +297,7 @@ export function useUpdateRole() {
   return useMutation({
     mutationFn: ({ companyId, id, ...data }: { companyId: string; id: string; name?: string; description?: string }) =>
       apiClient<AdminRole>(
-        `/api/v2/companies/${companyId}/roles/${id}`,
+        `/companies/${companyId}/roles/${id}`,
         { method: "PATCH", body: data }
       ),
     onSuccess: () => {
@@ -315,7 +311,7 @@ export function useArchiveRole() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<AdminRole>(
-        `/api/v2/companies/${companyId}/roles/${id}/archive`,
+        `/companies/${companyId}/roles/${id}/archive`,
         { method: "POST" }
       ),
     onSuccess: () => {
@@ -329,7 +325,7 @@ export function useDeleteRole() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<void>(
-        `/api/v2/companies/${companyId}/roles/${id}`,
+        `/companies/${companyId}/roles/${id}`,
         { method: "DELETE" }
       ),
     onSuccess: () => {
@@ -345,7 +341,7 @@ export function useFeatures(companyId: string) {
     queryKey: ["features", companyId],
     queryFn: () =>
       apiClient<CompanyFeature[]>(
-        `/api/v2/companies/${companyId}/features`
+        `/companies/${companyId}/features`
       ),
     enabled: !!companyId,
   });
@@ -354,7 +350,7 @@ export function useFeatures(companyId: string) {
 export function useAllFeatures() {
   return useQuery({
     queryKey: ["all-features"],
-    queryFn: () => apiClient<AdminFeature[]>("/api/v2/features"),
+    queryFn: () => apiClient<AdminFeature[]>("/features"),
   });
 }
 
@@ -363,7 +359,7 @@ export function useToggleFeature() {
   return useMutation({
     mutationFn: ({ companyId, featureId, enabled }: { companyId: string; featureId: string; enabled: boolean }) =>
       apiClient<CompanyFeature>(
-        `/api/v2/companies/${companyId}/features/${featureId}`,
+        `/companies/${companyId}/features/${featureId}`,
         { method: "PATCH", body: { enabled } }
       ),
     onSuccess: () => {
@@ -396,7 +392,7 @@ export interface RolePermissionDetail {
 export function useRolePermissions(companyId: string, roleId: string) {
   return useQuery({
     queryKey: ["role-permissions", companyId, roleId],
-    queryFn: () => apiClient<RolePermissionDetail>(`/api/v2/companies/${companyId}/roles/${roleId}`),
+    queryFn: () => apiClient<RolePermissionDetail>(`/companies/${companyId}/roles/${roleId}`),
     enabled: !!companyId && !!roleId,
   });
 }
@@ -406,7 +402,7 @@ export function useAddRolePermission() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ companyId, roleId, featurePermissionId, scope }: { companyId: string; roleId: string; featurePermissionId: string; scope: string }) =>
-      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions`, {
+      apiClient(`/companies/${companyId}/roles/${roleId}/permissions`, {
         method: "POST",
         body: { featurePermissionId, scope },
       }),
@@ -421,7 +417,7 @@ export function useRemoveRolePermission() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ companyId, roleId, permId }: { companyId: string; roleId: string; permId: string }) =>
-      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions/${permId}`, {
+      apiClient(`/companies/${companyId}/roles/${roleId}/permissions/${permId}`, {
         method: "DELETE",
       }),
     onSuccess: () => {
@@ -435,7 +431,7 @@ export function useBulkRolePermissions() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ companyId, roleId, permissions }: { companyId: string; roleId: string; permissions: Array<{ featurePermissionId: string; scope: string }> }) =>
-      apiClient(`/api/v2/companies/${companyId}/roles/${roleId}/permissions/bulk`, {
+      apiClient(`/companies/${companyId}/roles/${roleId}/permissions/bulk`, {
         method: "POST",
         body: { permissions },
       }),

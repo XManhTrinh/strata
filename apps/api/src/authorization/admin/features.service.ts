@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaClient } from '@strata/database';
 import Redis from 'ioredis';
 import { FeatureRegistryService } from '../feature-registry/feature-registry.service';
@@ -51,12 +51,15 @@ export class FeaturesService {
     });
 
     return features.map((f) => ({
-      id: f.id,
-      key: f.key,
-      displayName: f.displayName,
-      description: f.description,
-      permissions: f.permissions,
+      featureId: f.id,
       enabled: f.companies.length === 0 ? true : f.companies[0].enabled,
+      feature: {
+        id: f.id,
+        key: f.key,
+        displayName: f.displayName,
+        description: f.description,
+        permissions: f.permissions,
+      },
     }));
   }
 
@@ -69,6 +72,13 @@ export class FeaturesService {
     });
     if (!feature) {
       throw new NotFoundException('Feature not found');
+    }
+
+    // Authorization feature cannot be disabled (prevents lockout)
+    if (feature.key === 'authorization' && !enabled) {
+      throw new BadRequestException(
+        'The Authorization feature cannot be disabled',
+      );
     }
 
     const result = await this.prisma.companyFeature.upsert({

@@ -15,7 +15,7 @@ import { RequireFeaturePermission } from '../../authorization/authorization.deco
 import { AccrualService } from '../services/accrual.service';
 import { CreateAccrualPolicySchema, UpdateAccrualPolicySchema } from '../dto/create-accrual-policy.dto';
 
-@Controller('api/v2/companies/:companyId/calendar/accrual-policies')
+@Controller('companies/:companyId/calendar/accrual-policies')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class AccrualPolicyController {
   constructor(private readonly accrualService: AccrualService) {}

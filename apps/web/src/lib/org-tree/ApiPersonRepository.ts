@@ -2,8 +2,6 @@ import { apiClient } from "@/lib/api-client";
 import { Person, PersonRepository, PersonStatus } from "./types";
 import { OrgChartPerson } from "@/services/org-chart.service";
 
-const COMPANY_ID = "cm_acme_corp_001";
-
 /**
  * PersonRepository implementation backed by the org-chart API.
  * fetchAll returns the pre-loaded data passed via constructor.
@@ -13,7 +11,7 @@ export class ApiPersonRepository implements PersonRepository {
   private people: Person[];
   private companyId: string;
 
-  constructor(people: OrgChartPerson[], companyId: string = COMPANY_ID) {
+  constructor(people: OrgChartPerson[], companyId: string) {
     this.companyId = companyId;
     this.people = people.map((p) => this.toPerson(p));
   }
@@ -69,7 +67,7 @@ export class ApiPersonRepository implements PersonRepository {
     // If parentId is being updated, call the reporting relationship API
     if (data.parentId !== undefined) {
       await apiClient(
-        `/api/v2/companies/${this.companyId}/org-chart/reparent`,
+        `/companies/${this.companyId}/org-chart/reparent`,
         {
           method: "PUT",
           body: { userId: id, newManagerId: data.parentId },

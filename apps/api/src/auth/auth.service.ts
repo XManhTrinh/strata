@@ -1,218 +1,161 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@strata/database';
-import {
-  comparePassword,
-  signAccessToken,
-  signRefreshToken,
-  verifyToken,
-} from '@strata/auth';
-import { randomUUID } from 'crypto';
-import Redis from 'ioredis';
+import { getSupabaseAdmin } from './supabase';
 
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MINUTES = 30;
-const RATE_LIMIT_WINDOW_SECONDS = 15 * 60; // 15 minutes
-
+/**
+ * AuthService — coordinates between Supabase Auth (identity provider)
+ * and the local Prisma database (app profile/data).
+ *
+ * All authentication (login, signup, token refresh) happens on the
+ * frontend via the Supabase browser client. This service only handles:
+ * - Syncing Supabase users → local Prisma User records
+ * - Looking up local user profiles
+ * - Server-side session revocation (logout)
+ */
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly redis: Redis,
-  ) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
-  private get jwtSecret(): string {
-    return process.env.JWT_SECRET || 'default-secret';
+  /**
+   * Get user profile from the local database.
+   */
+  async getProfile(supabaseUserId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { supabaseUserId },
+      include: { person: true },
+    });
+
+    if (!user) return null;
+
+    // Find the user's company membership
+    const membership = await this.prisma.userCompanyMembership.findFirst({
+      where: { userId: user.id },
+      include: { company: true },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.person?.fullName || user.email,
+      supabaseUserId: user.supabaseUserId,
+      companyId: membership?.companyId || null,
+      companyName: membership?.company?.name || null,
+      isSuperAdmin: membership?.isSuperAdmin || false,
+    };
   }
 
-  async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
+  /**
+   * Ensure a local User record exists for a Supabase user.
+   * Also creates a Company + membership if the user signed up with a company name.
+   * Called on first authenticated API request to sync identity → profile.
+   */
+  async ensureLocalUser(supabaseUserId: string, email: string) {
+    // Fast path: user already linked
+    const existing = await this.prisma.user.findUnique({
+      where: { supabaseUserId },
+    });
+    if (existing) return existing;
+
+    // Migration path: legacy user with same email but no Supabase link
+    const legacyUser = await this.prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+    if (legacyUser && !legacyUser.supabaseUserId) {
+      return this.prisma.user.update({
+        where: { id: legacyUser.id },
+        data: { supabaseUserId },
+      });
     }
 
-    // Check if account is locked
-    if (user.isLocked && user.lockedUntil) {
-      if (new Date() < user.lockedUntil) {
-        const remainingMs = user.lockedUntil.getTime() - Date.now();
-        const remainingMinutes = Math.ceil(remainingMs / 60000);
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.TOO_MANY_REQUESTS,
-            error: 'Too Many Requests',
-            message: `Account is locked. Try again in ${remainingMinutes} minute(s).`,
-          },
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
-      } else {
-        // Lock has expired, reset
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: { isLocked: false, lockedUntil: null, failedAttempts: 0 },
+    if (legacyUser) return legacyUser;
+
+    // Fetch Supabase user metadata (contains full_name, company_name)
+    const supabase = getSupabaseAdmin();
+    const { data: supabaseUser } = await supabase.auth.admin.getUserById(
+      supabaseUserId,
+    );
+
+    const fullName =
+      supabaseUser?.user?.user_metadata?.full_name ||
+      email.split('@')[0];
+    const companyName =
+      supabaseUser?.user?.user_metadata?.company_name || null;
+
+    // Create Person + User
+    const person = await this.prisma.person.create({
+      data: {
+        fullName,
+        email,
+        dateOfBirth: new Date('1970-01-01'),
+      },
+    });
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        personId: person.id,
+        supabaseUserId,
+      },
+    });
+
+    // If a company name was provided during signup, create the company
+    // and make the user a super admin of it
+    if (companyName) {
+      // Generate a URL-safe slug from the workspace name
+      const baseSlug = companyName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      // Try base slug first, append counter if taken
+      let slug = baseSlug;
+      let attempt = 0;
+      while (await this.prisma.company.findUnique({ where: { slug } })) {
+        attempt++;
+        slug = `${baseSlug}-${attempt}`;
+      }
+
+      const company = await this.prisma.company.create({
+        data: {
+          name: companyName,
+          slug,
+        },
+      });
+
+      await this.prisma.userCompanyMembership.create({
+        data: {
+          userId: user.id,
+          companyId: company.id,
+          isSuperAdmin: true,
+        },
+      });
+
+      // Enable all features for the new workspace
+      const allFeatures = await this.prisma.feature.findMany({
+        select: { id: true },
+      });
+      if (allFeatures.length > 0) {
+        await this.prisma.companyFeature.createMany({
+          data: allFeatures.map((f) => ({
+            companyId: company.id,
+            featureId: f.id,
+            enabled: true,
+          })),
+          skipDuplicates: true,
         });
-        user.isLocked = false;
-        user.lockedUntil = null;
-        user.failedAttempts = 0;
       }
     }
 
-    // Validate password
-    const isPasswordValid = await comparePassword(password, user.passwordHash);
-
-    if (!isPasswordValid) {
-      await this.handleFailedAttempt(user.id, email);
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    // Reset failed attempts on successful login
-    await this.resetFailedAttempts(user.id, email);
-
-    // Generate tokens
-    const accessToken = signAccessToken(
-      { sub: user.id, email: user.email },
-      this.jwtSecret,
-    );
-
-    const refreshTokenValue = randomUUID();
-    const refreshExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-    );
-
-    // Store refresh token in database
-    await this.prisma.refreshToken.create({
-      data: {
-        token: refreshTokenValue,
-        userId: user.id,
-        expiresAt: refreshExpiresAt,
-      },
-    });
-
-    return {
-      accessToken,
-      refreshToken: refreshTokenValue,
-      expiresIn: 900, // 15 minutes in seconds
-    };
+    return user;
   }
 
-  async refresh(refreshToken: string) {
-    // Find the refresh token in the database
-    const storedToken = await this.prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
-      include: { user: true },
-    });
-
-    if (!storedToken) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    // Check if token is expired
-    if (new Date() > storedToken.expiresAt) {
-      // Clean up expired token
-      await this.prisma.refreshToken.delete({
-        where: { id: storedToken.id },
-      });
-      throw new UnauthorizedException('Refresh token has expired');
-    }
-
-    // Rotate: delete old token and create new one
-    await this.prisma.refreshToken.delete({
-      where: { id: storedToken.id },
-    });
-
-    const newRefreshTokenValue = randomUUID();
-    const refreshExpiresAt = new Date(
-      Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-    );
-
-    await this.prisma.refreshToken.create({
-      data: {
-        token: newRefreshTokenValue,
-        userId: storedToken.userId,
-        expiresAt: refreshExpiresAt,
-      },
-    });
-
-    // Issue new access token
-    const accessToken = signAccessToken(
-      { sub: storedToken.user.id, email: storedToken.user.email },
-      this.jwtSecret,
-    );
-
-    return {
-      accessToken,
-      refreshToken: newRefreshTokenValue,
-      expiresIn: 900,
-    };
-  }
-
-  async logout(refreshToken: string) {
-    const storedToken = await this.prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
-    });
-
-    if (storedToken) {
-      await this.prisma.refreshToken.delete({
-        where: { id: storedToken.id },
-      });
-    }
-
+  /**
+   * Revoke a Supabase session server-side.
+   */
+  async logout(accessToken: string) {
+    const supabase = getSupabaseAdmin();
+    await supabase.auth.admin.signOut(accessToken, 'local');
     return { message: 'Logged out successfully' };
-  }
-
-  private async handleFailedAttempt(
-    userId: string,
-    email: string,
-  ): Promise<void> {
-    const redisKey = `ratelimit:login:${email}`;
-
-    // Increment the Redis counter
-    const attempts = await this.redis.incr(redisKey);
-
-    // Set TTL on first attempt
-    if (attempts === 1) {
-      await this.redis.expire(redisKey, RATE_LIMIT_WINDOW_SECONDS);
-    }
-
-    // Also update the user record
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { failedAttempts: { increment: 1 } },
-    });
-
-    // If we've hit the threshold, lock the account
-    if (attempts >= MAX_FAILED_ATTEMPTS) {
-      const lockedUntil = new Date(
-        Date.now() + LOCKOUT_DURATION_MINUTES * 60 * 1000,
-      );
-
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          isLocked: true,
-          lockedUntil,
-          failedAttempts: attempts,
-        },
-      });
-    }
-  }
-
-  private async resetFailedAttempts(
-    userId: string,
-    email: string,
-  ): Promise<void> {
-    const redisKey = `ratelimit:login:${email}`;
-    await this.redis.del(redisKey);
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { failedAttempts: 0 },
-    });
   }
 }

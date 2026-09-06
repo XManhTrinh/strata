@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@vkieu/mui/buttons";
 import { TextField } from "@vkieu/mui";
@@ -15,18 +16,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [showSSO, setShowSSO] = useState(false);
-  const [ssoOrgId, setSsoOrgId] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login, loginWithGoogle, isLoading, error, isAuthenticated, checkSession } = useAuth();
   const router = useRouter();
+  const checked = useRef(false);
 
-  // Check if already authenticated on mount
+  // Check session once on mount
   useEffect(() => {
-    checkSession();
-  }, [checkSession]);
+    if (!checked.current) {
+      checked.current = true;
+      checkSession();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to dashboard once authenticated
   useEffect(() => {
     if (isAuthenticated) {
       router.replace("/dashboard");
@@ -63,23 +68,16 @@ export default function LoginPage() {
     e.preventDefault();
     const emailValid = validateEmail(email);
     const passwordValid = validatePassword(password);
-
     if (!emailValid || !passwordValid) return;
-
     await login(email, password);
   };
 
-  const handleSSOLogin = (e: FormEvent) => {
-    e.preventDefault();
-    if (!ssoOrgId.trim()) return;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-    window.location.href = `${API_URL}/auth/sso/${ssoOrgId.trim()}/login?returnUrl=${encodeURIComponent("/")}`;
-  };
+  // Show skeleton only during initial session check, not during login attempt
+  const showSkeleton = isLoading && !email && !password && !checked.current;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-      {/* Loading skeleton while checking session */}
-      {isLoading && !email && !password ? (
+      {showSkeleton ? (
         <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-6 py-10">
             <Skeleton className="h-12 w-12 rounded-full" />
@@ -95,12 +93,10 @@ export default function LoginPage() {
       ) : (
         <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
-            {/* Brand logo */}
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
               <Icon name="shield" size={40} className="text-primary" filled />
             </div>
 
-            {/* Title & description */}
             <div className="text-center space-y-1">
               <h1 className="text-[24px] font-normal leading-8 text-surface-foreground">
                 Sign in to Strata
@@ -110,140 +106,72 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {!showSSO ? (
-              <div className="w-full space-y-5">
-                {/* Credential form */}
-                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                  {error && (
-                    <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
-                      <Icon name="error" size={20} className="text-error shrink-0" />
-                      <p className="text-[14px] leading-5 text-error">{error}</p>
-                    </div>
-                  )}
+            <div className="w-full space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                {error && (
+                  <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
+                    <Icon name="error" size={20} className="text-error shrink-0" />
+                    <p className="text-[14px] leading-5 text-error">{error}</p>
+                  </div>
+                )}
 
-                  <TextField
-                    id="email"
-                    type="email"
-                    variant="outlined"
-                    label="Email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (emailError) validateEmail(e.target.value);
-                    }}
-                    onBlur={() => validateEmail(email)}
-                    placeholder="you@company.com"
-                    error={!!emailError}
-                    errorText={emailError}
-                    autoComplete="email"
-                    leadingIcon={<Icon name="mail" size={20} />}
-                    aria-invalid={!!emailError}
-                    aria-describedby={emailError ? "email-error" : undefined}
-                  />
-
-                  <TextField
-                    id="password"
-                    type="password"
-                    variant="outlined"
-                    label="Password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (passwordError) validatePassword(e.target.value);
-                    }}
-                    onBlur={() => validatePassword(password)}
-                    placeholder="••••••••"
-                    error={!!passwordError}
-                    errorText={passwordError}
-                    autoComplete="current-password"
-                    leadingIcon={<Icon name="lock" size={20} />}
-                    aria-invalid={!!passwordError}
-                    aria-describedby={passwordError ? "password-error" : undefined}
-                  />
-
-                  <Button
-                    type="submit"
-                    variant="filled"
-                    disabled={isLoading}
-                    loading={isLoading}
-                    size="l"
-                    className="w-full"
-                  >
-                    {isLoading ? "Signing in..." : "Sign in"}
-                  </Button>
-                </form>
-
-                {/* Divider */}
-                <div className="relative flex items-center gap-4">
-                  <Divider className="flex-1" />
-                  <span className="text-[12px] leading-4 tracking-[0.5px] text-surface-variant-foreground uppercase">
-                    Or continue with
-                  </span>
-                  <Divider className="flex-1" />
-                </div>
-
-                {/* Social / SSO buttons */}
-                <div className="space-y-3">
-                  <Button
-                    type="button"
-                    variant="tonal"
-                    size="l"
-                    className="w-full"
-                    icon={<Icon name="public" size={20} />}
-                    onClick={() => loginWithGoogle("/")}
-                  >
-                    Sign in with Google
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    size="l"
-                    className="w-full"
-                    icon={<Icon name="domain" size={20} />}
-                    onClick={() => setShowSSO(true)}
-                  >
-                    Sign in with SSO
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              /* SSO org input form */
-              <form onSubmit={handleSSOLogin} className="w-full space-y-4" noValidate>
                 <TextField
-                  id="sso-org"
-                  type="text"
+                  id="email"
+                  type="email"
                   variant="outlined"
-                  label="Organization ID"
-                  value={ssoOrgId}
-                  onChange={(e) => setSsoOrgId(e.target.value)}
-                  placeholder="Enter your organization ID"
-                  leadingIcon={<Icon name="corporate_fare" size={20} />}
-                  autoFocus
+                  label="Email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (emailError) validateEmail(e.target.value); }}
+                  onBlur={() => validateEmail(email)}
+                  placeholder="you@company.com"
+                  error={!!emailError}
+                  errorText={emailError}
+                  autoComplete="email"
+                  leadingIcon={<Icon name="mail" size={20} />}
+                  aria-invalid={!!emailError}
                 />
 
-                <Button
-                  type="submit"
-                  variant="filled"
-                  disabled={!ssoOrgId.trim()}
-                  size="l"
-                  className="w-full"
-                >
-                  Continue with SSO
-                </Button>
+                <TextField
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  variant="outlined"
+                  label="Password"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); if (passwordError) validatePassword(e.target.value); }}
+                  onBlur={() => validatePassword(password)}
+                  placeholder="••••••••"
+                  error={!!passwordError}
+                  errorText={passwordError}
+                  autoComplete="current-password"
+                  leadingIcon={<Icon name="lock" size={20} />}
+                  trailingIcon={
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-surface-variant-foreground hover:text-surface-foreground transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
+                      <Icon name={showPassword ? "visibility_off" : "visibility"} size={20} />
+                    </button>
+                  }
+                  aria-invalid={!!passwordError}
+                />
 
-                <Button
-                  type="button"
-                  variant="text"
-                  size="s"
-                  className="w-full"
-                  icon={<Icon name="arrow_back" size={20} />}
-                  onClick={() => setShowSSO(false)}
-                >
-                  Back to email login
+                <Button type="submit" variant="filled" disabled={isLoading} loading={isLoading} size="l" className="w-full">
+                  {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
-            )}
+
+              <div className="relative flex items-center gap-4">
+                <Divider className="flex-1" />
+                <span className="text-[12px] leading-4 tracking-[0.5px] text-surface-variant-foreground uppercase">Or continue with</span>
+                <Divider className="flex-1" />
+              </div>
+
+              <Button type="button" variant="tonal" size="l" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+                Sign in with Google
+              </Button>
+
+              <p className="text-center text-[14px] text-surface-variant-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">Create one</Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

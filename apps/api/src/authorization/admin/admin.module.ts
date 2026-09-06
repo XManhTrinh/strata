@@ -12,6 +12,8 @@ import { FeaturesController } from './features.controller';
 import { FeaturesService } from './features.service';
 import { ReportingController } from './reporting.controller';
 import { ReportingService } from './reporting.service';
+import { CareerLevelsController } from './career-levels.controller';
+import { CareerLevelsService } from './career-levels.service';
 
 @Module({
   imports: [AuthModule],
@@ -22,6 +24,7 @@ import { ReportingService } from './reporting.service';
     RolesController,
     FeaturesController,
     ReportingController,
+    CareerLevelsController,
   ],
   providers: [
     OrgUnitTypesService,
@@ -30,6 +33,7 @@ import { ReportingService } from './reporting.service';
     RolesService,
     FeaturesService,
     ReportingService,
+    CareerLevelsService,
   ],
   exports: [
     OrgUnitTypesService,
@@ -38,6 +42,7 @@ import { ReportingService } from './reporting.service';
     RolesService,
     FeaturesService,
     ReportingService,
+    CareerLevelsService,
   ],
 })
 export class AdminModule {}

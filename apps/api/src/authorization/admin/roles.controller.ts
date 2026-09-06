@@ -20,15 +20,15 @@ import { AssignPermissionSchema } from './dto/assign-permission.dto';
 import { BulkPermissionsSchema } from './dto/bulk-permissions.dto';
 import { AssignRoleSchema } from './dto/assign-role.dto';
 
-@Controller('api/v2/companies/:companyId')
+@Controller('companies/:companyId')
 @UseGuards(AuthorizationGuard)
-@RequireFeaturePermission('authorization', 'manage_roles')
 export class RolesController {
   constructor(private readonly service: RolesService) {}
 
   // ─── Role CRUD ────────────────────────────────────────────────────────────
 
   @Post('roles')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   async create(
     @Param('companyId') companyId: string,
     @Body() body: unknown,
@@ -54,6 +54,7 @@ export class RolesController {
   }
 
   @Patch('roles/:id')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   async update(
     @Param('companyId') companyId: string,
     @Param('id') id: string,
@@ -67,6 +68,7 @@ export class RolesController {
   }
 
   @Post('roles/:id/duplicate')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async duplicate(
     @Param('companyId') companyId: string,
@@ -76,6 +78,7 @@ export class RolesController {
   }
 
   @Post('roles/:id/archive')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async archive(
     @Param('companyId') companyId: string,
@@ -85,6 +88,7 @@ export class RolesController {
   }
 
   @Delete('roles/:id')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async delete(
     @Param('companyId') companyId: string,
@@ -96,6 +100,7 @@ export class RolesController {
   // ─── Permission Assignment ──────────────────────────────────────────────────
 
   @Post('roles/:id/permissions')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   async addPermission(
     @Param('companyId') companyId: string,
     @Param('id') id: string,
@@ -109,6 +114,7 @@ export class RolesController {
   }
 
   @Delete('roles/:id/permissions/:permId')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async removePermission(
     @Param('companyId') companyId: string,
@@ -119,6 +125,7 @@ export class RolesController {
   }
 
   @Post('roles/:id/permissions/bulk')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async bulkPermissions(
     @Param('companyId') companyId: string,
@@ -135,6 +142,7 @@ export class RolesController {
   // ─── User Role Assignment ──────────────────────────────────────────────────
 
   @Post('users/:userId/roles')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   async assignRole(
     @Param('companyId') companyId: string,
     @Param('userId') userId: string,
@@ -156,6 +164,7 @@ export class RolesController {
   }
 
   @Delete('users/:userId/roles/:roleId')
+  @RequireFeaturePermission('authorization', 'manage_roles')
   @HttpCode(HttpStatus.OK)
   async removeRole(
     @Param('companyId') companyId: string,

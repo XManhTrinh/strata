@@ -62,7 +62,7 @@ export function useCalendarEvents(
   return useQuery({
     queryKey: ["calendar-events", companyId, params],
     queryFn: () =>
-      apiClient<CalendarEvent[]>(`/api/v2/companies/${companyId}/calendar/events`, {
+      apiClient<CalendarEvent[]>(`/companies/${companyId}/calendar/events`, {
         params: {
           startDate: params?.startDate,
           endDate: params?.endDate,
@@ -79,7 +79,7 @@ export function useCreateCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateCalendarEventRequest) =>
-      apiClient<CalendarEvent>(`/api/v2/companies/${data.companyId}/calendar/events`, {
+      apiClient<CalendarEvent>(`/companies/${data.companyId}/calendar/events`, {
         method: "POST",
         body: data,
       }),
@@ -93,7 +93,7 @@ export function useUpdateCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, companyId, ...data }: UpdateCalendarEventRequest) =>
-      apiClient<CalendarEvent>(`/api/v2/companies/${companyId}/calendar/events/${id}`, {
+      apiClient<CalendarEvent>(`/companies/${companyId}/calendar/events/${id}`, {
         method: "PUT",
         body: data,
       }),
@@ -107,11 +107,38 @@ export function useDeleteCalendarEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
-      apiClient<void>(`/api/v2/companies/${companyId}/calendar/events/${id}`, {
+      apiClient<void>(`/companies/${companyId}/calendar/events/${id}`, {
         method: "DELETE",
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
     },
+  });
+}
+
+
+// ─── Leave Requests ───────────────────────────────────────────────────────────
+
+export interface LeaveRequest {
+  id: string;
+  companyId: string;
+  userId: string;
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function useLeaveRequests(companyId: string) {
+  return useQuery({
+    queryKey: ["leave-requests", companyId],
+    queryFn: () =>
+      apiClient<LeaveRequest[]>(
+        `/companies/${companyId}/calendar/leave-requests`,
+      ),
+    enabled: !!companyId,
   });
 }

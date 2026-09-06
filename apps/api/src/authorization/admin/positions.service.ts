@@ -14,7 +14,7 @@ export class PositionsService {
 
   async create(companyId: string, dto: CreatePositionDto) {
     // Check unique name within company
-    const existing = await this.prisma.positionV2.findUnique({
+    const existing = await this.prisma.position.findUnique({
       where: { companyId_name: { companyId, name: dto.name } },
     });
     if (existing) {
@@ -23,7 +23,7 @@ export class PositionsService {
       );
     }
 
-    return this.prisma.positionV2.create({
+    return this.prisma.position.create({
       data: {
         companyId,
         name: dto.name,
@@ -35,14 +35,14 @@ export class PositionsService {
   }
 
   async findAll(companyId: string) {
-    return this.prisma.positionV2.findMany({
+    return this.prisma.position.findMany({
       where: { companyId, archivedAt: null },
       orderBy: { name: 'asc' },
     });
   }
 
   async update(companyId: string, id: string, dto: UpdatePositionDto) {
-    const position = await this.prisma.positionV2.findFirst({
+    const position = await this.prisma.position.findFirst({
       where: { id, companyId },
     });
     if (!position) {
@@ -51,7 +51,7 @@ export class PositionsService {
 
     // Check unique name if being changed
     if (dto.name) {
-      const existing = await this.prisma.positionV2.findFirst({
+      const existing = await this.prisma.position.findFirst({
         where: { companyId, name: dto.name, id: { not: id } },
       });
       if (existing) {
@@ -61,14 +61,14 @@ export class PositionsService {
       }
     }
 
-    return this.prisma.positionV2.update({
+    return this.prisma.position.update({
       where: { id },
       data: dto,
     });
   }
 
   async archive(companyId: string, id: string) {
-    const position = await this.prisma.positionV2.findFirst({
+    const position = await this.prisma.position.findFirst({
       where: { id, companyId },
     });
     if (!position) {
@@ -77,14 +77,14 @@ export class PositionsService {
     if (position.archivedAt) {
       throw new BadRequestException('Position is already archived');
     }
-    return this.prisma.positionV2.update({
+    return this.prisma.position.update({
       where: { id },
       data: { archivedAt: new Date() },
     });
   }
 
   async delete(companyId: string, id: string) {
-    const position = await this.prisma.positionV2.findFirst({
+    const position = await this.prisma.position.findFirst({
       where: { id, companyId },
     });
     if (!position) {
@@ -101,7 +101,7 @@ export class PositionsService {
       );
     }
 
-    await this.prisma.positionV2.delete({ where: { id } });
+    await this.prisma.position.delete({ where: { id } });
     return { deleted: true };
   }
 }

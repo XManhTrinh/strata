@@ -16,7 +16,7 @@ import { RequireFeaturePermission } from '../../authorization/authorization.deco
 import { LeaveService } from '../services/leave.service';
 import { CreateLeaveTypeSchema, UpdateLeaveTypeSchema } from '../dto/create-leave-type.dto';
 
-@Controller('api/v2/companies/:companyId/calendar/leave-types')
+@Controller('companies/:companyId/calendar/leave-types')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class LeaveTypeController {
   constructor(private readonly leaveService: LeaveService) {}

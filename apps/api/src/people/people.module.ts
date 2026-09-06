@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { PeopleController } from './people.controller';
-import { PeopleService } from './people.service';
-import { PeopleDomain } from './people.domain';
-import { PeopleRepository } from './people.repository';
+import { CompanyPeopleController } from './company-people.controller';
+import { CompanyPeopleService } from './company-people.service';
+import { TableViewsController } from './table-views.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [PeopleController],
-  providers: [PeopleService, PeopleDomain, PeopleRepository],
-  exports: [PeopleService],
+  controllers: [CompanyPeopleController, TableViewsController],
+  providers: [CompanyPeopleService],
+  exports: [CompanyPeopleService],
 })
 export class PeopleModule {}

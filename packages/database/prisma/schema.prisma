@@ -9,34 +9,6 @@ datasource db {
 
 // ─── Enums ──────────────────────────────────────────────────────────────────────
 
-enum EmploymentStatus {
-  ACTIVE
-  ON_LEAVE
-  TERMINATED
-  SUSPENDED
-}
-
-enum LeaveType {
-  ANNUAL
-  SICK
-  PERSONAL
-  PARENTAL
-  UNPAID
-}
-
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
-
-enum PermissionScope {
-  SELF
-  TEAM
-  ORGANIZATION
-}
-
 enum NotificationType {
   LEAVE_REQUEST
   LEAVE_APPROVED
@@ -57,31 +29,6 @@ enum AuditOperation {
   CREATE
   UPDATE
   DELETE
-}
-
-// ─── SSO/OIDC Models ────────────────────────────────────────────────────────────
-
-enum SSOProvider {
-  AZURE_AD
-  GOOGLE
-  OKTA
-  GENERIC_OIDC
-}
-
-model SSOConfig {
-  id             String       @id @default(cuid())
-  organizationId String       @unique
-  provider       SSOProvider
-  clientId       String
-  clientSecret   String
-  issuerUrl      String
-  callbackUrl    String
-  enabled        Boolean      @default(true)
-  autoProvision  Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
 // ─── API Key Model ──────────────────────────────────────────────────────────────
@@ -110,248 +57,25 @@ model Person {
   address     String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  employees   Employee[]
   user        User?
 }
 
-model Employee {
-  id                  String               @id @default(cuid())
-  uin                 String
-  personId            String
-  organizationId      String
-  departmentId        String?
-  positionId          String?
-  startDate           DateTime
-  endDate             DateTime?
-  status              EmploymentStatus     @default(ACTIVE)
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-
-  person              Person               @relation(fields: [personId], references: [id])
-  organization        Organization         @relation(fields: [organizationId], references: [id])
-  department          Department?          @relation(fields: [departmentId], references: [id])
-  position            Position?            @relation(fields: [positionId], references: [id])
-  teamMemberships     TeamMembership[]
-  capacityAllocations CapacityAllocation[]
-  leaveRequests       LeaveRequest[]
-
-  @@unique([uin, organizationId])
-}
-
-// ─── Organization Models ────────────────────────────────────────────────────────
-
-model Organization {
-  id          String       @id @default(cuid())
-  name        String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  departments Department[]
-  employees   Employee[]
-  tribes      Tribe[]
-  ssoConfig   SSOConfig?
-}
-
-model Department {
-  id             String       @id @default(cuid())
-  name           String
-  description    String?
-  parentId       String?
-  organizationId String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  parent         Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
-  children       Department[] @relation("DepartmentHierarchy")
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  positions      Position[]
-  employees      Employee[]
-  budgets        Budget[]
-}
-
-model Position {
-  id           String     @id @default(cuid())
-  title        String
-  level        Int
-  description  String?
-  departmentId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  department   Department @relation(fields: [departmentId], references: [id])
-  employees    Employee[]
-}
-
 // ─── Engineering Hierarchy Models ───────────────────────────────────────────────
-
-model Tribe {
-  id             String       @id @default(cuid())
-  name           String
-  organizationId String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  clusters       Cluster[]
-}
-
-model Cluster {
-  id        String   @id @default(cuid())
-  name      String
-  tribeId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tribe     Tribe    @relation(fields: [tribeId], references: [id])
-  squads    Squad[]
-}
-
-model Squad {
-  id          String               @id @default(cuid())
-  name        String
-  clusterId   String
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-
-  cluster     Cluster              @relation(fields: [clusterId], references: [id])
-  memberships TeamMembership[]
-  allocations CapacityAllocation[]
-}
-
-model TeamMembership {
-  id         String    @id @default(cuid())
-  employeeId String
-  squadId    String
-  role       String?
-  startDate  DateTime  @default(now())
-  endDate    DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  employee   Employee  @relation(fields: [employeeId], references: [id])
-  squad      Squad     @relation(fields: [squadId], references: [id])
-
-  @@unique([employeeId, squadId])
-}
-
-model CapacityAllocation {
-  id         String   @id @default(cuid())
-  employeeId String
-  squadId    String
-  percentage Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  squad      Squad    @relation(fields: [squadId], references: [id])
-
-  @@unique([employeeId, squadId])
-}
-
-// ─── Budget Model ───────────────────────────────────────────────────────────────
-
-model Budget {
-  id           String     @id @default(cuid())
-  departmentId String
-  fiscalPeriod String
-  amount       Decimal    @db.Decimal(15, 2)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  department   Department @relation(fields: [departmentId], references: [id])
-}
-
-// ─── Leave Model ────────────────────────────────────────────────────────────────
-
-model LeaveRequest {
-  id         String      @id @default(cuid())
-  employeeId String
-  type       LeaveType
-  startDate  DateTime
-  endDate    DateTime
-  reason     String?
-  status     LeaveStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  employee   Employee    @relation(fields: [employeeId], references: [id])
-}
 
 // ─── Auth & Access Control Models ───────────────────────────────────────────────
 
 model User {
   id              String           @id @default(cuid())
   email           String           @unique
-  passwordHash    String
+  supabaseUserId  String?          @unique
   personId        String           @unique
-  isLocked        Boolean          @default(false)
-  lockedUntil     DateTime?
-  failedAttempts  Int              @default(0)
-  ssoProviderId   String?
-  ssoSubjectId    String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
   person          Person           @relation(fields: [personId], references: [id])
-  roleAssignments RoleAssignment[]
   notifications   Notification[]
   auditRecords    AuditRecord[]
-  refreshTokens   RefreshToken[]
   apiKeys         ApiKey[]
-}
-
-model RefreshToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model Role {
-  id          String           @id @default(cuid())
-  name        String           @unique
-  description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  permissions RolePermission[]
-  assignments RoleAssignment[]
-}
-
-model Permission {
-  id        String           @id @default(cuid())
-  action    String
-  resource  String
-  createdAt DateTime         @default(now())
-
-  roles     RolePermission[]
-
-  @@unique([action, resource])
-}
-
-model RolePermission {
-  id           String     @id @default(cuid())
-  roleId       String
-  permissionId String
-
-  role         Role       @relation(fields: [roleId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
-
-  @@unique([roleId, permissionId])
-}
-
-model RoleAssignment {
-  id     String          @id @default(cuid())
-  userId String
-  roleId String
-  scope  PermissionScope
-
-  user   User            @relation(fields: [userId], references: [id])
-  role   Role            @relation(fields: [roleId], references: [id])
-
-  @@unique([userId, roleId, scope])
 }
 
 // ─── Notification Model ─────────────────────────────────────────────────────────
@@ -388,12 +112,12 @@ model AuditRecord {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// V2 Permission System — Scalable Dynamic Authorization
+// Permission System — Scalable Dynamic Authorization
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// ─── New Enums ──────────────────────────────────────────────────────────────────
+// ─── Enums ──────────────────────────────────────────────────────────────────────
 
-enum PermissionScopeV2 {
+enum PermissionScope {
   OWN
   DIRECT_REPORTS
   ORGANIZATION_UNIT
@@ -415,8 +139,8 @@ model Company {
   // Relations
   organizationUnitTypes  OrganizationUnitType[]
   organizationUnits      OrganizationUnit[]
-  positions              PositionV2[]
-  roles                  RoleV2[]
+  positions              Position[]
+  roles                  Role[]
   users                  UserCompanyMembership[]
   features               CompanyFeature[]
   reportingRelationships ReportingRelationship[]
@@ -429,6 +153,26 @@ model Company {
 
   // Legacy link (migration bridge)
   legacyOrganizationId String? @unique
+
+  // Table views
+  tableViews             TableView[]
+}
+
+// ─── Table Views (saved column configurations per company) ──────────────────────
+
+model TableView {
+  id        String   @id @default(cuid())
+  companyId String
+  name      String   // "Default", "HR View", "Finance View"
+  table     String   // "members", "capacity", etc.
+  columns   Json     // ["fullName", "email", "metadata.Division", "metadata.Grade"]
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, table, name])
 }
 
 // ─── Organization Unit Types ────────────────────────────────────────────────────
@@ -507,18 +251,18 @@ model CareerLevel {
   updatedAt   DateTime @updatedAt
 
   scheme    CareerLevelScheme      @relation(fields: [schemeId], references: [id], onDelete: Cascade)
-  positions PositionV2[]           @relation("PositionLevel")
-  positionsMin PositionV2[]        @relation("PositionMinLevel")
-  positionsMax PositionV2[]        @relation("PositionMaxLevel")
+  positions Position[]           @relation("PositionLevel")
+  positionsMin Position[]        @relation("PositionMinLevel")
+  positionsMax Position[]        @relation("PositionMaxLevel")
   users     UserCompanyMembership[]
 
   @@unique([schemeId, label])
   @@index([schemeId])
 }
 
-// ─── Positions (replaces existing Position, company-scoped) ─────────────────────
+// ─── Positions (company-scoped) ─────────────────────────────────────────────────
 
-model PositionV2 {
+model Position {
   id                   String    @id @default(cuid())
   companyId            String
   name                 String
@@ -570,14 +314,18 @@ model UserCompanyMembership {
   orgUnitId      String?
   careerLevelId  String?  // person's actual career level within position range
   isSuperAdmin   Boolean  @default(false)
+  employmentType String?  // "Perm" or "SubCon"
+  annualSalary   Decimal? @db.Decimal(12, 2) // for Perm employees
+  dayRate        Decimal? @db.Decimal(10, 2) // for SubCon — annual cost = dayRate × 228
+  metadata       Json?    @default("{}") // flexible key-value store for CSV import fields
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   company         Company           @relation(fields: [companyId], references: [id])
-  position        PositionV2?       @relation(fields: [positionId], references: [id])
+  position        Position?         @relation(fields: [positionId], references: [id])
   orgUnit         OrganizationUnit? @relation("UserOrgUnit", fields: [orgUnitId], references: [id])
   careerLevel     CareerLevel?      @relation(fields: [careerLevelId], references: [id])
-  roleAssignments RoleAssignmentV2[]
+  roleAssignments RoleAssignment[]
 
   @@unique([userId, companyId])
   @@index([companyId, orgUnitId])
@@ -585,9 +333,9 @@ model UserCompanyMembership {
   @@index([careerLevelId])
 }
 
-// ─── Roles (replaces existing Role, company-scoped) ─────────────────────────────
+// ─── Roles (company-scoped) ─────────────────────────────────────────────────────
 
-model RoleV2 {
+model Role {
   id          String    @id @default(cuid())
   companyId   String
   name        String
@@ -597,9 +345,9 @@ model RoleV2 {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  company     Company                    @relation(fields: [companyId], references: [id])
-  permissions RolePermissionAssignment[]
-  assignments RoleAssignmentV2[]
+  company     Company          @relation(fields: [companyId], references: [id])
+  permissions RolePermission[]
+  assignments RoleAssignment[]
 
   @@unique([companyId, name])
   @@index([companyId, archivedAt])
@@ -629,8 +377,8 @@ model FeaturePermission {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  feature         Feature                    @relation(fields: [featureId], references: [id])
-  roleAssignments RolePermissionAssignment[]
+  feature         Feature          @relation(fields: [featureId], references: [id])
+  roleAssignments RolePermission[]
 
   @@unique([featureId, key])
 }
@@ -653,14 +401,14 @@ model CompanyFeature {
 
 // ─── Role-Permission Assignment (the core tuple) ────────────────────────────────
 
-model RolePermissionAssignment {
+model RolePermission {
   id                  String            @id @default(cuid())
   roleId              String
   featurePermissionId String
-  scope               PermissionScopeV2
+  scope               PermissionScope
   createdAt           DateTime          @default(now())
 
-  role              RoleV2            @relation(fields: [roleId], references: [id])
+  role              Role              @relation(fields: [roleId], references: [id])
   featurePermission FeaturePermission @relation(fields: [featurePermissionId], references: [id])
 
   @@unique([roleId, featurePermissionId, scope])
@@ -670,7 +418,7 @@ model RolePermissionAssignment {
 
 // ─── Role Assignment (user ↔ role within company) ───────────────────────────────
 
-model RoleAssignmentV2 {
+model RoleAssignment {
   id           String   @id @default(cuid())
   membershipId String
   roleId       String
@@ -678,11 +426,10 @@ model RoleAssignmentV2 {
   assignedBy   String?
 
   membership UserCompanyMembership @relation(fields: [membershipId], references: [id])
-  role       RoleV2                @relation(fields: [roleId], references: [id])
+  role       Role                  @relation(fields: [roleId], references: [id])
 
   @@unique([membershipId, roleId])
 }
-
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Calendar & Leave Module

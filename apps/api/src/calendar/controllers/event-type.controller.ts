@@ -16,7 +16,7 @@ import { RequireFeaturePermission } from '../../authorization/authorization.deco
 import { CalendarService } from '../services/calendar.service';
 import { CreateEventTypeSchema, UpdateEventTypeSchema } from '../dto/create-event-type.dto';
 
-@Controller('api/v2/companies/:companyId/calendar/event-types')
+@Controller('companies/:companyId/calendar/event-types')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class EventTypeController {
   constructor(private readonly calendarService: CalendarService) {}

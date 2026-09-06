@@ -5,7 +5,7 @@ import {
   AccessDecision,
   EffectivePermission,
 } from './authorization.types';
-import { PermissionScopeV2, maxScope } from './scope-resolver/scope-resolver.types';
+import { PermissionScope, maxScope } from './scope-resolver/scope-resolver.types';
 import { ScopeResolverService } from './scope-resolver/scope-resolver.service';
 import { PermissionCacheService } from './permission-cache/permission-cache.service';
 import { FeatureRegistryService } from './feature-registry/feature-registry.service';
@@ -39,7 +39,7 @@ export class AuthorizationEngine {
       request.companyId,
     );
     if (isSuperAdmin) {
-      return { allowed: true, effectiveScope: PermissionScopeV2.COMPANY };
+      return { allowed: true, effectiveScope: PermissionScope.COMPANY };
     }
 
     // Get effective permissions (cached or computed)
@@ -106,17 +106,52 @@ export class AuthorizationEngine {
     return Promise.all(requests.map((req) => this.evaluate(req)));
   }
 
+  /**
+   * Checks if the user is a super admin for the given company.
+   */
+  async isSuperAdmin(
+    userId: string,
+    companyId: string,
+  ): Promise<boolean> {
+    return this.checkSuperAdmin(userId, companyId);
+  }
+
+  /**
+   * Checks if a feature is enabled for the given company.
+   */
+  async isFeatureEnabled(
+    featureKey: string,
+    companyId: string,
+  ): Promise<boolean> {
+    return this.featureRegistry.isEnabledForCompany(featureKey, companyId);
+  }
+
   // ─── Private Methods ─────────────────────────────────────────────────────
 
   /**
    * Checks if the user is a super admin for the given company.
+   * Accepts either a Prisma userId or a Supabase userId.
    */
   private async checkSuperAdmin(
     userId: string,
     companyId: string,
   ): Promise<boolean> {
-    const membership = await this.prisma.userCompanyMembership.findUnique({
+    // Try direct lookup first (Prisma user ID)
+    const directMembership = await this.prisma.userCompanyMembership.findUnique({
       where: { userId_companyId: { userId, companyId } },
+      select: { isSuperAdmin: true },
+    });
+    if (directMembership) return directMembership.isSuperAdmin === true;
+
+    // Fallback: lookup via Supabase user ID → Prisma user ID
+    const user = await this.prisma.user.findUnique({
+      where: { supabaseUserId: userId },
+      select: { id: true },
+    });
+    if (!user) return false;
+
+    const membership = await this.prisma.userCompanyMembership.findUnique({
+      where: { userId_companyId: { userId: user.id, companyId } },
       select: { isSuperAdmin: true },
     });
     return membership?.isSuperAdmin === true;
@@ -155,7 +190,7 @@ export class AuthorizationEngine {
 
   /**
    * Computes effective permissions from the database by traversing:
-   * UserCompanyMembership → RoleAssignmentV2 → RoleV2 → RolePermissionAssignment → FeaturePermission → Feature
+   * UserCompanyMembership → RoleAssignment → Role → RolePermission → FeaturePermission → Feature
    */
   private async computeEffectivePermissions(
     userId: string,
@@ -168,7 +203,7 @@ export class AuthorizationEngine {
 
     if (!membership) return [];
 
-    const roleAssignments = await this.prisma.roleAssignmentV2.findMany({
+    const roleAssignments = await this.prisma.roleAssignment.findMany({
       where: { membershipId: membership.id },
       select: {
         role: {
@@ -197,7 +232,7 @@ export class AuthorizationEngine {
         permissions.push({
           feature: rolePerm.featurePermission.feature.key,
           permission: rolePerm.featurePermission.key,
-          scope: rolePerm.scope as PermissionScopeV2,
+          scope: rolePerm.scope as PermissionScope,
         });
       }
     }

@@ -22,7 +22,7 @@ export default function LandingPage() {
               Sign in
             </Link>
             <Link
-              href="/login"
+              href="/register"
               className="inline-flex items-center justify-center rounded-full h-10 px-4 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
             >
               Get Started
@@ -45,7 +45,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link
-                href="/login"
+                href="/register"
                 className="inline-flex items-center justify-center rounded-full h-14 px-7 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
               >
                 Start Free Trial
@@ -101,7 +101,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-8">
               <Link
-                href="/login"
+                href="/register"
                 className="inline-flex items-center justify-center rounded-full h-14 px-7 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
               >
                 Get Started Today

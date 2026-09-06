@@ -44,7 +44,7 @@ export function useOrgUnits(companyId: string) {
     queryKey: ["org-units", companyId],
     queryFn: () =>
       apiClient<OrganizationUnit[]>(
-        `/api/v2/companies/${companyId}/org-units`
+        `/companies/${companyId}/org-units`
       ),
     enabled: !!companyId,
   });
@@ -55,7 +55,7 @@ export function useOrgUnit(companyId: string, id: string) {
     queryKey: ["org-units", companyId, id],
     queryFn: () =>
       apiClient<OrganizationUnit>(
-        `/api/v2/companies/${companyId}/org-units/${id}`
+        `/companies/${companyId}/org-units/${id}`
       ),
     enabled: !!companyId && !!id,
   });
@@ -66,7 +66,7 @@ export function useCreateOrgUnit() {
   return useMutation({
     mutationFn: (data: CreateOrgUnitRequest) =>
       apiClient<OrganizationUnit>(
-        `/api/v2/companies/${data.companyId}/org-units`,
+        `/companies/${data.companyId}/org-units`,
         {
           method: "POST",
           body: data,
@@ -83,7 +83,7 @@ export function useUpdateOrgUnit() {
   return useMutation({
     mutationFn: ({ companyId, id, ...data }: UpdateOrgUnitRequest) =>
       apiClient<OrganizationUnit>(
-        `/api/v2/companies/${companyId}/org-units/${id}`,
+        `/companies/${companyId}/org-units/${id}`,
         {
           method: "PUT",
           body: data,
@@ -100,7 +100,7 @@ export function useDeleteOrgUnit() {
   return useMutation({
     mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
       apiClient<void>(
-        `/api/v2/companies/${companyId}/org-units/${id}`,
+        `/companies/${companyId}/org-units/${id}`,
         {
           method: "DELETE",
         }

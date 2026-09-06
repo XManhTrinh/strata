@@ -21,23 +21,21 @@ export const BUILT_IN_FEATURES: FeatureDefinition[] = [
     ],
   },
   {
-    key: 'leave',
-    displayName: 'Leave Management',
-    description: 'Employee leave request and approval workflow',
-    permissions: [
-      { key: 'view_own', displayName: 'View Own Requests', description: 'View own leave requests' },
-      { key: 'submit_request', displayName: 'Submit Request', description: 'Submit a leave request' },
-      { key: 'approve', displayName: 'Approve Requests', description: 'Approve leave requests' },
-      { key: 'manage_policies', displayName: 'Manage Policies', description: 'Configure leave policies' },
-    ],
-  },
-  {
     key: 'organizations',
     displayName: 'Organizations',
     description: 'Organization structure management',
     permissions: [
       { key: 'view', displayName: 'View Organizations', description: 'View organization details' },
       { key: 'manage', displayName: 'Manage Organizations', description: 'Create and update organizations' },
+    ],
+  },
+  {
+    key: 'org_chart',
+    displayName: 'Organization Chart',
+    description: 'Visual hierarchy of teams, reporting lines, and org units',
+    permissions: [
+      { key: 'view', displayName: 'View Org Chart', description: 'View the organizational chart' },
+      { key: 'manage', displayName: 'Manage Org Chart', description: 'Reparent people and manage reporting lines' },
     ],
   },
   {
@@ -49,15 +47,6 @@ export const BUILT_IN_FEATURES: FeatureDefinition[] = [
       { key: 'create', displayName: 'Create Person', description: 'Create people records' },
       { key: 'update', displayName: 'Update Person', description: 'Update people records' },
       { key: 'delete', displayName: 'Delete Person', description: 'Delete people records' },
-    ],
-  },
-  {
-    key: 'engineering',
-    displayName: 'Engineering',
-    description: 'Engineering team structure (tribes, clusters, squads)',
-    permissions: [
-      { key: 'view', displayName: 'View Engineering', description: 'View engineering structure' },
-      { key: 'manage', displayName: 'Manage Engineering', description: 'Manage tribes, clusters, and squads' },
     ],
   },
   {

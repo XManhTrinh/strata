@@ -9,22 +9,13 @@ import { FeatureRegistryService } from './feature-registry/feature-registry.serv
 import { FeatureRegistryBootstrap } from './feature-registry/feature-registry.bootstrap';
 import { AdminModule } from './admin/admin.module';
 import { CompatModule } from './compat/compat.module';
-import { MigrationModule } from './migration/migration.module';
 
 /**
- * Global authorization module providing the v2 permission system.
- *
- * This module registers all authorization services and makes them available
- * throughout the application. It depends on AuthModule for PrismaClient and Redis.
- *
- * The AuthorizationGuard is NOT registered as a global APP_GUARD here —
- * it operates as a secondary guard that can be applied per-controller/handler
- * via the @RequireFeaturePermission decorator. The existing AuthGuard
- * (JWT validation) remains the primary global guard.
+ * Global authorization module providing the permission system.
  */
 @Global()
 @Module({
-  imports: [AuthModule, AdminModule, CompatModule, MigrationModule],
+  imports: [AuthModule, AdminModule, CompatModule],
   providers: [
     AuthorizationEngine,
     AuthorizationGuard,

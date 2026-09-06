@@ -17,7 +17,7 @@ import { OrgUnitTypesService } from './org-unit-types.service';
 import { CreateOrgUnitTypeSchema } from './dto/create-org-unit-type.dto';
 import { UpdateOrgUnitTypeSchema } from './dto/update-org-unit-type.dto';
 
-@Controller('api/v2/companies/:companyId/org-unit-types')
+@Controller('companies/:companyId/org-unit-types')
 @UseGuards(AuthorizationGuard)
 @RequireFeaturePermission('authorization', 'manage_org_structure')
 export class OrgUnitTypesController {

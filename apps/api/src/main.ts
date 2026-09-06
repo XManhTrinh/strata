@@ -1,13 +1,10 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
-import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
-import { CsrfGuard } from './auth/csrf/csrf.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  app.use(cookieParser());
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -18,16 +15,15 @@ async function bootstrap() {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // Allow all in development — tighten for production if needed
+        callback(new Error('Origin not allowed by CORS'));
       }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-CSRF-Token'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
     credentials: true,
   });
 
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalGuards(new CsrfGuard());
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

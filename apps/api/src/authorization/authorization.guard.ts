@@ -53,16 +53,31 @@ export class AuthorizationGuard implements CanActivate {
       throw new ForbiddenException('Access denied');
     }
 
-    // Dev bypass — skip authorization checks for dev-mock-token
-    if (user.email === 'alice.johnson@acme.test' && user.sub === 'usr_001') {
-      (request as any).effectiveScope = 'GLOBAL';
-      return true;
-    }
+    // Check if user is a super admin of the target company
+    const companyId = user.companyId || this.extractCompanyId(request);
+    if (companyId) {
+      const isSuperAdmin = await this.engine.isSuperAdmin(user.sub, companyId);
 
-    // Super Admin bypass — skip authorization checks for admin@admin.com
-    if (user.email === 'admin@admin.com' || user.sub === 'usr_admin_001') {
-      (request as any).effectiveScope = 'GLOBAL';
-      return true;
+      // Feature toggle check — block disabled features
+      // Exceptions: super admins can always access manage_features (prevents lockout)
+      const isFeatureEnabled = await this.engine.isFeatureEnabled(
+        required.feature,
+        companyId,
+      );
+
+      if (!isFeatureEnabled) {
+        // Super admins can still manage features even when disabled
+        if (isSuperAdmin) {
+          (request as any).effectiveScope = 'GLOBAL';
+          return true;
+        }
+        throw new ForbiddenException('This feature is not enabled for your workspace');
+      }
+
+      if (isSuperAdmin) {
+        (request as any).effectiveScope = 'GLOBAL';
+        return true;
+      }
     }
 
     // Build the access request from the HTTP context

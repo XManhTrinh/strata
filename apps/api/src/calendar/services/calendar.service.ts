@@ -9,7 +9,7 @@ import {
 import { PrismaClient } from '@strata/database';
 import { CalendarRepository } from '../repository/calendar.repository';
 import { ScopeResolverService } from '../../authorization/scope-resolver/scope-resolver.service';
-import { PermissionScopeV2 } from '../../authorization/scope-resolver/scope-resolver.types';
+import { PermissionScope } from '../../authorization/scope-resolver/scope-resolver.types';
 import { validateDateRange } from '../domain/calendar.domain';
 import { expandRecurrence, RecurrencePattern } from '../domain/recurrence.domain';
 import { CreateCalendarEventDto } from '../dto/create-calendar-event.dto';
@@ -35,9 +35,9 @@ export class CalendarService {
    * Get events with scope-based filtering.
    * The effectiveScope is attached to the request by AuthorizationGuard.
    */
-  async getEvents(actorUserId: string, companyId: string, query: CalendarQueryDto, effectiveScope?: PermissionScopeV2) {
+  async getEvents(actorUserId: string, companyId: string, query: CalendarQueryDto, effectiveScope?: PermissionScope) {
     // Resolve authorized user IDs based on scope
-    const scope = effectiveScope ?? PermissionScopeV2.OWN;
+    const scope = effectiveScope ?? PermissionScope.OWN;
     const authorizedUserIds = await this.scopeResolver.getUserIdsInScope(scope, actorUserId, companyId);
 
     // Intersect with filter params if provided
@@ -77,8 +77,8 @@ export class CalendarService {
   /**
    * Returns the accessible scope (teams/users) the actor can see on the calendar.
    */
-  async getAccessibleScope(actorUserId: string, companyId: string, effectiveScope?: PermissionScopeV2) {
-    const scope = effectiveScope ?? PermissionScopeV2.OWN;
+  async getAccessibleScope(actorUserId: string, companyId: string, effectiveScope?: PermissionScope) {
+    const scope = effectiveScope ?? PermissionScope.OWN;
     const userIds = await this.scopeResolver.getUserIdsInScope(scope, actorUserId, companyId);
     return { userIds, scope };
   }
@@ -288,8 +288,8 @@ export class CalendarService {
 
   // ─── Team Availability ──────────────────────────────────────────────────
 
-  async getTeamAvailability(actorUserId: string, companyId: string, startDate: Date, endDate: Date, effectiveScope?: PermissionScopeV2) {
-    const scope = effectiveScope ?? PermissionScopeV2.DIRECT_REPORTS;
+  async getTeamAvailability(actorUserId: string, companyId: string, startDate: Date, endDate: Date, effectiveScope?: PermissionScope) {
+    const scope = effectiveScope ?? PermissionScope.DIRECT_REPORTS;
     const teamUserIds = await this.scopeResolver.getUserIdsInScope(scope, actorUserId, companyId);
     const totalMembers = teamUserIds.length;
 

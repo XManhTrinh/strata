@@ -8,19 +8,18 @@ import { Card, CardContent } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCalendarEvents,
-  useCreateLeaveRequest,
 } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
-const COMPANY_ID = "cm_acme_corp_001";
-
 export default function CalendarPage() {
+  const companyId = useCompanyId();
   const {
     isLoading,
     isError,
     error,
     refetch,
-  } = useCalendarEvents(COMPANY_ID, {
+  } = useCalendarEvents(companyId, {
     startDate: new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
@@ -36,9 +35,6 @@ export default function CalendarPage() {
       .toISOString()
       .split("T")[0],
   });
-
-  // Pre-initialize the mutation so it's ready for use
-  useCreateLeaveRequest();
 
   if (isLoading) {
     return (

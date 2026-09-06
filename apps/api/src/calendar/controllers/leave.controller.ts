@@ -17,7 +17,7 @@ import { LeaveService } from '../services/leave.service';
 import { SubmitLeaveRequestSchema } from '../dto/submit-leave-request.dto';
 import { ScopeResolverService } from '../../authorization/scope-resolver/scope-resolver.service';
 
-@Controller('api/v2/companies/:companyId/calendar/leave-requests')
+@Controller('companies/:companyId/calendar/leave-requests')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class LeaveController {
   constructor(

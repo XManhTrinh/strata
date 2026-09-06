@@ -15,7 +15,7 @@ import { RequireFeaturePermission } from '../authorization.decorator';
 import { ReportingService } from './reporting.service';
 import { SetManagerSchema } from './dto/set-manager.dto';
 
-@Controller('api/v2/companies/:companyId/reporting')
+@Controller('companies/:companyId/reporting')
 @UseGuards(AuthorizationGuard)
 @RequireFeaturePermission('authorization', 'manage_org_structure')
 export class ReportingController {

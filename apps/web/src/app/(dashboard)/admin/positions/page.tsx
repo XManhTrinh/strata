@@ -39,12 +39,13 @@ import {
   useDeletePosition,
   useCareerLevels,
   useCreateCareerLevel,
-  COMPANY_ID,
   type AdminPosition,
 } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 export default function PositionsPage() {
+  const companyId = useCompanyId();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showLevelModal, setShowLevelModal] = useState(false);
@@ -63,8 +64,8 @@ export default function PositionsPage() {
     track: "",
   });
 
-  const { data: positions = [], isLoading, error, refetch } = usePositions(COMPANY_ID);
-  const { data: careerLevelScheme } = useCareerLevels(COMPANY_ID);
+  const { data: positions = [], isLoading, error, refetch } = usePositions(companyId);
+  const { data: careerLevelScheme } = useCareerLevels(companyId);
   const careerLevelsData = careerLevelScheme?.levels ?? [];
   const createMutation = useCreatePosition();
   const updateMutation = useUpdatePosition();
@@ -99,7 +100,7 @@ export default function PositionsPage() {
   const handleSubmit = () => {
     if (editingPosition) {
       updateMutation.mutate(
-        { companyId: COMPANY_ID, id: editingPosition.id, ...formData },
+        { companyId: companyId, id: editingPosition.id, ...formData },
         {
           onSuccess: () => {
             toast.success("Position updated successfully");
@@ -112,7 +113,7 @@ export default function PositionsPage() {
       );
     } else {
       createMutation.mutate(
-        { companyId: COMPANY_ID, ...formData },
+        { companyId: companyId, ...formData },
         {
           onSuccess: () => {
             toast.success("Position created successfully");
@@ -128,7 +129,7 @@ export default function PositionsPage() {
 
   const handleArchive = (id: string) => {
     archiveMutation.mutate(
-      { companyId: COMPANY_ID, id },
+      { companyId: companyId, id },
       {
         onSuccess: () => {
           toast.success("Position archived successfully");
@@ -142,7 +143,7 @@ export default function PositionsPage() {
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(
-      { companyId: COMPANY_ID, id },
+      { companyId: companyId, id },
       {
         onSuccess: () => {
           toast.success("Position deleted successfully");
@@ -555,7 +556,7 @@ export default function PositionsPage() {
               onClick={() => {
                 createLevelMutation.mutate(
                   {
-                    companyId: COMPANY_ID,
+                    companyId: companyId,
                     label: levelFormData.label,
                     displayName: levelFormData.displayName || undefined,
                     rank: levelFormData.rank,

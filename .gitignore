@@ -5,5 +5,9 @@ dist
 coverage
 *.tsbuildinfo
 .env
+.env.*
 .env.local
 .env.*.local
+
+# macOS
+.DS_Store

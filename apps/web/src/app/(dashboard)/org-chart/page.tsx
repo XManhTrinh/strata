@@ -16,6 +16,7 @@ import {
 } from "@vkieu/mui";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnits } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";
@@ -35,12 +36,13 @@ interface PendingGroupMove {
 }
 
 export default function OrgChartPage() {
-  const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople();
-  const { data: orgUnits = [] } = useOrgUnits("cm_acme_corp_001");
+  const companyId = useCompanyId();
+  const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople(companyId);
+  const { data: orgUnits = [] } = useOrgUnits(companyId);
 
   const repository = useMemo(
-    () => new ApiPersonRepository(orgChartPeople ?? []),
-    [orgChartPeople]
+    () => new ApiPersonRepository(orgChartPeople ?? [], companyId),
+    [orgChartPeople, companyId]
   );
   const { unallocated, persons, loading, error, reparent } =
     useOrgTree(repository);

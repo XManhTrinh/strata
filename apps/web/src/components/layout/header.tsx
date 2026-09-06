@@ -10,36 +10,41 @@ import { Tooltip } from "@vkieu/mui";
 import { Select } from "@vkieu/mui";
 import { Menu, MenuItem, MenuDivider } from "@vkieu/mui";
 import { Avatar } from "@/components/ui/avatar";
-import { useRoles, COMPANY_ID } from "@/services";
+import { useRoles } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { useUserRole } from "@/hooks/use-user-role";
 
 export function Header() {
   const { logout } = useAuth();
-  const { data: roles = [] } = useRoles(COMPANY_ID);
+  const companyId = useCompanyId();
+  const { data: roles = [] } = useRoles(companyId);
   const { role, setRole } = useUserRole();
 
   const roleOptions = [
-    { value: "super_admin", label: "Super Admin" },
+    { value: "super_admin", label: "👑 Super Admin" },
     ...roles.map((r) => ({ value: r.id, label: r.name })),
   ];
 
   return (
-    <AppBar>
+    <AppBar className="bg-surface-container">
       <AppBar.Headline>
         <Breadcrumbs />
       </AppBar.Headline>
       <AppBar.Trailing>
-        {/* Role switcher (dev) */}
-        <div className="hidden lg:block w-48">
-          <Select
-            value={role}
-            onValueChange={(value) => setRole(value as import("@/hooks/use-user-role").UserRoleView)}
-            placeholder="Select role"
-            variant="outlined"
-            options={roleOptions}
-            className="h-10"
-          />
-        </div>
+        {/* Role view switcher */}
+        <Tooltip content="Preview as different role" side="bottom">
+          <div className="hidden lg:flex items-center gap-2">
+            <Icon name="visibility" size={18} className="text-surface-variant-foreground" />
+            <Select
+              value={role}
+              onValueChange={(value) => setRole(value)}
+              placeholder="View as..."
+              variant="outlined"
+              options={roleOptions}
+              className="h-9 w-44 text-[13px]"
+            />
+          </div>
+        </Tooltip>
 
         {/* Notifications */}
         <NotificationDropdown />

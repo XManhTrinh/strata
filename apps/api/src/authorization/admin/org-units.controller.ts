@@ -20,7 +20,7 @@ import { UpdateOrgUnitSchema } from './dto/update-org-unit.dto';
 import { MoveOrgUnitSchema } from './dto/move-org-unit.dto';
 import { z } from 'zod';
 
-@Controller('api/v2/companies/:companyId/org-units')
+@Controller('companies/:companyId/org-units')
 @UseGuards(AuthorizationGuard)
 @RequireFeaturePermission('authorization', 'manage_org_structure')
 export class OrgUnitsController {

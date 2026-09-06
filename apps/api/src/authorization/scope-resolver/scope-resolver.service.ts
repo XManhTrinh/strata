@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaClient } from '@strata/database';
-import { PermissionScopeV2 } from './scope-resolver.types';
+import { PermissionScope } from './scope-resolver.types';
 import { ScopeResolverCache } from './scope-resolver.cache';
 
 @Injectable()
@@ -23,20 +23,20 @@ export class ScopeResolverService {
    * @returns true if the scope covers the target resource
    */
   async resolve(
-    scope: PermissionScopeV2,
+    scope: PermissionScope,
     actorUserId: string,
     actorCompanyId: string,
     targetResourceOwnerId?: string,
     targetResourceOrgUnitId?: string,
   ): Promise<boolean> {
     switch (scope) {
-      case PermissionScopeV2.GLOBAL:
+      case PermissionScope.GLOBAL:
         return true;
 
-      case PermissionScopeV2.COMPANY:
+      case PermissionScope.COMPANY:
         return this.resolveCompany(actorCompanyId, targetResourceOwnerId);
 
-      case PermissionScopeV2.BRANCH:
+      case PermissionScope.BRANCH:
         return this.resolveBranch(
           actorUserId,
           actorCompanyId,
@@ -44,7 +44,7 @@ export class ScopeResolverService {
           targetResourceOrgUnitId,
         );
 
-      case PermissionScopeV2.ORGANIZATION_UNIT:
+      case PermissionScope.ORGANIZATION_UNIT:
         return this.resolveOrganizationUnit(
           actorUserId,
           actorCompanyId,
@@ -52,14 +52,14 @@ export class ScopeResolverService {
           targetResourceOrgUnitId,
         );
 
-      case PermissionScopeV2.DIRECT_REPORTS:
+      case PermissionScope.DIRECT_REPORTS:
         return this.resolveDirectReports(
           actorUserId,
           actorCompanyId,
           targetResourceOwnerId,
         );
 
-      case PermissionScopeV2.OWN:
+      case PermissionScope.OWN:
         return this.resolveOwn(actorUserId, targetResourceOwnerId);
 
       default:
@@ -72,19 +72,19 @@ export class ScopeResolverService {
    * Returns all user IDs accessible to the actor for a given scope.
    */
   async getUserIdsInScope(
-    scope: PermissionScopeV2,
+    scope: PermissionScope,
     actorUserId: string,
     actorCompanyId: string,
   ): Promise<string[]> {
     switch (scope) {
-      case PermissionScopeV2.GLOBAL:
+      case PermissionScope.GLOBAL:
         // All users across all companies
         const allUsers = await this.prisma.userCompanyMembership.findMany({
           select: { userId: true },
         });
         return allUsers.map((u) => u.userId);
 
-      case PermissionScopeV2.COMPANY:
+      case PermissionScope.COMPANY:
         const companyUsers =
           await this.prisma.userCompanyMembership.findMany({
             where: { companyId: actorCompanyId },
@@ -92,16 +92,16 @@ export class ScopeResolverService {
           });
         return companyUsers.map((u) => u.userId);
 
-      case PermissionScopeV2.BRANCH:
+      case PermissionScope.BRANCH:
         return this.getUserIdsInBranch(actorUserId, actorCompanyId);
 
-      case PermissionScopeV2.ORGANIZATION_UNIT:
+      case PermissionScope.ORGANIZATION_UNIT:
         return this.getUserIdsInOrgUnit(actorUserId, actorCompanyId);
 
-      case PermissionScopeV2.DIRECT_REPORTS:
+      case PermissionScope.DIRECT_REPORTS:
         return this.getUserIdsInDirectReports(actorUserId, actorCompanyId);
 
-      case PermissionScopeV2.OWN:
+      case PermissionScope.OWN:
         return [actorUserId];
 
       default:

@@ -20,7 +20,7 @@ import { CreateCalendarEventSchema, CreateCalendarEventDto } from '../dto/create
 import { UpdateCalendarEventSchema, UpdateCalendarEventDto } from '../dto/update-calendar-event.dto';
 import { CalendarQuerySchema } from '../dto/calendar-query.dto';
 
-@Controller('api/v2/companies/:companyId/calendar')
+@Controller('companies/:companyId/calendar')
 @UseGuards(AuthGuard, AuthorizationGuard)
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
@@ -8,16 +8,30 @@ interface AuthGuardProps {
   children: ReactNode;
 }
 
+/**
+ * Client-side auth guard.
+ *
+ * The middleware already handles server-side redirects, so this component
+ * is a safety net for client-side navigation where the session might
+ * expire between page transitions.
+ */
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, isLoading, checkSession } = useAuth();
   const router = useRouter();
+  const initialized = useRef(false);
 
+  // Check session once on mount
   useEffect(() => {
-    checkSession();
-  }, [checkSession]);
+    if (!initialized.current) {
+      initialized.current = true;
+      checkSession();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Redirect if not authenticated after session check completes
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (initialized.current && !isLoading && !isAuthenticated) {
       router.replace("/login");
     }
   }, [isLoading, isAuthenticated, router]);

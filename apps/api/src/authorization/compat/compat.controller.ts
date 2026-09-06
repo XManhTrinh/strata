@@ -12,25 +12,25 @@ import {
 } from '@nestjs/common';
 import { AuthorizationEngine } from '../authorization.engine';
 import { FeatureRegistryService } from '../feature-registry/feature-registry.service';
-import { PermissionScopeV2 } from '../scope-resolver/scope-resolver.types';
+import { PermissionScope } from '../scope-resolver/scope-resolver.types';
 
 /**
  * Scope translation map: old scope names → new scope names.
  * Used for backward-compatible API endpoints.
  */
-const SCOPE_MAP_OLD_TO_NEW: Record<string, PermissionScopeV2> = {
-  SELF: PermissionScopeV2.OWN,
-  TEAM: PermissionScopeV2.DIRECT_REPORTS,
-  ORGANIZATION: PermissionScopeV2.COMPANY,
+const SCOPE_MAP_OLD_TO_NEW: Record<string, PermissionScope> = {
+  SELF: PermissionScope.OWN,
+  TEAM: PermissionScope.DIRECT_REPORTS,
+  ORGANIZATION: PermissionScope.COMPANY,
 };
 
 const SCOPE_MAP_NEW_TO_OLD: Record<string, string> = {
-  [PermissionScopeV2.OWN]: 'SELF',
-  [PermissionScopeV2.DIRECT_REPORTS]: 'TEAM',
-  [PermissionScopeV2.ORGANIZATION_UNIT]: 'ORGANIZATION',
-  [PermissionScopeV2.BRANCH]: 'ORGANIZATION',
-  [PermissionScopeV2.COMPANY]: 'ORGANIZATION',
-  [PermissionScopeV2.GLOBAL]: 'ORGANIZATION',
+  [PermissionScope.OWN]: 'SELF',
+  [PermissionScope.DIRECT_REPORTS]: 'TEAM',
+  [PermissionScope.ORGANIZATION_UNIT]: 'ORGANIZATION',
+  [PermissionScope.BRANCH]: 'ORGANIZATION',
+  [PermissionScope.COMPANY]: 'ORGANIZATION',
+  [PermissionScope.GLOBAL]: 'ORGANIZATION',
 };
 
 /**

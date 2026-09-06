@@ -29,7 +29,8 @@ import {
   useDeleteOrgUnit,
   type OrganizationUnit,
 } from "@/services";
-import { useOrgUnitTypes, COMPANY_ID } from "@/services";
+import { useOrgUnitTypes } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 interface OrgTreeNode {
@@ -162,13 +163,14 @@ function TreeNode({
 }
 
 export default function OrgStructurePage() {
+  const companyId = useCompanyId();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingUnit, setEditingUnit] = useState<OrgTreeNode | null>(null);
   const [formData, setFormData] = useState({ name: "", typeId: "", parentId: "" });
 
-  const { data: orgUnits = [], isLoading, error, refetch } = useOrgUnits(COMPANY_ID);
-  const { data: orgUnitTypes = [] } = useOrgUnitTypes(COMPANY_ID);
+  const { data: orgUnits = [], isLoading, error, refetch } = useOrgUnits(companyId);
+  const { data: orgUnitTypes = [] } = useOrgUnitTypes(companyId);
   const createMutation = useCreateOrgUnit();
   const updateMutation = useUpdateOrgUnit();
   const deleteMutation = useDeleteOrgUnit();
@@ -192,7 +194,7 @@ export default function OrgStructurePage() {
     if (editingUnit) {
       updateMutation.mutate(
         {
-          companyId: COMPANY_ID,
+          companyId: companyId,
           id: editingUnit.id,
           name: formData.name,
           typeId: formData.typeId || undefined,
@@ -211,7 +213,7 @@ export default function OrgStructurePage() {
     } else {
       createMutation.mutate(
         {
-          companyId: COMPANY_ID,
+          companyId: companyId,
           name: formData.name,
           typeId: formData.typeId,
           parentId: formData.parentId || null,
@@ -231,7 +233,7 @@ export default function OrgStructurePage() {
 
   const handleArchive = (id: string) => {
     deleteMutation.mutate(
-      { companyId: COMPANY_ID, id },
+      { companyId: companyId, id },
       {
         onSuccess: () => {
           toast.success("Organization unit archived successfully");

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -199,17 +198,9 @@ async function seedCompany() {
 }
 
 async function seedLegacyOrganization() {
-  logSection("Organization (tenant record)");
-  const org = await prisma.organization.upsert({
-    where: { id: IDS.legacyOrg },
-    update: { name: "Strata Technologies" },
-    create: {
-      id: IDS.legacyOrg,
-      name: "Strata Technologies",
-    },
-  });
-  log(`Organization: ${org.name} (${org.id})`);
-  return org;
+  logSection("Organization (legacy — skipped, model removed)");
+  log(`Skipping legacy organization seed (Organization model removed)`);
+  return { id: IDS.legacyOrg, name: "Strata Technologies" };
 }
 
 async function seedOrgUnitTypes(companyId: string) {
@@ -406,13 +397,13 @@ async function seedPositions(companyId: string, careerLevels: Record<string, str
   const results = [];
   for (const pos of positions) {
     const range = levelRangeMap[pos.name];
-    const result = await prisma.positionV2.upsert({
+    const result = await prisma.position.upsert({
       where: { companyId_name: { companyId, name: pos.name } },
       update: { canHaveDirectReports: pos.canHaveDirectReports, minLevelId: range?.min, maxLevelId: range?.max },
       create: { id: pos.id, companyId, name: pos.name, canHaveDirectReports: pos.canHaveDirectReports, minLevelId: range?.min, maxLevelId: range?.max },
     });
     results.push(result);
-    log(`PositionV2: ${result.name} → range [${range?.min ? "set" : "—"}, ${range?.max ? "set" : "—"}]`);
+    log(`Position: ${result.name} → range [${range?.min ? "set" : "—"}, ${range?.max ? "set" : "—"}]`);
   }
   return results;
 }
@@ -423,8 +414,7 @@ async function seedUsers(
   _orgUnits: Awaited<ReturnType<typeof seedOrgUnits>>,
   _positions: Awaited<ReturnType<typeof seedPositions>>,
 ) {
-  logSection("Users (Person + User + Employee + Membership)");
-  const passwordHash = await bcrypt.hash("Test1234!", 10);
+  logSection("Users (Person + User + Membership)");
 
   const posMap: Record<string, string> = {
     CTO: IDS.positions.cto,
@@ -463,7 +453,6 @@ async function seedUsers(
   };
 
   const users = [];
-  const employees = [];
 
   for (let i = 0; i < USER_DATA.length; i++) {
     const u = USER_DATA[i];
@@ -488,31 +477,14 @@ async function seedUsers(
     // Upsert User
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: { passwordHash },
+      update: {},
       create: {
         id: userId,
         email: u.email,
-        passwordHash,
         personId: person.id,
       },
     });
     users.push(user);
-
-    // Upsert Employee (linked to Organization, no departmentId)
-    const employee = await prisma.employee.upsert({
-      where: { uin_organizationId: { uin: `ACM-${String(1000 + i)}`, organizationId } },
-      update: { departmentId: null },
-      create: {
-        id: employeeId,
-        uin: `ACM-${String(1000 + i)}`,
-        personId: person.id,
-        organizationId,
-        departmentId: null,
-        startDate: new Date(2022, i % 12, 1),
-        status: "ACTIVE",
-      },
-    });
-    employees.push(employee);
 
     // Upsert UserCompanyMembership
     await prisma.userCompanyMembership.upsert({
@@ -572,30 +544,14 @@ async function seedUsers(
 
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: { passwordHash },
+      update: {},
       create: {
         id: userId,
         email: u.email,
-        passwordHash,
         personId: person.id,
       },
     });
     users.push(user);
-
-    const employee = await prisma.employee.upsert({
-      where: { uin_organizationId: { uin: `ACM-${String(1000 + idx)}`, organizationId } },
-      update: { departmentId: null },
-      create: {
-        id: employeeId,
-        uin: `ACM-${String(1000 + idx)}`,
-        personId: person.id,
-        organizationId,
-        departmentId: null,
-        startDate: new Date(2022, idx % 12, 1),
-        status: "ACTIVE",
-      },
-    });
-    employees.push(employee);
 
     const assignedOrgUnit = orgUnitIds[i % orgUnitIds.length];
     const assignedPosition = posMap[u.role] ?? IDS.positions.softwareEngineer;
@@ -618,7 +574,7 @@ async function seedUsers(
   }
   log(`Total users created: ${users.length}`);
 
-  return { users, employees };
+  return { users };
 }
 
 async function seedFeatures() {
@@ -689,13 +645,13 @@ async function seedRoles(companyId: string) {
 
   const results = [];
   for (const r of roles) {
-    const role = await prisma.roleV2.upsert({
+    const role = await prisma.role.upsert({
       where: { companyId_name: { companyId, name: r.name } },
       update: { description: r.description },
       create: { id: r.id, companyId, name: r.name, description: r.description, isSystem: r.isSystem },
     });
     results.push(role);
-    log(`RoleV2: ${role.name}`);
+    log(`Role: ${role.name}`);
   }
 
   // Assign permissions to roles — covering all 6 PermissionScopeV2 values
@@ -719,7 +675,7 @@ async function seedRoles(companyId: string) {
   ];
 
   for (const sa of scopeAssignments) {
-    await prisma.rolePermissionAssignment.upsert({
+    await prisma.rolePermission.upsert({
       where: { roleId_featurePermissionId_scope: { roleId: sa.roleId, featurePermissionId: sa.featurePermissionId, scope: sa.scope } },
       update: {},
       create: { roleId: sa.roleId, featurePermissionId: sa.featurePermissionId, scope: sa.scope },
@@ -757,7 +713,7 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
       where: { userId_companyId: { userId: a.userId, companyId } },
     });
     if (membership) {
-      await prisma.roleAssignmentV2.upsert({
+      await prisma.roleAssignment.upsert({
         where: { membershipId_roleId: { membershipId: membership.id, roleId: a.roleId } },
         update: {},
         create: { membershipId: membership.id, roleId: a.roleId, assignedBy: IDS.users[0] },
@@ -771,7 +727,7 @@ async function seedRoleAssignments(companyId: string, users: { id: string }[], r
       where: { userId_companyId: { userId: IDS.users[i], companyId } },
     });
     if (membership) {
-      await prisma.roleAssignmentV2.upsert({
+      await prisma.roleAssignment.upsert({
         where: { membershipId_roleId: { membershipId: membership.id, roleId: employeeRole.id } },
         update: {},
         create: { membershipId: membership.id, roleId: employeeRole.id, assignedBy: IDS.users[0] },
@@ -1171,13 +1127,13 @@ async function logSummary() {
     Organizations: await prisma.organization.count(),
     OrgUnitTypes: await prisma.organizationUnitType.count(),
     OrgUnits: await prisma.organizationUnit.count(),
-    "Positions (V2)": await prisma.positionV2.count(),
+    "Positions (V2)": await prisma.position.count(),
     Persons: await prisma.person.count(),
     Users: await prisma.user.count(),
     Employees: await prisma.employee.count(),
     Memberships: await prisma.userCompanyMembership.count(),
-    "Roles (V2)": await prisma.roleV2.count(),
-    RoleAssignments: await prisma.roleAssignmentV2.count(),
+    "Roles (V2)": await prisma.role.count(),
+    RoleAssignments: await prisma.roleAssignment.count(),
     Features: await prisma.feature.count(),
     ReportingRelationships: await prisma.reportingRelationship.count(),
     EventTypes: await prisma.eventType.count(),
@@ -1232,8 +1188,6 @@ async function seedTestAccounts(companyId: string, organizationId: string) {
   ];
 
   for (const acct of accounts) {
-    const passwordHash = await bcrypt.hash(acct.password, 10);
-
     const person = await prisma.person.upsert({
       where: { id: acct.id },
       update: { fullName: acct.fullName, email: acct.email },
@@ -1247,11 +1201,10 @@ async function seedTestAccounts(companyId: string, organizationId: string) {
 
     const user = await prisma.user.upsert({
       where: { email: acct.email },
-      update: { passwordHash },
+      update: {},
       create: {
         id: acct.userId,
         email: acct.email,
-        passwordHash,
         personId: person.id,
       },
     });

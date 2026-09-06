@@ -35,18 +35,19 @@ import {
   useUpdateOrgUnitType,
   useArchiveOrgUnitType,
   useRestoreOrgUnitType,
-  COMPANY_ID,
   type AdminOrgUnitType,
 } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 export default function OrgUnitTypesPage() {
+  const companyId = useCompanyId();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingType, setEditingType] = useState<AdminOrgUnitType | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "", icon: "corporate_fare", color: "#3B82F6" });
 
-  const { data: orgUnitTypes = [], isLoading, error, refetch } = useOrgUnitTypes(COMPANY_ID);
+  const { data: orgUnitTypes = [], isLoading, error, refetch } = useOrgUnitTypes(companyId);
   const createMutation = useCreateOrgUnitType();
   const updateMutation = useUpdateOrgUnitType();
   const archiveMutation = useArchiveOrgUnitType();
@@ -78,7 +79,7 @@ export default function OrgUnitTypesPage() {
   const handleSubmit = () => {
     if (editingType) {
       updateMutation.mutate(
-        { companyId: COMPANY_ID, id: editingType.id, ...formData },
+        { companyId: companyId, id: editingType.id, ...formData },
         {
           onSuccess: () => {
             toast.success("Type updated successfully");
@@ -91,7 +92,7 @@ export default function OrgUnitTypesPage() {
       );
     } else {
       createMutation.mutate(
-        { companyId: COMPANY_ID, ...formData },
+        { companyId: companyId, ...formData },
         {
           onSuccess: () => {
             toast.success("Type created successfully");
@@ -107,7 +108,7 @@ export default function OrgUnitTypesPage() {
 
   const handleArchive = (id: string) => {
     archiveMutation.mutate(
-      { companyId: COMPANY_ID, id },
+      { companyId: companyId, id },
       {
         onSuccess: () => toast.success("Type archived"),
         onError: (err) => toast.error(err.message || "Failed to archive type"),
@@ -117,7 +118,7 @@ export default function OrgUnitTypesPage() {
 
   const handleRestore = (id: string) => {
     restoreMutation.mutate(
-      { companyId: COMPANY_ID, id },
+      { companyId: companyId, id },
       {
         onSuccess: () => toast.success("Type restored"),
         onError: (err) => toast.error(err.message || "Failed to restore type"),

@@ -1,4 +1,4 @@
-import { PermissionScopeV2 } from './scope-resolver/scope-resolver.types';
+import { PermissionScope } from './scope-resolver/scope-resolver.types';
 
 /**
  * Represents an incoming access request to be evaluated by the authorization engine.
@@ -18,7 +18,7 @@ export interface AccessRequest {
 export interface AccessDecision {
   allowed: boolean;
   deniedAtStep?: 2 | 3 | 4 | 5;
-  effectiveScope?: PermissionScopeV2;
+  effectiveScope?: PermissionScope;
 }
 
 /**
@@ -28,5 +28,5 @@ export interface AccessDecision {
 export interface EffectivePermission {
   feature: string;
   permission: string;
-  scope: PermissionScopeV2;
+  scope: PermissionScope;
 }

@@ -37,9 +37,8 @@ const superAdminRailItems: SidebarNavItem[] = [
  */
 const permissionBasedItems: SidebarNavItem[] = [
   { value: "dashboard", label: "Dashboard", href: "/dashboard", icon: "dashboard", feature: "dashboard" },
-  { value: "people", label: "People", href: "/people", icon: "person", feature: "people" },
+  { value: "people", label: "Members", href: "/people", icon: "group", feature: "people" },
   { value: "org-chart", label: "Org Chart", href: "/org-chart", icon: "account_tree", feature: "org_chart" },
-  { value: "engineering", label: "Engineering", href: "/engineering", icon: "engineering", feature: "capacity" },
   { value: "budgets", label: "Budgets", href: "/budgets", icon: "payments", feature: "budgets" },
   { value: "reports", label: "Reports", href: "/reports", icon: "summarize", feature: "reports" },
   { value: "calendar", label: "Calendar", href: "/calendar", icon: "calendar_month", feature: "calendar" },
@@ -77,18 +76,22 @@ function StrataLogo() {
 export function Sidebar() {
   const pathname = usePathname();
   const { role } = useUserRole();
-  const { hasFeatureAccess } = useUserPermissions();
+  const { isSuperAdmin, hasFeatureAccess } = useUserPermissions();
   const { theme, setTheme } = useTheme();
 
-  // Determine rail items based on role
+  // Super admin sees admin items, other roles see permission-filtered items
   let sidebarItems: SidebarNavItem[];
 
-  if (role === "super_admin") {
+  if (isSuperAdmin) {
     sidebarItems = superAdminRailItems;
   } else {
     sidebarItems = permissionBasedItems.filter(
       (item) => item.feature === "dashboard" || hasFeatureAccess(item.feature!)
     );
+    // Always include dashboard
+    if (sidebarItems.length === 0) {
+      sidebarItems = [permissionBasedItems[0]]; // Dashboard
+    }
   }
 
   if (sidebarItems.length === 0) return null;

@@ -1,4 +1,4 @@
-import { PermissionScopeV2 } from '../scope-resolver/scope-resolver.types';
+import { PermissionScope } from '../scope-resolver/scope-resolver.types';
 import {
   InvalidPermissionFormatError,
   ParsedPermission,
@@ -16,7 +16,7 @@ const VALID_SEGMENT = /^[a-z0-9_]+$/;
 export function serialize(
   feature: string,
   permission: string,
-  scope: PermissionScopeV2,
+  scope: PermissionScope,
 ): string {
   return `${feature}:${permission}:${scope.toLowerCase()}`;
 }
@@ -26,7 +26,7 @@ export function serialize(
  * Validates:
  * - Exactly 3 colon-separated segments
  * - Each segment contains only lowercase alphanumeric + underscore
- * - Scope is a valid PermissionScopeV2 enum value
+ * - Scope is a valid PermissionScope enum value
  *
  * @throws InvalidPermissionFormatError if the string is malformed
  */
@@ -53,10 +53,10 @@ export function parse(permissionString: string): ParsedPermission {
     );
   }
 
-  const scope = scopeStr.toUpperCase() as PermissionScopeV2;
-  if (!Object.values(PermissionScopeV2).includes(scope)) {
+  const scope = scopeStr.toUpperCase() as PermissionScope;
+  if (!Object.values(PermissionScope).includes(scope)) {
     throw new InvalidPermissionFormatError(
-      `Invalid scope value: "${scopeStr}". Must be one of: ${Object.values(PermissionScopeV2).map((s) => s.toLowerCase()).join(', ')}`,
+      `Invalid scope value: "${scopeStr}". Must be one of: ${Object.values(PermissionScope).map((s) => s.toLowerCase()).join(', ')}`,
     );
   }
 

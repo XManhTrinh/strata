@@ -203,8 +203,8 @@ export class OrgChartService {
    * - in the management chain above that person
    */
   async getPeople(companyId: string, requestingUserId: string): Promise<OrgChartPerson[]> {
-    // 1. Fetch memberships, relationships, and employees in parallel
-    const [memberships, relationships, employees] = await Promise.all([
+    // 1. Fetch memberships and relationships in parallel
+    const [memberships, relationships] = await Promise.all([
       this.prisma.userCompanyMembership.findMany({
         where: { companyId },
         include: {
@@ -215,10 +215,6 @@ export class OrgChartService {
       this.prisma.reportingRelationship.findMany({
         where: { companyId },
         select: { userId: true, managerId: true },
-      }),
-      this.prisma.employee.findMany({
-        where: { organizationId: companyId },
-        select: { id: true, personId: true, uin: true, status: true, departmentId: true },
       }),
     ]);
 
@@ -233,7 +229,6 @@ export class OrgChartService {
     const userMap = new Map(users.map(u => [u.id, u]));
     const memberMap = new Map(memberships.map(m => [m.userId, m]));
     const relMap = new Map(relationships.map(r => [r.userId, r.managerId]));
-    const employeeByPerson = new Map(employees.map(e => [e.personId, e]));
 
     // 4. Determine salary visibility
     const managedUserIds = this.getSubordinateIds(requestingUserId, relationships);
@@ -245,7 +240,6 @@ export class OrgChartService {
     const people: OrgChartPerson[] = users.map(user => {
       const membership = memberMap.get(user.id);
       const parentId = relMap.get(user.id) ?? null;
-      const employee = employeeByPerson.get(user.personId);
 
       const canSeeSalary = isSuperAdmin || managedUserIds.has(user.id);
 
@@ -254,13 +248,13 @@ export class OrgChartService {
         fullName: (user as any).person?.fullName ?? user.email,
         title: (membership as any)?.position?.name ?? 'No title',
         squads: [],
-        salary: canSeeSalary ? (employee as any)?.salary ?? null : null,
+        salary: canSeeSalary ? null : null,
         parentId,
         avatarUrl: null,
         departmentId: (membership as any)?.orgUnit?.id ?? null,
         departmentName: (membership as any)?.orgUnit?.name ?? null,
-        uin: employee?.uin ?? null,
-        status: employee?.status ?? 'ACTIVE',
+        uin: null,
+        status: 'ACTIVE',
         capacityAllocation: canSeeSalary ? 100 : 0,
         positionTitle: (membership as any)?.position?.name ?? null,
       };

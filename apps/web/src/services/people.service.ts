@@ -5,12 +5,16 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 
-// Shared pagination response type
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
   page: number;
   pageSize: number;
+}
+
+export interface MemberRole {
+  id: string;
+  name: string;
 }
 
 export interface Person {
@@ -20,8 +24,20 @@ export interface Person {
   phone: string | null;
   address: string | null;
   dateOfBirth: string;
+  userId: string;
+  membershipId: string;
+  isSuperAdmin: boolean;
+  orgUnitId: string | null;
+  orgUnitName: string | null;
+  positionId: string | null;
+  positionName: string | null;
+  roles: MemberRole[];
+  employmentType: string | null;
+  annualSalary: number | null;
+  dayRate: number | null;
+  annualCost: number | null;
+  metadata: Record<string, string>;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreatePersonRequest {
@@ -29,78 +45,227 @@ export interface CreatePersonRequest {
   email: string;
   phone?: string | null;
   address?: string | null;
-  dateOfBirth: string;
+  dateOfBirth?: string;
+  roleId?: string;
+  metadata?: Record<string, string>;
 }
 
-export interface UpdatePersonRequest extends Partial<CreatePersonRequest> {
+export interface UpdatePersonRequest {
   id: string;
+  fullName?: string;
+  email?: string;
+  phone?: string | null;
+  address?: string | null;
+  dateOfBirth?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface ImportMemberRow {
+  fullName: string;
+  email: string;
+  orgStructure?: string;
+  orgLevelTypes?: string[]; // ["Division", "Tribe", "Squad"] — type name per level
+  position?: string;
+  grade?: string;
+  lineManagerEmail?: string;
+  employmentType?: string;
+  annualSalary?: string;
+  dayRate?: string;
+  roleId?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface ImportResult {
+  total: number;
+  created: number;
+  updated: number;
+  errors: { status: string; email: string; error?: string }[];
+}
+
+export interface TableView {
+  id: string;
+  companyId: string;
+  name: string;
+  table: string;
+  columns: string[];
+  isDefault: boolean;
 }
 
 export interface PeopleParams {
+  companyId: string;
   page?: number;
   pageSize?: number;
   search?: string;
 }
 
-export function usePeople(params?: PeopleParams) {
+// ─── Members ──────────────────────────────────────────────────────────────────
+
+export function usePeople(params: PeopleParams) {
   return useQuery({
-    queryKey: ["people", params],
+    queryKey: ["members", params.companyId, params],
     queryFn: () =>
-      apiClient<PaginatedResponse<Person>>("/people", {
-        params: {
-          page: params?.page,
-          pageSize: params?.pageSize,
-          search: params?.search,
+      apiClient<PaginatedResponse<Person>>(
+        `/companies/${params.companyId}/members`,
+        {
+          params: {
+            page: params.page,
+            pageSize: params.pageSize,
+            search: params.search,
+          },
         },
-      }),
+      ),
+    enabled: !!params.companyId,
   });
 }
 
-export function usePerson(id: string) {
+export function usePerson(companyId: string, id: string) {
   return useQuery({
-    queryKey: ["people", id],
-    queryFn: () => apiClient<Person>(`/people/${id}`),
-    enabled: !!id,
+    queryKey: ["members", companyId, id],
+    queryFn: () =>
+      apiClient<Person>(`/companies/${companyId}/members/${id}`),
+    enabled: !!companyId && !!id,
   });
 }
 
-export function useCreatePerson() {
+export function useMetadataKeys(companyId: string) {
+  return useQuery({
+    queryKey: ["members", companyId, "metadata-keys"],
+    queryFn: () =>
+      apiClient<string[]>(`/companies/${companyId}/members/metadata-keys`),
+    enabled: !!companyId,
+  });
+}
+
+export function useCreatePerson(companyId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreatePersonRequest) =>
-      apiClient<Person>("/people", {
+      apiClient<Person>(`/companies/${companyId}/members`, {
         method: "POST",
         body: data,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
     },
   });
 }
 
-export function useUpdatePerson() {
+export function useUpdatePerson(companyId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...data }: UpdatePersonRequest) =>
-      apiClient<Person>(`/people/${id}`, {
+      apiClient<Person>(`/companies/${companyId}/members/${id}`, {
         method: "PUT",
         body: data,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
     },
   });
 }
 
-export function useDeletePerson() {
+export function useDeletePerson(companyId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      apiClient<void>(`/people/${id}`, {
+      apiClient<void>(`/companies/${companyId}/members/${id}`, {
         method: "DELETE",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
+    },
+  });
+}
+
+export function useDeleteAllMembers(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiClient<{ removed: number }>(`/companies/${companyId}/members/all`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
+    },
+  });
+}
+
+export function useBulkImport(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (rows: ImportMemberRow[]) =>
+      apiClient<ImportResult>(`/companies/${companyId}/members/import`, {
+        method: "POST",
+        body: { rows },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
+    },
+  });
+}
+
+export function useAssignRole(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ personId, roleId }: { personId: string; roleId: string }) =>
+      apiClient<Person>(
+        `/companies/${companyId}/members/${personId}/roles/${roleId}`,
+        { method: "POST" },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
+    },
+  });
+}
+
+export function useRemoveRole(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ personId, roleId }: { personId: string; roleId: string }) =>
+      apiClient<Person>(
+        `/companies/${companyId}/members/${personId}/roles/${roleId}`,
+        { method: "DELETE" },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["members", companyId] });
+    },
+  });
+}
+
+// ─── Table Views ──────────────────────────────────────────────────────────────
+
+export function useTableViews(companyId: string, table: string = "members") {
+  return useQuery({
+    queryKey: ["table-views", companyId, table],
+    queryFn: () =>
+      apiClient<TableView[]>(`/companies/${companyId}/table-views/${table}`),
+    enabled: !!companyId,
+  });
+}
+
+export function useCreateTableView(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; table: string; columns: string[]; isDefault?: boolean }) =>
+      apiClient<TableView>(`/companies/${companyId}/table-views`, {
+        method: "POST",
+        body: data,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["table-views", companyId] });
+    },
+  });
+}
+
+export function useDeleteTableView(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiClient<void>(`/companies/${companyId}/table-views/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["table-views", companyId] });
     },
   });
 }

@@ -11,17 +11,32 @@ import { Switch } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Divider } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
 import { toast } from "sonner";
-import { useFeatures, useToggleFeature, COMPANY_ID, type CompanyFeature } from "@/services";
+import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+
+// ─── Feature icon & color mapping ─────────────────────────────────────────────
+
+const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> = {
+  calendar:      { icon: "calendar_month",       color: "text-blue-600",    bg: "bg-blue-100 dark:bg-blue-900/30" },
+  employees:     { icon: "badge",                color: "text-indigo-600",  bg: "bg-indigo-100 dark:bg-indigo-900/30" },
+  people:        { icon: "group",                color: "text-violet-600",  bg: "bg-violet-100 dark:bg-violet-900/30" },
+  organizations: { icon: "account_tree",         color: "text-teal-600",    bg: "bg-teal-100 dark:bg-teal-900/30" },
+  org_chart:     { icon: "lan",                  color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
+  engineering:   { icon: "engineering",          color: "text-orange-600",  bg: "bg-orange-100 dark:bg-orange-900/30" },
+  capacity:      { icon: "stacked_bar_chart",    color: "text-cyan-600",    bg: "bg-cyan-100 dark:bg-cyan-900/30" },
+  budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
+  authorization: { icon: "admin_panel_settings", color: "text-amber-600",   bg: "bg-amber-100 dark:bg-amber-900/30" },
+  notifications: { icon: "notifications",        color: "text-rose-600",    bg: "bg-rose-100 dark:bg-rose-900/30" },
+  reports:       { icon: "bar_chart",            color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
+  search:        { icon: "search",               color: "text-gray-600",    bg: "bg-gray-100 dark:bg-gray-900/30" },
+  audit:         { icon: "history",              color: "text-slate-600",   bg: "bg-slate-100 dark:bg-slate-900/30" },
+};
+
+const DEFAULT_META = { icon: "extension", color: "text-primary", bg: "bg-primary/10" };
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface FeatureRow {
   id: string;
@@ -52,8 +67,11 @@ function toFeatureRow(cf: CompanyFeature): FeatureRow | null {
   };
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function FeaturesPage() {
-  const { data: companyFeatures, isLoading, error, refetch } = useFeatures(COMPANY_ID);
+  const companyId = useCompanyId();
+  const { data: companyFeatures, isLoading, error, refetch } = useFeatures(companyId);
   const toggleFeatureMutation = useToggleFeature();
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
@@ -62,21 +80,11 @@ export default function FeaturesPage() {
 
   const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
     toggleFeatureMutation.mutate(
+      { companyId, featureId, enabled: !currentEnabled },
       {
-        companyId: COMPANY_ID,
-        featureId,
-        enabled: !currentEnabled,
+        onSuccess: () => toast.success(`"${displayName}" ${!currentEnabled ? "enabled" : "disabled"}`),
+        onError: (err) => toast.error(err.message || "Failed to toggle feature"),
       },
-      {
-        onSuccess: () => {
-          toast.success(
-            `Feature "${displayName}" ${!currentEnabled ? "enabled" : "disabled"} successfully`
-          );
-        },
-        onError: (err) => {
-          toast.error(err.message || "Failed to toggle feature");
-        },
-      }
     );
   };
 
@@ -84,8 +92,10 @@ export default function FeaturesPage() {
     (f) =>
       f.displayName.toLowerCase().includes(search.toLowerCase()) ||
       f.description.toLowerCase().includes(search.toLowerCase()) ||
-      f.key.toLowerCase().includes(search.toLowerCase())
+      f.key.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const enabledCount = features.filter((f) => f.enabled).length;
 
   if (isLoading) {
     return (
@@ -94,22 +104,25 @@ export default function FeaturesPage() {
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
             <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              View registered features and control which are enabled for your organization.
+              Control which features are enabled for your workspace.
             </p>
           </div>
         </AppBar>
-        <Card variant="elevated">
-          <CardContent className="p-6 space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="h-5 w-5 rounded" />
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-5 flex-1" />
-                <Skeleton className="h-6 w-12 rounded-full" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} variant="outlined">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start justify-between">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <Skeleton className="h-7 w-12 rounded-full" />
+                </div>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -121,7 +134,7 @@ export default function FeaturesPage() {
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
             <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              View registered features and control which are enabled for your organization.
+              Control which features are enabled for your workspace.
             </p>
           </div>
         </AppBar>
@@ -130,15 +143,10 @@ export default function FeaturesPage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
-              Unable to load features
-            </h2>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
-              Failed to load features. Please try again later.
-            </p>
+            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">Unable to load features</h2>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">Something went wrong. Please try again.</p>
             <Button variant="tonal" onClick={() => refetch()}>
-              <Icon name="refresh" size={18} />
-              Retry
+              <Icon name="refresh" size={18} /> Retry
             </Button>
           </CardContent>
         </Card>
@@ -160,185 +168,114 @@ export default function FeaturesPage() {
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            View registered features and control which are enabled for your organization.
+            Control which features are enabled for your workspace.{" "}
+            <span className="font-medium text-surface-foreground">
+              {enabledCount} of {features.length}
+            </span>{" "}
+            active.
           </p>
         </div>
       </AppBar>
 
       {/* Search */}
-      <Search
-        className="max-w-sm"
-        value={search}
-        onValueChange={setSearch}
-        placeholder="Search features..."
-      />
+      <Search className="max-w-sm" value={search} onValueChange={setSearch} placeholder="Search features..." />
 
-      {/* Desktop Table */}
-      <Card variant="elevated" className="hidden md:block">
-        <CardContent className="p-0">
-          {filteredFeatures.length === 0 ? (
-            <div className="flex flex-col items-center py-12 text-center">
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
-                <Icon name="extension" size={24} className="text-surface-variant-foreground" />
-              </div>
-              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
-                No features found
-              </h2>
-              <p className="text-[14px] leading-5 text-surface-variant-foreground">
-                {search ? "Try adjusting your search query." : "No features are registered yet."}
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Feature</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-center">Permissions</TableHead>
-                  <TableHead className="text-center">Enabled</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFeatures.map((feature) => (
-                  <TableRow
-                    key={feature.id}
-                    className="cursor-pointer"
-                    onClick={() => setExpandedFeatureId(expandedFeatureId === feature.id ? null : feature.id)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Icon name="extension" size={18} className="text-primary" />
-                        <div>
-                          <span className="text-[14px] font-medium text-surface-foreground">{feature.displayName}</span>
-                          <span className="ml-2 text-[12px] text-surface-variant-foreground">({feature.key})</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-[14px] text-surface-variant-foreground">
-                      {feature.description}
-                    </TableCell>
-                    <TableCell className="text-center text-[14px] text-surface-variant-foreground">
-                      {feature.permissionsCount}
-                    </TableCell>
-                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                      <Switch
-                        checked={feature.enabled}
-                        onCheckedChange={() => {
-                          toggleEnabled(feature.featureId, feature.enabled, feature.displayName);
-                        }}
-                        disabled={toggleFeatureMutation.isPending}
-                        aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Mobile Card List */}
-      <div className="md:hidden space-y-4">
-        {filteredFeatures.length === 0 ? (
-          <Card variant="elevated">
-            <CardContent className="flex flex-col items-center py-12 text-center">
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
-                <Icon name="extension" size={24} className="text-surface-variant-foreground" />
-              </div>
-              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
-                No features found
-              </h2>
-              <p className="text-[14px] leading-5 text-surface-variant-foreground">
-                {search ? "Try adjusting your search query." : "No features are registered yet."}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredFeatures.map((feature) => (
-            <Card
-              key={feature.id}
-              variant="elevated"
-              className="cursor-pointer"
-              onClick={() => setExpandedFeatureId(expandedFeatureId === feature.id ? null : feature.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Icon name="extension" size={20} className="text-primary" />
-                    <div>
-                      <p className="text-[14px] font-medium text-surface-foreground">{feature.displayName}</p>
-                      <p className="text-[12px] text-surface-variant-foreground">{feature.key}</p>
-                    </div>
-                  </div>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={feature.enabled}
-                      onCheckedChange={() => {
-                        toggleEnabled(feature.featureId, feature.enabled, feature.displayName);
-                      }}
-                      disabled={toggleFeatureMutation.isPending}
-                      aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
-                    />
-                  </div>
-                </div>
-                {feature.description && (
-                  <p className="text-[12px] text-surface-variant-foreground mt-2">{feature.description}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Feature Detail Panel */}
-      {expandedFeatureId && (
+      {/* Cards Grid */}
+      {filteredFeatures.length === 0 ? (
         <Card variant="elevated">
-          <CardContent className="p-6">
-            {(() => {
-              const feature = features.find((f) => f.id === expandedFeatureId);
-              if (!feature) return null;
-              return (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-[16px] leading-6 font-medium text-surface-foreground flex items-center gap-2">
-                      <Icon name="key" size={20} className="text-primary" />
-                      {feature.displayName} — Permissions
-                    </h3>
-                    <Chip variant="filter" selected={feature.enabled}>
-                      {feature.enabled ? "Enabled" : "Disabled"}
-                    </Chip>
-                  </div>
-                  <Divider />
-                  <Card variant="elevated">
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Key</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Description</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {feature.permissions.map((perm) => (
-                            <TableRow key={perm.key}>
-                              <TableCell className="font-mono text-[12px] text-surface-variant-foreground">
-                                {feature.key}:{perm.key}
-                              </TableCell>
-                              <TableCell className="text-surface-foreground">{perm.displayName}</TableCell>
-                              <TableCell className="text-surface-variant-foreground">{perm.description}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                </div>
-              );
-            })()}
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+              <Icon name="extension" size={24} className="text-surface-variant-foreground" />
+            </div>
+            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">No features found</h2>
+            <p className="text-[14px] leading-5 text-surface-variant-foreground">
+              {search ? "Try adjusting your search query." : "No features are registered yet."}
+            </p>
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredFeatures.map((feature) => {
+            const meta = FEATURE_META[feature.key] ?? DEFAULT_META;
+            const isExpanded = expandedFeatureId === feature.id;
+
+            return (
+              <Card
+                key={feature.id}
+                variant="outlined"
+                className={`transition-all hover:shadow-md ${
+                  !feature.enabled ? "opacity-60" : ""
+                } ${isExpanded ? "ring-2 ring-primary/30" : ""}`}
+              >
+                <CardContent className="p-5">
+                  {/* Top row: icon + toggle */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${meta.bg}`}>
+                      <Icon name={meta.icon} size={28} className={meta.color} />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {feature.key === "authorization" ? (
+                        <Chip variant="filter" selected>Always on</Chip>
+                      ) : (
+                        <Switch
+                          checked={feature.enabled}
+                          onCheckedChange={() => toggleEnabled(feature.featureId, feature.enabled, feature.displayName)}
+                          disabled={toggleFeatureMutation.isPending}
+                          aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Title + key */}
+                  <h3 className="text-[16px] leading-6 font-medium text-surface-foreground">
+                    {feature.displayName}
+                  </h3>
+                  <p className="text-[12px] leading-4 text-surface-variant-foreground mt-0.5 font-mono">
+                    {feature.key}
+                  </p>
+
+                  {/* Description */}
+                  <p className="text-[13px] leading-5 text-surface-variant-foreground mt-2 line-clamp-2">
+                    {feature.description || "No description available."}
+                  </p>
+
+                  {/* Footer: permissions count + expand */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
+                    <Chip variant="filter" selected={feature.enabled}>
+                      {feature.permissionsCount} permission{feature.permissionsCount !== 1 ? "s" : ""}
+                    </Chip>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedFeatureId(isExpanded ? null : feature.id)}
+                      className="flex items-center gap-1 text-[12px] font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {isExpanded ? "Hide" : "Details"}
+                      <Icon name={isExpanded ? "expand_less" : "expand_more"} size={16} />
+                    </button>
+                  </div>
+
+                  {/* Expanded permissions */}
+                  {isExpanded && (
+                    <div className="mt-4 pt-3 border-t border-outline-variant/50 space-y-2">
+                      {feature.permissions.map((perm) => (
+                        <div key={perm.key} className="flex items-start gap-2">
+                          <Icon name="key" size={14} className="text-surface-variant-foreground mt-0.5 shrink-0" />
+                          <div>
+                            <p className="text-[13px] font-medium text-surface-foreground">{perm.displayName}</p>
+                            <p className="text-[11px] text-surface-variant-foreground font-mono">
+                              {feature.key}:{perm.key}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
     </motion.div>
   );

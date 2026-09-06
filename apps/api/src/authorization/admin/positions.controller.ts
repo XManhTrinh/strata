@@ -17,7 +17,7 @@ import { PositionsService } from './positions.service';
 import { CreatePositionSchema } from './dto/create-position.dto';
 import { UpdatePositionSchema } from './dto/update-position.dto';
 
-@Controller('api/v2/companies/:companyId/positions')
+@Controller('companies/:companyId/positions')
 @UseGuards(AuthorizationGuard)
 @RequireFeaturePermission('authorization', 'manage_org_structure')
 export class PositionsController {

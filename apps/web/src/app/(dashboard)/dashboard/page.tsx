@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { AppBar } from "@/components/layout/app-bar";
-import { useEmployees } from "@/services";
+import { usePeople } from "@/services";
 import { useLeaveRequests } from "@/services";
 import { useCalendarEvents } from "@/services";
 import { Button } from "@vkieu/mui/buttons";
@@ -12,9 +12,9 @@ import { Icon } from "@vkieu/mui";
 import { List, ListItem } from "@vkieu/mui";
 import { Divider } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
+import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
-const COMPANY_ID = "cm_acme_corp_001";
 
 interface StatCardData {
   icon: string;
@@ -84,13 +84,14 @@ function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData
 /* ─── Main Page ────────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
+  const companyId = useCompanyId();
   const {
     data: employeesData,
     isLoading: employeesLoading,
     isError: employeesError,
     error: employeesErr,
     refetch: refetchEmployees,
-  } = useEmployees({ page: 1, limit: 1 });
+  } = usePeople({ companyId, page: 1, pageSize: 1 });
 
   const {
     data: leaveData,
@@ -98,7 +99,7 @@ export default function DashboardPage() {
     isError: leaveError,
     error: leaveErr,
     refetch: refetchLeave,
-  } = useLeaveRequests(COMPANY_ID);
+  } = useLeaveRequests(companyId);
 
   const {
     data: eventsData,
@@ -106,7 +107,7 @@ export default function DashboardPage() {
     isError: eventsError,
     error: eventsErr,
     refetch: refetchEvents,
-  } = useCalendarEvents(COMPANY_ID, {
+  } = useCalendarEvents(companyId, {
     startDate: new Date().toISOString().split("T")[0],
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -125,7 +126,7 @@ export default function DashboardPage() {
     {
       icon: "group",
       value: headcount,
-      label: "Total employees",
+      label: "Total members",
       tint: "bg-primary/12",
       iconColor: "text-primary",
     },
@@ -316,7 +317,7 @@ export default function DashboardPage() {
             <CardContent className="flex flex-col gap-3 pt-0">
               <Button variant="tonal" className="w-full justify-start gap-3">
                 <Icon name="person_add" size={20} />
-                Add Employee
+                Add Member
               </Button>
               <Button variant="tonal" className="w-full justify-start gap-3">
                 <Icon name="account_tree" size={20} />

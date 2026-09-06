@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/client";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface ApiError {
@@ -25,10 +27,14 @@ export interface RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-function getCsrfToken(): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : undefined;
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function parseErrorResponse(response: Response): Promise<ApiError> {
@@ -64,31 +70,33 @@ function buildUrl(endpoint: string, params?: RequestOptions["params"]): string {
   return url;
 }
 
+/**
+ * API client that automatically attaches the Supabase access token
+ * as a Bearer token in the Authorization header.
+ *
+ * On 401, attempts a session refresh and retries the request once.
+ */
 export async function apiClient<T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { method = "GET", body, headers = {}, params } = options;
 
   const url = buildUrl(endpoint, params);
+  const token = await getAccessToken();
 
   const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...headers,
   };
 
-  // Add CSRF token for state-changing requests
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const csrf = getCsrfToken();
-    if (csrf) {
-      requestHeaders["X-CSRF-Token"] = csrf;
-    }
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
   }
 
   const fetchOptions: RequestInit = {
     method,
     headers: requestHeaders,
-    credentials: "include",
   };
 
   if (body && method !== "GET") {
@@ -106,29 +114,33 @@ export async function apiClient<T>(
     });
   }
 
-  // Handle 401 — attempt cookie-based refresh and retry
+  // Handle 401 — attempt Supabase session refresh and retry once
   if (response.status === 401) {
     try {
-      const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!refreshRes.ok) {
-        throw new Error("Refresh failed");
+      const supabase = createClient();
+      const { data } = await supabase.auth.refreshSession();
+
+      if (data.session) {
+        requestHeaders["Authorization"] = `Bearer ${data.session.access_token}`;
+        try {
+          response = await fetch(url, { ...fetchOptions, headers: requestHeaders });
+        } catch {
+          throw new ApiClientError({
+            statusCode: 0,
+            message: "Network error. Please check your connection.",
+          });
+        }
       }
-      // Retry original request (cookies refreshed automatically by browser)
-      try {
-        response = await fetch(url, fetchOptions);
-      } catch {
+
+      // If refresh failed or retry still 401, throw (don't redirect — let AuthGuard handle it)
+      if (!data.session || response.status === 401) {
         throw new ApiClientError({
-          statusCode: 0,
-          message: "Network error. Please check your connection.",
+          statusCode: 401,
+          message: "Session expired. Please log in again.",
         });
       }
-    } catch {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
+    } catch (err) {
+      if (err instanceof ApiClientError) throw err;
       throw new ApiClientError({
         statusCode: 401,
         message: "Session expired. Please log in again.",
@@ -136,45 +148,7 @@ export async function apiClient<T>(
     }
   }
 
-  // Handle 403 CSRF — re-read cookie and retry once
-  if (response.status === 403) {
-    const csrf = getCsrfToken();
-    if (csrf && ["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-      requestHeaders["X-CSRF-Token"] = csrf;
-      const retryFetchOptions: RequestInit = {
-        method,
-        headers: requestHeaders,
-        credentials: "include",
-      };
-      if (body && method !== "GET") {
-        retryFetchOptions.body = JSON.stringify(body);
-      }
-      try {
-        response = await fetch(url, retryFetchOptions);
-      } catch {
-        throw new ApiClientError({
-          statusCode: 0,
-          message: "Network error. Please check your connection.",
-        });
-      }
-    }
-  }
-
-  // Handle 5xx — retry once after 1 second delay
-  if (response.status >= 500) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    try {
-      response = await fetch(url, fetchOptions);
-    } catch {
-      throw new ApiClientError({
-        statusCode: 0,
-        message: "Network error. Please check your connection.",
-      });
-    }
-  }
-
-  // Handle non-OK responses after retries
+  // Handle non-OK responses
   if (!response.ok) {
     const apiError = await parseErrorResponse(response);
     throw new ApiClientError(apiError);

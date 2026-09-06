@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 
-const COMPANY_ID = "cm_acme_corp_001";
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface OrgTreeNode {
@@ -46,28 +44,25 @@ export interface UnitViewResponse {
  * Fetch the full reporting hierarchy tree for a company.
  * Returns an array of root nodes with nested directReports.
  */
-export function useOrgChart(companyId: string = COMPANY_ID) {
+export function useOrgChart(companyId: string) {
   return useQuery<OrgTreeNode[]>({
     queryKey: ["org-chart", companyId],
     queryFn: () =>
-      apiClient<OrgTreeNode[]>(`/api/v2/companies/${companyId}/org-chart`),
+      apiClient<OrgTreeNode[]>(`/companies/${companyId}/org-chart`),
     enabled: !!companyId,
-    staleTime: 30_000, // 30 seconds
+    staleTime: 30_000,
   });
 }
 
 /**
  * Fetch employees grouped by a specific org unit, with ancestor breadcrumb.
  */
-export function useOrgChartByUnit(
-  companyId: string = COMPANY_ID,
-  unitId: string | undefined
-) {
+export function useOrgChartByUnit(companyId: string, unitId: string | undefined) {
   return useQuery<UnitViewResponse>({
     queryKey: ["org-chart", "unit", companyId, unitId],
     queryFn: () =>
       apiClient<UnitViewResponse>(
-        `/api/v2/companies/${companyId}/org-chart/unit/${unitId}`
+        `/companies/${companyId}/org-chart/unit/${unitId}`
       ),
     enabled: !!companyId && !!unitId,
     staleTime: 30_000,
@@ -96,12 +91,12 @@ export interface OrgChartPerson {
  * Fetch flat array of all people for the org chart.
  * Salary visibility is controlled server-side based on the requesting user's permissions.
  */
-export function useOrgChartPeople(companyId: string = COMPANY_ID) {
+export function useOrgChartPeople(companyId: string) {
   return useQuery<OrgChartPerson[]>({
     queryKey: ["org-chart", "people", companyId],
     queryFn: () =>
       apiClient<OrgChartPerson[]>(
-        `/api/v2/companies/${companyId}/org-chart/people`
+        `/companies/${companyId}/org-chart/people`
       ),
     enabled: !!companyId,
     staleTime: 30_000,

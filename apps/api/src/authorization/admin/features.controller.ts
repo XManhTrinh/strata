@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { AuthorizationGuard } from '../authorization.guard';
 import { RequireFeaturePermission } from '../authorization.decorator';
-import { Public } from '../../auth/public.decorator';
 import { FeaturesService } from './features.service';
 import { z } from 'zod';
 
@@ -21,8 +20,7 @@ export class FeaturesController {
   /**
    * List all registered features (platform-wide, no company context needed).
    */
-  @Get('api/v2/features')
-  @Public()
+  @Get('features')
   async findAll() {
     return this.service.findAll();
   }
@@ -30,17 +28,17 @@ export class FeaturesController {
   /**
    * Get a feature by key with its permissions.
    */
-  @Get('api/v2/features/:key')
-  @Public()
+  @Get('features/:key')
   async findByKey(@Param('key') key: string) {
     return this.service.findByKey(key);
   }
 
   /**
    * List features for a company with enabled status.
+   * Accessible to any authenticated user — they can see which features
+   * are available. Only super admins can toggle them (via PATCH).
    */
-  @Get('api/v2/companies/:companyId/features')
-  @RequireFeaturePermission('authorization', 'manage_features')
+  @Get('companies/:companyId/features')
   async findForCompany(@Param('companyId') companyId: string) {
     return this.service.findForCompany(companyId);
   }
@@ -48,7 +46,7 @@ export class FeaturesController {
   /**
    * Enable or disable a feature for a company.
    */
-  @Patch('api/v2/companies/:companyId/features/:featureId')
+  @Patch('companies/:companyId/features/:featureId')
   @RequireFeaturePermission('authorization', 'manage_features')
   async toggleFeature(
     @Param('companyId') companyId: string,

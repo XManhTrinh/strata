@@ -4,7 +4,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { OrgChartService } from './org-chart.service';
 import { OrgChartPerson, OrgTreeNode, UnitViewResponse } from './org-chart.types';
 
-@Controller('api/v2/companies/:companyId/org-chart')
+@Controller('companies/:companyId/org-chart')
 @UseGuards(AuthGuard)
 export class OrgChartController {
   constructor(private readonly service: OrgChartService) {}

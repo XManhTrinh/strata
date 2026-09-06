@@ -1,0 +1,101 @@
+UIN,Full Name,Email,Division,Cluster,Tribe,Squad,Employment Type,Grade,Location,Day Rate,Salary,Position,Line Manager Email
+200001,Sarah Mitchell,sarah.mitchell@stratacorp.com,Digital,Commerce,Online Marketplace,Checkout,Perm,L7,London,,77049,Engineering Manager,
+200002,James Cooper,james.cooper@stratacorp.com,Digital,Commerce,Online Marketplace,Checkout,Perm,L6,London,,64281,Senior Backend Engineer,sarah.mitchell@stratacorp.com
+200003,Aisha Patel,aisha.patel@stratacorp.com,Digital,Commerce,Online Marketplace,Checkout,Perm,L5,London,,49952,Backend Engineer,james.cooper@stratacorp.com
+200004,Tom Harrison,tom.harrison@stratacorp.com,Digital,Commerce,Online Marketplace,Checkout,SubCon,,London,850,,Contract Developer,james.cooper@stratacorp.com
+200005,Priya Nair,priya.nair@stratacorp.com,Digital,Commerce,Online Marketplace,Product Listings,Perm,L6,Bangalore,,62934,Senior Full Stack Engineer,sarah.mitchell@stratacorp.com
+200006,Ravi Sharma,ravi.sharma@stratacorp.com,Digital,Commerce,Online Marketplace,Product Listings,Perm,L5,Bangalore,,49256,Full Stack Engineer,priya.nair@stratacorp.com
+200007,Emma Watson,emma.watson@stratacorp.com,Digital,Commerce,Online Marketplace,Product Listings,Perm,L5,London,,53293,Frontend Engineer,priya.nair@stratacorp.com
+200008,Daniel Kim,daniel.kim@stratacorp.com,Digital,Commerce,Online Marketplace,Product Listings,SubCon,,Bangalore,720,,Contract QA Engineer,priya.nair@stratacorp.com
+200009,Sophie Turner,sophie.turner@stratacorp.com,Digital,Commerce,Payments,Payment Gateway,Perm,L7,London,,77994,Tech Lead,
+200010,Marcus Johnson,marcus.johnson@stratacorp.com,Digital,Commerce,Payments,Payment Gateway,Perm,L6,London,,66575,Senior Platform Engineer,sophie.turner@stratacorp.com
+200011,Fatima Khan,fatima.khan@stratacorp.com,Digital,Commerce,Payments,Payment Gateway,Perm,L5,Manchester,,51548,Platform Engineer,marcus.johnson@stratacorp.com
+200012,Oliver Brown,oliver.brown@stratacorp.com,Digital,Commerce,Payments,Fraud Detection,Perm,L6,London,,66026,Senior Data Engineer,sophie.turner@stratacorp.com
+200013,Deepa Menon,deepa.menon@stratacorp.com,Digital,Commerce,Payments,Fraud Detection,Perm,L5,Bangalore,,53230,Data Engineer,oliver.brown@stratacorp.com
+200014,Jack Williams,jack.williams@stratacorp.com,Digital,Commerce,Payments,Fraud Detection,SubCon,,London,950,,Contract ML Engineer,oliver.brown@stratacorp.com
+200015,Ananya Gupta,ananya.gupta@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L8,London,,103267,Principal Engineer,
+200016,Chris Taylor,chris.taylor@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L6,London,,64536,Senior Search Engineer,ananya.gupta@stratacorp.com
+200017,Meera Joshi,meera.joshi@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L5,Bangalore,,50510,Search Engineer,chris.taylor@stratacorp.com
+200018,Will Thompson,will.thompson@stratacorp.com,Digital,Experience,Search & Personalisation,Recommendations,Perm,L6,London,,67125,Senior ML Engineer,ananya.gupta@stratacorp.com
+200019,Kavitha Raman,kavitha.raman@stratacorp.com,Digital,Experience,Search & Personalisation,Recommendations,Perm,L5,Bangalore,,48254,ML Engineer,will.thompson@stratacorp.com
+200020,Lucy Evans,lucy.evans@stratacorp.com,Digital,Experience,Search & Personalisation,Recommendations,SubCon,,London,880,,Contract Data Scientist,will.thompson@stratacorp.com
+200021,Raj Krishnan,raj.krishnan@stratacorp.com,Digital,Experience,Customer Journey,Basket & Favourites,Perm,L7,Bangalore,,78078,Engineering Manager,
+200022,Hannah Clarke,hannah.clarke@stratacorp.com,Digital,Experience,Customer Journey,Basket & Favourites,Perm,L6,London,,69717,Senior Frontend Engineer,raj.krishnan@stratacorp.com
+200023,Vikram Singh,vikram.singh@stratacorp.com,Digital,Experience,Customer Journey,Basket & Favourites,Perm,L5,Bangalore,,49310,Frontend Engineer,hannah.clarke@stratacorp.com
+200024,Grace Roberts,grace.roberts@stratacorp.com,Digital,Experience,Customer Journey,Account & Loyalty,Perm,L6,Manchester,,66620,Senior Full Stack Engineer,raj.krishnan@stratacorp.com
+200025,Arjun Pillai,arjun.pillai@stratacorp.com,Digital,Experience,Customer Journey,Account & Loyalty,Perm,L5,Bangalore,,49761,Full Stack Engineer,grace.roberts@stratacorp.com
+200026,Emily Adams,emily.adams@stratacorp.com,Digital,Experience,Customer Journey,Account & Loyalty,Perm,L4,London,,38669,Junior Developer,grace.roberts@stratacorp.com
+200027,Suresh Reddy,suresh.reddy@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,Perm,L8,London,,104274,Staff Engineer,
+200028,Charlotte Harris,charlotte.harris@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,Perm,L6,London,,65368,Senior Cloud Engineer,suresh.reddy@stratacorp.com
+200029,Manish Tiwari,manish.tiwari@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,Perm,L5,Bangalore,,51909,Cloud Engineer,charlotte.harris@stratacorp.com
+200030,Benjamin Hall,benjamin.hall@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,SubCon,,London,1100,,Contract AWS Architect,charlotte.harris@stratacorp.com
+200031,Neha Agarwal,neha.agarwal@stratacorp.com,Technology,Platform,Core Infrastructure,Kubernetes,Perm,L7,Bangalore,,84352,Tech Lead,suresh.reddy@stratacorp.com
+200032,George Lewis,george.lewis@stratacorp.com,Technology,Platform,Core Infrastructure,Kubernetes,Perm,L6,London,,68752,Senior SRE,neha.agarwal@stratacorp.com
+200033,Pooja Mehta,pooja.mehta@stratacorp.com,Technology,Platform,Core Infrastructure,Kubernetes,Perm,L5,Bangalore,,49374,SRE Engineer,george.lewis@stratacorp.com
+200034,Harry Scott,harry.scott@stratacorp.com,Technology,Platform,Core Infrastructure,Observability,Perm,L6,Manchester,,63850,Senior Platform Engineer,suresh.reddy@stratacorp.com
+200035,Divya Saxena,divya.saxena@stratacorp.com,Technology,Platform,Core Infrastructure,Observability,Perm,L5,Bangalore,,50173,Platform Engineer,harry.scott@stratacorp.com
+200036,Thomas Mitchell,thomas.mitchell@stratacorp.com,Technology,Platform,Core Infrastructure,Observability,SubCon,,London,920,,Contract DevOps,harry.scott@stratacorp.com
+200037,Amit Gupta,amit.gupta@stratacorp.com,Technology,Platform,Developer Experience,CI/CD & Tooling,Perm,L7,Bangalore,,79284,Engineering Manager,
+200038,Jessica Clark,jessica.clark@stratacorp.com,Technology,Platform,Developer Experience,CI/CD & Tooling,Perm,L6,London,,66267,Senior DevOps Engineer,amit.gupta@stratacorp.com
+200039,Rohit Bhatia,rohit.bhatia@stratacorp.com,Technology,Platform,Developer Experience,CI/CD & Tooling,Perm,L5,Bangalore,,52974,DevOps Engineer,jessica.clark@stratacorp.com
+200040,Isabella Baker,isabella.baker@stratacorp.com,Technology,Platform,Developer Experience,Internal APIs,Perm,L6,London,,67654,Senior API Engineer,amit.gupta@stratacorp.com
+200041,Karthik Menon,karthik.menon@stratacorp.com,Technology,Platform,Developer Experience,Internal APIs,Perm,L5,Bangalore,,50162,API Engineer,isabella.baker@stratacorp.com
+200042,Amelia Phillips,amelia.phillips@stratacorp.com,Technology,Platform,Developer Experience,Internal APIs,Perm,L4,Manchester,,38483,Junior Developer,isabella.baker@stratacorp.com
+200043,Siddharth Roy,siddharth.roy@stratacorp.com,Technology,Data,Data Engineering,Data Pipeline,Perm,L7,Bangalore,,77082,Tech Lead,
+200044,Mia Campbell,mia.campbell@stratacorp.com,Technology,Data,Data Engineering,Data Pipeline,Perm,L6,London,,66328,Senior Data Engineer,siddharth.roy@stratacorp.com
+200045,Ashwin Hegde,ashwin.hegde@stratacorp.com,Technology,Data,Data Engineering,Data Pipeline,Perm,L5,Bangalore,,47584,Data Engineer,mia.campbell@stratacorp.com
+200046,Ella Cooper,ella.cooper@stratacorp.com,Technology,Data,Data Engineering,Data Warehouse,Perm,L6,London,,63092,Senior Analytics Engineer,siddharth.roy@stratacorp.com
+200047,Naveen Prasad,naveen.prasad@stratacorp.com,Technology,Data,Data Engineering,Data Warehouse,Perm,L5,Bangalore,,53790,Analytics Engineer,ella.cooper@stratacorp.com
+200048,Freddie Morgan,freddie.morgan@stratacorp.com,Technology,Data,Data Engineering,Data Warehouse,SubCon,,London,780,,Contract BI Developer,ella.cooper@stratacorp.com
+200049,Sandeep Malik,sandeep.malik@stratacorp.com,Technology,Data,AI & ML,ML Platform,Perm,L8,Bangalore,,97677,Principal ML Engineer,
+200050,Poppy Reed,poppy.reed@stratacorp.com,Technology,Data,AI & ML,ML Platform,Perm,L6,London,,69827,Senior ML Engineer,sandeep.malik@stratacorp.com
+200051,Gautam Srinivasan,gautam.srinivasan@stratacorp.com,Technology,Data,AI & ML,ML Platform,Perm,L5,Bangalore,,54202,ML Engineer,poppy.reed@stratacorp.com
+200052,Chloe Howard,chloe.howard@stratacorp.com,Technology,Data,AI & ML,NLP & Computer Vision,Perm,L6,London,,66422,Senior AI Engineer,sandeep.malik@stratacorp.com
+200053,Venkat Rao,venkat.rao@stratacorp.com,Technology,Data,AI & ML,NLP & Computer Vision,Perm,L5,Bangalore,,54133,AI Engineer,chloe.howard@stratacorp.com
+200054,Archie Watson,archie.watson@stratacorp.com,Technology,Data,AI & ML,NLP & Computer Vision,SubCon,,London,1050,,Contract AI Researcher,chloe.howard@stratacorp.com
+200055,Daisy Brooks,daisy.brooks@stratacorp.com,Technology,Security,Cyber Defence,Threat Intelligence,Perm,L7,London,,79446,Security Lead,
+200056,Pranav Chatterjee,pranav.chatterjee@stratacorp.com,Technology,Security,Cyber Defence,Threat Intelligence,Perm,L6,Bangalore,,62559,Senior Security Engineer,daisy.brooks@stratacorp.com
+200057,Isla Kelly,isla.kelly@stratacorp.com,Technology,Security,Cyber Defence,Threat Intelligence,Perm,L5,London,,48488,Security Analyst,pranav.chatterjee@stratacorp.com
+200058,Nikhil Deshpande,nikhil.deshpande@stratacorp.com,Technology,Security,Cyber Defence,SOC,Perm,L6,Bangalore,,67310,Senior SOC Analyst,daisy.brooks@stratacorp.com
+200059,Oscar Gray,oscar.gray@stratacorp.com,Technology,Security,Cyber Defence,SOC,Perm,L5,London,,52393,SOC Analyst,nikhil.deshpande@stratacorp.com
+200060,Scarlett Hughes,scarlett.hughes@stratacorp.com,Technology,Security,Cyber Defence,SOC,SubCon,,Manchester,790,,Contract Security Ops,nikhil.deshpande@stratacorp.com
+200061,Ramesh Sundaram,ramesh.sundaram@stratacorp.com,Technology,Security,Application Security,AppSec Engineering,Perm,L7,Bangalore,,79947,AppSec Lead,
+200062,Phoebe Price,phoebe.price@stratacorp.com,Technology,Security,Application Security,AppSec Engineering,Perm,L6,London,,63330,Senior AppSec Engineer,ramesh.sundaram@stratacorp.com
+200063,Varun Kapoor,varun.kapoor@stratacorp.com,Technology,Security,Application Security,AppSec Engineering,Perm,L5,Bangalore,,54809,AppSec Engineer,phoebe.price@stratacorp.com
+200064,Alfie Bennett,alfie.bennett@stratacorp.com,Technology,Security,Application Security,Identity & Access,Perm,L6,London,,68942,Senior IAM Engineer,ramesh.sundaram@stratacorp.com
+200065,Swati Kulkarni,swati.kulkarni@stratacorp.com,Technology,Security,Application Security,Identity & Access,Perm,L5,Bangalore,,53266,IAM Engineer,alfie.bennett@stratacorp.com
+200066,Florence Russell,florence.russell@stratacorp.com,Technology,Security,Application Security,Identity & Access,Perm,L4,London,,34680,Junior Security Eng,alfie.bennett@stratacorp.com
+200067,Saurabh Pandey,saurabh.pandey@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,WMS Platform,Perm,L7,Bangalore,,79785,Tech Lead,
+200068,Rosie Henderson,rosie.henderson@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,WMS Platform,Perm,L6,Leeds,,66183,Senior Backend Engineer,saurabh.pandey@stratacorp.com
+200069,Ajay Mohan,ajay.mohan@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,WMS Platform,Perm,L5,Bangalore,,48053,Backend Engineer,rosie.henderson@stratacorp.com
+200070,Henry Coleman,henry.coleman@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,Robotics Integration,Perm,L6,Leeds,,69177,Senior Embedded Engineer,saurabh.pandey@stratacorp.com
+200071,Isha Banerjee,isha.banerjee@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,Robotics Integration,Perm,L5,Bangalore,,53217,Embedded Engineer,henry.coleman@stratacorp.com
+200072,Evie Barnes,evie.barnes@stratacorp.com,Supply Chain,Fulfilment,Warehouse Tech,Robotics Integration,SubCon,,Leeds,870,,Contract IoT Developer,henry.coleman@stratacorp.com
+200073,Charlie Foster,charlie.foster@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Route Optimisation,Perm,L7,London,,83130,Engineering Manager,
+200074,Lakshmi Nambiar,lakshmi.nambiar@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Route Optimisation,Perm,L6,Bangalore,,62875,Senior Backend Engineer,charlie.foster@stratacorp.com
+200075,Leo Richardson,leo.richardson@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Route Optimisation,Perm,L5,London,,52777,Backend Engineer,lakshmi.nambiar@stratacorp.com
+200076,Willow Butler,willow.butler@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Driver App,Perm,L6,Leeds,,68409,Senior Mobile Engineer,charlie.foster@stratacorp.com
+200077,Tarun Sethi,tarun.sethi@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Driver App,Perm,L5,Bangalore,,54785,Mobile Engineer,willow.butler@stratacorp.com
+200078,Millie Dixon,millie.dixon@stratacorp.com,Supply Chain,Fulfilment,Last Mile Delivery,Driver App,SubCon,,London,810,,Contract iOS Developer,willow.butler@stratacorp.com
+200079,Rahul Dhawan,rahul.dhawan@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Forecast Models,Perm,L7,Bangalore,,77404,Tech Lead,
+200080,Ethan Ward,ethan.ward@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Forecast Models,Perm,L6,London,,68523,Senior Data Scientist,rahul.dhawan@stratacorp.com
+200081,Sienna Fisher,sienna.fisher@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Forecast Models,Perm,L5,Manchester,,53962,Data Scientist,ethan.ward@stratacorp.com
+200082,Manoj Thakur,manoj.thakur@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Inventory Optimisation,Perm,L6,Bangalore,,69226,Senior Operations Researcher,rahul.dhawan@stratacorp.com
+200083,Ava Hunt,ava.hunt@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Inventory Optimisation,Perm,L5,London,,54748,Operations Researcher,manoj.thakur@stratacorp.com
+200084,Liam Palmer,liam.palmer@stratacorp.com,Supply Chain,Planning,Demand Forecasting,Inventory Optimisation,SubCon,,Bangalore,680,,Contract Data Analyst,manoj.thakur@stratacorp.com
+200085,Iris Shaw,iris.shaw@stratacorp.com,Corporate,Finance Tech,Finance Platform,ERP Integration,Perm,L7,London,,83157,Engineering Manager,
+200086,Vivek Mishra,vivek.mishra@stratacorp.com,Corporate,Finance Tech,Finance Platform,ERP Integration,Perm,L6,Bangalore,,67612,Senior Integration Engineer,iris.shaw@stratacorp.com
+200087,Maya Grant,maya.grant@stratacorp.com,Corporate,Finance Tech,Finance Platform,ERP Integration,Perm,L5,London,,51189,Integration Engineer,vivek.mishra@stratacorp.com
+200088,Akash Srivastava,akash.srivastava@stratacorp.com,Corporate,Finance Tech,Finance Platform,Reporting & BI,Perm,L6,Bangalore,,66831,Senior BI Developer,iris.shaw@stratacorp.com
+200089,Jasper Knight,jasper.knight@stratacorp.com,Corporate,Finance Tech,Finance Platform,Reporting & BI,Perm,L5,London,,53890,BI Developer,akash.srivastava@stratacorp.com
+200090,Ruby Collins,ruby.collins@stratacorp.com,Corporate,Finance Tech,Finance Platform,Reporting & BI,SubCon,,London,750,,Contract Analyst,akash.srivastava@stratacorp.com
+200091,Noah Stewart,noah.stewart@stratacorp.com,Corporate,People Tech,HR Platform,Core HR,Perm,L6,Manchester,,66573,Senior Full Stack Engineer,
+200092,Zoe Murphy,zoe.murphy@stratacorp.com,Corporate,People Tech,HR Platform,Core HR,Perm,L5,London,,50442,Full Stack Engineer,noah.stewart@stratacorp.com
+200093,Samuel Green,samuel.green@stratacorp.com,Corporate,People Tech,HR Platform,Core HR,Perm,L4,Bangalore,,38160,Junior Developer,zoe.murphy@stratacorp.com
+200094,Harsh Verma,harsh.verma@stratacorp.com,Corporate,People Tech,HR Platform,Talent & Learning,Perm,L6,Bangalore,,63376,Senior Product Engineer,noah.stewart@stratacorp.com
+200095,Edward Carter,edward.carter@stratacorp.com,Corporate,People Tech,HR Platform,Talent & Learning,Perm,L5,London,,47146,Product Engineer,harsh.verma@stratacorp.com
+200096,Lily Parker,lily.parker@stratacorp.com,Corporate,People Tech,HR Platform,Talent & Learning,SubCon,,Manchester,690,,Contract UX Designer,harsh.verma@stratacorp.com
+200097,Alexander Young,alexander.young@stratacorp.com,Digital,Commerce,Online Marketplace,Checkout,Perm,L5,Manchester,,47500,QA Engineer,james.cooper@stratacorp.com
+200098,David Brown,david.brown@stratacorp.com,Digital,Experience,Search & Personalisation,Search,Perm,L4,London,,32563,Junior Search Engineer,chris.taylor@stratacorp.com
+200099,Olivia Wright,olivia.wright@stratacorp.com,Technology,Platform,Core Infrastructure,Cloud Platform,Perm,L4,Bangalore,,36631,Junior Cloud Engineer,charlotte.harris@stratacorp.com
+200100,William Turner,william.turner@stratacorp.com,Technology,Data,AI & ML,ML Platform,Perm,L4,London,,39662,Junior ML Engineer,poppy.reed@stratacorp.com
