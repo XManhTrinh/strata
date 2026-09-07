@@ -34,13 +34,6 @@ import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 const PERIODS = ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12"] as const;
 const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const FTE_OPTIONS = [
-  { value: "0", label: "0" },
-  { value: "0.25", label: "0.25" },
-  { value: "0.5", label: "0.5" },
-  { value: "0.75", label: "0.75" },
-  { value: "1", label: "1" },
-];
 
 type PeriodKey = typeof PERIODS[number];
 
@@ -544,10 +537,24 @@ export default function CapacityPage() {
                                       const isOver = totalFte > 1;
                                       const isUnder = totalFte > 0 && totalFte < 1;
                                       return (
-                                        <select
-                                          value={String(alloc[pk])}
-                                          onChange={(e) => handleFTEChange(member.membershipId, squad.orgUnitId, pk, parseFloat(e.target.value))}
-                                          className={`w-14 h-7 text-[12px] text-center bg-transparent border rounded focus:border-primary focus:outline-none cursor-pointer ${
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          max="1"
+                                          step="0.05"
+                                          value={alloc[pk]}
+                                          onChange={(e) => {
+                                            const val = parseFloat(e.target.value);
+                                            if (!isNaN(val) && val >= 0 && val <= 1) {
+                                              handleFTEChange(member.membershipId, squad.orgUnitId, pk, Math.round(val * 100) / 100);
+                                            }
+                                          }}
+                                          onBlur={(e) => {
+                                            const val = parseFloat(e.target.value);
+                                            if (isNaN(val) || val < 0) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 0);
+                                            else if (val > 1) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 1);
+                                          }}
+                                          className={`w-14 h-7 text-[12px] text-center bg-transparent border rounded focus:border-primary focus:outline-none ${
                                             isOver
                                               ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold"
                                               : isUnder
@@ -559,11 +566,7 @@ export default function CapacityPage() {
                                             isUnder ? `Underallocated: ${totalFte.toFixed(2)} FTE total (${((1 - totalFte) * 100).toFixed(0)}% unaccounted)` :
                                             undefined
                                           }
-                                        >
-                                          {FTE_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>{o.label}</option>
-                                          ))}
-                                        </select>
+                                        />
                                       );
                                     })()}
                                   </TableCell>
