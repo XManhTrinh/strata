@@ -540,7 +540,9 @@ export default function CapacityPage() {
                                   <TableCell key={pk} className="text-center p-1">
                                     {(() => {
                                       const personTotal = personTotalFTE.get(member.membershipId);
-                                      const isOver = personTotal ? personTotal[pk] > 1 : false;
+                                      const totalFte = personTotal ? personTotal[pk] : 0;
+                                      const isOver = totalFte > 1;
+                                      const isUnder = totalFte > 0 && totalFte < 1;
                                       return (
                                         <select
                                           value={String(alloc[pk])}
@@ -548,9 +550,15 @@ export default function CapacityPage() {
                                           className={`w-14 h-7 text-[12px] text-center bg-transparent border rounded focus:border-primary focus:outline-none cursor-pointer ${
                                             isOver
                                               ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold"
+                                              : isUnder
+                                              ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400"
                                               : "border-outline-variant/50"
                                           }`}
-                                          title={isOver ? `Overallocated: ${personTotal![pk].toFixed(2)} FTE total across squads` : undefined}
+                                          title={
+                                            isOver ? `Overallocated: ${totalFte.toFixed(2)} FTE total` :
+                                            isUnder ? `Underallocated: ${totalFte.toFixed(2)} FTE total (${((1 - totalFte) * 100).toFixed(0)}% unaccounted)` :
+                                            undefined
+                                          }
                                         >
                                           {FTE_OPTIONS.map((o) => (
                                             <option key={o.value} value={o.value}>{o.label}</option>
