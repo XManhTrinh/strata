@@ -295,19 +295,17 @@ export default function CapacityPage() {
   // ─── Aggregations ─────────────────────────────────────────────────────────
 
   // Cross-squad FTE totals per person (for overallocation detection)
+  // Scans ALL draft entries, not just server squad members
   const personTotalFTE = useMemo(() => {
     const map = new Map<string, PeriodValues>();
-    const allSquads = squads ?? [];
-    for (const sq of allSquads) {
-      for (const m of sq.members) {
-        const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
-        const existing = map.get(m.membershipId) ?? zeroPeriods();
-        for (const pk of PERIODS) existing[pk] += alloc[pk];
-        map.set(m.membershipId, existing);
-      }
+    for (const [key, alloc] of localDraft) {
+      const [membershipId] = key.split("|");
+      const existing = map.get(membershipId) ?? zeroPeriods();
+      for (const pk of PERIODS) existing[pk] += alloc[pk];
+      map.set(membershipId, existing);
     }
     return map;
-  }, [squads, localDraft]);
+  }, [localDraft]);
 
   const totalFTE = useMemo(() => {
     const t = zeroPeriods();
