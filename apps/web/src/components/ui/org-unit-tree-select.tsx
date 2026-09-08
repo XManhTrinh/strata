@@ -198,7 +198,7 @@ export function OrgUnitTreeSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 h-10 px-3 rounded-lg border border-outline-variant bg-surface hover:bg-surface-foreground/4 transition-colors text-left w-full min-w-[200px]"
+        className="flex items-center gap-2 h-10 px-3 rounded-lg border border-outline-variant bg-surface hover:bg-surface-foreground/4 transition-colors text-left w-full min-w-50"
       >
         <Icon name="account_tree" size={18} className="text-surface-variant-foreground shrink-0" />
         <span className="flex-1 text-[13px] truncate text-surface-variant-foreground">
@@ -248,7 +248,7 @@ export function OrgUnitTreeSelect({
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 w-full min-w-[320px] max-w-[480px] rounded-xl bg-surface-container border border-outline-variant shadow-lg overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 z-50 w-full min-w-80 max-w-120 rounded-xl bg-surface-container border border-outline-variant shadow-lg overflow-hidden">
           {/* Search input */}
           <div className="px-3 py-2 border-b border-outline-variant">
             <div className="flex items-center gap-2 h-9 px-2.5 rounded-lg bg-surface-container-highest/50">
@@ -270,7 +270,7 @@ export function OrgUnitTreeSelect({
           </div>
 
           {/* Tree list */}
-          <div className="max-h-[320px] overflow-y-auto py-1">
+          <div className="max-h-80 overflow-y-auto py-1">
             {flatNodes.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center px-4">
                 <Icon name="search_off" size={24} className="text-surface-variant-foreground/40 mb-2" />
