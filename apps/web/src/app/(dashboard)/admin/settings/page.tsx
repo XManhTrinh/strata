@@ -7,6 +7,9 @@ import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
+import { Chip } from "@vkieu/mui";
+import { Divider } from "@vkieu/mui";
+import { List, ListItem } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -16,11 +19,15 @@ import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
+// ─── Helpers ────────────────────────────────────────────────────────────────────
+
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("en-GB", {
     year: "numeric", month: "long", day: "numeric",
   });
 }
+
+// ─── Constants ──────────────────────────────────────────────────────────────────
 
 type SettingsSection = "general" | "financial" | "danger";
 
@@ -29,6 +36,16 @@ const NAV_ITEMS: { id: SettingsSection; label: string; icon: string }[] = [
   { id: "financial", label: "Financial", icon: "payments" },
   { id: "danger", label: "Danger Zone", icon: "warning" },
 ];
+
+const STAT_CONFIG = [
+  { label: "Members", icon: "group", color: "bg-primary-container", iconColor: "text-on-primary-container" },
+  { label: "Roles", icon: "shield", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
+  { label: "Positions", icon: "work", color: "bg-tertiary-container", iconColor: "text-on-tertiary-container" },
+  { label: "Org Units", icon: "lan", color: "bg-primary-container", iconColor: "text-on-primary-container" },
+  { label: "Unit Types", icon: "label", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
+];
+
+// ─── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const companyId = useCompanyId();
@@ -108,35 +125,54 @@ export default function SettingsPage() {
     "July","August","September","October","November","December",
   ];
 
+  const statValues = [
+    company?.stats.members ?? 0,
+    company?.stats.roles ?? 0,
+    company?.stats.positions ?? 0,
+    company?.stats.orgUnits ?? 0,
+    company?.stats.orgUnitTypes ?? 0,
+  ];
+
+  // ─── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <AppBar><div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1>
-        </div></AppBar>
-        <div className="flex-1 grid grid-cols-[240px_1fr] mt-6 gap-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
-          <div className="border-r border-outline-variant p-4 space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+        <AppBar>
+          <div>
+            <h1 className="text-headline-small text-surface-foreground">Settings</h1>
+            <p className="text-body-medium text-surface-variant-foreground">Workspace configuration.</p>
+          </div>
+        </AppBar>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i} variant="elevated"><CardContent className="p-4"><Skeleton className="h-14 w-full" /></CardContent></Card>
+          ))}
+        </div>
+        <div className="flex-1 grid grid-cols-[240px_1fr] mt-4 gap-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
+          <div className="border-r border-outline-variant p-2">
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl mb-1" />)}
           </div>
           <div className="p-8 space-y-6">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-8 w-48" /><Skeleton className="h-14 w-full" /><Skeleton className="h-14 w-full" />
           </div>
         </div>
       </div>
     );
   }
 
+  // ─── Error ────────────────────────────────────────────────────────────────
   if (isError) {
     return (
       <div className="flex flex-col h-full">
-        <AppBar><div><h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1></div></AppBar>
+        <AppBar><div><h1 className="text-headline-small text-surface-foreground">Settings</h1></div></AppBar>
         <div className="flex-1 flex items-center justify-center">
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
-              <Icon name="error" size={32} className="text-error mb-3" />
-              <p className="text-[14px] text-muted-foreground">{error?.message || "Failed to load"}</p>
+              <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error-container mb-4">
+                <Icon name="error" size={28} className="text-on-error-container" />
+              </div>
+              <p className="text-title-medium text-surface-foreground mb-1">Unable to load settings</p>
+              <p className="text-body-medium text-surface-variant-foreground">{error?.message || "Something went wrong."}</p>
             </CardContent>
           </Card>
         </div>
@@ -144,18 +180,19 @@ export default function SettingsPage() {
     );
   }
 
+  // ─── Main ─────────────────────────────────────────────────────────────────
   return (
     <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
       <AppBar className="justify-between shrink-0">
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">Workspace configuration and preferences.</p>
+          <h1 className="text-headline-small text-surface-foreground">Settings</h1>
+          <p className="text-body-medium text-surface-variant-foreground">Workspace configuration and preferences.</p>
         </div>
         {isDirty && (
           <div className="flex items-center gap-2">
             <Button variant="text" onClick={handleDiscard} disabled={updateMutation.isPending}>Discard</Button>
-            <Button onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button variant="filled" onClick={handleSave} disabled={updateMutation.isPending}>
               <Icon name="save" size={18} />
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
@@ -163,61 +200,72 @@ export default function SettingsPage() {
         )}
       </AppBar>
 
-      {/* Workspace Overview Strip */}
+      {/* Workspace Overview Strip — M3 elevated cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 shrink-0">
-        {[
-          { label: "Members", value: company?.stats.members ?? 0, icon: "group", color: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600" },
-          { label: "Roles", value: company?.stats.roles ?? 0, icon: "shield", color: "bg-violet-100 dark:bg-violet-900/30", iconColor: "text-violet-600" },
-          { label: "Positions", value: company?.stats.positions ?? 0, icon: "work", color: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-600" },
-          { label: "Org Units", value: company?.stats.orgUnits ?? 0, icon: "lan", color: "bg-amber-100 dark:bg-amber-900/30", iconColor: "text-amber-600" },
-          { label: "Unit Types", value: company?.stats.orgUnitTypes ?? 0, icon: "label", color: "bg-cyan-100 dark:bg-cyan-900/30", iconColor: "text-cyan-600" },
-        ].map((stat) => (
-          <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-outline-variant/50 bg-surface px-4 py-3">
-            <div className={`flex items-center justify-center w-9 h-9 rounded-full ${stat.color} shrink-0`}>
-              <Icon name={stat.icon} size={18} className={stat.iconColor} />
-            </div>
-            <div>
-              <p className="text-[20px] leading-6 font-normal text-surface-foreground">{stat.value}</p>
-              <p className="text-[11px] text-surface-variant-foreground">{stat.label}</p>
-            </div>
-          </div>
+        {STAT_CONFIG.map((stat, i) => (
+          <Card key={stat.label} variant="elevated">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${stat.color} shrink-0`}>
+                <Icon name={stat.icon} size={20} className={stat.iconColor} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-headline-small text-surface-foreground leading-tight">{statValues[i]}</p>
+                <p className="text-label-small text-surface-variant-foreground">{stat.label}</p>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Main Layout: Side Nav + Content */}
+      {/* Master-Detail Layout */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] mt-4 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
-        {/* Side Navigation */}
-        <nav className="border-b lg:border-b-0 lg:border-r border-outline-variant py-2 flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setActiveSection(item.id)}
-              className={`flex items-center gap-3 px-4 py-3 text-left text-[14px] transition-colors whitespace-nowrap ${
-                activeSection === item.id
-                  ? "bg-primary/8 text-primary font-medium border-b-2 lg:border-b-0 lg:border-r-2 border-primary"
-                  : "text-surface-variant-foreground hover:bg-surface-foreground/4"
-              }`}
-            >
-              <Icon name={item.icon} size={20} className={activeSection === item.id ? "text-primary" : "text-surface-variant-foreground"} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        {/* Side Navigation — M3 List */}
+        <div className="border-b lg:border-b-0 lg:border-r border-outline-variant flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
+          <List className="py-1 flex lg:flex-col w-full">
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <ListItem
+                  key={item.id}
+                  interactive
+                  selected={isActive}
+                  leading={
+                    <Icon
+                      name={item.icon}
+                      size={20}
+                      className={isActive ? "text-primary" : "text-surface-variant-foreground"}
+                    />
+                  }
+                  onClick={() => setActiveSection(item.id)}
+                >
+                  {item.label}
+                </ListItem>
+              );
+            })}
+          </List>
+        </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 lg:p-8">
-          {/* General Section */}
+
+          {/* ── General ──────────────────────────────────────────────────── */}
           {activeSection === "general" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-[22px] leading-7 font-normal text-surface-foreground">General</h2>
-                <p className="text-[14px] text-surface-variant-foreground mt-1">Basic workspace information.</p>
+                <h2 className="text-title-large text-surface-foreground">General</h2>
+                <p className="text-body-medium text-surface-variant-foreground mt-1">Basic workspace information.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Company profile form */}
                 <Card variant="outlined">
-                  <CardContent className="p-5 space-y-4">
+                  <CardContent className="p-6 space-y-5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
+                        <Icon name="edit" size={20} className="text-on-primary-container" />
+                      </div>
+                      <p className="text-title-small text-surface-foreground">Company Profile</p>
+                    </div>
                     <TextField
                       variant="outlined"
                       label="Company Name"
@@ -236,41 +284,57 @@ export default function SettingsPage() {
                   </CardContent>
                 </Card>
 
+                {/* Workspace metadata */}
                 <Card variant="outlined">
-                  <CardContent className="p-5">
-                    <h3 className="text-[14px] font-medium text-surface-foreground mb-3">Workspace Details</h3>
-                    <div className="space-y-3 text-[13px]">
-                      <div className="flex justify-between">
-                        <span className="text-surface-variant-foreground">Workspace ID</span>
-                        <code className="text-[11px] bg-surface-variant/20 px-2 py-0.5 rounded font-mono">{company?.id}</code>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
+                        <Icon name="info" size={20} className="text-on-secondary-container" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-surface-variant-foreground">Created</span>
-                        <span className="text-surface-foreground">{company ? fmtDate(company.createdAt) : "—"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-surface-variant-foreground">Last Updated</span>
-                        <span className="text-surface-foreground">{company ? fmtDate(company.updatedAt) : "—"}</span>
-                      </div>
+                      <p className="text-title-small text-surface-foreground">Workspace Details</p>
                     </div>
+                    <List className="py-0">
+                      <ListItem
+                        lines={1}
+                        supporting="Workspace ID"
+                        trailing={
+                          <Chip variant="filter" className="font-mono text-[11px]">{company?.id}</Chip>
+                        }
+                      >
+                        Identifier
+                      </ListItem>
+                      <Divider />
+                      <ListItem lines={1} supporting="When this workspace was created" trailing={<span className="text-body-small text-surface-foreground">{company ? fmtDate(company.createdAt) : "—"}</span>}>
+                        Created
+                      </ListItem>
+                      <Divider />
+                      <ListItem lines={1} supporting="Last settings update" trailing={<span className="text-body-small text-surface-foreground">{company ? fmtDate(company.updatedAt) : "—"}</span>}>
+                        Updated
+                      </ListItem>
+                    </List>
                   </CardContent>
                 </Card>
               </div>
             </div>
           )}
 
-          {/* Financial Section */}
+          {/* ── Financial ────────────────────────────────────────────────── */}
           {activeSection === "financial" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-[22px] leading-7 font-normal text-surface-foreground">Financial Settings</h2>
-                <p className="text-[14px] text-surface-variant-foreground mt-1">Currency, fiscal year, and cost calculation parameters.</p>
+                <h2 className="text-title-large text-surface-foreground">Financial Settings</h2>
+                <p className="text-body-medium text-surface-variant-foreground mt-1">Currency, fiscal year, and cost calculation parameters.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card variant="outlined">
-                  <CardContent className="p-5 space-y-4">
-                    <h3 className="text-[14px] font-medium text-surface-foreground">Currency & Fiscal Year</h3>
+                  <CardContent className="p-6 space-y-5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
+                        <Icon name="currency_exchange" size={20} className="text-on-tertiary-container" />
+                      </div>
+                      <p className="text-title-small text-surface-foreground">Currency & Fiscal Year</p>
+                    </div>
                     <TextField
                       variant="outlined"
                       label="Currency"
@@ -291,8 +355,13 @@ export default function SettingsPage() {
                 </Card>
 
                 <Card variant="outlined">
-                  <CardContent className="p-5 space-y-4">
-                    <h3 className="text-[14px] font-medium text-surface-foreground">Working Days</h3>
+                  <CardContent className="p-6 space-y-5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
+                        <Icon name="schedule" size={20} className="text-on-primary-container" />
+                      </div>
+                      <p className="text-title-small text-surface-foreground">Working Days</p>
+                    </div>
                     <TextField
                       variant="outlined"
                       label="Working Days per Year"
@@ -315,72 +384,73 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* Danger Zone Section */}
+          {/* ── Danger Zone ──────────────────────────────────────────────── */}
           {activeSection === "danger" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-[22px] leading-7 font-normal text-error">Danger Zone</h2>
-                <p className="text-[14px] text-surface-variant-foreground mt-1">Destructive actions that cannot be undone.</p>
+                <h2 className="text-title-large text-error">Danger Zone</h2>
+                <p className="text-body-medium text-surface-variant-foreground mt-1">Destructive actions that cannot be undone.</p>
               </div>
 
-              <div className="space-y-4">
-                <Card variant="outlined" className="border-outline-variant">
-                  <CardContent className="p-5 flex items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant/20 shrink-0">
+              <Card variant="outlined">
+                <List className="py-0">
+                  {/* Export */}
+                  <ListItem
+                    lines={2}
+                    leading={
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant/30">
                         <Icon name="download" size={20} className="text-surface-variant-foreground" />
                       </div>
-                      <div>
-                        <p className="text-[14px] font-medium text-surface-foreground">Export All Data</p>
-                        <p className="text-[13px] text-surface-variant-foreground">Download all workspace data as CSV files.</p>
-                      </div>
-                    </div>
-                    <Button variant="outlined" disabled className="shrink-0">Coming Soon</Button>
-                  </CardContent>
-                </Card>
+                    }
+                    supporting="Download all workspace data as CSV files."
+                    trailing={<Button variant="outlined" disabled>Coming Soon</Button>}
+                  >
+                    Export All Data
+                  </ListItem>
 
-                <Card variant="outlined" className="border-amber-300 dark:border-amber-700">
-                  <CardContent className="p-5 flex items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 shrink-0">
-                        <Icon name="restart_alt" size={20} className="text-amber-600" />
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-medium text-surface-foreground">Reset All Data</p>
-                        <p className="text-[13px] text-surface-variant-foreground">
-                          Delete all members, org structure, roles, positions, calendar data, and capacity allocations. Super admin accounts will be preserved.
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outlined" className="text-amber-600 border-amber-300 dark:border-amber-700 shrink-0" onClick={() => setShowResetDialog(true)}>
-                      <Icon name="restart_alt" size={18} />Reset
-                    </Button>
-                  </CardContent>
-                </Card>
+                  <Divider />
 
-                <Card variant="outlined" className="border-error/30">
-                  <CardContent className="p-5 flex items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error/12 shrink-0">
-                        <Icon name="delete_forever" size={20} className="text-error" />
+                  {/* Reset */}
+                  <ListItem
+                    lines={2}
+                    leading={
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
+                        <Icon name="restart_alt" size={20} className="text-on-error-container" />
                       </div>
-                      <div>
-                        <p className="text-[14px] font-medium text-surface-foreground">Delete Workspace</p>
-                        <p className="text-[13px] text-surface-variant-foreground">Permanently delete this workspace and all its data. This cannot be undone.</p>
+                    }
+                    supporting="Delete all members, org structure, roles, capacity data. Preserves super admin accounts."
+                    trailing={
+                      <Button variant="tonal" className="text-error" onClick={() => setShowResetDialog(true)}>
+                        <Icon name="restart_alt" size={18} />Reset
+                      </Button>
+                    }
+                  >
+                    Reset All Data
+                  </ListItem>
+
+                  <Divider />
+
+                  {/* Delete */}
+                  <ListItem
+                    lines={2}
+                    leading={
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
+                        <Icon name="delete_forever" size={20} className="text-on-error-container" />
                       </div>
-                    </div>
-                    <Button variant="outlined" className="text-error border-error/30 shrink-0" disabled>
-                      <Icon name="delete_forever" size={18} />Delete
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+                    }
+                    supporting="Permanently delete this workspace and all its data."
+                    trailing={<Button variant="outlined" className="text-error border-error/30" disabled><Icon name="delete_forever" size={18} />Delete</Button>}
+                  >
+                    Delete Workspace
+                  </ListItem>
+                </List>
+              </Card>
             </div>
           )}
         </div>
       </div>
 
-      {/* Reset Confirmation Dialog */}
+      {/* Reset Confirmation Dialog — M3 Dialog */}
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent icon="warning">
           <DialogHeader centered>
@@ -388,11 +458,10 @@ export default function SettingsPage() {
             <DialogDescription>
               This will permanently delete all members, org structure, positions, roles, calendar data,
               capacity allocations, and rate cards. Only super admin accounts will be preserved.
-              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-[13px] text-surface-variant-foreground">
+            <p className="text-body-small text-surface-variant-foreground">
               Type <strong className="text-error">RESET</strong> to confirm:
             </p>
             <TextField
