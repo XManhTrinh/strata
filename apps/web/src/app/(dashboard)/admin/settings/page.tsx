@@ -22,12 +22,11 @@ function fmtDate(d: string) {
   });
 }
 
-type SettingsSection = "general" | "financial" | "workspace" | "danger";
+type SettingsSection = "general" | "financial" | "danger";
 
 const NAV_ITEMS: { id: SettingsSection; label: string; icon: string }[] = [
   { id: "general", label: "General", icon: "business" },
   { id: "financial", label: "Financial", icon: "payments" },
-  { id: "workspace", label: "Workspace", icon: "analytics" },
   { id: "danger", label: "Danger Zone", icon: "warning" },
 ];
 
@@ -164,8 +163,29 @@ export default function SettingsPage() {
         )}
       </AppBar>
 
+      {/* Workspace Overview Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 shrink-0">
+        {[
+          { label: "Members", value: company?.stats.members ?? 0, icon: "group", color: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600" },
+          { label: "Roles", value: company?.stats.roles ?? 0, icon: "shield", color: "bg-violet-100 dark:bg-violet-900/30", iconColor: "text-violet-600" },
+          { label: "Positions", value: company?.stats.positions ?? 0, icon: "work", color: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-600" },
+          { label: "Org Units", value: company?.stats.orgUnits ?? 0, icon: "lan", color: "bg-amber-100 dark:bg-amber-900/30", iconColor: "text-amber-600" },
+          { label: "Unit Types", value: company?.stats.orgUnitTypes ?? 0, icon: "label", color: "bg-cyan-100 dark:bg-cyan-900/30", iconColor: "text-cyan-600" },
+        ].map((stat) => (
+          <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-outline-variant/50 bg-surface px-4 py-3">
+            <div className={`flex items-center justify-center w-9 h-9 rounded-full ${stat.color} shrink-0`}>
+              <Icon name={stat.icon} size={18} className={stat.iconColor} />
+            </div>
+            <div>
+              <p className="text-[20px] leading-6 font-normal text-surface-foreground">{stat.value}</p>
+              <p className="text-[11px] text-surface-variant-foreground">{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Main Layout: Side Nav + Content */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] mt-4 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
         {/* Side Navigation */}
         <nav className="border-b lg:border-b-0 lg:border-r border-outline-variant py-2 flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
           {NAV_ITEMS.map((item) => (
@@ -291,36 +311,6 @@ export default function SettingsPage() {
                     />
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          )}
-
-          {/* Workspace Section */}
-          {activeSection === "workspace" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-[22px] leading-7 font-normal text-surface-foreground">Workspace Overview</h2>
-                <p className="text-[14px] text-surface-variant-foreground mt-1">Current workspace statistics and usage.</p>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                {[
-                  { label: "Members", value: company?.stats.members ?? 0, icon: "group", color: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600" },
-                  { label: "Roles", value: company?.stats.roles ?? 0, icon: "shield", color: "bg-violet-100 dark:bg-violet-900/30", iconColor: "text-violet-600" },
-                  { label: "Positions", value: company?.stats.positions ?? 0, icon: "work", color: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-600" },
-                  { label: "Org Units", value: company?.stats.orgUnits ?? 0, icon: "lan", color: "bg-amber-100 dark:bg-amber-900/30", iconColor: "text-amber-600" },
-                  { label: "Unit Types", value: company?.stats.orgUnitTypes ?? 0, icon: "label", color: "bg-cyan-100 dark:bg-cyan-900/30", iconColor: "text-cyan-600" },
-                ].map((stat) => (
-                  <Card key={stat.label} variant="outlined">
-                    <CardContent className="p-4 text-center">
-                      <div className={`flex items-center justify-center w-10 h-10 rounded-full ${stat.color} mx-auto mb-2`}>
-                        <Icon name={stat.icon} size={20} className={stat.iconColor} />
-                      </div>
-                      <p className="text-[28px] font-normal text-surface-foreground">{stat.value}</p>
-                      <p className="text-[12px] text-surface-variant-foreground">{stat.label}</p>
-                    </CardContent>
-                  </Card>
-                ))}
               </div>
             </div>
           )}
