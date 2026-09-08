@@ -441,18 +441,21 @@ function MappingStep({
       <Card variant="outlined" className="overflow-visible">
         <div>
           {/* Header */}
-          <div className="grid grid-cols-[6fr_20px_5fr] gap-x-2 items-center px-3 py-2 bg-surface-container-low/50 border-b border-outline-variant/50">
+          <div className="grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 bg-surface-container-low/50 border-b border-outline-variant/50">
             <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">CSV Column</p>
             <div />
             <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">Maps To</p>
+            <div />
           </div>
           {/* Rows */}
-          {columnMappings.map((mapping, idx) => (
-            <div key={idx} className="grid grid-cols-[6fr_20px_5fr] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors">
+          {columnMappings.map((mapping, idx) => {
+            const isSkipped = mapping.target === "skip";
+            return (
+            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""}`}>
               <div className="flex items-center gap-1.5 min-w-0">
                 <Icon name="table_chart" size={12} className="text-surface-variant-foreground shrink-0" />
-                <span className="text-[11px] text-surface-foreground font-medium truncate">{mapping.csvHeader}</span>
-                {csvRows.length > 0 && csvRows[0][idx] && (
+                <span className={`text-[11px] font-medium truncate ${isSkipped ? "line-through text-surface-variant-foreground" : "text-surface-foreground"}`}>{mapping.csvHeader}</span>
+                {!isSkipped && csvRows.length > 0 && csvRows[0][idx] && (
                   <span className="text-[10px] text-surface-variant-foreground/60 truncate max-w-20">({csvRows[0][idx]})</span>
                 )}
               </div>
@@ -468,8 +471,17 @@ function MappingStep({
                   className="w-full text-[11px]"
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => onMappingChange(idx, isSkipped ? "extra" : "skip")}
+                className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors"
+                title={isSkipped ? "Restore column" : "Skip column"}
+              >
+                <Icon name={isSkipped ? "undo" : "close"} size={14} className="text-surface-variant-foreground" />
+              </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 
