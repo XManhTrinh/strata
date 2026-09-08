@@ -451,11 +451,27 @@ export default function RolesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Tooltip content="Duplicate this role" side="bottom">
-                      <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
-                        <Icon name="content_copy" size={18} />Duplicate
-                      </Button>
-                    </Tooltip>
+                    {isDirty && (
+                      <>
+                        <Chip variant="filter" selected className="shrink-0">
+                          {changeCount} unsaved
+                        </Chip>
+                        <Button variant="text" onClick={handleDiscard} disabled={bulkPermissionMutation.isPending}>
+                          Discard
+                        </Button>
+                        <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending}>
+                          <Icon name="save" size={18} />
+                          {bulkPermissionMutation.isPending ? "Saving..." : "Save"}
+                        </Button>
+                      </>
+                    )}
+                    {!isDirty && (
+                      <Tooltip content="Duplicate this role" side="bottom">
+                        <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
+                          <Icon name="content_copy" size={18} />Duplicate
+                        </Button>
+                      </Tooltip>
+                    )}
                   </div>
                 </div>
               </div>
@@ -482,32 +498,6 @@ export default function RolesPage() {
                   />
                 )}
               </div>
-
-              {/* Floating Save Bar */}
-              <AnimatePresence>
-                {isDirty && (
-                  <motion.div
-                    initial={{ y: 80, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 80, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-                    className="shrink-0 border-t border-outline-variant bg-surface-container px-6 py-3 flex items-center justify-between gap-4"
-                  >
-                    <p className="text-[13px] text-surface-variant-foreground">
-                      <span className="font-medium text-foreground">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Button variant="text" onClick={handleDiscard} disabled={bulkPermissionMutation.isPending}>
-                        Discard
-                      </Button>
-                      <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending}>
-                        <Icon name="save" size={18} />
-                        {bulkPermissionMutation.isPending ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
