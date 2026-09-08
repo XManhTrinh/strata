@@ -24,11 +24,12 @@ import {
   useRateCards,
   useUpsertRateCard,
   useDeleteRateCard,
-  useOrgUnits,
+  useOrgUnitTree,
 } from "@/services";
 import type { SquadCapacitySummary, PeriodValues, MemberAllocation, UpsertAllocationDto } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -127,7 +128,7 @@ export default function CapacityPage() {
   } | null>(null);
 
   const { data: squads, isLoading, isError, error } = useCapacitySummary(companyId, fiscalYear);
-  const { data: orgUnits = [] } = useOrgUnits(companyId);
+  const { data: orgUnits = [] } = useOrgUnitTree(companyId);
   const { data: rateCards = [] } = useRateCards(companyId);
   const saveAllocationsMutation = useSaveAllocations();
   const upsertRateCardMutation = useUpsertRateCard();
@@ -334,15 +335,6 @@ export default function CapacityPage() {
     return { value: String(y), label: `FY ${y}` };
   });
 
-  const toggleSquadFilter = useCallback((squadId: string) => {
-    setSelectedSquadIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(squadId)) next.delete(squadId);
-      else next.add(squadId);
-      return next;
-    });
-  }, []);
-
   // ─── Loading ────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -400,20 +392,13 @@ export default function CapacityPage() {
 
         <div className="w-px h-6 bg-outline-variant mx-1" />
 
-        {/* Squad multi-select chips */}
-        {selectedSquadIds.size > 0 && (
-          <Chip variant="filter" selected={false} onClick={() => setSelectedSquadIds(new Set())} leadingIcon="close">Clear squads</Chip>
-        )}
-        {(squads ?? []).map((s) => (
-          <Chip
-            key={s.orgUnitId}
-            variant="filter"
-            selected={selectedSquadIds.has(s.orgUnitId)}
-            onClick={() => toggleSquadFilter(s.orgUnitId)}
-          >
-            {s.orgUnitName}
-          </Chip>
-        ))}
+        {/* Org unit tree multi-select */}
+        <OrgUnitTreeSelect
+          tree={orgUnits}
+          selectedIds={selectedSquadIds}
+          onSelectionChange={setSelectedSquadIds}
+          placeholder="Filter by org unit..."
+        />
       </div>
 
       {/* KPI Cards */}

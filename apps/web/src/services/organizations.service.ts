@@ -110,3 +110,18 @@ export function useDeleteOrgUnit() {
     },
   });
 }
+
+/**
+ * Fetches the org unit hierarchy as a pre-built tree from the API.
+ * Each node includes nested `children`.
+ */
+export function useOrgUnitTree(companyId: string) {
+  return useQuery({
+    queryKey: ["org-units", companyId, "tree"],
+    queryFn: () =>
+      apiClient<OrganizationUnit[]>(
+        `/companies/${companyId}/org-units/tree`,
+      ),
+    enabled: !!companyId,
+  });
+}
