@@ -234,47 +234,37 @@ function SortableOrgLevelItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+      className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${
         isDragging
           ? "border-primary bg-primary/5 shadow-lg"
           : "border-outline-variant/50 bg-surface"
       }`}
     >
-      {/* Drag handle */}
       <button
         type="button"
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none"
+        className="cursor-grab active:cursor-grabbing text-surface-variant-foreground hover:text-surface-foreground shrink-0 touch-none"
         aria-label={`Reorder ${csvHeader}`}
       >
-        <Icon name="drag_indicator" size={18} />
+        <Icon name="drag_indicator" size={16} />
       </button>
-
-      {/* Rank badge */}
-      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold shrink-0">
+      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-[10px] font-semibold shrink-0">
         {rank + 1}
       </span>
-
-      {/* CSV header label */}
-      <span className="text-[13px] text-surface-variant-foreground w-28 shrink-0 truncate" title={csvHeader}>
+      <span className="text-[12px] text-surface-variant-foreground w-24 shrink-0 truncate" title={csvHeader}>
         {csvHeader}
       </span>
-
-      <span className="text-[12px] text-muted-foreground shrink-0">→</span>
-
-      {/* Unit type name input */}
-      <TextField
-        variant="outlined"
+      <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/50 shrink-0" />
+      <input
+        type="text"
         value={unitTypeName}
         onChange={(e) => onUnitTypeChange(e.target.value)}
-        placeholder="e.g. Division, Tribe, Squad"
-        className="flex-1"
+        placeholder="Type name"
+        className="flex-1 min-w-0 h-6 px-1.5 text-[12px] bg-transparent border border-outline-variant/40 rounded focus:border-primary focus:outline-none"
       />
-
-      {/* Level indicator */}
-      <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right">
-        {rank === 0 ? "Top level" : rank === total - 1 ? "Lowest" : `Level ${rank + 1}`}
+      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-12 text-right">
+        {rank === 0 ? "Top" : rank === total - 1 ? "Bottom" : `Lvl ${rank + 1}`}
       </span>
     </div>
   );
@@ -1691,12 +1681,12 @@ export default function PeoplePage() {
               {/* Org Level hierarchy order — drag to reorder */}
               {orgLevelOrder.length > 0 && (
                 <div className="mt-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/50">
-                  <p className="text-[13px] font-medium text-surface-foreground mb-1">
-                    Organization Hierarchy Order
-                  </p>
-                  <p className="text-[11px] text-muted-foreground mb-3">
-                    Drag to reorder. Top = highest level, bottom = lowest (squad/team).
-                  </p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[12px] font-medium text-surface-foreground">
+                      Organization Hierarchy Order
+                    </p>
+                    <p className="text-[10px] text-surface-variant-foreground">Drag to reorder</p>
+                  </div>
                   <DndContext
                     sensors={dndSensors}
                     collisionDetection={closestCenter}
@@ -1712,7 +1702,7 @@ export default function PeoplePage() {
                     }}
                   >
                     <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {orgLevelOrder.map((idx, rank) => (
                           <SortableOrgLevelItem
                             key={idx}
@@ -1732,11 +1722,9 @@ export default function PeoplePage() {
                     </SortableContext>
                   </DndContext>
                   {/* Hierarchy preview */}
-                  <div className="mt-3 pt-2 border-t border-outline-variant/50">
-                    <p className="text-[11px] text-muted-foreground">
-                      Hierarchy: {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
-                    </p>
-                  </div>
+                  <p className="mt-2 text-[10px] text-surface-variant-foreground">
+                    {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
+                  </p>
                 </div>
               )}
 
