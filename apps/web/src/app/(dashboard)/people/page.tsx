@@ -23,6 +23,7 @@ import {
 import { Button } from "@vkieu/mui/buttons";
 import { AppBar } from "@/components/layout/app-bar";
 import { apiClient } from "@/lib/api-client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   usePeople,
   useCreatePerson,
@@ -183,6 +184,7 @@ function autoDetectMapping(header: string): MappingTarget {
 
 export default function PeoplePage() {
   const companyId = useCompanyId();
+  const queryClient = useQueryClient();
 
   // ── Data queries (always called) ──────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -580,6 +582,8 @@ export default function PeoplePage() {
         } else {
           toast.success(msg, { id: toastId });
         }
+        // Refresh members list and metadata keys (new columns from CSV)
+        queryClient.invalidateQueries({ queryKey: ["members", companyId] });
       })
       .catch((err) => {
         toast.error(err.message || "Import failed", { id: toastId });
