@@ -450,24 +450,24 @@ export default function PeoplePage() {
             {showColumnToggle && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowColumnToggle(false)} />
-                <div className="absolute right-0 top-full mt-2 z-50 w-64 rounded-xl bg-surface-container-low border border-outline-variant shadow-lg p-3 space-y-1">
-                  <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider px-2 mb-2">Core Columns</p>
+                <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl bg-surface-container-low border border-outline-variant shadow-lg py-1">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-3 py-1">Core</p>
                   {CORE_COLUMNS.map((col) => (
-                    <div key={col.key} className="flex items-center gap-3 px-2 py-1.5 rounded-lg">
-                      <Checkbox checked disabled />
-                      <span className="text-[14px] text-surface-foreground">{col.label}</span>
+                    <div key={col.key} className="flex items-center gap-2 px-3 h-7 opacity-50">
+                      <Checkbox checked disabled className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5" />
+                      <span className="text-[12px] text-surface-foreground">{col.label}</span>
                     </div>
                   ))}
                   {metadataKeys.length > 0 && (
                     <>
-                      <Divider className="my-2" />
-                      <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider px-2 mb-2">Extra Columns</p>
+                      <Divider className="my-1" />
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-3 py-1">Extra</p>
                       {metadataKeys.map((key) => {
                         const colKey = `meta:${key}`;
                         return (
-                          <label key={colKey} className="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-surface-foreground/4 cursor-pointer">
-                            <Checkbox checked={visibleMetaKeys.has(colKey)} onCheckedChange={() => toggleMetaColumn(colKey)} />
-                            <span className="text-[14px] text-surface-foreground">{key}</span>
+                          <label key={colKey} className="flex items-center gap-2 px-3 h-7 rounded hover:bg-surface-foreground/4 cursor-pointer">
+                            <Checkbox checked={visibleMetaKeys.has(colKey)} onCheckedChange={() => toggleMetaColumn(colKey)} className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5" />
+                            <span className="text-[12px] text-surface-foreground">{key}</span>
                           </label>
                         );
                       })}
