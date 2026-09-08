@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <CompanyProvider>
         <ReducedMotionProvider>
           <AppShell>
-            <div className="w-full min-w-0 overflow-x-auto space-y-4 md:space-y-6">
+            <div className="w-full min-w-0 overflow-x-auto space-y-4 md:space-y-6 h-full min-h-0">
               {children}
             </div>
           </AppShell>

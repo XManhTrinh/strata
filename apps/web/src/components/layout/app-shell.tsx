@@ -15,11 +15,11 @@ export function AppShell({ children }: AppShellProps) {
     <>
       <SkipToContent />
       <RouteAnnouncer />
-      <div className="min-h-screen bg-background">
+      <div className="h-screen bg-background overflow-hidden">
         <Sidebar />
-        <div className="flex flex-col min-h-screen md:ml-24">
+        <div className="flex flex-col h-screen md:ml-24">
           <Header />
-          <main id="main-content" className="flex-1 px-4 pb-4 md:px-6 md:pb-6" tabIndex={-1}>
+          <main id="main-content" className="flex-1 min-h-0 px-4 pb-4 md:px-6 md:pb-6" tabIndex={-1}>
             {children}
           </main>
         </div>

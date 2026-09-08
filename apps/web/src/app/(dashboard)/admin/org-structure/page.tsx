@@ -8,7 +8,6 @@ import { Button } from "@vkieu/mui/buttons";
 import { IconButton } from "@vkieu/mui/buttons";
 import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
@@ -24,6 +23,7 @@ import {
 import { toast } from "sonner";
 import {
   useOrgUnits,
+  useOrgUnitTree,
   useCreateOrgUnit,
   useUpdateOrgUnit,
   useDeleteOrgUnit,
@@ -32,6 +32,7 @@ import {
 import { useOrgUnitTypes } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { OrgUnitFlow } from "@/components/flow-org/OrgUnitFlow";
 
 interface OrgTreeNode {
   id: string;
@@ -52,7 +53,7 @@ function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
       name: unit.name,
       typeId: unit.typeId,
       typeName: unit.type?.name || "Unknown",
-      typeColor: "#6B7280",
+      typeColor: unit.type?.color || "#6B7280",
       parentId: unit.parentId,
       children: [],
     });
@@ -120,9 +121,19 @@ function TreeNode({
         )}
 
         <div className="flex flex-1 items-center gap-3">
-          <Icon name="folder" size={18} className="text-primary" />
+          <div
+            className="flex items-center justify-center w-6 h-6 rounded-md shrink-0"
+            style={{ backgroundColor: unit.typeColor + "25" }}
+          >
+            <span className="material-symbols-rounded text-[16px]" style={{ color: unit.typeColor }}>folder</span>
+          </div>
           <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
-          <Chip variant="assist">{unit.typeName}</Chip>
+          <span
+            className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: unit.typeColor + "20", color: unit.typeColor }}
+          >
+            {unit.typeName}
+          </span>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -165,11 +176,13 @@ function TreeNode({
 export default function OrgStructurePage() {
   const companyId = useCompanyId();
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "flow">("list");
   const [showModal, setShowModal] = useState(false);
   const [editingUnit, setEditingUnit] = useState<OrgTreeNode | null>(null);
   const [formData, setFormData] = useState({ name: "", typeId: "", parentId: "" });
 
   const { data: orgUnits = [], isLoading, error, refetch } = useOrgUnits(companyId);
+  const { data: orgUnitTreeData = [] } = useOrgUnitTree(companyId);
   const { data: orgUnitTypes = [] } = useOrgUnitTypes(companyId);
   const createMutation = useCreateOrgUnit();
   const updateMutation = useUpdateOrgUnit();
@@ -186,6 +199,21 @@ export default function OrgStructurePage() {
 
   const openEdit = (unit: OrgTreeNode) => {
     setEditingUnit(unit);
+    setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId || "" });
+    setShowModal(true);
+  };
+
+  /** Edit handler for the flow view (receives OrganizationUnit instead of OrgTreeNode). */
+  const openEditFromFlow = (unit: OrganizationUnit) => {
+    setEditingUnit({
+      id: unit.id,
+      name: unit.name,
+      typeId: unit.typeId,
+      typeName: unit.type?.name || "Unknown",
+      typeColor: unit.type?.color || "#6B7280",
+      parentId: unit.parentId,
+      children: [],
+    });
     setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId || "" });
     setShowModal(true);
   };
@@ -279,7 +307,7 @@ export default function OrgStructurePage() {
 
   return (
     <motion.div
-      className="space-y-6"
+      className="flex flex-col h-full min-h-0 gap-6 overflow-hidden"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -287,7 +315,7 @@ export default function OrgStructurePage() {
       transition={defaultTransition}
     >
       {/* Header */}
-      <AppBar className="justify-between">
+      <AppBar className="justify-between shrink-0">
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
@@ -300,17 +328,42 @@ export default function OrgStructurePage() {
         </Button>
       </AppBar>
 
-      {/* Search */}
-      <Search
-        className="max-w-sm"
-        value={search}
-        onValueChange={setSearch}
-        placeholder="Search units..."
-      />
+      {/* Search + View Toggle */}
+      <div className="flex items-center justify-between gap-4 shrink-0">
+        <Search
+          className="max-w-sm"
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search units..."
+        />
+        <div className="flex items-center gap-1 rounded-full bg-surface-container-highest/50 p-1">
+          <Tooltip content="List view">
+            <IconButton
+              variant={viewMode === "list" ? "filled-tonal" : "standard"}
+              size="xs"
+              onClick={() => setViewMode("list")}
+              aria-label="List view"
+            >
+              <Icon name="list" size={18} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip content="Flow view">
+            <IconButton
+              variant={viewMode === "flow" ? "filled-tonal" : "standard"}
+              size="xs"
+              onClick={() => setViewMode("flow")}
+              aria-label="Flow view"
+            >
+              <Icon name="account_tree" size={18} />
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
 
-      {/* Tree */}
-      <Card variant="elevated">
-        <CardContent className="p-2">
+      {/* List View */}
+      {viewMode === "list" && (
+      <Card variant="elevated" className="flex-1 min-h-0 overflow-hidden">
+        <CardContent className="p-2 h-full overflow-y-auto">
           {isLoading ? (
             <div className="space-y-3 p-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -350,6 +403,32 @@ export default function OrgStructurePage() {
           )}
         </CardContent>
       </Card>
+      )}
+
+      {/* Flow View */}
+      {viewMode === "flow" && (
+        orgUnitTreeData.length === 0 && !isLoading ? (
+          <Card variant="elevated">
+            <CardContent className="flex flex-col items-center py-12 text-center">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
+                <Icon name="account_tree" size={24} className="text-surface-variant-foreground" />
+              </div>
+              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">No units to visualize</h2>
+              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">Create org units first, then switch to flow view.</p>
+              <Button onClick={() => { setViewMode("list"); openCreate(); }}>
+                <Icon name="add" size={18} />Create Unit
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <OrgUnitFlow
+            tree={orgUnitTreeData}
+            onEdit={openEditFromFlow}
+            onAddChild={(parentId) => openCreate(parentId)}
+            onArchive={handleArchive}
+          />
+        )
+      )}
 
       {/* Create/Edit Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>

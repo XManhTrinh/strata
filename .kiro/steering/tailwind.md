@@ -35,3 +35,10 @@ When a Tailwind utility class exists for a value, always use the canonical class
 
 ## M3 typography
 This project uses Material Design 3 type scale. Prefer M3 semantic classes (`text-body-medium`, `text-label-small`, `text-title-large`) where available. Use arbitrary pixel sizes only for compact UI elements (tables, chips, badges).
+
+
+## Important modifier
+Tailwind v4 uses the **suffix** `!` syntax for the important modifier:
+- `shadow-md!` not `!shadow-md`
+- `bg-surface!` not `!bg-surface`
+- `[&>button]:bg-red!` not `[&>button]:!bg-red`

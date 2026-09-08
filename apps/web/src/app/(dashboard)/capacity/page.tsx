@@ -469,7 +469,7 @@ export default function CapacityPage() {
             <Card variant="elevated">
               <CardContent className="flex flex-col items-center py-16 text-center">
                 <Icon name="stacked_bar_chart" size={40} className="text-muted-foreground/30 mb-4" />
-                <p className="text-[16px] font-medium text-foreground mb-1">No capacity data</p>
+                <p className="text-base font-medium text-foreground mb-1">No capacity data</p>
                 <p className="text-[14px] text-muted-foreground">Import members to generate default allocations.</p>
               </CardContent>
             </Card>
@@ -492,7 +492,7 @@ export default function CapacityPage() {
                   <CardContent className="p-0">
                     <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
                       <div>
-                        <h3 className="text-[16px] font-medium text-surface-foreground">{squad.orgUnitName}</h3>
+                        <h3 className="text-base font-medium text-surface-foreground">{squad.orgUnitName}</h3>
                         <p className="text-[12px] text-surface-variant-foreground">
                           {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
                         </p>
@@ -694,7 +694,7 @@ export default function CapacityPage() {
           <CardContent className="p-0">
             <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
               <div>
-                <h3 className="text-[16px] font-medium text-surface-foreground">Perm Rate Cards</h3>
+                <h3 className="text-base font-medium text-surface-foreground">Perm Rate Cards</h3>
                 <p className="text-[12px] text-surface-variant-foreground">
                   Annual cost lookup by Division × Location × Grade. SubCon uses day rate × 228.
                 </p>
@@ -706,7 +706,7 @@ export default function CapacityPage() {
             {rateCards.length === 0 ? (
               <div className="flex flex-col items-center py-16 text-center">
                 <Icon name="credit_card" size={40} className="text-muted-foreground/30 mb-4" />
-                <p className="text-[16px] font-medium text-foreground mb-1">No rate cards</p>
+                <p className="text-base font-medium text-foreground mb-1">No rate cards</p>
                 <p className="text-[14px] text-muted-foreground">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</p>
               </div>
             ) : (

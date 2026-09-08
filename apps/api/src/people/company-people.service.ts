@@ -794,8 +794,9 @@ export class CompanyPeopleService {
     name: string,
     parentId: string | null,
   ): Promise<string> {
+    // Match by name AND parent — null means root level (use explicit null, not undefined)
     const existing = await this.prisma.organizationUnit.findFirst({
-      where: { companyId, name, parentId: parentId ?? undefined },
+      where: { companyId, name, parentId: parentId === null ? null : parentId },
       select: { id: true },
     });
     if (existing) return existing.id;

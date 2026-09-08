@@ -661,7 +661,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
         <Card variant="outlined" className="border-secondary/30">
           <CardContent className="flex items-start gap-3 p-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container shrink-0">
-              <Icon name="group_work" size={16} className="text-on-secondary-container" />
+              <Icon name="workspaces" size={16} className="text-on-secondary-container" />
             </div>
             <div>
               <p className="text-label-medium text-surface-foreground">{duplicateRows} multi-squad allocation{duplicateRows !== 1 ? "s" : ""}</p>

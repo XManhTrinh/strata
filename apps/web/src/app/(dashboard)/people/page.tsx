@@ -458,7 +458,7 @@ export default function PeoplePage() {
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-destructive" />
             </div>
-            <h2 className="text-[16px] font-medium leading-6 text-foreground mb-2">Unable to load members</h2>
+            <h2 className="text-base font-medium leading-6 text-foreground mb-2">Unable to load members</h2>
             <p className="text-[14px] leading-5 text-muted-foreground mb-6">
               {error?.message || "Something went wrong while fetching member data."}
             </p>
@@ -701,7 +701,7 @@ export default function PeoplePage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <Avatar name={person.fullName} size="l" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[16px] font-medium leading-6 text-foreground truncate">{person.fullName}</p>
+                    <p className="text-base font-medium leading-6 text-foreground truncate">{person.fullName}</p>
                     <p className="text-[14px] leading-5 text-muted-foreground truncate">{person.email}</p>
                     {person.orgUnitName && (
                       <p className="text-[12px] leading-4 text-muted-foreground mt-0.5">{person.orgUnitName}</p>
