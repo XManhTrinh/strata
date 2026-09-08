@@ -485,7 +485,7 @@ export default function PeoplePage() {
       <AppBar className="justify-between">
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-foreground">Members</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">Manage workspace members and their roles.</p>
+          <p className="text-[14px] leading-5 text-muted-foreground">{data?.total ?? 0} members · Manage workspace members and their roles.</p>
         </div>
         <div className="flex items-center gap-2">
           <Tooltip content="Export visible columns to CSV">
@@ -511,9 +511,6 @@ export default function PeoplePage() {
             onValueChange={(val) => setSearch(val)}
             placeholder="Search by name or email..."
           />
-          <Chip variant="filter" selected={false} leadingIcon="group">
-            {data?.total ?? 0} members
-          </Chip>
         </div>
 
         <div className="flex items-center gap-2">

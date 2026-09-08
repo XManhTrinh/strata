@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { Icon } from "@vkieu/mui";
 import { Checkbox } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
 import { Search } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import type { OrganizationUnit } from "@/services";

@@ -676,9 +676,11 @@ export class CompanyPeopleService {
       });
       managerUserId = managerUser?.id;
     } else if (matchField === 'fullName') {
-      // Look up by person name → user (1:1 relation)
+      // Look up by person name → user (case-insensitive)
       const person = await this.prisma.person.findFirst({
-        where: { fullName: managerIdentifier },
+        where: {
+          fullName: { equals: managerIdentifier, mode: 'insensitive' },
+        },
         select: { user: { select: { id: true } } },
       });
       managerUserId = person?.user?.id;
@@ -690,7 +692,8 @@ export class CompanyPeopleService {
       });
       const match = memberships.find((m) => {
         const meta = (m.metadata as Record<string, string>) ?? {};
-        return meta[matchField] === managerIdentifier;
+        const val = meta[matchField];
+        return val?.toLowerCase() === managerIdentifier.toLowerCase();
       });
       managerUserId = match?.userId;
     }
