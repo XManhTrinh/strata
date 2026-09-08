@@ -21,6 +21,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  restrictToVerticalAxis,
+  restrictToParentElement,
+} from "@dnd-kit/modifiers";
+import {
   Search,
   Icon,
   Card,
@@ -553,6 +557,7 @@ export default function PeoplePage() {
                   <DndContext
                     sensors={dndSensors}
                     collisionDetection={closestCenter}
+                    modifiers={[restrictToVerticalAxis, restrictToParentElement]}
                     onDragEnd={(event: DragEndEvent) => {
                       const { active, over } = event;
                       if (over && active.id !== over.id) {
