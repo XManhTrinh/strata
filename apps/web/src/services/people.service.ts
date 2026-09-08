@@ -67,7 +67,9 @@ export interface ImportMemberRow {
   orgLevelTypes?: string[]; // ["Division", "Tribe", "Squad"] — type name per level
   position?: string;
   grade?: string;
-  lineManagerEmail?: string;
+  lineManagerEmail?: string; // kept for backward compat
+  lineManagerIdentifier?: string; // raw value from CSV (email, UIN, name, etc.)
+  lineManagerMatchField?: string; // "email" | "fullName" | any metadata key
   employmentType?: string;
   annualSalary?: string;
   dayRate?: string;

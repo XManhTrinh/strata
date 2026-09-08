@@ -34,7 +34,9 @@ export interface ImportMemberDto {
   orgLevelTypes?: string[]; // type name per level: ["Division", "Tribe", "Squad"]
   position?: string;
   grade?: string;
-  lineManagerEmail?: string;
+  lineManagerEmail?: string; // kept for backward compat
+  lineManagerIdentifier?: string; // the raw value from the CSV (could be email, UIN, name, etc.)
+  lineManagerMatchField?: string; // "email" | "fullName" | any metadata key
   employmentType?: string;
   annualSalary?: string;
   dayRate?: string;
@@ -464,9 +466,12 @@ export class CompanyPeopleService {
 
     // Phase 2: Resolve line manager relationships (all members exist now)
     for (const row of rows) {
-      if (!row.lineManagerEmail) continue;
+      // Support both legacy lineManagerEmail and the new flexible identifier
+      const identifier = row.lineManagerIdentifier || row.lineManagerEmail;
+      if (!identifier) continue;
+      const matchField = row.lineManagerMatchField || 'email';
       try {
-        await this.resolveLineManager(companyId, row.email, row.lineManagerEmail);
+        await this.resolveLineManager(companyId, row.email, identifier, matchField);
       } catch {
         // Silently skip — manager might not exist
       }
@@ -633,12 +638,19 @@ export class CompanyPeopleService {
    * e.g., "Digital | Marketplace | PLP" → creates hierarchy and returns PLP's ID.
    */
   /**
-   * Resolves a line manager relationship between two members by email.
+   * Resolves a line manager relationship between a member and their manager.
+   *
+   * The manager is identified by `managerIdentifier` matched against the field
+   * specified by `matchField`:
+   *   - "email"    → User.email
+   *   - "fullName" → Person.fullName
+   *   - anything else → treated as a metadata key on UserCompanyMembership
    */
   private async resolveLineManager(
     companyId: string,
     memberEmail: string,
-    managerEmail: string,
+    managerIdentifier: string,
+    matchField: string = 'email',
   ): Promise<void> {
     // Find member's user
     const memberUser = await this.prisma.user.findUnique({
@@ -654,16 +666,40 @@ export class CompanyPeopleService {
     });
     if (!memberMembership) return;
 
-    // Find manager's user
-    const managerUser = await this.prisma.user.findUnique({
-      where: { email: managerEmail },
-      select: { id: true },
-    });
-    if (!managerUser) return;
+    // Find manager's user based on the match field
+    let managerUserId: string | undefined;
 
-    // Find manager's membership
+    if (matchField === 'email') {
+      const managerUser = await this.prisma.user.findUnique({
+        where: { email: managerIdentifier },
+        select: { id: true },
+      });
+      managerUserId = managerUser?.id;
+    } else if (matchField === 'fullName') {
+      // Look up by person name → user (1:1 relation)
+      const person = await this.prisma.person.findFirst({
+        where: { fullName: managerIdentifier },
+        select: { user: { select: { id: true } } },
+      });
+      managerUserId = person?.user?.id;
+    } else {
+      // Treat as metadata key — search memberships in this company
+      const memberships = await this.prisma.userCompanyMembership.findMany({
+        where: { companyId, isSuperAdmin: false },
+        select: { userId: true, metadata: true },
+      });
+      const match = memberships.find((m) => {
+        const meta = (m.metadata as Record<string, string>) ?? {};
+        return meta[matchField] === managerIdentifier;
+      });
+      managerUserId = match?.userId;
+    }
+
+    if (!managerUserId) return;
+
+    // Verify manager has a membership in this company
     const managerMembership = await this.prisma.userCompanyMembership.findFirst({
-      where: { userId: managerUser.id, companyId },
+      where: { userId: managerUserId, companyId },
       select: { id: true },
     });
     if (!managerMembership) return;
@@ -676,30 +712,28 @@ export class CompanyPeopleService {
     if (existing) {
       await this.prisma.reportingRelationship.update({
         where: { id: existing.id },
-        data: { managerId: managerUser.id },
+        data: { managerId: managerUserId },
       });
     } else {
       await this.prisma.reportingRelationship.create({
         data: {
           companyId,
           userId: memberUser.id,
-          managerId: managerUser.id,
+          managerId: managerUserId,
         },
       });
     }
 
     // Auto-set canHaveDirectReports on the manager's position
-    if (managerMembership) {
-      const membership = await this.prisma.userCompanyMembership.findFirst({
-        where: { userId: managerUser.id, companyId },
-        select: { positionId: true },
+    const managerFullMembership = await this.prisma.userCompanyMembership.findFirst({
+      where: { userId: managerUserId, companyId },
+      select: { positionId: true },
+    });
+    if (managerFullMembership?.positionId) {
+      await this.prisma.position.update({
+        where: { id: managerFullMembership.positionId },
+        data: { canHaveDirectReports: true },
       });
-      if (membership?.positionId) {
-        await this.prisma.position.update({
-          where: { id: membership.positionId },
-          data: { canHaveDirectReports: true },
-        });
-      }
     }
   }
 

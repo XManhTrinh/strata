@@ -46,6 +46,8 @@ const ImportMemberSchema = z.object({
   position: z.string().optional(),
   grade: z.string().optional(),
   lineManagerEmail: z.string().optional(),
+  lineManagerIdentifier: z.string().optional(),
+  lineManagerMatchField: z.string().optional(),
   employmentType: z.string().optional(),
   annualSalary: z.string().optional(),
   dayRate: z.string().optional(),

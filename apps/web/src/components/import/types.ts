@@ -37,7 +37,7 @@ export const MAPPING_OPTIONS: { value: MappingTarget; label: string }[] = [
   { value: "orgLevel", label: "Org Level (specify type below)" },
   { value: "position", label: "Position" },
   { value: "grade", label: "Grade / Career Level" },
-  { value: "lineManager", label: "Line Manager (email)" },
+  { value: "lineManager", label: "Line Manager" },
   { value: "employmentType", label: "Employment Type (Perm/SubCon)" },
   { value: "salary", label: "Annual Salary (Perm)" },
   { value: "dayRate", label: "Day Rate (SubCon)" },

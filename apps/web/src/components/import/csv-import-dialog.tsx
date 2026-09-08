@@ -87,6 +87,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
   const [columnMappings, setColumnMappings] = useState<ColumnMapping[]>([]);
   const [orgLevelOrder, setOrgLevelOrder] = useState<number[]>([]);
   const [importDefaultRoleId, setImportDefaultRoleId] = useState("");
+  const [lineManagerMatchField, setLineManagerMatchField] = useState("email");
 
   // ── Reset ───────────────────────────────────────────────────────────────
   const reset = useCallback(() => {
@@ -97,6 +98,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     setColumnMappings([]);
     setOrgLevelOrder([]);
     setImportDefaultRoleId("");
+    setLineManagerMatchField("email");
   }, []);
 
   // ── File selection & parsing ────────────────────────────────────────────
@@ -226,7 +228,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
         orgLevelTypes: orgLevelTypesList.length > 0 ? orgLevelTypesList : undefined,
         position: posIdx >= 0 ? fields[posIdx]?.trim() || undefined : undefined,
         grade: gradeIdx >= 0 ? fields[gradeIdx]?.trim() || undefined : undefined,
-        lineManagerEmail: managerIdx >= 0 ? fields[managerIdx]?.trim() || undefined : undefined,
+        lineManagerIdentifier: managerIdx >= 0 ? fields[managerIdx]?.trim() || undefined : undefined,
+        lineManagerMatchField: managerIdx >= 0 && fields[managerIdx]?.trim() ? lineManagerMatchField : undefined,
         employmentType: empTypeIdx >= 0 ? fields[empTypeIdx]?.trim() || undefined : undefined,
         annualSalary: salaryIdx >= 0 ? fields[salaryIdx]?.trim() || undefined : undefined,
         dayRate: dayRateIdx >= 0 ? fields[dayRateIdx]?.trim() || undefined : undefined,
@@ -236,7 +239,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     }
 
     return { rows, errors };
-  }, [importStep, csvRows, columnMappings, importDefaultRoleId, orgLevelOrder]);
+  }, [importStep, csvRows, columnMappings, importDefaultRoleId, orgLevelOrder, lineManagerMatchField]);
 
   // ── Step navigation ─────────────────────────────────────────────────────
   const handleMappingNext = useCallback(() => {
@@ -324,6 +327,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
               columnMappings={columnMappings}
               orgLevelOrder={orgLevelOrder}
               importDefaultRoleId={importDefaultRoleId}
+              lineManagerMatchField={lineManagerMatchField}
               roles={roles}
               dndSensors={dndSensors}
               onMappingChange={handleMappingChange}
@@ -336,6 +340,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
                 });
               }}
               onDefaultRoleChange={setImportDefaultRoleId}
+              onLineManagerMatchFieldChange={setLineManagerMatchField}
             />
           )}
 
@@ -398,12 +403,14 @@ interface MappingStepProps {
   columnMappings: ColumnMapping[];
   orgLevelOrder: number[];
   importDefaultRoleId: string;
+  lineManagerMatchField: string;
   roles: { id: string; name: string }[];
   dndSensors: ReturnType<typeof useSensors>;
   onMappingChange: (index: number, target: MappingTarget) => void;
   onOrgLevelReorder: React.Dispatch<React.SetStateAction<number[]>>;
   onUnitTypeChange: (index: number, value: string) => void;
   onDefaultRoleChange: (value: string) => void;
+  onLineManagerMatchFieldChange: (value: string) => void;
 }
 
 function MappingStep({
@@ -412,12 +419,14 @@ function MappingStep({
   columnMappings,
   orgLevelOrder,
   importDefaultRoleId,
+  lineManagerMatchField,
   roles,
   dndSensors,
   onMappingChange,
   onOrgLevelReorder,
   onUnitTypeChange,
   onDefaultRoleChange,
+  onLineManagerMatchFieldChange,
 }: MappingStepProps) {
   return (
     <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto">
@@ -512,6 +521,35 @@ function MappingStep({
         </Card>
       )}
 
+      {/* Line Manager Matching */}
+      {columnMappings.some((m) => m.target === "lineManager") && (
+        <Card variant="outlined">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name="supervisor_account" size={16} className="text-primary" />
+              <p className="text-label-medium text-surface-foreground">Line Manager Matching</p>
+            </div>
+            <p className="text-[11px] text-surface-variant-foreground mb-2">
+              Which column should be used to identify the manager? The line manager value
+              will be matched against this field.
+            </p>
+            <Select
+              variant="outlined"
+              value={lineManagerMatchField}
+              onValueChange={onLineManagerMatchFieldChange}
+              options={[
+                { value: "email", label: "Email" },
+                { value: "fullName", label: "Full Name" },
+                ...columnMappings
+                  .filter((m) => m.target === "extra")
+                  .map((m) => ({ value: m.csvHeader, label: `${m.csvHeader} (metadata)` })),
+              ]}
+              className="w-full"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Default Role */}
       <Card variant="outlined">
         <CardContent className="p-3">
@@ -558,7 +596,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
   const grades = new Set(rows.map((r) => r.grade).filter(Boolean));
   const permCount = rows.filter((r) => r.employmentType === "Perm").length;
   const subConCount = rows.filter((r) => r.employmentType === "SubCon").length;
-  const withManagers = rows.filter((r) => r.lineManagerEmail).length;
+  const withManagers = rows.filter((r) => r.lineManagerIdentifier).length;
   const withSalary = rows.filter((r) => r.annualSalary).length;
   const withDayRate = rows.filter((r) => r.dayRate).length;
 
