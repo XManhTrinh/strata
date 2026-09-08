@@ -597,6 +597,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
   const permCount = rows.filter((r) => r.employmentType === "Perm").length;
   const subConCount = rows.filter((r) => r.employmentType === "SubCon").length;
   const withManagers = rows.filter((r) => r.lineManagerIdentifier).length;
+  const uniqueManagers = new Set(rows.map((r) => r.lineManagerIdentifier).filter(Boolean)).size;
   const withSalary = rows.filter((r) => r.annualSalary).length;
   const withDayRate = rows.filter((r) => r.dayRate).length;
 
@@ -667,7 +668,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
           <div className="flex flex-wrap gap-2">
             {permCount > 0 && <Chip variant="filter" selected leadingIcon="badge">{permCount} Perm</Chip>}
             {subConCount > 0 && <Chip variant="filter" selected leadingIcon="engineering">{subConCount} SubCon</Chip>}
-            {withManagers > 0 && <Chip variant="filter" leadingIcon="supervisor_account">{withManagers} line managers</Chip>}
+            {withManagers > 0 && <Chip variant="filter" leadingIcon="supervisor_account">{uniqueManagers} managers ({withManagers} reports)</Chip>}
             {withSalary > 0 && <Chip variant="filter" leadingIcon="payments">{withSalary} salaries</Chip>}
             {withDayRate > 0 && <Chip variant="filter" leadingIcon="schedule">{withDayRate} day rates</Chip>}
           </div>
