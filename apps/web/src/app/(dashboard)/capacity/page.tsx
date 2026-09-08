@@ -469,18 +469,18 @@ export default function CapacityPage() {
                       <Table>
                         <TableHeader className="sticky top-0 z-10 bg-surface">
                           <TableRow>
-                            <TableHead className="sticky left-0 z-20 bg-surface min-w-[200px]">Member</TableHead>
-                            <TableHead className="min-w-[60px] text-center">Type</TableHead>
-                            <TableHead className="min-w-[50px] text-center">Grade</TableHead>
+                            <TableHead className="sticky left-0 z-20 bg-surface min-w-50">Member</TableHead>
+                            <TableHead className="min-w-15 text-center">Type</TableHead>
+                            <TableHead className="min-w-12.5 text-center">Grade</TableHead>
                             {PERIODS.map((pk, i) => (
-                              <TableHead key={pk} className="text-center min-w-[56px]">
+                              <TableHead key={pk} className="text-center min-w-14">
                                 <div className="text-[11px]">
                                   <span className="font-medium">{pk.toUpperCase()}</span><br/>
                                   <span className="text-surface-variant-foreground font-normal">{MONTH_LABELS[i]}</span>
                                 </div>
                               </TableHead>
                             ))}
-                            <TableHead className="text-right min-w-[90px]">Annual Cost</TableHead>
+                            <TableHead className="text-right min-w-22.5">Annual Cost</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -504,7 +504,7 @@ export default function CapacityPage() {
                                     }}
                                     className="cursor-context-menu"
                                   >
-                                    <p className="text-[13px] font-medium text-foreground truncate max-w-[180px]">{member.fullName}</p>
+                                    <p className="text-[13px] font-medium text-foreground truncate max-w-45">{member.fullName}</p>
                                     <p className="text-[11px] text-muted-foreground">{member.position ?? ""}</p>
                                   </div>
                                 </TableCell>
@@ -601,13 +601,13 @@ export default function CapacityPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[200px]">Grand Total</TableHead>
-                        <TableHead className="min-w-[60px]" />
-                        <TableHead className="min-w-[50px]" />
+                        <TableHead className="min-w-50">Grand Total</TableHead>
+                        <TableHead className="min-w-15" />
+                        <TableHead className="min-w-12.5" />
                         {PERIODS.map((pk, i) => (
-                          <TableHead key={pk} className="text-center min-w-[56px] text-[11px]">{pk.toUpperCase()}</TableHead>
+                          <TableHead key={pk} className="text-center min-w-14 text-[11px]">{pk.toUpperCase()}</TableHead>
                         ))}
-                        <TableHead className="text-right min-w-[90px]">Total</TableHead>
+                        <TableHead className="text-right min-w-22.5">Total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -746,14 +746,14 @@ export default function CapacityPage() {
         <>
           <div className="fixed inset-0 z-50" onClick={() => setContextMenu(null)} />
           <div
-            className="fixed z-50 min-w-[200px] rounded-lg border border-outline-variant bg-surface shadow-xl py-1"
+            className="fixed z-50 min-w-50 rounded-lg border border-outline-variant bg-surface shadow-xl py-1"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <div className="px-3 py-2 border-b border-outline-variant">
               <p className="text-[12px] font-medium text-surface-variant-foreground">Allocate to squad</p>
               <p className="text-[13px] text-foreground truncate">{contextMenu.fullName}</p>
             </div>
-            <div className="max-h-[300px] overflow-y-auto py-1">
+            <div className="max-h-75 overflow-y-auto py-1">
               {(squads ?? [])
                 .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
                 .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
