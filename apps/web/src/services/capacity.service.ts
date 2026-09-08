@@ -28,6 +28,7 @@ export interface SquadCapacitySummary {
   orgUnitId: string;
   orgUnitName: string;
   parentName: string | null;
+  breadcrumb: string[];
   members: MemberAllocation[];
   totals: PeriodValues;
   fteTotals: PeriodValues;

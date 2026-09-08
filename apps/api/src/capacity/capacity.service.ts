@@ -37,6 +37,7 @@ export interface SquadCapacitySummary {
   orgUnitId: string;
   orgUnitName: string;
   parentName: string | null;
+  breadcrumb: string[]; // full path: ["Division", "Cluster", "Tribe", "Squad"]
   members: MemberAllocation[];
   totals: PeriodValues;
   fteTotals: PeriodValues;
@@ -236,6 +237,13 @@ export class CapacityService {
     const userMap = new Map(users.map((u) => [u.id, u]));
     const membershipMap = new Map(memberships.map((m) => [m.id, m]));
 
+    // Fetch all org units for breadcrumb resolution
+    const allOrgUnits = await this.prisma.organizationUnit.findMany({
+      where: { companyId },
+      select: { id: true, name: true },
+    });
+    const orgUnitNameMap = new Map(allOrgUnits.map((u) => [u.id, u.name]));
+
     // Group by org unit
     const squadMap = new Map<string, typeof allocations>();
     for (const alloc of allocations) {
@@ -320,10 +328,23 @@ export class CapacityService {
         });
       }
 
+      // Build breadcrumb from materialized path
+      const pathIds = (orgUnit.path ?? "/")
+        .split("/")
+        .filter((id: string) => id.length > 0);
+      const breadcrumb = pathIds
+        .map((id: string) => orgUnitNameMap.get(id) ?? id)
+        .concat(orgUnit.name);
+      // Deduplicate last entry if path includes self
+      if (breadcrumb.length > 1 && breadcrumb[breadcrumb.length - 1] === breadcrumb[breadcrumb.length - 2]) {
+        breadcrumb.pop();
+      }
+
       summaries.push({
         orgUnitId: unitId,
         orgUnitName: orgUnit.name,
         parentName: orgUnit.parent?.name ?? null,
+        breadcrumb,
         members: memberAllocations,
         totals: costTotals,
         fteTotals,

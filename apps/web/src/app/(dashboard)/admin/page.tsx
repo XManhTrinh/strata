@@ -59,6 +59,14 @@ const settingsCards: SettingsCard[] = [
     feature: "authorization",
     permission: "manage_features",
   },
+  {
+    title: "Settings",
+    description: "Company profile, financial configuration, and workspace preferences",
+    href: "/admin/settings",
+    icon: "settings",
+    feature: "authorization",
+    permission: "manage_features",
+  },
 ];
 
 export default function SettingsPage() {

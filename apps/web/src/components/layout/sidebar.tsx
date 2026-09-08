@@ -27,6 +27,7 @@ const superAdminRailItems: SidebarNavItem[] = [
   { value: "positions", label: "Positions", href: "/admin/positions", icon: "work" },
   { value: "roles", label: "Roles", href: "/admin/roles", icon: "admin_panel_settings" },
   { value: "features", label: "Features", href: "/admin/features", icon: "extension" },
+  { value: "settings", label: "Settings", href: "/admin/settings", icon: "settings" },
 ];
 
 /**

@@ -3,6 +3,23 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   Search,
   Icon,
   Card,
@@ -180,11 +197,100 @@ function autoDetectMapping(header: string): MappingTarget {
   return "extra";
 }
 
+// ─── Sortable Org Level Item ──────────────────────────────────────────────────
+
+function SortableOrgLevelItem({
+  id,
+  rank,
+  total,
+  csvHeader,
+  unitTypeName,
+  onUnitTypeChange,
+}: {
+  id: number;
+  rank: number;
+  total: number;
+  csvHeader: string;
+  unitTypeName: string;
+  onUnitTypeChange: (value: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : undefined,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+        isDragging
+          ? "border-primary bg-primary/5 shadow-lg"
+          : "border-outline-variant/50 bg-surface"
+      }`}
+    >
+      {/* Drag handle */}
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 touch-none"
+        aria-label={`Reorder ${csvHeader}`}
+      >
+        <Icon name="drag_indicator" size={18} />
+      </button>
+
+      {/* Rank badge */}
+      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold shrink-0">
+        {rank + 1}
+      </span>
+
+      {/* CSV header label */}
+      <span className="text-[13px] text-surface-variant-foreground w-28 shrink-0 truncate" title={csvHeader}>
+        {csvHeader}
+      </span>
+
+      <span className="text-[12px] text-muted-foreground shrink-0">→</span>
+
+      {/* Unit type name input */}
+      <TextField
+        variant="outlined"
+        value={unitTypeName}
+        onChange={(e) => onUnitTypeChange(e.target.value)}
+        placeholder="e.g. Division, Tribe, Squad"
+        className="flex-1"
+      />
+
+      {/* Level indicator */}
+      <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right">
+        {rank === 0 ? "Top level" : rank === total - 1 ? "Lowest" : `Level ${rank + 1}`}
+      </span>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PeoplePage() {
   const companyId = useCompanyId();
   const queryClient = useQueryClient();
+
+  // DnD sensors (must be at top level, not inside conditional JSX)
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   // ── Data queries (always called) ──────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -248,6 +354,7 @@ export default function PeoplePage() {
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [csvRows, setCsvRows] = useState<string[][]>([]);
   const [columnMappings, setColumnMappings] = useState<ColumnMapping[]>([]);
+  const [orgLevelOrder, setOrgLevelOrder] = useState<number[]>([]); // indices into columnMappings, user-ordered
   const [importDefaultRoleId, setImportDefaultRoleId] = useState("");
 
   // ── Column visibility state ───────────────────────────────────────────────
@@ -327,10 +434,8 @@ export default function PeoplePage() {
 
     const nameIdx = columnMappings.findIndex((m) => m.target === "fullName");
     const emailIdx = columnMappings.findIndex((m) => m.target === "email");
-    // Collect all org level columns in order
-    const orgLevelIdxs = columnMappings
-      .map((m, i) => (m.target === "orgLevel" ? i : -1))
-      .filter((i) => i >= 0);
+    // Use user-defined org level order (drag-reorderable)
+    const orgLevelIdxs = orgLevelOrder;
     const posIdx = columnMappings.findIndex((m) => m.target === "position");
     const gradeIdx = columnMappings.findIndex((m) => m.target === "grade");
     const managerIdx = columnMappings.findIndex((m) => m.target === "lineManager");
@@ -405,7 +510,7 @@ export default function PeoplePage() {
     }
 
     return { rows, errors };
-  }, [importStep, csvRows, columnMappings, importDefaultRoleId]);
+  }, [importStep, csvRows, columnMappings, importDefaultRoleId, orgLevelOrder]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -532,6 +637,11 @@ export default function PeoplePage() {
         return { csvHeader: h, target, unitTypeName };
       });
       setColumnMappings(mappings);
+      // Initialize org level order from CSV column position (left to right)
+      const initialOrgOrder = mappings
+        .map((m, i) => (m.target === "orgLevel" ? i : -1))
+        .filter((i) => i >= 0);
+      setOrgLevelOrder(initialOrgOrder);
       setImportStep("mapping");
       setShowImportDialog(true);
     };
@@ -544,6 +654,16 @@ export default function PeoplePage() {
       const next = [...prev];
       next[index] = { ...next[index], target };
       return next;
+    });
+    // Keep orgLevelOrder in sync
+    setOrgLevelOrder((prev) => {
+      if (target === "orgLevel") {
+        // Add to end if not already present
+        return prev.includes(index) ? prev : [...prev, index];
+      } else {
+        // Remove if it was an org level
+        return prev.filter((i) => i !== index);
+      }
     });
   };
 
@@ -596,6 +716,7 @@ export default function PeoplePage() {
     setCsvHeaders([]);
     setCsvRows([]);
     setColumnMappings([]);
+    setOrgLevelOrder([]);
     setImportDefaultRoleId("");
   };
 
@@ -1567,34 +1688,54 @@ export default function PeoplePage() {
                 {csvHeaders.length} columns
               </p>
 
-              {/* Org Level type names shown when orgLevel is selected */}
-              {columnMappings.some((m) => m.target === "orgLevel") && (
+              {/* Org Level hierarchy order — drag to reorder */}
+              {orgLevelOrder.length > 0 && (
                 <div className="mt-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/50">
-                  <p className="text-[13px] font-medium text-surface-foreground mb-2">
-                    Unit type for each org level column:
+                  <p className="text-[13px] font-medium text-surface-foreground mb-1">
+                    Organization Hierarchy Order
                   </p>
-                  <div className="space-y-2">
-                    {columnMappings.map((m, idx) =>
-                      m.target === "orgLevel" ? (
-                        <div key={idx} className="flex items-center gap-2">
-                          <span className="text-[13px] text-surface-variant-foreground w-32 shrink-0 truncate">
-                            {m.csvHeader}
-                          </span>
-                          <span className="text-[12px] text-muted-foreground">→</span>
-                          <TextField
-                            variant="outlined"
-                            value={m.unitTypeName ?? ""}
-                            onChange={(e) => {
+                  <p className="text-[11px] text-muted-foreground mb-3">
+                    Drag to reorder. Top = highest level, bottom = lowest (squad/team).
+                  </p>
+                  <DndContext
+                    sensors={dndSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event: DragEndEvent) => {
+                      const { active, over } = event;
+                      if (over && active.id !== over.id) {
+                        setOrgLevelOrder((prev) => {
+                          const oldIndex = prev.indexOf(Number(active.id));
+                          const newIndex = prev.indexOf(Number(over.id));
+                          return arrayMove(prev, oldIndex, newIndex);
+                        });
+                      }
+                    }}
+                  >
+                    <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
+                      <div className="space-y-1.5">
+                        {orgLevelOrder.map((idx, rank) => (
+                          <SortableOrgLevelItem
+                            key={idx}
+                            id={idx}
+                            rank={rank}
+                            total={orgLevelOrder.length}
+                            csvHeader={columnMappings[idx]?.csvHeader ?? ""}
+                            unitTypeName={columnMappings[idx]?.unitTypeName ?? ""}
+                            onUnitTypeChange={(value) => {
                               const next = [...columnMappings];
-                              next[idx] = { ...next[idx], unitTypeName: e.target.value };
+                              next[idx] = { ...next[idx], unitTypeName: value };
                               setColumnMappings(next);
                             }}
-                            placeholder="e.g. Division, Tribe, Squad"
-                            className="flex-1"
                           />
-                        </div>
-                      ) : null,
-                    )}
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                  {/* Hierarchy preview */}
+                  <div className="mt-3 pt-2 border-t border-outline-variant/50">
+                    <p className="text-[11px] text-muted-foreground">
+                      Hierarchy: {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
+                    </p>
                   </div>
                 </div>
               )}
