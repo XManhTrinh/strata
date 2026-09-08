@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { CsvImportDialog } from "@/components/import";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -29,11 +30,12 @@ function fmtDate(d: string) {
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
 
-type SettingsSection = "general" | "financial" | "danger";
+type SettingsSection = "general" | "financial" | "import" | "danger";
 
 const NAV_ITEMS: { id: SettingsSection; label: string; icon: string }[] = [
   { id: "general", label: "General", icon: "business" },
   { id: "financial", label: "Financial", icon: "payments" },
+  { id: "import", label: "Data Import", icon: "upload" },
   { id: "danger", label: "Danger Zone", icon: "warning" },
 ];
 
@@ -381,6 +383,92 @@ export default function SettingsPage() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          )}
+
+          {/* ── Data Import ────────────────────────────────────────────── */}
+          {activeSection === "import" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-title-large text-surface-foreground">Data Import</h2>
+                <p className="text-body-medium text-surface-variant-foreground mt-1">
+                  Import members, org structure, positions, and roles from a CSV file.
+                </p>
+              </div>
+
+              <Card variant="outlined">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-container shrink-0">
+                      <Icon name="upload_file" size={24} className="text-on-primary-container" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-title-small text-surface-foreground">CSV Import</p>
+                      <p className="text-body-medium text-surface-variant-foreground mt-1">
+                        Upload a CSV file to bulk-import members and automatically create your
+                        org hierarchy (divisions, tribes, squads), positions, grades, and role
+                        assignments. The import wizard will guide you through column mapping and
+                        preview before committing.
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Chip variant="filter" leadingIcon="group">Members</Chip>
+                        <Chip variant="filter" leadingIcon="lan">Org Structure</Chip>
+                        <Chip variant="filter" leadingIcon="work">Positions</Chip>
+                        <Chip variant="filter" leadingIcon="leaderboard">Grades</Chip>
+                        <Chip variant="filter" leadingIcon="shield">Roles</Chip>
+                      </div>
+                      <div className="mt-4">
+                        <CsvImportDialog companyId={companyId} />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tips card */}
+              <Card variant="outlined">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
+                      <Icon name="lightbulb" size={20} className="text-on-tertiary-container" />
+                    </div>
+                    <p className="text-title-small text-surface-foreground">Import Tips</p>
+                  </div>
+                  <List className="py-0">
+                    <ListItem
+                      lines={2}
+                      leading={<Icon name="check_circle" size={20} className="text-primary" />}
+                      supporting="Each row must have at least a name and email."
+                    >
+                      Required columns: Full Name & Email
+                    </ListItem>
+                    <Divider />
+                    <ListItem
+                      lines={2}
+                      leading={<Icon name="account_tree" size={20} className="text-primary" />}
+                      supporting="Use separate columns for each level (e.g. Division, Tribe, Squad). You can reorder them in the wizard."
+                    >
+                      Org hierarchy from multiple columns
+                    </ListItem>
+                    <Divider />
+                    <ListItem
+                      lines={2}
+                      leading={<Icon name="table_chart" size={20} className="text-primary" />}
+                      supporting="Any CSV column not mapped to a known field is stored as member metadata."
+                    >
+                      Extra columns become metadata
+                    </ListItem>
+                    <Divider />
+                    <ListItem
+                      lines={2}
+                      leading={<Icon name="sync" size={20} className="text-primary" />}
+                      supporting="Members matched by email are updated. New emails create new members."
+                    >
+                      Safe to re-import
+                    </ListItem>
+                  </List>
+                </CardContent>
+              </Card>
             </div>
           )}
 
