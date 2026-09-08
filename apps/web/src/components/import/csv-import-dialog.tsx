@@ -705,7 +705,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
                 {importPreview.errors.length} row{importPreview.errors.length !== 1 ? "s" : ""} will be skipped
               </p>
             </div>
-            <div className="space-y-0.5 max-h-[80px] overflow-y-auto">
+            <div className="space-y-0.5 max-h-20 overflow-y-auto">
               {importPreview.errors.map((err, i) => (
                 <p key={i} className="text-[11px] text-error/80">Row {err.row}: {err.message}</p>
               ))}

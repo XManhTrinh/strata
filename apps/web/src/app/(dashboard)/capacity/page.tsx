@@ -10,7 +10,6 @@ import { Button } from "@vkieu/mui/buttons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
-import { Divider } from "@vkieu/mui";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@vkieu/mui";
@@ -324,9 +323,20 @@ export default function CapacityPage() {
     return t;
   }, [filteredSquads, localDraft]);
 
-  const totalMembers = filteredSquads.reduce((s, sq) => s + sq.members.length, 0);
-  const totalPerm = filteredSquads.reduce((s, sq) => s + sq.permCount, 0);
-  const totalSubCon = filteredSquads.reduce((s, sq) => s + sq.subConCount, 0);
+  // Deduplicate members across squads (a person in 2 squads counts once)
+  const uniqueMembers = useMemo(() => {
+    const seen = new Map<string, MemberAllocation>();
+    for (const sq of filteredSquads) {
+      for (const m of sq.members) {
+        if (!seen.has(m.membershipId)) seen.set(m.membershipId, m);
+      }
+    }
+    return seen;
+  }, [filteredSquads]);
+
+  const totalMembers = uniqueMembers.size;
+  const totalPerm = Array.from(uniqueMembers.values()).filter((m) => m.employmentType === "Perm").length;
+  const totalSubCon = Array.from(uniqueMembers.values()).filter((m) => m.employmentType === "SubCon").length;
   const annualCostTotal = sumPeriods(totalCost);
   const avgMonthlyFTE = sumPeriods(totalFTE) / 12;
 
@@ -384,22 +394,46 @@ export default function CapacityPage() {
       </AppBar>
 
       {/* Filters Row */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Employment type filter */}
-        <Chip variant="filter" selected={employmentFilter === "all"} onClick={() => setEmploymentFilter("all")}>All</Chip>
-        <Chip variant="filter" selected={employmentFilter === "Perm"} onClick={() => setEmploymentFilter(employmentFilter === "Perm" ? "all" : "Perm")} leadingIcon="badge">Perm</Chip>
-        <Chip variant="filter" selected={employmentFilter === "SubCon"} onClick={() => setEmploymentFilter(employmentFilter === "SubCon" ? "all" : "SubCon")} leadingIcon="engineering">Contractors</Chip>
-
-        <div className="w-px h-6 bg-outline-variant mx-1" />
-
-        {/* Org unit tree multi-select */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Left: Org unit tree multi-select */}
         <OrgUnitTreeSelect
           tree={orgUnits}
           selectedIds={selectedSquadIds}
           onSelectionChange={setSelectedSquadIds}
           placeholder="Filter by org unit..."
+          className="w-1/4"
+        />
+
+        {/* Right: Employment type select */}
+        <Select
+          variant="outlined"
+          value={employmentFilter}
+          onValueChange={(v) => setEmploymentFilter(v as "all" | "Perm" | "SubCon")}
+          options={[
+            { value: "all", label: "All Types" },
+            { value: "Perm", label: "Permanent" },
+            { value: "SubCon", label: "Contractors" },
+          ]}
+          className="w-40 shrink-0"
         />
       </div>
+
+      {/* Applied org unit filters */}
+      {selectedSquadIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-1">
+          {(squads ?? [])
+            .filter((s) => selectedSquadIds.has(s.orgUnitId))
+            .map((s) => (
+              <Chip key={s.orgUnitId} variant="input" onDismiss={() => {
+                const next = new Set(selectedSquadIds);
+                next.delete(s.orgUnitId);
+                setSelectedSquadIds(next);
+              }}>
+                {s.orgUnitName}
+              </Chip>
+            ))}
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -466,21 +500,21 @@ export default function CapacityPage() {
                       <Chip variant="filter" selected>{fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE</Chip>
                     </div>
                     <div className="overflow-x-auto">
-                      <Table>
+                      <Table className="table-fixed">
                         <TableHeader className="sticky top-0 z-10 bg-surface">
                           <TableRow>
-                            <TableHead className="sticky left-0 z-20 bg-surface min-w-50">Member</TableHead>
-                            <TableHead className="min-w-15 text-center">Type</TableHead>
-                            <TableHead className="min-w-12.5 text-center">Grade</TableHead>
+                            <TableHead className="sticky left-0 z-20 bg-surface w-50">Member</TableHead>
+                            <TableHead className="w-12 text-center">Type</TableHead>
+                            <TableHead className="w-12 text-center">Grade</TableHead>
                             {PERIODS.map((pk, i) => (
-                              <TableHead key={pk} className="text-center min-w-14">
+                              <TableHead key={pk} className="text-center w-14">
                                 <div className="text-[11px]">
                                   <span className="font-medium">{pk.toUpperCase()}</span><br/>
                                   <span className="text-surface-variant-foreground font-normal">{MONTH_LABELS[i]}</span>
                                 </div>
                               </TableHead>
                             ))}
-                            <TableHead className="text-right min-w-22.5">Annual Cost</TableHead>
+                            <TableHead className="text-right w-24">Annual Cost</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -539,7 +573,7 @@ export default function CapacityPage() {
                                             if (isNaN(val) || val < 0) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 0);
                                             else if (val > 1) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 1);
                                           }}
-                                          className={`w-14 h-7 text-[12px] text-center bg-transparent border rounded focus:border-primary focus:outline-none ${
+                                          className={`w-14 h-7 text-[12px] text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none bg-transparent border rounded focus:border-primary focus:outline-none ${
                                             isOver
                                               ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold"
                                               : isUnder
@@ -598,16 +632,16 @@ export default function CapacityPage() {
             <Card variant="elevated">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="table-fixed">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-50">Grand Total</TableHead>
-                        <TableHead className="min-w-15" />
-                        <TableHead className="min-w-12.5" />
-                        {PERIODS.map((pk, i) => (
-                          <TableHead key={pk} className="text-center min-w-14 text-[11px]">{pk.toUpperCase()}</TableHead>
+                        <TableHead className="w-50">Grand Total</TableHead>
+                        <TableHead className="w-12" />
+                        <TableHead className="w-12" />
+                        {PERIODS.map((pk) => (
+                          <TableHead key={pk} className="text-center w-14 text-[11px]">{pk.toUpperCase()}</TableHead>
                         ))}
-                        <TableHead className="text-right min-w-22.5">Total</TableHead>
+                        <TableHead className="text-right w-24">Total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -716,10 +716,6 @@ export default function PeoplePage() {
             <DialogTitle>Delete All Members</DialogTitle>
             <DialogDescription>Are you sure you want to remove all members? This action cannot be undone.</DialogDescription>
           </DialogHeader>
-          <div className="flex items-start gap-3 rounded-lg bg-warning-container/40 p-3 mx-6">
-            <Icon name="info" size={20} className="text-warning shrink-0 mt-0.5" />
-            <p className="text-[13px] text-warning-foreground">Super admins will not be removed.</p>
-          </div>
           <DialogFooter>
             <Button type="button" variant="text" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
             <Button variant="text" className="text-error" onClick={handleDeleteAll} disabled={deleteAllMutation.isPending}>

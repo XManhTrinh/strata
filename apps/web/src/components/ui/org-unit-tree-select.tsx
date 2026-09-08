@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { Icon } from "@vkieu/mui";
 import { Checkbox } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
+import { Search } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import type { OrganizationUnit } from "@/services";
 
@@ -93,7 +94,7 @@ export interface OrgUnitTreeSelectProps {
   selectedIds: Set<string>;
   /** Called when selection changes. */
   onSelectionChange: (ids: Set<string>) => void;
-  /** Placeholder text for the trigger. */
+  /** Placeholder text for the search input. */
   placeholder?: string;
   className?: string;
 }
@@ -101,26 +102,23 @@ export interface OrgUnitTreeSelectProps {
 // ─── Component ──────────────────────────────────────────────────────────────────
 
 /**
- * Searchable multi-select dropdown that displays an org unit hierarchy as
- * an indented tree with checkboxes.
+ * Searchable multi-select combobox that displays an org unit hierarchy
+ * as an indented tree with checkboxes.
  *
- * - Selecting a parent selects all its descendants.
- * - Deselecting a parent deselects all its descendants.
- * - Partial selection shows an indeterminate checkbox.
- * - Search filters the tree and auto-expands matching branches.
+ * The search input IS the trigger — focus or type to open the dropdown.
+ * No extra click required.
  */
 export function OrgUnitTreeSelect({
   tree,
   selectedIds,
   onSelectionChange,
-  placeholder = "Filter org units...",
+  placeholder = "Search org units...",
   className,
 }: OrgUnitTreeSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Close on click outside
   useEffect(() => {
@@ -133,11 +131,6 @@ export function OrgUnitTreeSelect({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
   }, [open]);
 
   const query = search.toLowerCase().trim();
@@ -172,10 +165,8 @@ export function OrgUnitTreeSelect({
       const next = new Set(selectedIds);
 
       if (state === "checked") {
-        // Deselect all descendants
         for (const id of allIds) next.delete(id);
       } else {
-        // Select all descendants
         for (const id of allIds) next.add(id);
       }
 
@@ -189,86 +180,33 @@ export function OrgUnitTreeSelect({
     onSelectionChange(new Set());
   }, [onSelectionChange]);
 
-  // ── Summary text ────────────────────────────────────────────────────────
   const selectedCount = selectedIds.size;
 
   return (
     <div ref={containerRef} className={`relative ${className ?? ""}`}>
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 h-10 px-3 rounded-lg border border-outline-variant bg-surface hover:bg-surface-foreground/4 transition-colors text-left w-full min-w-50"
-      >
-        <Icon name="account_tree" size={18} className="text-surface-variant-foreground shrink-0" />
-        <span className="flex-1 text-[13px] truncate text-surface-variant-foreground">
-          {selectedCount > 0 ? `${selectedCount} org unit${selectedCount !== 1 ? "s" : ""} selected` : placeholder}
-        </span>
-        <Icon
-          name={open ? "expand_less" : "expand_more"}
-          size={18}
-          className="text-surface-variant-foreground shrink-0"
-        />
-      </button>
-
-      {/* Selected chips (shown below trigger when there are selections) */}
-      {selectedCount > 0 && !open && (
-        <div className="flex flex-wrap gap-1 mt-1.5">
-          {flattenTree(tree, 0, new Set(collectAllIds(tree)))
-            .filter(({ node }) => selectedIds.has(node.id))
-            // Only show leaf-level or directly selected (skip if parent is fully selected)
-            .filter(({ node }) => {
-              const children = node.children ?? [];
-              if (children.length === 0) return true;
-              // Show parent chip only if not all children are selected
-              const childIds = children.map((c) => c.id);
-              return !childIds.every((id) => selectedIds.has(id));
-            })
-            .slice(0, 5)
-            .map(({ node }) => (
-              <Chip
-                key={node.id}
-                variant="filter"
-                selected
-                onClick={() => toggleSelect(node)}
-              >
-                {node.name}
-              </Chip>
-            ))}
-          {selectedCount > 5 && (
-            <Chip variant="filter" onClick={clearAll}>
-              +{selectedCount - 5} more
-            </Chip>
-          )}
-          <Chip variant="filter" selected={false} onClick={clearAll} leadingIcon="close">
-            Clear
-          </Chip>
-        </div>
-      )}
+      {/* Search input (the trigger) — M3 Search Bar */}
+      <Search
+        value={search}
+        onValueChange={(v) => { setSearch(v); if (!open) setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        className="mx-0 min-w-0 w-full"
+        trailingIcon={
+          (search || selectedCount > 0) ? (
+            <button
+              type="button"
+              onClick={() => { setSearch(""); if (selectedCount > 0) clearAll(); }}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-foreground/8 transition-colors"
+            >
+              <Icon name="close" size={20} className="text-surface-variant-foreground" />
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Dropdown panel */}
       {open && (
         <div className="absolute top-full left-0 mt-1 z-50 w-full min-w-80 max-w-120 rounded-xl bg-surface-container border border-outline-variant shadow-lg overflow-hidden">
-          {/* Search input */}
-          <div className="px-3 py-2 border-b border-outline-variant">
-            <div className="flex items-center gap-2 h-9 px-2.5 rounded-lg bg-surface-container-highest/50">
-              <Icon name="search" size={18} className="text-surface-variant-foreground shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search org units..."
-                className="flex-1 bg-transparent text-[13px] text-surface-foreground placeholder:text-surface-variant-foreground/60 outline-none"
-              />
-              {search && (
-                <button type="button" onClick={() => setSearch("")} className="text-surface-variant-foreground hover:text-surface-foreground">
-                  <Icon name="close" size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Tree list */}
           <div className="max-h-80 overflow-y-auto py-1">
             {flatNodes.length === 0 ? (
@@ -335,7 +273,23 @@ export function OrgUnitTreeSelect({
           {selectedCount > 0 && (
             <div className="px-3 py-2 border-t border-outline-variant flex items-center justify-between">
               <span className="text-[12px] text-surface-variant-foreground">
-                {selectedCount} selected
+                {(() => {
+                  // Build summary by type name
+                  const typeCounts = new Map<string, number>();
+                  const countSelected = (nodes: OrganizationUnit[]) => {
+                    for (const node of nodes) {
+                      if (selectedIds.has(node.id)) {
+                        const typeName = node.type?.name ?? "Unit";
+                        typeCounts.set(typeName, (typeCounts.get(typeName) ?? 0) + 1);
+                      }
+                      countSelected(node.children ?? []);
+                    }
+                  };
+                  countSelected(tree);
+                  return Array.from(typeCounts.entries())
+                    .map(([type, count]) => `${count} ${type}${count !== 1 ? "s" : ""}`)
+                    .join(" · ");
+                })()}
               </span>
               <Button variant="text" size="xs" onClick={clearAll}>
                 Clear all
