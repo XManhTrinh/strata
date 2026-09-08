@@ -391,7 +391,7 @@ export default function RolesPage() {
   const featureCatalog: AdminFeature[] = allFeatures ?? [];
 
   return (
-    <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+    <motion.div className="flex flex-col h-[calc(100vh-100px)]" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       <PageHeader onCreateClick={() => setShowCreateModal(true)} />
 
       {/* Master-Detail Layout */}
