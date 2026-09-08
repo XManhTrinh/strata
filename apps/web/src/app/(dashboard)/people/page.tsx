@@ -226,8 +226,9 @@ function SortableOrgLevelItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 10 : undefined,
-    opacity: isDragging ? 0.8 : 1,
+    zIndex: isDragging ? 50 : undefined,
+    position: (isDragging ? "relative" : undefined) as "relative" | undefined,
+    opacity: isDragging ? 0.9 : 1,
   };
 
   return (
@@ -236,7 +237,7 @@ function SortableOrgLevelItem({
       style={style}
       className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${
         isDragging
-          ? "border-primary bg-primary/5 shadow-lg"
+          ? "border-primary bg-primary/5 shadow-xl ring-1 ring-primary/20"
           : "border-outline-variant/50 bg-surface"
       }`}
     >
@@ -244,15 +245,15 @@ function SortableOrgLevelItem({
         type="button"
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-surface-variant-foreground hover:text-surface-foreground shrink-0 touch-none"
+        className="cursor-grab active:cursor-grabbing text-surface-variant-foreground hover:text-surface-foreground shrink-0 touch-none flex items-center"
         aria-label={`Reorder ${csvHeader}`}
       >
         <Icon name="drag_indicator" size={16} />
       </button>
-      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-[10px] font-semibold shrink-0">
+      <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-[10px] font-semibold shrink-0 leading-none">
         {rank + 1}
       </span>
-      <span className="text-[12px] text-surface-variant-foreground w-24 shrink-0 truncate" title={csvHeader}>
+      <span className="text-[12px] text-surface-variant-foreground w-24 shrink-0 truncate leading-none" title={csvHeader}>
         {csvHeader}
       </span>
       <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/50 shrink-0" />
@@ -261,9 +262,9 @@ function SortableOrgLevelItem({
         value={unitTypeName}
         onChange={(e) => onUnitTypeChange(e.target.value)}
         placeholder="Type name"
-        className="flex-1 min-w-0 h-6 px-1.5 text-[12px] bg-transparent border border-outline-variant/40 rounded focus:border-primary focus:outline-none"
+        className="flex-1 min-w-0 h-6 px-1.5 text-[12px] leading-none bg-transparent border border-outline-variant/40 rounded focus:border-primary focus:outline-none"
       />
-      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-12 text-right">
+      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-12 text-right leading-none">
         {rank === 0 ? "Top" : rank === total - 1 ? "Bottom" : `Lvl ${rank + 1}`}
       </span>
     </div>
@@ -1617,245 +1618,304 @@ export default function PeoplePage() {
           <DialogHeader>
             <DialogTitle>
               {importStep === "mapping" && "Map CSV Columns"}
-              {importStep === "preview" && "Confirm Import"}
+              {importStep === "preview" && "Import Summary"}
             </DialogTitle>
             <DialogDescription>
               {importStep === "mapping" &&
-                "Match each CSV column to a member field. Columns mapped to 'Extra Column' will be stored as metadata."}
+                "Match each CSV column to a member field. Unmapped columns are stored as metadata."}
               {importStep === "preview" &&
-                "Review the data below before importing."}
+                "Review what will be imported into your workspace."}
             </DialogDescription>
           </DialogHeader>
 
-          {/* Step 2: Column Mapping */}
+          {/* ── Step 1: Column Mapping ──────────────────────────────────── */}
           {importStep === "mapping" && (
-            <div className="px-6 space-y-3 max-h-[60vh] overflow-y-auto">
-              <div className="grid grid-cols-[1fr_auto_1fr] gap-x-4 gap-y-2 items-center">
-                <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">
-                  CSV Column
-                </p>
-                <div />
-                <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Maps To
-                </p>
-
-                {columnMappings.map((mapping, idx) => (
-                  <React.Fragment key={idx}>
-                    <div className="flex items-center gap-2">
-                      <Icon
-                        name="table_chart"
-                        size={16}
-                        className="text-muted-foreground"
-                      />
-                      <span className="text-[14px] text-surface-foreground font-medium truncate">
-                        {mapping.csvHeader}
-                      </span>
-                      {csvRows.length > 0 && csvRows[0][idx] && (
-                        <span className="text-[12px] text-muted-foreground truncate max-w-30">
-                          (e.g. {csvRows[0][idx]})
-                        </span>
-                      )}
-                    </div>
-                    <Icon
-                      name="arrow_forward"
-                      size={16}
-                      className="text-muted-foreground"
-                    />
-                    <Select
-                      variant="outlined"
-                      value={mapping.target}
-                      onValueChange={(val) =>
-                        handleMappingChange(idx, val as MappingTarget)
-                      }
-                      options={MAPPING_OPTIONS}
-                    />
-                  </React.Fragment>
-                ))}
+            <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Step indicator */}
+              <div className="flex items-center gap-2">
+                <Chip variant="filter" selected leadingIcon="looks_one">Step 1 of 2</Chip>
+                <Chip variant="filter" leadingIcon="table_chart">{csvHeaders.length} columns</Chip>
+                <Chip variant="filter" leadingIcon="dataset">{csvRows.length} rows</Chip>
               </div>
 
-              <p className="text-[12px] text-muted-foreground pt-2">
-                {csvRows.length} data rows detected ·{" "}
-                {csvHeaders.length} columns
-              </p>
-
-              {/* Org Level hierarchy order — drag to reorder */}
-              {orgLevelOrder.length > 0 && (
-                <div className="mt-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[12px] font-medium text-surface-foreground">
-                      Organization Hierarchy Order
-                    </p>
-                    <p className="text-[10px] text-surface-variant-foreground">Drag to reorder</p>
+              {/* Column mapping grid */}
+              <Card variant="outlined" className="overflow-visible">
+                <div>
+                  {/* Header */}
+                  <div className="grid grid-cols-[6fr_20px_5fr] gap-x-2 items-center px-3 py-2 bg-surface-container-low/50 border-b border-outline-variant/50">
+                    <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">CSV Column</p>
+                    <div />
+                    <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">Maps To</p>
                   </div>
-                  <DndContext
-                    sensors={dndSensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event: DragEndEvent) => {
-                      const { active, over } = event;
-                      if (over && active.id !== over.id) {
-                        setOrgLevelOrder((prev) => {
-                          const oldIndex = prev.indexOf(Number(active.id));
-                          const newIndex = prev.indexOf(Number(over.id));
-                          return arrayMove(prev, oldIndex, newIndex);
-                        });
-                      }
-                    }}
-                  >
-                    <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
-                      <div className="space-y-1">
-                        {orgLevelOrder.map((idx, rank) => (
-                          <SortableOrgLevelItem
-                            key={idx}
-                            id={idx}
-                            rank={rank}
-                            total={orgLevelOrder.length}
-                            csvHeader={columnMappings[idx]?.csvHeader ?? ""}
-                            unitTypeName={columnMappings[idx]?.unitTypeName ?? ""}
-                            onUnitTypeChange={(value) => {
-                              const next = [...columnMappings];
-                              next[idx] = { ...next[idx], unitTypeName: value };
-                              setColumnMappings(next);
-                            }}
-                          />
-                        ))}
+                  {/* Rows */}
+                  {columnMappings.map((mapping, idx) => (
+                    <div key={idx} className="grid grid-cols-[6fr_20px_5fr] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Icon name="table_chart" size={12} className="text-surface-variant-foreground shrink-0" />
+                        <span className="text-[11px] text-surface-foreground font-medium truncate">{mapping.csvHeader}</span>
+                        {csvRows.length > 0 && csvRows[0][idx] && (
+                          <span className="text-[10px] text-surface-variant-foreground/60 truncate max-w-20">({csvRows[0][idx]})</span>
+                        )}
                       </div>
-                    </SortableContext>
-                  </DndContext>
-                  {/* Hierarchy preview */}
-                  <p className="mt-2 text-[10px] text-surface-variant-foreground">
-                    {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
-                  </p>
+                      <div className="flex items-center justify-center">
+                        <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/40" />
+                      </div>
+                      <div className="min-w-0">
+                        <Select
+                          variant="outlined"
+                          value={mapping.target}
+                          onValueChange={(val) => handleMappingChange(idx, val as MappingTarget)}
+                          options={MAPPING_OPTIONS}
+                          className="w-full text-[11px]"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </Card>
+
+              {/* Org Hierarchy Order (draggable) */}
+              {orgLevelOrder.length > 0 && (
+                <Card variant="outlined">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon name="account_tree" size={16} className="text-primary" />
+                        <p className="text-label-medium text-surface-foreground">Hierarchy Order</p>
+                      </div>
+                      <p className="text-[10px] text-surface-variant-foreground">Drag to reorder</p>
+                    </div>
+                    <DndContext
+                      sensors={dndSensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(event: DragEndEvent) => {
+                        const { active, over } = event;
+                        if (over && active.id !== over.id) {
+                          setOrgLevelOrder((prev) => {
+                            const oldIndex = prev.indexOf(Number(active.id));
+                            const newIndex = prev.indexOf(Number(over.id));
+                            return arrayMove(prev, oldIndex, newIndex);
+                          });
+                        }
+                      }}
+                    >
+                      <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-1">
+                          {orgLevelOrder.map((idx, rank) => (
+                            <SortableOrgLevelItem
+                              key={idx}
+                              id={idx}
+                              rank={rank}
+                              total={orgLevelOrder.length}
+                              csvHeader={columnMappings[idx]?.csvHeader ?? ""}
+                              unitTypeName={columnMappings[idx]?.unitTypeName ?? ""}
+                              onUnitTypeChange={(value) => {
+                                const next = [...columnMappings];
+                                next[idx] = { ...next[idx], unitTypeName: value };
+                                setColumnMappings(next);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                    <p className="mt-2 text-[10px] text-surface-variant-foreground">
+                      {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
+                    </p>
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Default role for imported members */}
-              <div className="mt-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/50">
-                <p className="text-[13px] font-medium text-surface-foreground mb-2">
-                  Default role for imported members
-                </p>
-                <p className="text-[12px] text-muted-foreground mb-2">
-                  All imported members will be assigned this role. Leave empty for no role.
-                </p>
-                <Select
-                  variant="outlined"
-                  value={importDefaultRoleId}
-                  onValueChange={setImportDefaultRoleId}
-                  options={[
-                    { value: "", label: "No role" },
-                    ...roles.map((r) => ({ value: r.id, label: r.name })),
-                  ]}
-                  className="w-full"
-                />
-              </div>
+              {/* Default Role */}
+              <Card variant="outlined">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon name="shield" size={16} className="text-primary" />
+                    <p className="text-label-medium text-surface-foreground">Default Role</p>
+                  </div>
+                  <p className="text-[11px] text-surface-variant-foreground mb-2">
+                    Assigned to all imported members. Leave empty for no role.
+                  </p>
+                  <Select
+                    variant="outlined"
+                    value={importDefaultRoleId}
+                    onValueChange={setImportDefaultRoleId}
+                    options={[
+                      { value: "", label: "No role" },
+                      ...roles.map((r) => ({ value: r.id, label: r.name })),
+                    ]}
+                    className="w-full"
+                  />
+                </CardContent>
+              </Card>
             </div>
           )}
 
-          {/* Step 3: Preview */}
+          {/* ── Step 2: Import Preview ─────────────────────────────────── */}
           {importStep === "preview" && importPreview && (
             <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto relative">
+              {/* Loading overlay */}
               {bulkImportMutation.isPending && (
                 <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 rounded-xl">
                   <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-[16px] font-medium text-surface-foreground">
-                    Importing members...
+                  <p className="text-title-medium text-surface-foreground">Importing...</p>
+                  <p className="text-body-small text-surface-variant-foreground">
+                    {importPreview.rows.length} records with org structure, positions, and roles
                   </p>
-                  <p className="text-[13px] text-surface-variant-foreground">
-                    Creating {importPreview.rows.length} members with org structure, positions, and roles
-                  </p>
-                  <div className="w-48 h-1.5 bg-surface-variant/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '60%' }} />
-                  </div>
                 </div>
               )}
-              {importPreview.rows.length > 0 && (
-                <div>
-                  <p className="text-[14px] font-medium text-surface-foreground mb-2">
-                    ✓ {importPreview.rows.length} valid{" "}
-                    {importPreview.rows.length === 1 ? "record" : "records"}
-                  </p>
-                  <div className="space-y-1">
-                    {importPreview.rows.slice(0, 5).map((row, i) => (
-                      <div
-                        key={i}
-                        className="text-[13px] text-surface-variant-foreground flex gap-2"
-                      >
-                        <span className="font-medium text-surface-foreground">
-                          {row.fullName}
-                        </span>
-                        <span>— {row.email}</span>
-                        {row.orgStructure && (
-                          <span className="text-muted-foreground">
-                            · {row.orgStructure}
-                          </span>
+
+              {/* Step indicator */}
+              <div className="flex items-center gap-2">
+                <Chip variant="filter" selected leadingIcon="looks_two">Step 2 of 2</Chip>
+                {importPreview.errors.length === 0 && (
+                  <Chip variant="filter" selected leadingIcon="check_circle" className="text-primary">Ready to import</Chip>
+                )}
+              </div>
+
+              {(() => {
+                const rows = importPreview.rows;
+                const uniqueEmails = new Set(rows.map((r) => r.email.toLowerCase()));
+                const duplicateRows = rows.length - uniqueEmails.size;
+                const positions = new Set(rows.map((r) => r.position).filter(Boolean));
+                const grades = new Set(rows.map((r) => r.grade).filter(Boolean));
+                const permCount = rows.filter((r) => r.employmentType === "Perm").length;
+                const subConCount = rows.filter((r) => r.employmentType === "SubCon").length;
+                const withManagers = rows.filter((r) => r.lineManagerEmail).length;
+                const withSalary = rows.filter((r) => r.annualSalary).length;
+                const withDayRate = rows.filter((r) => r.dayRate).length;
+
+                return (
+                  <>
+                    {/* KPI Summary */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[
+                        { value: uniqueEmails.size, label: "Members", icon: "group", color: "bg-primary-container" },
+                        { value: positions.size, label: "Positions", icon: "work", color: "bg-secondary-container" },
+                        { value: grades.size, label: "Grades", icon: "leaderboard", color: "bg-tertiary-container" },
+                        { value: importPreview.errors.length, label: "Errors", icon: importPreview.errors.length > 0 ? "error" : "check_circle", color: importPreview.errors.length > 0 ? "bg-error-container" : "bg-primary-container" },
+                      ].map((stat) => (
+                        <Card key={stat.label} variant="elevated">
+                          <CardContent className="flex items-center gap-3 p-3">
+                            <div className={`flex items-center justify-center w-9 h-9 rounded-full ${stat.color} shrink-0`}>
+                              <Icon name={stat.icon} size={18} className="text-on-primary-container" />
+                            </div>
+                            <div>
+                              <p className="text-title-large text-surface-foreground leading-tight">{stat.value}</p>
+                              <p className="text-label-small text-surface-variant-foreground">{stat.label}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Multi-squad notice */}
+                    {duplicateRows > 0 && (
+                      <Card variant="outlined" className="border-secondary/30">
+                        <CardContent className="flex items-start gap-3 p-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container shrink-0">
+                            <Icon name="group_work" size={16} className="text-on-secondary-container" />
+                          </div>
+                          <div>
+                            <p className="text-label-medium text-surface-foreground">{duplicateRows} multi-squad allocation{duplicateRows !== 1 ? "s" : ""}</p>
+                            <p className="text-body-small text-surface-variant-foreground">
+                              Members appearing on multiple rows will be split across squads automatically.
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Data breakdown */}
+                    <Card variant="outlined">
+                      <CardContent className="p-3 space-y-3">
+                        <p className="text-label-medium text-surface-foreground">Data Breakdown</p>
+                        <div className="flex flex-wrap gap-2">
+                          {permCount > 0 && <Chip variant="filter" selected leadingIcon="badge">{permCount} Perm</Chip>}
+                          {subConCount > 0 && <Chip variant="filter" selected leadingIcon="engineering">{subConCount} SubCon</Chip>}
+                          {withManagers > 0 && <Chip variant="filter" leadingIcon="supervisor_account">{withManagers} line managers</Chip>}
+                          {withSalary > 0 && <Chip variant="filter" leadingIcon="payments">{withSalary} salaries</Chip>}
+                          {withDayRate > 0 && <Chip variant="filter" leadingIcon="schedule">{withDayRate} day rates</Chip>}
+                        </div>
+
+                        {/* Org structure counts per level */}
+                        {orgLevelOrder.length > 0 && (
+                          <>
+                            <Divider />
+                            <p className="text-label-medium text-surface-foreground">Org Structure</p>
+                            <div className="flex flex-wrap gap-2">
+                              {orgLevelOrder.map((colIdx, levelIdx) => {
+                                const typeName = columnMappings[colIdx]?.unitTypeName || columnMappings[colIdx]?.csvHeader;
+                                const uniqueValues = new Set(
+                                  rows.map((r) => r.orgStructure?.split(" | ")?.[levelIdx]).filter(Boolean),
+                                );
+                                return (
+                                  <Chip key={colIdx} variant="filter" leadingIcon="lan">
+                                    {uniqueValues.size} {typeName}{uniqueValues.size !== 1 ? "s" : ""}
+                                  </Chip>
+                                );
+                              })}
+                            </div>
+                          </>
                         )}
-                      </div>
-                    ))}
-                    {importPreview.rows.length > 5 && (
-                      <p className="text-[12px] text-surface-variant-foreground">
-                        ...and {importPreview.rows.length - 5} more
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
+                      </CardContent>
+                    </Card>
+                  </>
+                );
+              })()}
+
+              {/* Errors */}
               {importPreview.errors.length > 0 && (
-                <div>
-                  <p className="text-[14px] font-medium text-error mb-2">
-                    ✗ {importPreview.errors.length}{" "}
-                    {importPreview.errors.length === 1 ? "error" : "errors"}
-                  </p>
-                  <div className="space-y-1">
-                    {importPreview.errors.slice(0, 5).map((err, i) => (
-                      <p key={i} className="text-[12px] text-error">
-                        Row {err.row}: {err.message}
+                <Card variant="outlined" className="border-error/30">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Icon name="error" size={16} className="text-error" />
+                      <p className="text-label-medium text-error">
+                        {importPreview.errors.length} row{importPreview.errors.length !== 1 ? "s" : ""} will be skipped
                       </p>
-                    ))}
-                    {importPreview.errors.length > 5 && (
-                      <p className="text-[12px] text-surface-variant-foreground">
-                        ...and {importPreview.errors.length - 5} more errors
-                      </p>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                    <div className="space-y-0.5 max-h-[80px] overflow-y-auto">
+                      {importPreview.errors.map((err, i) => (
+                        <p key={i} className="text-[11px] text-error/80">Row {err.row}: {err.message}</p>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}
 
+          {/* ── Footer ─────────────────────────────────────────────────── */}
           <DialogFooter>
             {importStep === "mapping" && (
               <>
-                <Button variant="text" onClick={resetImportDialog}>
-                  Cancel
-                </Button>
-                <Button variant="text" onClick={handleMappingNext}>
-                  Next
+                <Button variant="text" onClick={resetImportDialog}>Cancel</Button>
+                <Button variant="filled" onClick={handleMappingNext}>
+                  <Icon name="arrow_forward" size={18} />Review Import
                 </Button>
               </>
             )}
             {importStep === "preview" && (
               <>
-                <Button
-                  variant="text"
-                  onClick={() => setImportStep("mapping")}
-                >
-                  Back
+                <Button variant="text" onClick={() => setImportStep("mapping")}>
+                  <Icon name="arrow_back" size={18} />Back
                 </Button>
                 <Button
-                  variant="text"
+                  variant="filled"
                   onClick={handleImportConfirm}
-                  disabled={
-                    !importPreview?.rows.length ||
-                    bulkImportMutation.isPending
-                  }
+                  disabled={!importPreview?.rows.length || bulkImportMutation.isPending}
                 >
-                  {bulkImportMutation.isPending
-                    ? (
-                      <span className="flex items-center gap-2">
-                        <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        Importing {importPreview?.rows.length ?? 0} records...
-                      </span>
-                    )
-                    : `Import ${importPreview?.rows.length ?? 0} records`}
+                  {bulkImportMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                      Importing...
+                    </span>
+                  ) : (
+                    <>
+                      <Icon name="upload" size={18} />
+                      Import {importPreview?.rows.length ?? 0} Records
+                    </>
+                  )}
                 </Button>
               </>
             )}
