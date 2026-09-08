@@ -39,6 +39,8 @@ import {
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 export default function OrgUnitTypesPage() {
   const companyId = useCompanyId();
@@ -383,21 +385,15 @@ export default function OrgUnitTypesPage() {
               placeholder="Brief description"
             />
             <div className="grid grid-cols-2 gap-4">
-              <TextField
-                variant="outlined"
-                label="Icon (Material Symbol)"
+              <IconPicker
                 value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                onChange={(icon) => setFormData({ ...formData, icon })}
+                color={formData.color}
               />
-              <div className="space-y-1">
-                <label className="text-[12px] leading-4 text-surface-variant-foreground">Color</label>
-                <input
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  className="h-14 w-full cursor-pointer rounded-xl border border-outline bg-transparent"
-                />
-              </div>
+              <ColorPicker
+                value={formData.color}
+                onChange={(color) => setFormData({ ...formData, color })}
+              />
             </div>
           </div>
           <DialogFooter>

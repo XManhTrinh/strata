@@ -25,6 +25,10 @@ export interface ColumnMapping {
   target: MappingTarget;
   /** For orgLevel columns: the human-readable type name (e.g. "Division", "Tribe"). */
   unitTypeName?: string;
+  /** For orgLevel columns: the icon name for the unit type. */
+  unitTypeIcon?: string;
+  /** For orgLevel columns: the hex color for the unit type. */
+  unitTypeColor?: string;
 }
 
 export type ImportStep = "upload" | "mapping" | "preview";

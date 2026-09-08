@@ -103,3 +103,44 @@ export function detectUnitTypeName(header: string): string {
   if (h.includes("department")) return "Department";
   return header; // fallback to the column header itself
 }
+
+
+/**
+ * Auto-detect a default icon for an org-unit type based on its name.
+ * Falls back to a rotating list by index to avoid duplicates.
+ */
+export function detectUnitTypeIcon(header: string, index?: number): string {
+  const h = header.toLowerCase();
+  if (h.includes("division")) return "domain";
+  if (h.includes("tribe")) return "groups";
+  if (h.includes("cluster")) return "hub";
+  if (h.includes("squad") || h.includes("team")) return "lan";
+  if (h.includes("department")) return "apartment";
+  // Rotate through distinct icons for unknown names
+  const fallbackIcons = [
+    "corporate_fare", "account_tree", "schema", "device_hub",
+    "diversity_3", "engineering", "badge", "business",
+    "work", "storefront",
+  ];
+  return fallbackIcons[(index ?? 0) % fallbackIcons.length];
+}
+
+/**
+ * Auto-detect a default color for an org-unit type based on its name.
+ * Falls back to a rotating palette by index to avoid duplicates.
+ */
+export function detectUnitTypeColor(header: string, index?: number): string {
+  const h = header.toLowerCase();
+  if (h.includes("division")) return "#6366F1";
+  if (h.includes("tribe")) return "#0EA5E9";
+  if (h.includes("cluster")) return "#14B8A6";
+  if (h.includes("squad") || h.includes("team")) return "#F59E0B";
+  if (h.includes("department")) return "#3B82F6";
+  // Rotate through distinct colors for unknown names
+  const fallbackColors = [
+    "#8B5CF6", "#EC4899", "#EF4444", "#10B981",
+    "#F97316", "#06B6D4", "#84CC16", "#A855F7",
+    "#78909C", "#E91E63",
+  ];
+  return fallbackColors[(index ?? 0) % fallbackColors.length];
+}

@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Icon } from "@vkieu/mui";
+import { IconColorPicker } from "@/components/ui/icon-color-picker";
 
 // ─── Props ──────────────────────────────────────────────────────────────────────
 
@@ -12,24 +13,26 @@ export interface SortableOrgLevelItemProps {
   total: number;
   csvHeader: string;
   unitTypeName: string;
+  unitTypeIcon: string;
+  unitTypeColor: string;
   onUnitTypeChange: (value: string) => void;
+  onUnitTypeIconChange: (value: string) => void;
+  onUnitTypeColorChange: (value: string) => void;
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 
-/**
- * Draggable row representing one org-hierarchy level in the CSV import flow.
- *
- * Uses `@dnd-kit/sortable` and renders a drag handle, a rank badge,
- * the original CSV column name, and an editable unit-type input.
- */
 export function SortableOrgLevelItem({
   id,
   rank,
   total,
   csvHeader,
   unitTypeName,
+  unitTypeIcon,
+  unitTypeColor,
   onUnitTypeChange,
+  onUnitTypeIconChange,
+  onUnitTypeColorChange,
 }: SortableOrgLevelItemProps) {
   const {
     attributes,
@@ -52,10 +55,8 @@ export function SortableOrgLevelItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${
-        isDragging
-          ? "border-primary bg-primary/5 shadow-xl ring-1 ring-primary/20"
-          : "border-outline-variant/50 bg-surface"
+      className={`flex items-center gap-1.5 border-b border-outline-variant/30 last:border-b-0 px-2 py-1.5 ${
+        isDragging ? "border-primary bg-primary/5 shadow-xl" : "bg-surface"
       }`}
     >
       {/* Drag handle */}
@@ -75,16 +76,21 @@ export function SortableOrgLevelItem({
       </span>
 
       {/* CSV column name */}
-      <span
-        className="text-[12px] text-surface-variant-foreground w-24 shrink-0 truncate leading-none"
-        title={csvHeader}
-      >
+      <span className="text-[12px] text-surface-variant-foreground w-20 shrink-0 truncate leading-none" title={csvHeader}>
         {csvHeader}
       </span>
 
       <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/50 shrink-0" />
 
-      {/* Editable unit type */}
+      {/* Combined icon + color picker */}
+      <IconColorPicker
+        icon={unitTypeIcon}
+        color={unitTypeColor}
+        onIconChange={onUnitTypeIconChange}
+        onColorChange={onUnitTypeColorChange}
+      />
+
+      {/* Editable unit type name */}
       <input
         type="text"
         value={unitTypeName}
@@ -94,7 +100,7 @@ export function SortableOrgLevelItem({
       />
 
       {/* Level indicator */}
-      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-12 text-right leading-none">
+      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-10 text-right leading-none">
         {rank === 0 ? "Top" : rank === total - 1 ? "Bottom" : `Lvl ${rank + 1}`}
       </span>
     </div>

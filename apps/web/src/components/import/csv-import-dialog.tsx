@@ -33,7 +33,7 @@ import {
 import { Button } from "@vkieu/mui/buttons";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { parseCsvLine, autoDetectMapping, detectUnitTypeName } from "@/lib/csv";
+import { parseCsvLine, autoDetectMapping, detectUnitTypeName, detectUnitTypeIcon, detectUnitTypeColor } from "@/lib/csv";
 import { useBulkImport, useRoles } from "@/services";
 import type { ImportMemberRow } from "@/services";
 import { toast } from "sonner";
@@ -131,6 +131,16 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
             unitTypeName: target === "orgLevel" ? detectUnitTypeName(h) : undefined,
           };
         });
+
+        // Assign unique icons/colors per org level using index
+        let orgIdx = 0;
+        for (const m of mappings) {
+          if (m.target === "orgLevel") {
+            m.unitTypeIcon = detectUnitTypeIcon(m.csvHeader, orgIdx);
+            m.unitTypeColor = detectUnitTypeColor(m.csvHeader, orgIdx);
+            orgIdx++;
+          }
+        }
         setColumnMappings(mappings);
 
         // Build initial org-level ordering (left-to-right from CSV)
@@ -339,6 +349,20 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
                   return next;
                 });
               }}
+              onUnitTypeIconChange={(idx, value) => {
+                setColumnMappings((prev) => {
+                  const next = [...prev];
+                  next[idx] = { ...next[idx], unitTypeIcon: value };
+                  return next;
+                });
+              }}
+              onUnitTypeColorChange={(idx, value) => {
+                setColumnMappings((prev) => {
+                  const next = [...prev];
+                  next[idx] = { ...next[idx], unitTypeColor: value };
+                  return next;
+                });
+              }}
               onDefaultRoleChange={setImportDefaultRoleId}
               onLineManagerMatchFieldChange={setLineManagerMatchField}
             />
@@ -409,6 +433,8 @@ interface MappingStepProps {
   onMappingChange: (index: number, target: MappingTarget) => void;
   onOrgLevelReorder: React.Dispatch<React.SetStateAction<number[]>>;
   onUnitTypeChange: (index: number, value: string) => void;
+  onUnitTypeIconChange: (index: number, value: string) => void;
+  onUnitTypeColorChange: (index: number, value: string) => void;
   onDefaultRoleChange: (value: string) => void;
   onLineManagerMatchFieldChange: (value: string) => void;
 }
@@ -425,6 +451,8 @@ function MappingStep({
   onMappingChange,
   onOrgLevelReorder,
   onUnitTypeChange,
+  onUnitTypeIconChange,
+  onUnitTypeColorChange,
   onDefaultRoleChange,
   onLineManagerMatchFieldChange,
 }: MappingStepProps) {
@@ -511,7 +539,7 @@ function MappingStep({
               }}
             >
               <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
-                <div className="space-y-1">
+                <div className="rounded-lg border border-outline-variant/50 overflow-hidden">
                   {orgLevelOrder.map((idx, rank) => (
                     <SortableOrgLevelItem
                       key={idx}
@@ -520,7 +548,11 @@ function MappingStep({
                       total={orgLevelOrder.length}
                       csvHeader={columnMappings[idx]?.csvHeader ?? ""}
                       unitTypeName={columnMappings[idx]?.unitTypeName ?? ""}
+                      unitTypeIcon={columnMappings[idx]?.unitTypeIcon ?? "corporate_fare"}
+                      unitTypeColor={columnMappings[idx]?.unitTypeColor ?? "#6366F1"}
                       onUnitTypeChange={(value) => onUnitTypeChange(idx, value)}
+                      onUnitTypeIconChange={(value) => onUnitTypeIconChange(idx, value)}
+                      onUnitTypeColorChange={(value) => onUnitTypeColorChange(idx, value)}
                     />
                   ))}
                 </div>
