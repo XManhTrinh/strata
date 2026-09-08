@@ -65,6 +65,8 @@ export interface ImportMemberRow {
   email: string;
   orgStructure?: string;
   orgLevelTypes?: string[]; // ["Division", "Tribe", "Squad"] — type name per level
+  orgLevelIcons?: string[]; // ["domain", "hub", "lan"] — icon per level
+  orgLevelColors?: string[]; // ["#6366F1", "#14B8A6", "#F59E0B"] — color per level
   position?: string;
   grade?: string;
   lineManagerEmail?: string; // kept for backward compat

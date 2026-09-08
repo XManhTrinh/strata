@@ -32,6 +32,8 @@ export interface ImportMemberDto {
   email: string;
   orgStructure?: string; // pipe-delimited: "Digital | Marketplace | PLP"
   orgLevelTypes?: string[]; // type name per level: ["Division", "Tribe", "Squad"]
+  orgLevelIcons?: string[]; // icon per level: ["domain", "hub", "lan"]
+  orgLevelColors?: string[]; // color per level: ["#6366F1", "#14B8A6", "#F59E0B"]
   position?: string;
   grade?: string;
   lineManagerEmail?: string; // kept for backward compat
@@ -294,7 +296,7 @@ export class CompanyPeopleService {
     // Resolve org structure hierarchy
     let orgUnitId: string | null = null;
     if (dto.orgStructure) {
-      orgUnitId = await this.resolveOrgHierarchy(companyId, dto.orgStructure, dto.orgLevelTypes);
+      orgUnitId = await this.resolveOrgHierarchy(companyId, dto.orgStructure, dto.orgLevelTypes, dto.orgLevelIcons, dto.orgLevelColors);
     }
 
     // Resolve career level / grade (before position, so we can set level range)
@@ -744,6 +746,8 @@ export class CompanyPeopleService {
     companyId: string,
     path: string,
     levelTypes?: string[],
+    levelIcons?: string[],
+    levelColors?: string[],
   ): Promise<string> {
     const parts = path.split('|').map((p) => p.trim()).filter(Boolean);
     if (parts.length === 0) throw new BadRequestException('Invalid org structure path');
@@ -753,36 +757,38 @@ export class CompanyPeopleService {
     for (let i = 0; i < parts.length; i++) {
       const unitName = parts[i];
       const typeName = levelTypes?.[i] || 'Department';
-      const typeId = await this.resolveOrgUnitType(companyId, typeName);
+      const typeIcon = levelIcons?.[i];
+      const typeColor = levelColors?.[i];
+      const typeId = await this.resolveOrgUnitType(companyId, typeName, typeIcon, typeColor);
       currentParentId = await this.findOrCreateOrgUnit(companyId, typeId, unitName, currentParentId);
     }
 
     return currentParentId!;
   }
 
-  private async resolveOrgUnitType(companyId: string, name: string): Promise<string> {
+  private async resolveOrgUnitType(companyId: string, name: string, icon?: string, color?: string): Promise<string> {
     const existing = await this.prisma.organizationUnitType.findFirst({
       where: { companyId, name },
       select: { id: true },
     });
     if (existing) return existing.id;
 
-    // Auto-assign a color based on the type name
-    const colors: Record<string, string> = {
-      division: '#6366F1',   // indigo
-      cfu: '#8B5CF6',        // violet
-      tribe: '#0EA5E9',      // sky
-      cluster: '#14B8A6',    // teal
-      squad: '#F59E0B',      // amber
-      team: '#10B981',       // emerald
-      department: '#3B82F6', // blue
-      group: '#EC4899',      // pink
-      unit: '#64748B',       // slate
+    // Auto-assign a color based on the type name (if not provided)
+    const defaultColors: Record<string, string> = {
+      division: '#6366F1',
+      cfu: '#8B5CF6',
+      tribe: '#0EA5E9',
+      cluster: '#14B8A6',
+      squad: '#F59E0B',
+      team: '#10B981',
+      department: '#3B82F6',
+      group: '#EC4899',
+      unit: '#64748B',
     };
-    const color = colors[name.toLowerCase()] || '#6B7280'; // gray default
+    const resolvedColor = color || defaultColors[name.toLowerCase()] || '#6B7280';
 
     const created = await this.prisma.organizationUnitType.create({
-      data: { companyId, name, color },
+      data: { companyId, name, color: resolvedColor, icon: icon || null },
       select: { id: true },
     });
     return created.id;

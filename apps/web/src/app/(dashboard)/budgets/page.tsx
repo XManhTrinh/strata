@@ -323,7 +323,7 @@ export default function BudgetsPage() {
               Cost by Squad
             </h2>
           </div>
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-100 overflow-y-auto">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-surface shadow-sm">
                 <TableRow>

@@ -219,6 +219,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
       // Build org structure from multiple columns, skipping empty values
       let orgStructure: string | undefined;
       const orgLevelTypesList: string[] = [];
+      const orgLevelIconsList: string[] = [];
+      const orgLevelColorsList: string[] = [];
       if (orgLevelIdxs.length > 0) {
         const parts: string[] = [];
         for (const idx of orgLevelIdxs) {
@@ -226,6 +228,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
           if (val) {
             parts.push(val);
             orgLevelTypesList.push(columnMappings[idx].unitTypeName || columnMappings[idx].csvHeader);
+            orgLevelIconsList.push(columnMappings[idx].unitTypeIcon || "corporate_fare");
+            orgLevelColorsList.push(columnMappings[idx].unitTypeColor || "#6B7280");
           }
         }
         if (parts.length > 0) orgStructure = parts.join(" | ");
@@ -236,6 +240,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
         email,
         orgStructure,
         orgLevelTypes: orgLevelTypesList.length > 0 ? orgLevelTypesList : undefined,
+        orgLevelIcons: orgLevelIconsList.length > 0 ? orgLevelIconsList : undefined,
+        orgLevelColors: orgLevelColorsList.length > 0 ? orgLevelColorsList : undefined,
         position: posIdx >= 0 ? fields[posIdx]?.trim() || undefined : undefined,
         grade: gradeIdx >= 0 ? fields[gradeIdx]?.trim() || undefined : undefined,
         lineManagerIdentifier: managerIdx >= 0 ? fields[managerIdx]?.trim() || undefined : undefined,
@@ -515,8 +521,8 @@ function MappingStep({
 
       {/* Org Hierarchy Order (draggable) */}
       {orgLevelOrder.length > 0 && (
-        <Card variant="outlined">
-          <CardContent className="p-3">
+        <Card variant="outlined" className="overflow-visible">
+          <CardContent className="p-3 overflow-visible">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Icon name="account_tree" size={16} className="text-primary" />
@@ -539,7 +545,7 @@ function MappingStep({
               }}
             >
               <SortableContext items={orgLevelOrder} strategy={verticalListSortingStrategy}>
-                <div className="rounded-lg border border-outline-variant/50 overflow-hidden">
+                <div className="rounded-lg border border-outline-variant/50 overflow-visible">
                   {orgLevelOrder.map((idx, rank) => (
                     <SortableOrgLevelItem
                       key={idx}

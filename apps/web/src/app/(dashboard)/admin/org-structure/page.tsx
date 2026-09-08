@@ -40,6 +40,7 @@ interface OrgTreeNode {
   typeId: string;
   typeName: string;
   typeColor: string;
+  typeIcon: string;
   parentId: string | null;
   children: OrgTreeNode[];
 }
@@ -54,6 +55,7 @@ function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
       typeId: unit.typeId,
       typeName: unit.type?.name || "Unknown",
       typeColor: unit.type?.color || "#6B7280",
+      typeIcon: unit.type?.icon || "folder",
       parentId: unit.parentId,
       children: [],
     });
@@ -125,7 +127,7 @@ function TreeNode({
             className="flex items-center justify-center w-6 h-6 rounded-md shrink-0"
             style={{ backgroundColor: unit.typeColor + "25" }}
           >
-            <span className="material-symbols-rounded text-[16px]" style={{ color: unit.typeColor }}>folder</span>
+            <span className="material-symbols-rounded text-[16px]" style={{ color: unit.typeColor }}>{unit.typeIcon}</span>
           </div>
           <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
           <span
@@ -211,6 +213,7 @@ export default function OrgStructurePage() {
       typeId: unit.typeId,
       typeName: unit.type?.name || "Unknown",
       typeColor: unit.type?.color || "#6B7280",
+      typeIcon: unit.type?.icon || "folder",
       parentId: unit.parentId,
       children: [],
     });

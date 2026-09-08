@@ -43,6 +43,8 @@ const ImportMemberSchema = z.object({
   email: z.string().email(),
   orgStructure: z.string().optional(),
   orgLevelTypes: z.array(z.string()).optional(),
+  orgLevelIcons: z.array(z.string()).optional(),
+  orgLevelColors: z.array(z.string()).optional(),
   position: z.string().optional(),
   grade: z.string().optional(),
   lineManagerEmail: z.string().optional(),
