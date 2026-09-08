@@ -103,6 +103,7 @@ function SortableColumnItem({
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -119,27 +120,28 @@ function SortableColumnItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1.5 px-2 h-7 rounded cursor-pointer ${
-        isDragging ? "bg-primary/10 shadow-sm" : "hover:bg-surface-foreground/4"
+      className={`flex items-center gap-1.5 px-2 h-7 rounded ${
+        isDragging ? "bg-primary/10 shadow-sm" : ""
       } ${isCore ? "opacity-60" : ""}`}
-      onClick={isCore ? undefined : onToggle}
     >
       <button
+        ref={setActivatorNodeRef}
         type="button"
         {...attributes}
         {...listeners}
         className="shrink-0 touch-none cursor-grab active:cursor-grabbing text-surface-variant-foreground/40 hover:text-surface-variant-foreground"
-        onClick={(e) => e.stopPropagation()}
       >
         <Icon name="drag_indicator" size={14} />
       </button>
-      <Checkbox
-        checked={checked}
-        disabled={isCore}
-        onCheckedChange={isCore ? undefined : onToggle}
-        className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
-      />
-      <span className="text-[12px] text-surface-foreground truncate flex-1">{label}</span>
+      <label className={`flex items-center gap-1.5 flex-1 min-w-0 ${isCore ? "" : "cursor-pointer hover:bg-surface-foreground/4"} rounded px-0.5`}>
+        <Checkbox
+          checked={checked}
+          disabled={isCore}
+          onCheckedChange={isCore ? undefined : onToggle}
+          className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
+        />
+        <span className="text-[12px] text-surface-foreground truncate">{label}</span>
+      </label>
     </div>
   );
 }
