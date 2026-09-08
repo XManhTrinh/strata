@@ -123,12 +123,7 @@ function TreeNode({
         )}
 
         <div className="flex flex-1 items-center gap-3">
-          <div
-            className="flex items-center justify-center w-6 h-6 rounded-md shrink-0"
-            style={{ backgroundColor: unit.typeColor + "25" }}
-          >
-            <span className="material-symbols-rounded text-[16px]" style={{ color: unit.typeColor }}>{unit.typeIcon}</span>
-          </div>
+          <span className="material-symbols-rounded text-[18px] shrink-0" style={{ color: unit.typeColor }}>{unit.typeIcon}</span>
           <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
           <span
             className="text-[11px] font-medium px-2 py-0.5 rounded-full"
