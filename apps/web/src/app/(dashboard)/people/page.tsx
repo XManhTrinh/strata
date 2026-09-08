@@ -4,6 +4,23 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   Search,
   Icon,
   Card,
@@ -63,10 +80,76 @@ const CORE_COLUMNS = [
   { key: "roles", label: "Roles" },
 ] as const;
 
+// ─── Sortable Column Item ─────────────────────────────────────────────────────
+
+function SortableColumnItem({
+  id,
+  label,
+  isCore,
+  checked,
+  onToggle,
+}: {
+  id: string;
+  label: string;
+  isCore: boolean;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.7 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-1.5 px-2 h-7 rounded cursor-pointer ${
+        isDragging ? "bg-primary/10 shadow-sm" : "hover:bg-surface-foreground/4"
+      } ${isCore ? "opacity-60" : ""}`}
+      onClick={isCore ? undefined : onToggle}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="shrink-0 touch-none cursor-grab active:cursor-grabbing text-surface-variant-foreground/40 hover:text-surface-variant-foreground"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Icon name="drag_indicator" size={14} />
+      </button>
+      <Checkbox
+        checked={checked}
+        disabled={isCore}
+        onCheckedChange={isCore ? undefined : onToggle}
+        className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
+      />
+      <span className="text-[12px] text-surface-foreground truncate flex-1">{label}</span>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PeoplePage() {
   const companyId = useCompanyId();
+
+  // DnD sensors for column reordering
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   // ── Data queries ──────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -121,8 +204,9 @@ export default function PeoplePage() {
   });
   const [formMetadata, setFormMetadata] = useState<Record<string, string>>({});
 
-  // ── Column visibility state ───────────────────────────────────────────────
+  // ── Column visibility & order state ─────────────────────────────────────
   const [visibleMetaKeys, setVisibleMetaKeys] = useState<Set<string>>(new Set());
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
   const [selectedViewId, setSelectedViewId] = useState<string>("");
 
   // ── Derived data ──────────────────────────────────────────────────────────
@@ -176,9 +260,24 @@ export default function PeoplePage() {
     return [...core, ...meta];
   }, [metadataKeys]);
 
+  // Initialize column order when metadata keys change
+  useEffect(() => {
+    setColumnOrder((prev) => {
+      const allKeys = allColumns.map((c) => c.key);
+      // Keep existing order, append any new columns
+      const existing = prev.filter((k) => allKeys.includes(k));
+      const newKeys = allKeys.filter((k) => !existing.includes(k));
+      if (newKeys.length === 0 && existing.length === allKeys.length) return prev;
+      return [...existing, ...newKeys];
+    });
+  }, [allColumns]);
+
   const visibleColumns = useMemo(() => {
-    return allColumns.filter((col) => col.isCore || visibleMetaKeys.has(col.key));
-  }, [allColumns, visibleMetaKeys]);
+    const visible = allColumns.filter((col) => col.isCore || visibleMetaKeys.has(col.key));
+    // Sort by columnOrder
+    const orderMap = new Map(columnOrder.map((key, idx) => [key, idx]));
+    return [...visible].sort((a, b) => (orderMap.get(a.key) ?? 999) - (orderMap.get(b.key) ?? 999));
+  }, [allColumns, visibleMetaKeys, columnOrder]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -451,28 +550,37 @@ export default function PeoplePage() {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowColumnToggle(false)} />
                 <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl bg-surface-container-low border border-outline-variant shadow-lg py-1">
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-3 py-1">Core</p>
-                  {CORE_COLUMNS.map((col) => (
-                    <div key={col.key} className="flex items-center gap-2 px-3 h-7 opacity-50">
-                      <Checkbox checked disabled className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5" />
-                      <span className="text-[12px] text-surface-foreground">{col.label}</span>
-                    </div>
-                  ))}
-                  {metadataKeys.length > 0 && (
-                    <>
-                      <Divider className="my-1" />
-                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-3 py-1">Extra</p>
-                      {metadataKeys.map((key) => {
-                        const colKey = `meta:${key}`;
+                  <DndContext
+                    sensors={dndSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event: DragEndEvent) => {
+                      const { active, over } = event;
+                      if (over && active.id !== over.id) {
+                        setColumnOrder((prev) => {
+                          const oldIndex = prev.indexOf(String(active.id));
+                          const newIndex = prev.indexOf(String(over.id));
+                          return arrayMove(prev, oldIndex, newIndex);
+                        });
+                      }
+                    }}
+                  >
+                    <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
+                      {columnOrder.map((key) => {
+                        const col = allColumns.find((c) => c.key === key);
+                        if (!col) return null;
                         return (
-                          <label key={colKey} className="flex items-center gap-2 px-3 h-7 rounded hover:bg-surface-foreground/4 cursor-pointer">
-                            <Checkbox checked={visibleMetaKeys.has(colKey)} onCheckedChange={() => toggleMetaColumn(colKey)} className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5" />
-                            <span className="text-[12px] text-surface-foreground">{key}</span>
-                          </label>
+                          <SortableColumnItem
+                            key={key}
+                            id={key}
+                            label={col.label}
+                            isCore={col.isCore}
+                            checked={col.isCore || visibleMetaKeys.has(key)}
+                            onToggle={() => toggleMetaColumn(key)}
+                          />
                         );
                       })}
-                    </>
-                  )}
+                    </SortableContext>
+                  </DndContext>
                 </div>
               </>
             )}
