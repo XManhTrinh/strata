@@ -449,7 +449,7 @@ export class CompanyPeopleService {
   /**
    * Bulk import from CSV with column mapping.
    */
-  async bulkImport(companyId: string, rows: ImportMemberDto[]) {
+  async bulkImport(companyId: string, rows: ImportMemberDto[], supabaseUserId?: string) {
     const results: { status: string; email: string; error?: string }[] = [];
 
     // Phase 1: Create all members (without line manager)
@@ -479,12 +479,46 @@ export class CompanyPeopleService {
       }
     }
 
-    return {
+    const importResult = {
       total: rows.length,
       created: results.filter((r) => r.status === 'created').length,
       updated: results.filter((r) => r.status === 'updated').length,
       errors: results.filter((r) => r.status === 'error'),
     };
+
+    // Create notification for the importing user
+    if (supabaseUserId) {
+      try {
+        const user = await this.prisma.user.findUnique({
+          where: { supabaseUserId },
+          select: { id: true },
+        });
+        if (user) {
+          const hasErrors = importResult.errors.length > 0;
+          await this.prisma.notification.create({
+            data: {
+              companyId,
+              userId: user.id,
+              type: hasErrors ? 'import_error' : 'import_complete',
+              title: hasErrors
+                ? `Import completed with ${importResult.errors.length} error${importResult.errors.length !== 1 ? 's' : ''}`
+                : 'Import completed successfully',
+              message: `${importResult.created} created, ${importResult.updated} updated${hasErrors ? `, ${importResult.errors.length} failed` : ''}`,
+              metadata: {
+                total: importResult.total,
+                created: importResult.created,
+                updated: importResult.updated,
+                errorCount: importResult.errors.length,
+              },
+            },
+          });
+        }
+      } catch {
+        // Don't fail the import if notification creation fails
+      }
+    }
+
+    return importResult;
   }
 
   /**

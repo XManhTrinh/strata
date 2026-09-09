@@ -8,6 +8,7 @@ import { PeopleModule } from './people/people.module';
 import { CapacityModule } from './capacity/capacity.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { OrgChartModule } from './org-chart/org-chart.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { OrgChartModule } from './org-chart/org-chart.module';
     CapacityModule,
     CalendarModule,
     OrgChartModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [],

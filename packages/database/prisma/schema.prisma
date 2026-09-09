@@ -50,6 +50,7 @@ model User {
 
   person          Person           @relation(fields: [personId], references: [id])
   apiKeys         ApiKey[]
+  notifications   Notification[]
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -101,6 +102,7 @@ model Company {
   // Capacity planning
   capacityAllocations    CapacityAllocation[]
   rateCards              RateCard[]
+  notifications          Notification[]
 }
 
 // ─── Table Views (saved column configurations per company) ──────────────────────
@@ -606,4 +608,25 @@ model RateCard {
 
   @@unique([companyId, division, location, grade])
   @@index([companyId])
+}
+
+
+// ─── Notifications ──────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  companyId String
+  userId    String
+  type      String   // e.g. "import_complete", "import_error", "system"
+  title     String
+  message   String
+  metadata  Json?    @default("{}")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([userId, read, createdAt(sort: Desc)])
+  @@index([companyId, userId])
 }

@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import {
   CompanyPeopleService,
@@ -115,12 +116,14 @@ export class CompanyPeopleController {
   async bulkImport(
     @Param('companyId') companyId: string,
     @Body() body: unknown,
+    @Req() req?: any,
   ) {
     const parsed = BulkImportSchema.safeParse(body);
     if (!parsed.success) {
       throw new BadRequestException(parsed.error.flatten().fieldErrors);
     }
-    return this.service.bulkImport(companyId, parsed.data.rows);
+    const supabaseUserId = req?.user?.sub;
+    return this.service.bulkImport(companyId, parsed.data.rows, supabaseUserId);
   }
 
   @Put(':id')
