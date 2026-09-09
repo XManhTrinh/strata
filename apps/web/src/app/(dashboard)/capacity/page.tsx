@@ -24,6 +24,7 @@ import {
   useUpsertRateCard,
   useDeleteRateCard,
   useOrgUnitTree,
+  useCompanySettings,
 } from "@/services";
 import type { SquadCapacitySummary, PeriodValues, MemberAllocation, UpsertAllocationDto } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -33,7 +34,13 @@ import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PERIODS = ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10","p11","p12"] as const;
-const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_LABELS_ALL = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/** Build month labels offset by the fiscal year start month (1-indexed). */
+function buildMonthLabels(fiscalYearStart: number): string[] {
+  const start = (fiscalYearStart - 1) % 12;
+  return Array.from({ length: 12 }, (_, i) => MONTH_LABELS_ALL[(start + i) % 12]);
+}
 
 type PeriodKey = typeof PERIODS[number];
 
@@ -129,6 +136,10 @@ export default function CapacityPage() {
   const { data: squads, isLoading, isError, error } = useCapacitySummary(companyId, fiscalYear);
   const { data: orgUnits = [] } = useOrgUnitTree(companyId);
   const { data: rateCards = [] } = useRateCards(companyId);
+  const { data: companySettings } = useCompanySettings(companyId);
+
+  const fiscalYearStartMonth = (companySettings?.settings as Record<string, unknown>)?.fiscalYearStart as number ?? 1;
+  const MONTH_LABELS = useMemo(() => buildMonthLabels(fiscalYearStartMonth), [fiscalYearStartMonth]);
   const saveAllocationsMutation = useSaveAllocations();
   const upsertRateCardMutation = useUpsertRateCard();
   const deleteRateCardMutation = useDeleteRateCard();

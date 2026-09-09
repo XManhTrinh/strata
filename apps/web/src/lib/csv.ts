@@ -65,7 +65,7 @@ import type { MappingTarget } from "@/components/import/types";
 export function autoDetectMapping(header: string): MappingTarget {
   const h = header.toLowerCase();
 
-  if (h.includes("name") && !h.includes("unit")) return "fullName";
+  if (h.includes("name") && !h.includes("unit") && !h.includes("vendor") && !h.includes("company") && !h.includes("type")) return "fullName";
 
   if (h.includes("email") || h.includes("e-mail")) {
     // "line manager email" should map to lineManager, not the member's email

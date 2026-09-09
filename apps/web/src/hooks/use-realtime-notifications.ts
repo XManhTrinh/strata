@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 
 /**
  * Subscribes to Supabase Realtime for the Notification table.
@@ -35,33 +34,8 @@ export function useRealtimeNotifications(companyId: string) {
           table: "Notification",
         },
         (payload) => {
-          const notification = payload.new as {
-            id: string;
-            title: string;
-            message: string;
-            type: string;
-          };
-
-          // Refresh notification queries
+          // Refresh notification queries — bell badge will update
           queryClient.invalidateQueries({ queryKey: ["notifications", companyId] });
-
-          // Show toast
-          if (notification.type === "import_complete") {
-            toast.success(notification.title, {
-              description: notification.message,
-              duration: 6000,
-            });
-          } else if (notification.type === "import_error") {
-            toast.error(notification.title, {
-              description: notification.message,
-              duration: 8000,
-            });
-          } else {
-            toast(notification.title, {
-              description: notification.message,
-              duration: 5000,
-            });
-          }
         },
       )
       .subscribe();

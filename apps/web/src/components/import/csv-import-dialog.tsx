@@ -42,6 +42,17 @@ import type { ColumnMapping, MappingTarget, ImportStep } from "./types";
 import { MAPPING_OPTIONS } from "./types";
 import { SortableOrgLevelItem } from "./sortable-org-level-item";
 
+// ─── Helpers ────────────────────────────────────────────────────────────────────
+
+/** Normalize employment type variants to "Perm" or "SubCon". */
+function normalizeEmploymentType(value?: string): string | undefined {
+  if (!value) return undefined;
+  const v = value.toLowerCase().trim();
+  if (v === "perm" || v === "permanent" || v === "regular" || v === "fte" || v === "full-time" || v === "fulltime") return "Perm";
+  if (v === "subcon" || v === "contractor" || v === "contract" || v === "temporary" || v === "temp" || v === "contingent" || v === "vendor") return "SubCon";
+  return undefined; // unrecognized values are dropped
+}
+
 // ─── Props ──────────────────────────────────────────────────────────────────────
 
 export interface CsvImportDialogProps {
@@ -88,6 +99,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
   const [orgLevelOrder, setOrgLevelOrder] = useState<number[]>([]);
   const [importDefaultRoleId, setImportDefaultRoleId] = useState("");
   const [lineManagerMatchField, setLineManagerMatchField] = useState("email");
+  const [mappingErrors, setMappingErrors] = useState<string[]>([]);
+  const [errorIndices, setErrorIndices] = useState<Set<number>>(new Set());
 
   // ── Reset ───────────────────────────────────────────────────────────────
   const reset = useCallback(() => {
@@ -99,6 +112,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     setOrgLevelOrder([]);
     setImportDefaultRoleId("");
     setLineManagerMatchField("email");
+    setMappingErrors([]);
+    setErrorIndices(new Set());
   }, []);
 
   // ── File selection & parsing ────────────────────────────────────────────
@@ -164,6 +179,22 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     setColumnMappings((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], target };
+
+      // Revalidate duplicates live
+      const uniqueTargets: MappingTarget[] = ["fullName", "email", "position", "grade", "employmentType", "salary", "dayRate", "lineManager"];
+      const newErrors: string[] = [];
+      const newBadIndices = new Set<number>();
+      for (const t of uniqueTargets) {
+        const indices = next.map((m, i) => m.target === t ? i : -1).filter((i) => i >= 0);
+        if (indices.length > 1) {
+          const label = MAPPING_OPTIONS.find((o) => o.value === t)?.label ?? t;
+          newErrors.push(`"${label}" is mapped to ${indices.length} columns — each field should only be mapped once`);
+          for (const i of indices) newBadIndices.add(i);
+        }
+      }
+      setMappingErrors(newErrors);
+      setErrorIndices(newBadIndices);
+
       return next;
     });
     setOrgLevelOrder((prev) => {
@@ -235,6 +266,13 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
         if (parts.length > 0) orgStructure = parts.join(" | ");
       }
 
+      // Warn on unrecognized employment type
+      const rawEmpType = empTypeIdx >= 0 ? fields[empTypeIdx]?.trim() : undefined;
+      const normalizedEmpType = rawEmpType ? normalizeEmploymentType(rawEmpType) : undefined;
+      if (rawEmpType && !normalizedEmpType) {
+        errors.push({ row: i + 2, message: `Unknown employment type: "${rawEmpType}" (expected Perm/SubCon/Regular/Temporary)` });
+      }
+
       rows.push({
         fullName,
         email,
@@ -246,7 +284,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
         grade: gradeIdx >= 0 ? fields[gradeIdx]?.trim() || undefined : undefined,
         lineManagerIdentifier: managerIdx >= 0 ? fields[managerIdx]?.trim() || undefined : undefined,
         lineManagerMatchField: managerIdx >= 0 && fields[managerIdx]?.trim() ? lineManagerMatchField : undefined,
-        employmentType: empTypeIdx >= 0 ? fields[empTypeIdx]?.trim() || undefined : undefined,
+        employmentType: normalizedEmpType,
         annualSalary: salaryIdx >= 0 ? fields[salaryIdx]?.trim() || undefined : undefined,
         dayRate: dayRateIdx >= 0 ? fields[dayRateIdx]?.trim() || undefined : undefined,
         roleId: importDefaultRoleId || undefined,
@@ -262,42 +300,60 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     const hasName = columnMappings.some((m) => m.target === "fullName");
     const hasEmail = columnMappings.some((m) => m.target === "email");
     if (!hasName || !hasEmail) {
-      toast.error("You must map at least a Full Name and Email column");
+      setMappingErrors(["You must map at least a Full Name and Email column"]);
+      // Scroll to top to show errors
+      document.querySelector("[data-mapping-scroll]")?.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+
+    const uniqueTargets: MappingTarget[] = ["fullName", "email", "position", "grade", "employmentType", "salary", "dayRate", "lineManager"];
+    const dupeErrors: string[] = [];
+    const badIndices = new Set<number>();
+    for (const target of uniqueTargets) {
+      const indices = columnMappings.map((m, i) => m.target === target ? i : -1).filter((i) => i >= 0);
+      if (indices.length > 1) {
+        const label = MAPPING_OPTIONS.find((o) => o.value === target)?.label ?? target;
+        dupeErrors.push(`"${label}" is mapped to ${indices.length} columns — each field should only be mapped once`);
+        for (const i of indices) badIndices.add(i);
+      }
+    }
+    if (dupeErrors.length > 0) {
+      setMappingErrors(dupeErrors);
+      setErrorIndices(badIndices);
+      document.querySelector("[data-mapping-scroll]")?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setMappingErrors([]);
     setImportStep("preview");
+    setErrorIndices(new Set());
   }, [columnMappings]);
 
   // ── Confirm import ──────────────────────────────────────────────────────
   const handleImportConfirm = useCallback(() => {
     if (!importPreview?.rows.length) return;
 
-    const toastId = toast.loading(
-      `Importing ${importPreview.rows.length} members...`,
-      { duration: Infinity },
-    );
-
     const rows = importPreview.rows;
     reset();
+
+    toast("Import started", {
+      description: `Processing ${rows.length} members...`,
+      duration: 3000,
+    });
 
     // Use plain apiClient so the request survives component unmount
     apiClient<{ total: number; created: number; updated: number; errors: unknown[] }>(
       `/companies/${companyId}/members/import`,
       { method: "POST", body: { rows } },
     )
-      .then((result) => {
-        const msg = `Imported ${result.created} new, updated ${result.updated}`;
-        if (result.errors.length > 0) {
-          toast.success(`${msg} (${result.errors.length} errors)`, { id: toastId });
-        } else {
-          toast.success(msg, { id: toastId });
-        }
+      .then(() => {
+        // Notification is created by the backend — Realtime will show it
         queryClient.invalidateQueries({ queryKey: ["members", companyId] });
         queryClient.invalidateQueries({ queryKey: ["company-settings", companyId] });
         onImportComplete?.();
       })
       .catch((err) => {
-        toast.error(err.message || "Import failed", { id: toastId });
+        toast.error(err.message || "Import failed");
       });
   }, [importPreview, companyId, queryClient, onImportComplete, reset]);
 
@@ -344,6 +400,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
               orgLevelOrder={orgLevelOrder}
               importDefaultRoleId={importDefaultRoleId}
               lineManagerMatchField={lineManagerMatchField}
+              mappingErrors={mappingErrors}
               roles={roles}
               dndSensors={dndSensors}
               onMappingChange={handleMappingChange}
@@ -371,6 +428,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
               }}
               onDefaultRoleChange={setImportDefaultRoleId}
               onLineManagerMatchFieldChange={setLineManagerMatchField}
+              errorIndices={errorIndices}
             />
           )}
 
@@ -389,7 +447,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
             {importStep === "mapping" && (
               <>
                 <Button variant="text" onClick={reset}>Cancel</Button>
-                <Button variant="filled" onClick={handleMappingNext}>
+                <Button variant="filled" onClick={handleMappingNext} disabled={mappingErrors.length > 0}>
                   <Icon name="arrow_forward" size={18} />Review Import
                 </Button>
               </>
@@ -443,6 +501,10 @@ interface MappingStepProps {
   onUnitTypeColorChange: (index: number, value: string) => void;
   onDefaultRoleChange: (value: string) => void;
   onLineManagerMatchFieldChange: (value: string) => void;
+  /** Indices of rows with mapping errors (for highlighting). */
+  errorIndices: Set<number>;
+  /** Mapping validation errors to display. */
+  mappingErrors: string[];
 }
 
 function MappingStep({
@@ -461,18 +523,43 @@ function MappingStep({
   onUnitTypeColorChange,
   onDefaultRoleChange,
   onLineManagerMatchFieldChange,
+  errorIndices,
+  mappingErrors,
 }: MappingStepProps) {
   return (
-    <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto">
-      {/* Step indicator */}
-      <div className="flex items-center gap-2">
+    <>
+      {/* Step indicator — outside scroll */}
+      <div className="px-6 pb-3 flex items-center gap-2">
         <Chip variant="filter" selected leadingIcon="looks_one">Step 1 of 2</Chip>
         <Chip variant="filter" leadingIcon="table_chart">{csvHeaders.length} columns</Chip>
         <Chip variant="filter" leadingIcon="dataset">{csvRows.length} rows</Chip>
       </div>
 
+      {/* Scrollable content */}
+      <div data-mapping-scroll className="px-6 space-y-4 max-h-[55vh] overflow-y-auto">
+        {/* Sticky error banner */}
+        {mappingErrors.length > 0 && (
+          <div className="sticky -top-px z-10 bg-surface-container-high">
+            <div className="py-2.5 bg-error-container flex items-start gap-3">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-error shrink-0">
+                <Icon name="error" size={18} className="text-on-error" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-on-error-container">
+                  {mappingErrors.length} mapping issue{mappingErrors.length !== 1 ? "s" : ""} — fix before continuing
+                </p>
+                <div className="space-y-0.5 mt-1">
+                  {mappingErrors.map((err, i) => (
+                    <p key={i} className="text-[12px] text-on-error-container/80">{err}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* Column mapping grid */}
-      <Card variant="outlined" className="overflow-visible">
+      <Card variant="outlined" className="overflow-hidden">
         <div>
           {/* Header */}
           <div className="grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 bg-surface-container-low/50 border-b border-outline-variant/50">
@@ -485,7 +572,7 @@ function MappingStep({
           {columnMappings.map((mapping, idx) => {
             const isSkipped = mapping.target === "skip";
             return (
-            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""}`}>
+            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""} ${errorIndices.has(idx) ? "bg-error/8 ring-1 ring-error/20 rounded" : ""}`}>
               <div className="flex items-center gap-1.5 min-w-0">
                 <Icon name="table_chart" size={12} className="text-surface-variant-foreground shrink-0" />
                 <span className={`text-[11px] font-medium truncate ${isSkipped ? "line-through text-surface-variant-foreground" : "text-surface-foreground"}`}>{mapping.csvHeader}</span>
@@ -623,6 +710,7 @@ function MappingStep({
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
 

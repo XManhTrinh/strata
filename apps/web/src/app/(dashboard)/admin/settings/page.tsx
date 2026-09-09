@@ -6,6 +6,7 @@ import { AppBar } from "@/components/layout/app-bar";
 import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
+import { Select } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { Chip } from "@vkieu/mui";
 import { Divider } from "@vkieu/mui";
@@ -345,13 +346,12 @@ export default function SettingsPage() {
                       placeholder="e.g. GBP, USD, EUR"
                       supportingText="ISO 4217 currency code."
                     />
-                    <TextField
+                    <Select
                       variant="outlined"
                       label="Fiscal Year Start Month"
-                      type="number"
                       value={fiscalYearStart}
-                      onChange={(e) => setFiscalYearStart(e.target.value)}
-                      supportingText={`Month: ${monthLabels[parseInt(fiscalYearStart, 10) - 1] ?? "January"}`}
+                      onValueChange={(v) => setFiscalYearStart(v)}
+                      options={monthLabels.map((label, i) => ({ value: String(i + 1), label }))}
                     />
                   </CardContent>
                 </Card>
