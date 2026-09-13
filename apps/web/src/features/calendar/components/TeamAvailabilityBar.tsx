@@ -1,5 +1,7 @@
 "use client";
 
+import { Typography } from "@vkieu/mui";
+
 interface TeamAvailabilityBarProps {
   available: number;
   total: number;
@@ -25,9 +27,9 @@ export function TeamAvailabilityBar({ available, total }: TeamAvailabilityBarPro
     <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2">
       <div className="flex items-center gap-2">
         <div className={`h-2.5 w-2.5 rounded-full ${colorClass}`} aria-hidden="true" />
-        <span className={`text-sm font-medium ${textColor}`}>
+        <Typography variant="label-large" as="span" className={textColor}>
           {available}/{total} available today
-        </span>
+        </Typography>
       </div>
       <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-surface-variant">
         <div

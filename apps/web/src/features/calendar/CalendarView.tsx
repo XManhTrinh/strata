@@ -293,19 +293,19 @@ export function CalendarView() {
                     </Typography>
                     <div className="mt-1.5 flex items-center gap-2">
                       {canApprove && (
-                        <Button variant="text" size="xs" onClick={() => handleApprove(event.id)} className="text-tertiary h-auto p-0">
+                        <button type="button" onClick={() => handleApprove(event.id)} className="text-[11px] font-medium text-tertiary hover:underline">
                           Approve
-                        </Button>
+                        </button>
                       )}
                       {canReject && (
-                        <Button variant="text" size="xs" onClick={() => handleReject(event.id)} className="text-error h-auto p-0">
+                        <button type="button" onClick={() => handleReject(event.id)} className="text-[11px] font-medium text-error hover:underline">
                           Reject
-                        </Button>
+                        </button>
                       )}
                       {canCancel && !(canApprove || canReject) && (
-                        <Button variant="text" size="xs" onClick={() => handleCancel(event.id)} className="text-error h-auto p-0">
+                        <button type="button" onClick={() => handleCancel(event.id)} className="text-[11px] font-medium text-error hover:underline">
                           Cancel Request
-                        </Button>
+                        </button>
                       )}
                     </div>
                   </div>

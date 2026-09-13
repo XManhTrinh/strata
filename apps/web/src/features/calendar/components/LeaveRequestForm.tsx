@@ -1,6 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  TextField,
+  Select,
+  Icon,
+  Typography,
+} from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
 import { calculateWorkingDays, getAvailableBalance } from "../utils/calendar.utils";
 
@@ -21,14 +34,34 @@ const LEAVE_TYPES = [
   { id: "lt-5", name: "Training", eventTypeId: "et-4", color: "#F59E0B" },
 ];
 
-export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultDate, defaultEndDate }: LeaveRequestFormProps) {
+function formatDateInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function LeaveRequestForm({
+  isOpen,
+  onClose,
+  onSubmit,
+  balances,
+  defaultDate,
+  defaultEndDate,
+}: LeaveRequestFormProps) {
   const [leaveTypeId, setLeaveTypeId] = useState(LEAVE_TYPES[0].id);
-  const [startDate, setStartDate] = useState(defaultDate ? formatDateInput(defaultDate) : formatDateInput(new Date()));
-  const [endDate, setEndDate] = useState(defaultEndDate ? formatDateInput(defaultEndDate) : defaultDate ? formatDateInput(defaultDate) : formatDateInput(new Date()));
+  const [startDate, setStartDate] = useState(
+    defaultDate ? formatDateInput(defaultDate) : formatDateInput(new Date()),
+  );
+  const [endDate, setEndDate] = useState(
+    defaultEndDate
+      ? formatDateInput(defaultEndDate)
+      : defaultDate
+        ? formatDateInput(defaultDate)
+        : formatDateInput(new Date()),
+  );
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
-
-  if (!isOpen) return null;
 
   const workingDays = calculateWorkingDays(startDate, endDate);
   const selectedBalance = balances.find((b) => b.leaveTypeId === leaveTypeId);
@@ -46,7 +79,9 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
       validationErrors.push("Selected date range contains no working days");
     }
     if (workingDays > available) {
-      validationErrors.push(`Insufficient balance: ${available} days available, ${workingDays} requested (shortfall: ${workingDays - available} days)`);
+      validationErrors.push(
+        `Insufficient balance: ${available} days available, ${workingDays} requested`,
+      );
     }
 
     if (validationErrors.length > 0) {
@@ -60,7 +95,13 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
       ownerUserId: "u1",
       ownerName: "You",
       eventTypeId: selectedLeaveType?.eventTypeId ?? "et-1",
-      eventType: { id: selectedLeaveType?.eventTypeId ?? "et-1", companyId: "c1", name: "Leave", color: selectedLeaveType?.color ?? "#10B981", isSystem: true },
+      eventType: {
+        id: selectedLeaveType?.eventTypeId ?? "et-1",
+        companyId: "c1",
+        name: "Leave",
+        color: selectedLeaveType?.color ?? "#10B981",
+        isSystem: true,
+      },
       title: `${selectedLeaveType?.name ?? "Leave"} - You`,
       startDate: new Date(`${startDate}T00:00:00`).toISOString(),
       endDate: new Date(`${endDate}T23:59:59`).toISOString(),
@@ -71,7 +112,16 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
         id: `lr-new-${Date.now()}`,
         calendarEventId: `ev-leave-${Date.now()}`,
         leaveTypeId,
-        leaveType: selectedBalance?.leaveType ?? { id: leaveTypeId, companyId: "c1", name: selectedLeaveType?.name ?? "Leave", color: selectedLeaveType?.color ?? "#10B981", defaultAllocation: 25, requiresApproval: true, carryOver: false, isSystem: true },
+        leaveType: selectedBalance?.leaveType ?? {
+          id: leaveTypeId,
+          companyId: "c1",
+          name: selectedLeaveType?.name ?? "Leave",
+          color: selectedLeaveType?.color ?? "#10B981",
+          defaultAllocation: 25,
+          requiresApproval: true,
+          carryOver: false,
+          isSystem: true,
+        },
         status: "PENDING",
         workingDays,
       },
@@ -94,106 +144,90 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-scrim/50" onClick={handleClose} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-low p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-surface-foreground">Request Leave</h2>
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent icon="event_available">
+        <DialogHeader centered>
+          <DialogTitle>Request Leave</DialogTitle>
+          <DialogDescription>
+            Submit a leave request for approval.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           {errors.length > 0 && (
-            <div className="rounded-md bg-error-container p-3 dark:bg-error-container/20">
+            <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
-                <p key={err} className="text-sm text-error">{err}</p>
+                <Typography key={err} variant="body-small" color="error">
+                  {err}
+                </Typography>
               ))}
             </div>
           )}
 
-          <div>
-            <label htmlFor="leave-type" className="block text-sm font-medium text-surface-foreground">Leave Type</label>
-            <select
-              id="leave-type"
-              value={leaveTypeId}
-              onChange={(e) => setLeaveTypeId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {LEAVE_TYPES.map((type) => (
-                <option key={type.id} value={type.id}>{type.name}</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Leave Type"
+            value={leaveTypeId}
+            onValueChange={setLeaveTypeId}
+            variant="outlined"
+            options={LEAVE_TYPES.map((type) => ({
+              value: type.id,
+              label: type.name,
+            }))}
+          />
 
           {selectedBalance && (
-            <div className="rounded-md bg-surface-variant/50 p-3">
-              <p className="text-sm text-surface-variant-foreground">
-                Remaining balance: <span className="font-medium text-surface-foreground">{available} days</span>
-              </p>
+            <div className="rounded-lg bg-surface-variant/50 p-3 flex items-center gap-2">
+              <Icon name="info" size={16} className="text-surface-variant-foreground shrink-0" />
+              <Typography variant="body-small" color="surface-variant-foreground">
+                Remaining balance:{" "}
+                <Typography variant="label-large" as="span">{available} days</Typography>
+              </Typography>
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="leave-start-date" className="block text-sm font-medium text-surface-foreground">Start Date</label>
-              <input
-                id="leave-start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label htmlFor="leave-end-date" className="block text-sm font-medium text-surface-foreground">End Date</label>
-              <input
-                id="leave-end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <div className="rounded-md bg-primary-container p-3 dark:bg-primary-container/20">
-            <p className="text-sm text-primary">
-              Working days: <span className="font-medium">{workingDays}</span>
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="leave-notes" className="block text-sm font-medium text-surface-foreground">Notes (optional)</label>
-            <textarea
-              id="leave-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground placeholder:text-surface-variant-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-              placeholder="Reason for leave..."
+            <TextField
+              variant="outlined"
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              label="End Date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-md border border-outline-variant px-4 py-2 text-sm font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Submit Request
-            </button>
+          <div className="rounded-lg bg-primary-container p-3 dark:bg-primary-container/20 flex items-center gap-2">
+            <Icon name="calendar_today" size={16} className="text-primary shrink-0" />
+            <Typography variant="body-small" color="primary">
+              Working days: <Typography variant="label-large" as="span" color="primary">{workingDays}</Typography>
+            </Typography>
           </div>
-        </form>
-      </div>
-    </div>
-  );
-}
 
-function formatDateInput(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+          <TextField
+            variant="outlined"
+            label="Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Reason for leave..."
+            multiline
+          />
+
+          <DialogFooter>
+            <Button type="button" variant="text" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="text">
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 }

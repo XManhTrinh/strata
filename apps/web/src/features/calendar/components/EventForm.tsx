@@ -1,6 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  TextField,
+  Select,
+  Checkbox,
+  Typography,
+} from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
 interface EventFormProps {
@@ -26,6 +39,11 @@ const RECURRENCE_OPTIONS: { value: RecurrenceFrequency | ""; label: string }[] =
   { value: "YEARLY", label: "Yearly" },
 ];
 
+const VISIBILITY_OPTIONS = [
+  { value: "SHARED" as const, label: "Shared (visible to team)" },
+  { value: "PERSONAL" as const, label: "Personal (only you)" },
+];
+
 export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormProps) {
   const [title, setTitle] = useState("");
   const [eventTypeId, setEventTypeId] = useState(EVENT_TYPES[0].id);
@@ -37,8 +55,6 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
   const [visibility, setVisibility] = useState<EventVisibility>("SHARED");
   const [recurrence, setRecurrence] = useState<RecurrenceFrequency | "">("");
   const [errors, setErrors] = useState<string[]>([]);
-
-  if (!isOpen) return null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,149 +110,122 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-scrim/50" onClick={handleClose} aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-low p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-surface-foreground">Create Event</h2>
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent icon="event">
+        <DialogHeader centered>
+          <DialogTitle>Create Event</DialogTitle>
+          <DialogDescription>
+            Add a new event to the calendar.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           {errors.length > 0 && (
-            <div className="rounded-md bg-error-container p-3 dark:bg-error-container/20">
+            <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
-                <p key={err} className="text-sm text-error">{err}</p>
+                <Typography key={err} variant="body-small" color="error">
+                  {err}
+                </Typography>
               ))}
             </div>
           )}
 
-          <div>
-            <label htmlFor="event-title" className="block text-sm font-medium text-surface-foreground">Title</label>
-            <input
-              id="event-title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground placeholder:text-surface-variant-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Event title"
-            />
-          </div>
+          <TextField
+            variant="outlined"
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Event title"
+          />
 
-          <div>
-            <label htmlFor="event-type" className="block text-sm font-medium text-surface-foreground">Event Type</label>
-            <select
-              id="event-type"
-              value={eventTypeId}
-              onChange={(e) => setEventTypeId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {EVENT_TYPES.map((type) => (
-                <option key={type.id} value={type.id}>{type.name}</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Event Type"
+            value={eventTypeId}
+            onValueChange={setEventTypeId}
+            variant="outlined"
+            options={EVENT_TYPES.map((type) => ({
+              value: type.id,
+              label: type.name,
+            }))}
+          />
 
-          <div className="flex items-center gap-2">
-            <input
+          <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
+            <Checkbox
               id="all-day"
-              type="checkbox"
               checked={allDay}
-              onChange={(e) => setAllDay(e.target.checked)}
-              className="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary"
+              onCheckedChange={(checked) => setAllDay(checked === true)}
             />
-            <label htmlFor="all-day" className="text-sm text-surface-foreground">All Day</label>
+            <label htmlFor="all-day" className="text-sm text-surface-foreground cursor-pointer select-none">
+              All Day
+            </label>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="event-start-date" className="block text-sm font-medium text-surface-foreground">Start Date</label>
-              <input
-                id="event-start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label htmlFor="event-end-date" className="block text-sm font-medium text-surface-foreground">End Date</label>
-              <input
-                id="event-end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
+            <TextField
+              variant="outlined"
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              label="End Date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
           </div>
 
           {!allDay && (
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="event-start-time" className="block text-sm font-medium text-surface-foreground">Start Time</label>
-                <input
-                  id="event-start-time"
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label htmlFor="event-end-time" className="block text-sm font-medium text-surface-foreground">End Time</label>
-                <input
-                  id="event-end-time"
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
+              <TextField
+                variant="outlined"
+                label="Start Time"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+              <TextField
+                variant="outlined"
+                label="End Time"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
             </div>
           )}
 
-          <div>
-            <label htmlFor="event-visibility" className="block text-sm font-medium text-surface-foreground">Visibility</label>
-            <select
-              id="event-visibility"
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as EventVisibility)}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="SHARED">Shared (visible to team)</option>
-              <option value="PERSONAL">Personal (only you)</option>
-            </select>
-          </div>
+          <Select
+            label="Visibility"
+            value={visibility}
+            onValueChange={(v) => setVisibility(v as EventVisibility)}
+            variant="outlined"
+            options={VISIBILITY_OPTIONS}
+          />
 
-          <div>
-            <label htmlFor="event-recurrence" className="block text-sm font-medium text-surface-foreground">Recurrence</label>
-            <select
-              id="event-recurrence"
-              value={recurrence}
-              onChange={(e) => setRecurrence(e.target.value as RecurrenceFrequency | "")}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {RECURRENCE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Recurrence"
+            value={recurrence}
+            onValueChange={(v) => setRecurrence(v as RecurrenceFrequency | "")}
+            variant="outlined"
+            options={RECURRENCE_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: opt.label,
+            }))}
+          />
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-md border border-outline-variant px-4 py-2 text-sm font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
-            >
+          <DialogFooter>
+            <Button type="button" variant="text" onClick={handleClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
+            </Button>
+            <Button type="submit" variant="text">
               Create Event
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
