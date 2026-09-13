@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import type { CalendarEvent, CalendarFilter, OrgUnit } from "./types/calendar.types";
 import { formatMonthYear } from "./utils/calendar.utils";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import { useLeaveBalances } from "./hooks/useLeaveBalances";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -128,7 +128,7 @@ export function CalendarView() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <AppBar className="justify-between gap-3 flex-wrap sm:flex-nowrap">
+      <PageBar className="justify-between gap-3 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-semibold text-on-surface">Calendar</h1>
           <div className="flex items-center gap-1">
@@ -203,7 +203,7 @@ export function CalendarView() {
             </>
           )}
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* Main content area */}
       <div className="flex flex-1 justify-between gap-3 min-h-0 overflow-hidden">

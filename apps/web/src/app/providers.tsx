@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SnackbarProvider } from "@vkieu/mui";
 import { ThemeContext, type Theme } from "@/lib/theme";
 
 function getSystemTheme(): "light" | "dark" {
@@ -90,7 +91,9 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>
+        <SnackbarProvider>{children}</SnackbarProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

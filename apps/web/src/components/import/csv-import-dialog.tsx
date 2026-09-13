@@ -36,7 +36,7 @@ import { apiClient } from "@/lib/api-client";
 import { parseCsvLine, autoDetectMapping, detectUnitTypeName, detectUnitTypeIcon, detectUnitTypeColor } from "@/lib/csv";
 import { useBulkImport, useRoles } from "@/services";
 import type { ImportMemberRow } from "@/services";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 import type { ColumnMapping, MappingTarget, ImportStep } from "./types";
 import { MAPPING_OPTIONS } from "./types";
@@ -77,6 +77,7 @@ export interface CsvImportDialogProps {
  * via the returned ref.
  */
 export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialogProps) {
+  const toast = useToast();
   const queryClient = useQueryClient();
 
   // ── DnD sensors ─────────────────────────────────────────────────────────
@@ -336,10 +337,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     const rows = importPreview.rows;
     reset();
 
-    toast("Import started", {
-      description: `Processing ${rows.length} members...`,
-      duration: 3000,
-    });
+    toast.success(`Processing ${rows.length} members...`);
 
     // Use plain apiClient so the request survives component unmount
     apiClient<{ total: number; created: number; updated: number; errors: unknown[] }>(

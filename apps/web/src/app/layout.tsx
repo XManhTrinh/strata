@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { Providers } from "./providers";
-import { Toaster } from "@/components/ui/sonner";
 import "material-symbols/rounded.css";
 import "./globals.css";
 
@@ -26,7 +25,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={roboto.className}>
         <Providers>{children}</Providers>
-        <Toaster />
       </body>
     </html>
   );

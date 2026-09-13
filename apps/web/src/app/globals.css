@@ -2,3 +2,9 @@
 @import "@vkieu/mui/theme.css";
 @import "@vkieu/mui/themes/theme-facebook.css";
 @source "../../node_modules/@vkieu/mui/src";
+
+/* Restore cursor: pointer on interactive elements (Tailwind v4 preflight sets default) */
+button,
+[role="button"] {
+  cursor: pointer;
+}

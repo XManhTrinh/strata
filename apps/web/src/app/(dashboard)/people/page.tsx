@@ -41,9 +41,9 @@ import {
   Tooltip,
   Checkbox,
   Divider,
+  PageBar,
 } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
-import { AppBar } from "@/components/layout/app-bar";
 import {
   usePeople,
   useCreatePerson,
@@ -69,7 +69,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { escapeCsvField } from "@/lib/csv";
 
@@ -149,6 +149,7 @@ function SortableColumnItem({
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PeoplePage() {
+  const toast = useToast();
   const companyId = useCompanyId();
 
   // DnD sensors for column reordering
@@ -447,12 +448,12 @@ export default function PeoplePage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <AppBar className="justify-between">
+        <PageBar className="justify-between">
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-on-surface">Members</h1>
             <p className="text-[14px] leading-5 text-on-surface-variant">Manage workspace members and their roles.</p>
           </div>
-        </AppBar>
+        </PageBar>
         <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
@@ -482,7 +483,7 @@ export default function PeoplePage() {
       transition={defaultTransition}
     >
       {/* Page Header */}
-      <AppBar className="justify-between">
+      <PageBar className="justify-between">
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-on-surface">Members</h1>
           <p className="text-[14px] leading-5 text-on-surface-variant">{data?.total ?? 0} members · Manage workspace members and their roles.</p>
@@ -500,7 +501,7 @@ export default function PeoplePage() {
             <Icon name="person_add" size={18} />Add Member
           </Button>
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* Search + Filters Row */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

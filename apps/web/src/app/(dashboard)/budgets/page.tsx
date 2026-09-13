@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
@@ -173,7 +173,7 @@ export default function BudgetsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <AppBar>
+        <PageBar>
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
               Budget & Cost
@@ -182,7 +182,7 @@ export default function BudgetsPage() {
               Headcount costs across divisions and squads.
             </p>
           </div>
-        </AppBar>
+        </PageBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} variant="elevated">
@@ -201,13 +201,13 @@ export default function BudgetsPage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <AppBar>
+        <PageBar>
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
               Budget & Cost
             </h1>
           </div>
-        </AppBar>
+        </PageBar>
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
@@ -227,7 +227,7 @@ export default function BudgetsPage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <AppBar>
+      <PageBar>
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
             Budget & Cost
@@ -236,7 +236,7 @@ export default function BudgetsPage() {
             Headcount costs across divisions and squads · {fmtNum(members.length)} members
           </p>
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

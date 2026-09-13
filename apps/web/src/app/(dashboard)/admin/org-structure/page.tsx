@@ -1,26 +1,29 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
-import { Search } from "@vkieu/mui";
-import { AppBar } from "@/components/layout/app-bar";
-import { Button } from "@vkieu/mui/buttons";
-import { IconButton } from "@vkieu/mui/buttons";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip } from "@vkieu/mui";
-import { TextField } from "@vkieu/mui";
-import { Select } from "@vkieu/mui";
 import {
+  Search,
+  PageBar,
+  Icon,
+  Card,
+  CardContent,
+  Tooltip,
+  TextField,
+  Select,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  Chip,
+  List,
+  ListItem,
 } from "@vkieu/mui";
-import { toast } from "sonner";
+import { Button, IconButton } from "@vkieu/mui/buttons";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import {
   useOrgUnits,
   useOrgUnitTree,
@@ -34,6 +37,8 @@ import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { OrgUnitFlow } from "@/components/flow-org/OrgUnitFlow";
 
+// ─── Tree types ───────────────────────────────────────────────────────────────
+
 interface OrgTreeNode {
   id: string;
   name: string;
@@ -45,6 +50,8 @@ interface OrgTreeNode {
   children: OrgTreeNode[];
 }
 
+// ─── Tree helpers ─────────────────────────────────────────────────────────────
+
 function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
   const nodeMap = new Map<string, OrgTreeNode>();
 
@@ -53,9 +60,9 @@ function buildTree(units: OrganizationUnit[]): OrgTreeNode[] {
       id: unit.id,
       name: unit.name,
       typeId: unit.typeId,
-      typeName: unit.type?.name || "Unknown",
-      typeColor: unit.type?.color || "#6B7280",
-      typeIcon: unit.type?.icon || "folder",
+      typeName: unit.type?.name ?? "Unknown",
+      typeColor: unit.type?.color ?? "#6B7280",
+      typeIcon: unit.type?.icon ?? "folder",
       parentId: unit.parentId,
       children: [],
     });
@@ -85,6 +92,8 @@ function filterTree(nodes: OrgTreeNode[], search: string): OrgTreeNode[] {
   return nodes.filter(matches);
 }
 
+// ─── TreeNode ─────────────────────────────────────────────────────────────────
+
 function TreeNode({
   unit,
   depth = 0,
@@ -102,58 +111,65 @@ function TreeNode({
   const hasChildren = unit.children.length > 0;
 
   return (
-    <div>
-      <div
-        className="group flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-foreground/8 transition-colors"
-        style={{ paddingLeft: `${depth * 24 + 12}px` }}
+    <div role="treeitem" aria-expanded={hasChildren ? expanded : undefined}>
+      <div style={{ paddingInlineStart: `${depth * 24}px` }}>
+        <ListItem
+          interactive
+          className="group rounded-lg"
+          leading={
+          hasChildren ? (
+            <IconButton
+              variant="standard"
+              size="xs"
+              onClick={() => setExpanded(!expanded)}
+              aria-label={expanded ? "Collapse" : "Expand"}
+            >
+              <Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />
+            </IconButton>
+          ) : (
+            <span className="inline-flex items-center justify-center h-8 w-8">
+              <Icon name="remove" size={16} className="text-outline" />
+            </span>
+          )
+        }
+        trailing={
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+            <Tooltip content="Edit">
+              <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(unit)}>
+                <Icon name="edit" size={18} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip content="Add child">
+              <IconButton variant="standard" size="xs" aria-label="Add child" onClick={() => onAddChild(unit.id)}>
+                <Icon name="add" size={18} className="text-primary" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip content="Archive">
+              <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(unit.id)}>
+                <Icon name="archive" size={18} />
+              </IconButton>
+            </Tooltip>
+          </div>
+        }
+        onClick={() => hasChildren && setExpanded(!expanded)}
       >
-        {hasChildren ? (
-          <IconButton
-            variant="standard"
-            size="xs"
-            onClick={() => setExpanded(!expanded)}
-            aria-label={expanded ? "Collapse" : "Expand"}
-          >
-            <Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />
-          </IconButton>
-        ) : (
-          <span className="inline-flex items-center justify-center h-8 w-8">
-            <Icon name="remove" size={18} className="text-surface-variant-foreground/40" />
+        <div className="flex items-center gap-3">
+          <span className="shrink-0" style={{ color: unit.typeColor }}>
+            <Icon name={unit.typeIcon} size={18} />
           </span>
-        )}
-
-        <div className="flex flex-1 items-center gap-3">
-          <span className="material-symbols-rounded text-[18px] shrink-0" style={{ color: unit.typeColor }}>{unit.typeIcon}</span>
           <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
           <span
-            className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+            className="inline-flex items-center h-5 text-[11px] font-medium px-2 rounded-full"
             style={{ backgroundColor: unit.typeColor + "20", color: unit.typeColor }}
           >
             {unit.typeName}
           </span>
         </div>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Tooltip content="Edit">
-            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(unit)}>
-              <Icon name="edit" size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content="Add child">
-            <IconButton variant="standard" size="xs" aria-label="Add child" onClick={() => onAddChild(unit.id)}>
-              <Icon name="add" size={18} className="text-primary" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content="Archive">
-            <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(unit.id)}>
-              <Icon name="archive" size={18} />
-            </IconButton>
-          </Tooltip>
-        </div>
+      </ListItem>
       </div>
 
       {expanded && hasChildren && (
-        <div>
+        <div role="group">
           {unit.children.map((child) => (
             <TreeNode
               key={child.id}
@@ -170,14 +186,183 @@ function TreeNode({
   );
 }
 
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
+
+function TreeSkeleton() {
+  return (
+    <div className="space-y-1 p-2">
+      {Array.from({ length: 8 }).map((_, i) => {
+        const indent = [0, 1, 2, 2, 1, 2, 0, 1][i];
+        return (
+          <div
+            key={i}
+            className="flex items-center gap-3 px-3 py-2.5"
+            style={{ paddingInlineStart: `${indent * 24 + 12}px` }}
+          >
+            <Skeleton className="h-5 w-5 rounded" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-5 w-14 rounded-full" />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
+  return (
+    <div className="flex flex-col items-center py-16 text-center">
+      <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
+        <Icon name="account_tree" size={40} className="text-primary" />
+      </div>
+      <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+        No units found
+      </h2>
+      <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6 max-w-xs">
+        Create your first organization unit to start building your hierarchy.
+      </p>
+      <Button onClick={onCreateClick}>
+        <Icon name="add" size={18} />
+        Create Unit
+      </Button>
+    </div>
+  );
+}
+
+// ─── Error state ──────────────────────────────────────────────────────────────
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card variant="elevated" className="max-w-lg mx-auto">
+      <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+          <Icon name="error" size={24} className="text-error" />
+        </div>
+        <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+          Unable to load structure
+        </h2>
+        <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+          Something went wrong loading your hierarchy. Please try again.
+        </p>
+        <Button variant="tonal" onClick={onRetry}>
+          <Icon name="refresh" size={18} />
+          Retry
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Create / Edit dialog ─────────────────────────────────────────────────────
+
+interface OrgUnitDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  editing: OrgTreeNode | null;
+  formData: { name: string; typeId: string; parentId: string };
+  onFormChange: (data: { name: string; typeId: string; parentId: string }) => void;
+  onSubmit: () => void;
+  isPending: boolean;
+  orgUnitTypes: { id: string; name: string }[];
+  orgUnits: { id: string; name: string }[];
+}
+
+function OrgUnitDialog({
+  open,
+  onOpenChange,
+  editing,
+  formData,
+  onFormChange,
+  onSubmit,
+  isPending,
+  orgUnitTypes,
+  orgUnits,
+}: OrgUnitDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent icon={editing ? "edit" : "add_circle"}>
+        <DialogHeader centered>
+          <DialogTitle>
+            {editing ? "Edit Organization Unit" : "Create Organization Unit"}
+          </DialogTitle>
+          <DialogDescription>
+            {editing
+              ? "Update the details for this organization unit."
+              : "Add a new unit to your organization hierarchy."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <TextField
+            variant="outlined"
+            label="Name"
+            value={formData.name}
+            onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+            placeholder="e.g., Engineering"
+            onKeyDown={(e) => { if (e.key === "Enter" && formData.name.trim()) onSubmit(); }}
+          />
+          <Select
+            label="Type"
+            value={formData.typeId}
+            onValueChange={(value) => onFormChange({ ...formData, typeId: value })}
+            placeholder="Select a type..."
+            variant="outlined"
+            options={orgUnitTypes.map((t) => ({
+              value: t.id,
+              label: t.name,
+            }))}
+          />
+          <Select
+            label="Parent Unit"
+            value={formData.parentId || "none"}
+            onValueChange={(value) =>
+              onFormChange({ ...formData, parentId: value === "none" ? "" : value })
+            }
+            placeholder="None (root level)"
+            variant="outlined"
+            options={[
+              { value: "none", label: "None (root level)" },
+              ...orgUnits.map((u) => ({
+                value: u.id,
+                label: u.name,
+              })),
+            ]}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="text" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="text"
+            onClick={onSubmit}
+            disabled={!formData.name.trim() || !formData.typeId || isPending}
+          >
+            {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function OrgStructurePage() {
+  const toast = useToast();
   const companyId = useCompanyId();
+
+  // ── Local state ────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "flow">("list");
   const [showModal, setShowModal] = useState(false);
   const [editingUnit, setEditingUnit] = useState<OrgTreeNode | null>(null);
   const [formData, setFormData] = useState({ name: "", typeId: "", parentId: "" });
 
+  // ── Data ───────────────────────────────────────────────────────────────
   const { data: orgUnits = [], isLoading, error, refetch } = useOrgUnits(companyId);
   const { data: orgUnitTreeData = [] } = useOrgUnitTree(companyId);
   const { data: orgUnitTypes = [] } = useOrgUnitTypes(companyId);
@@ -185,42 +370,51 @@ export default function OrgStructurePage() {
   const updateMutation = useUpdateOrgUnit();
   const deleteMutation = useDeleteOrgUnit();
 
+  // ── Derived ────────────────────────────────────────────────────────────
   const tree = useMemo(() => buildTree(orgUnits), [orgUnits]);
   const filteredTree = useMemo(() => filterTree(tree, search), [tree, search]);
+  const unitCount = orgUnits.length;
 
-  const openCreate = (parentId?: string) => {
-    setEditingUnit(null);
-    setFormData({ name: "", typeId: "", parentId: parentId || "" });
-    setShowModal(true);
-  };
+  // ── Handlers ───────────────────────────────────────────────────────────
 
-  const openEdit = (unit: OrgTreeNode) => {
+  const openCreate = useCallback(
+    (parentId?: string) => {
+      setEditingUnit(null);
+      setFormData({ name: "", typeId: "", parentId: parentId ?? "" });
+      setShowModal(true);
+    },
+    [],
+  );
+
+  const openEdit = useCallback((unit: OrgTreeNode) => {
     setEditingUnit(unit);
-    setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId || "" });
+    setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId ?? "" });
     setShowModal(true);
-  };
+  }, []);
 
-  /** Edit handler for the flow view (receives OrganizationUnit instead of OrgTreeNode). */
-  const openEditFromFlow = (unit: OrganizationUnit) => {
-    setEditingUnit({
-      id: unit.id,
-      name: unit.name,
-      typeId: unit.typeId,
-      typeName: unit.type?.name || "Unknown",
-      typeColor: unit.type?.color || "#6B7280",
-      typeIcon: unit.type?.icon || "folder",
-      parentId: unit.parentId,
-      children: [],
-    });
-    setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId || "" });
-    setShowModal(true);
-  };
+  const openEditFromFlow = useCallback(
+    (unit: OrganizationUnit) => {
+      setEditingUnit({
+        id: unit.id,
+        name: unit.name,
+        typeId: unit.typeId,
+        typeName: unit.type?.name ?? "Unknown",
+        typeColor: unit.type?.color ?? "#6B7280",
+        typeIcon: unit.type?.icon ?? "folder",
+        parentId: unit.parentId,
+        children: [],
+      });
+      setFormData({ name: unit.name, typeId: unit.typeId, parentId: unit.parentId ?? "" });
+      setShowModal(true);
+    },
+    [],
+  );
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (editingUnit) {
       updateMutation.mutate(
         {
-          companyId: companyId,
+          companyId,
           id: editingUnit.id,
           name: formData.name,
           typeId: formData.typeId || undefined,
@@ -228,81 +422,62 @@ export default function OrgStructurePage() {
         },
         {
           onSuccess: () => {
-            toast.success("Organization unit updated successfully");
+            toast.success("Organization unit updated");
             setShowModal(false);
           },
-          onError: (err) => {
-            toast.error(err.message || "Failed to update organization unit");
-          },
-        }
+          onError: (err) => toast.error(err.message || "Failed to update unit"),
+        },
       );
     } else {
       createMutation.mutate(
         {
-          companyId: companyId,
+          companyId,
           name: formData.name,
           typeId: formData.typeId,
           parentId: formData.parentId || null,
         },
         {
           onSuccess: () => {
-            toast.success("Organization unit created successfully");
+            toast.success("Organization unit created");
             setShowModal(false);
           },
-          onError: (err) => {
-            toast.error(err.message || "Failed to create organization unit");
-          },
-        }
+          onError: (err) => toast.error(err.message || "Failed to create unit"),
+        },
       );
     }
-  };
+  }, [editingUnit, formData, companyId, createMutation, updateMutation, toast]);
 
-  const handleArchive = (id: string) => {
-    deleteMutation.mutate(
-      { companyId: companyId, id },
-      {
-        onSuccess: () => {
-          toast.success("Organization unit archived successfully");
+  const handleArchive = useCallback(
+    (id: string) => {
+      deleteMutation.mutate(
+        { companyId, id },
+        {
+          onSuccess: () => toast.success("Organization unit archived"),
+          onError: (err) => toast.error(err.message || "Failed to archive unit"),
         },
-        onError: (err) => {
-          toast.error(err.message || "Failed to archive organization unit");
-        },
-      }
-    );
-  };
+      );
+    },
+    [companyId, deleteMutation, toast],
+  );
 
+  // ── Error state ────────────────────────────────────────────────────────
   if (error) {
     return (
       <div className="space-y-6">
-        <AppBar className="justify-between">
+        <PageBar className="justify-between">
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
             <p className="text-[14px] leading-5 text-surface-variant-foreground">
               Build and manage your organization&apos;s hierarchical structure.
             </p>
           </div>
-        </AppBar>
-        <Card variant="elevated" className="max-w-lg mx-auto">
-          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-error" />
-            </div>
-            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
-              Unable to load structure
-            </h2>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
-              Failed to load hierarchy. Please try again.
-            </p>
-            <Button variant="tonal" onClick={() => refetch()}>
-              <Icon name="refresh" size={18} />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
+        </PageBar>
+        <ErrorState onRetry={() => refetch()} />
       </div>
     );
   }
 
+  // ── Main render ────────────────────────────────────────────────────────
   return (
     <motion.div
       className="flex flex-col h-full min-h-0 gap-6 overflow-hidden"
@@ -312,8 +487,8 @@ export default function OrgStructurePage() {
       exit="exit"
       transition={defaultTransition}
     >
-      {/* Header */}
-      <AppBar className="justify-between shrink-0">
+      {/* ── Page header ────────────────────────────────────────────────── */}
+      <PageBar className="justify-between shrink-0">
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
@@ -324,23 +499,31 @@ export default function OrgStructurePage() {
           <Icon name="add" size={18} />
           Create Unit
         </Button>
-      </AppBar>
+      </PageBar>
 
-      {/* Search + View Toggle */}
-      <div className="flex items-center justify-between gap-4 shrink-0">
+      {/* ── Toolbar: search + stats + view toggle ──────────────────────── */}
+      <div className="flex items-center gap-4 shrink-0">
         <Search
           className="max-w-sm"
           value={search}
           onValueChange={setSearch}
           placeholder="Search units..."
         />
-        <div className="flex items-center gap-1 rounded-full bg-surface-container-highest/50 p-1">
+
+        {!isLoading && unitCount > 0 && (
+          <Chip variant="filter" selected className="shrink-0">
+            {unitCount} {unitCount === 1 ? "unit" : "units"}
+          </Chip>
+        )}
+
+        <div className="ml-auto flex items-center gap-1 rounded-full bg-surface-container-highest/50 p-1">
           <Tooltip content="List view">
             <IconButton
               variant={viewMode === "list" ? "filled-tonal" : "standard"}
               size="xs"
               onClick={() => setViewMode("list")}
               aria-label="List view"
+              aria-pressed={viewMode === "list"}
             >
               <Icon name="list" size={18} />
             </IconButton>
@@ -351,6 +534,7 @@ export default function OrgStructurePage() {
               size="xs"
               onClick={() => setViewMode("flow")}
               aria-label="Flow view"
+              aria-pressed={viewMode === "flow"}
             >
               <Icon name="account_tree" size={18} />
             </IconButton>
@@ -358,64 +542,42 @@ export default function OrgStructurePage() {
         </div>
       </div>
 
-      {/* List View */}
+      {/* ── List view ──────────────────────────────────────────────────── */}
       {viewMode === "list" && (
-      <Card variant="elevated" className="flex-1 min-h-0 overflow-hidden">
-        <CardContent className="p-2 h-full overflow-y-auto">
-          {isLoading ? (
-            <div className="space-y-3 p-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3" style={{ paddingLeft: `${(i % 3) * 24}px` }}>
-                  <Skeleton className="h-5 w-5 rounded" />
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-6 w-16 rounded-lg" />
-                </div>
-              ))}
-            </div>
-          ) : filteredTree.length === 0 ? (
-            <div className="flex flex-col items-center py-12 text-center">
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
-                <Icon name="account_tree" size={24} className="text-surface-variant-foreground" />
-              </div>
-              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
-                No units found
-              </h2>
-              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
-                No organization units found. Create one to get started.
-              </p>
-              <Button onClick={() => openCreate()}>
-                <Icon name="add" size={18} />
-                Create Unit
-              </Button>
-            </div>
-          ) : (
-            filteredTree.map((unit) => (
-              <TreeNode
-                key={unit.id}
-                unit={unit}
-                onEdit={openEdit}
-                onArchive={handleArchive}
-                onAddChild={(parentId) => openCreate(parentId)}
-              />
-            ))
-          )}
-        </CardContent>
-      </Card>
+        <Card variant="elevated" className="flex-1 min-h-0 overflow-hidden">
+          <CardContent className="p-0 h-full overflow-y-auto">
+            {isLoading ? (
+              <TreeSkeleton />
+            ) : filteredTree.length === 0 ? (
+              <EmptyState onCreateClick={() => openCreate()} />
+            ) : (
+              <List className="py-1">
+                {filteredTree.map((unit) => (
+                  <TreeNode
+                    key={unit.id}
+                    unit={unit}
+                    onEdit={openEdit}
+                    onArchive={handleArchive}
+                    onAddChild={(parentId) => openCreate(parentId)}
+                  />
+                ))}
+              </List>
+            )}
+          </CardContent>
+        </Card>
       )}
 
-      {/* Flow View */}
+      {/* ── Flow view ──────────────────────────────────────────────────── */}
       {viewMode === "flow" && (
         orgUnitTreeData.length === 0 && !isLoading ? (
           <Card variant="elevated">
-            <CardContent className="flex flex-col items-center py-12 text-center">
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
-                <Icon name="account_tree" size={24} className="text-surface-variant-foreground" />
-              </div>
-              <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">No units to visualize</h2>
-              <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">Create org units first, then switch to flow view.</p>
-              <Button onClick={() => { setViewMode("list"); openCreate(); }}>
-                <Icon name="add" size={18} />Create Unit
-              </Button>
+            <CardContent className="p-0">
+              <EmptyState
+                onCreateClick={() => {
+                  setViewMode("list");
+                  openCreate();
+                }}
+              />
             </CardContent>
           </Card>
         ) : (
@@ -428,71 +590,18 @@ export default function OrgStructurePage() {
         )
       )}
 
-      {/* Create/Edit Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingUnit ? "Edit Organization Unit" : "Create Organization Unit"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingUnit
-                ? "Update the details for this organization unit."
-                : "Add a new unit to your organization hierarchy."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <TextField
-              variant="outlined"
-              label="Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Engineering"
-            />
-            <Select
-              label="Type"
-              value={formData.typeId}
-              onValueChange={(value) => setFormData({ ...formData, typeId: value })}
-              placeholder="Select a type..."
-              variant="outlined"
-              options={orgUnitTypes.map((t) => ({
-                value: t.id,
-                label: t.name,
-              }))}
-            />
-            <Select
-              label="Parent Unit"
-              value={formData.parentId || "none"}
-              onValueChange={(value) => setFormData({ ...formData, parentId: value === "none" ? "" : value })}
-              placeholder="None (root level)"
-              variant="outlined"
-              options={[
-                { value: "none", label: "None (root level)" },
-                ...orgUnits.map((u) => ({
-                  value: u.id,
-                  label: u.name,
-                })),
-              ]}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="text" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="text"
-              onClick={handleSubmit}
-              disabled={createMutation.isPending || updateMutation.isPending}
-            >
-              {createMutation.isPending || updateMutation.isPending
-                ? "Saving..."
-                : editingUnit
-                  ? "Save Changes"
-                  : "Create"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ── Create / Edit dialog ───────────────────────────────────────── */}
+      <OrgUnitDialog
+        open={showModal}
+        onOpenChange={setShowModal}
+        editing={editingUnit}
+        formData={formData}
+        onFormChange={setFormData}
+        onSubmit={handleSubmit}
+        isPending={createMutation.isPending || updateMutation.isPending}
+        orgUnitTypes={orgUnitTypes}
+        orgUnits={orgUnits}
+      />
     </motion.div>
   );
 }

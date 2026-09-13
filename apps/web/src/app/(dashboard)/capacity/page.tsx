@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
@@ -16,7 +16,7 @@ import {
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCapacitySummary,
   useSaveAllocations,
@@ -117,6 +117,7 @@ function StatCard({ label, value, sub, icon, color }: {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CapacityPage() {
+  const toast = useToast();
   const companyId = useCompanyId();
   const currentYear = new Date().getFullYear();
   const [fiscalYear, setFiscalYear] = useState(currentYear);
@@ -487,10 +488,10 @@ export default function CapacityPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <AppBar><div>
+        <PageBar><div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">Team allocation and monthly phasing.</p>
-        </div></AppBar>
+        </div></PageBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} variant="elevated"><CardContent className="p-5 space-y-3">
@@ -505,7 +506,7 @@ export default function CapacityPage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <AppBar><div><h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1></div></AppBar>
+        <PageBar><div><h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1></div></PageBar>
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
@@ -519,7 +520,7 @@ export default function CapacityPage() {
   return (
     <motion.div className="space-y-6" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
-      <AppBar className="justify-between">
+      <PageBar className="justify-between">
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
@@ -529,7 +530,7 @@ export default function CapacityPage() {
         <div className="flex items-center gap-3">
           <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* Filters Row */}
       <div className="flex items-center justify-between gap-3">

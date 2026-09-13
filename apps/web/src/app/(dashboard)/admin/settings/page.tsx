@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { Icon } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { TextField } from "@vkieu/mui";
@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@vkieu/mui";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
@@ -51,6 +51,7 @@ const STAT_CONFIG = [
 // ─── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  const toast = useToast();
   const companyId = useCompanyId();
   const { data: company, isLoading, isError, error } = useCompanySettings(companyId);
   const updateMutation = useUpdateCompanySettings();
@@ -140,12 +141,12 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <AppBar>
+        <PageBar>
           <div>
             <h1 className="text-headline-small text-surface-foreground">Settings</h1>
             <p className="text-body-medium text-surface-variant-foreground">Workspace configuration.</p>
           </div>
-        </AppBar>
+        </PageBar>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
           {Array.from({ length: 5 }).map((_, i) => (
             <Card key={i} variant="elevated"><CardContent className="p-4"><Skeleton className="h-14 w-full" /></CardContent></Card>
@@ -167,7 +168,7 @@ export default function SettingsPage() {
   if (isError) {
     return (
       <div className="flex flex-col h-full">
-        <AppBar><div><h1 className="text-headline-small text-surface-foreground">Settings</h1></div></AppBar>
+        <PageBar><div><h1 className="text-headline-small text-surface-foreground">Settings</h1></div></PageBar>
         <div className="flex-1 flex items-center justify-center">
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
@@ -187,7 +188,7 @@ export default function SettingsPage() {
   return (
     <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
-      <AppBar className="justify-between shrink-0">
+      <PageBar className="justify-between shrink-0">
         <div>
           <h1 className="text-headline-small text-surface-foreground">Settings</h1>
           <p className="text-body-medium text-surface-variant-foreground">Workspace configuration and preferences.</p>
@@ -201,7 +202,7 @@ export default function SettingsPage() {
             </Button>
           </div>
         )}
-      </AppBar>
+      </PageBar>
 
       {/* Workspace Overview Strip — M3 elevated cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 shrink-0">

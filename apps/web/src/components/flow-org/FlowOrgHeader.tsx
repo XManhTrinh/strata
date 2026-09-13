@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { Icon } from "@vkieu/mui";
 import { Chip } from "@vkieu/mui";
 import { Search } from "@vkieu/mui";
@@ -78,7 +78,7 @@ export default function FlowOrgHeader({
 
   return (
     <div className="shrink-0 z-10">
-      <AppBar className="justify-between gap-4">
+      <PageBar className="justify-between gap-4">
         <h1 className="text-[22px] leading-7 font-normal text-on-surface shrink-0">
           Org Chart
         </h1>
@@ -126,7 +126,7 @@ export default function FlowOrgHeader({
 
         {/* Export */}
         {exportButton}
-      </AppBar>
+      </PageBar>
 
       {/* Filter bar: squad selector + selected chips */}
       <div className="flex items-center gap-3 px-6 py-2 border-b border-outline-variant min-h-12">

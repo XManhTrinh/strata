@@ -1,33 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
-import { Search } from "@vkieu/mui";
-import { AppBar } from "@/components/layout/app-bar";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
-import { Switch } from "@vkieu/mui";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Divider } from "@vkieu/mui";
+import { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Search,
+  PageBar,
+  Icon,
+  Card,
+  CardContent,
+  Chip,
+  Switch,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
-import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
-// ─── Feature icon & color mapping ─────────────────────────────────────────────
+// ─── Feature metadata ─────────────────────────────────────────────────────────
 
 const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> = {
-  calendar:      { icon: "calendar_month",       color: "text-primary",    bg: "bg-primary-container dark:bg-primary-container/30" },
-  people:        { icon: "group",                color: "text-violet-600",  bg: "bg-violet-100 dark:bg-violet-900/30" },
-  org_chart:     { icon: "lan",                  color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
-  budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
-  dashboard:     { icon: "dashboard",            color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
-  capacity:      { icon: "stacked_bar_chart",    color: "text-cyan-600",    bg: "bg-cyan-100 dark:bg-cyan-900/30" },
+  calendar:  { icon: "calendar_month",    color: "text-primary",     bg: "bg-primary-container" },
+  people:    { icon: "group",             color: "text-violet-600",  bg: "bg-violet-100 dark:bg-violet-900/30" },
+  org_chart: { icon: "lan",              color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
+  budgeting: { icon: "payments",          color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
+  dashboard: { icon: "dashboard",         color: "text-sky-600",     bg: "bg-sky-100 dark:bg-sky-900/30" },
+  capacity:  { icon: "stacked_bar_chart", color: "text-cyan-600",    bg: "bg-cyan-100 dark:bg-cyan-900/30" },
 };
 
 const DEFAULT_META = { icon: "extension", color: "text-primary", bg: "bg-primary/10" };
+const ACTIVE_FEATURES = new Set(["people", "org_chart", "budgeting", "calendar", "dashboard", "capacity"]);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,97 +70,258 @@ function toFeatureRow(cf: CompanyFeature): FeatureRow | null {
   };
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
+
+function GridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Card key={i} variant="outlined">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start justify-between">
+              <Skeleton className="h-12 w-12 rounded-xl" />
+              <Skeleton className="h-7 w-12 rounded-full" />
+            </div>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Error state ──────────────────────────────────────────────────────────────
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Card variant="elevated" className="max-w-lg mx-auto">
+      <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+          <Icon name="error" size={24} className="text-error" />
+        </div>
+        <Typography variant="title-large" className="mb-2">Unable to load features</Typography>
+        <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+          Something went wrong. Please try again.
+        </Typography>
+        <Button variant="tonal" onClick={onRetry}>
+          <Icon name="refresh" size={18} />
+          Retry
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+function EmptyState({ hasSearch }: { hasSearch: boolean }) {
+  return (
+    <Card variant="elevated">
+      <CardContent className="flex flex-col items-center py-16 text-center">
+        <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
+          <Icon name="extension" size={40} className="text-primary" />
+        </div>
+        <Typography variant="title-large" className="mb-2">No features found</Typography>
+        <Typography variant="body-medium" color="surface-variant-foreground">
+          {hasSearch ? "Try adjusting your search query." : "No features are registered yet."}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Feature card ─────────────────────────────────────────────────────────────
+
+function FeatureCard({
+  feature,
+  isExpanded,
+  onToggle,
+  onExpand,
+  isToggling,
+}: {
+  feature: FeatureRow;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onExpand: () => void;
+  isToggling: boolean;
+}) {
+  const meta = FEATURE_META[feature.key] ?? DEFAULT_META;
+
+  return (
+    <Card
+      variant="outlined"
+      className={`transition-all hover:shadow-md ${!feature.enabled ? "opacity-60" : ""} ${isExpanded ? "ring-2 ring-primary/30" : ""}`}
+    >
+      <CardContent className="p-5">
+        {/* Icon + toggle */}
+        <div className="flex items-start justify-between mb-4">
+          <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${meta.bg}`}>
+            <Icon name={meta.icon} size={28} className={meta.color} />
+          </div>
+          <div onClick={(e) => e.stopPropagation()}>
+            <Switch
+              checked={feature.enabled}
+              onCheckedChange={onToggle}
+              disabled={isToggling}
+              aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
+            />
+          </div>
+        </div>
+
+        {/* Title + key */}
+        <Typography variant="title-medium">{feature.displayName}</Typography>
+        <Typography variant="label-small" color="surface-variant-foreground" className="font-mono mt-0.5">
+          {feature.key}
+        </Typography>
+
+        {/* Description */}
+        <Typography variant="body-small" color="surface-variant-foreground" className="mt-2 line-clamp-2">
+          {feature.description || "No description available."}
+        </Typography>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
+          <Chip variant="filter" selected={feature.enabled}>
+            {feature.permissionsCount} permission{feature.permissionsCount !== 1 ? "s" : ""}
+          </Chip>
+          <Button
+            variant="text"
+            onClick={onExpand}
+            className="text-xs h-8 gap-1"
+          >
+            {isExpanded ? "Hide" : "Details"}
+            <Icon name={isExpanded ? "expand_less" : "expand_more"} size={16} />
+          </Button>
+        </div>
+
+        {/* Expanded permissions list */}
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 pt-3 border-t border-outline-variant/50 space-y-2.5">
+                {feature.permissions.map((perm) => (
+                  <div key={perm.key} className="flex items-start gap-2.5">
+                    <Icon name="key" size={14} className="text-surface-variant-foreground mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <Typography variant="label-large" as="span">{perm.displayName}</Typography>
+                      <Typography variant="label-small" color="surface-variant-foreground" className="font-mono block">
+                        {feature.key}:{perm.key}
+                      </Typography>
+                    </div>
+                  </div>
+                ))}
+                {feature.permissions.length === 0 && (
+                  <Typography variant="body-small" color="surface-variant-foreground">
+                    No permissions defined for this feature.
+                  </Typography>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FeaturesPage() {
+  const toast = useToast();
   const companyId = useCompanyId();
   const { data: companyFeatures, isLoading, error, refetch } = useFeatures(companyId);
   const toggleFeatureMutation = useToggleFeature();
+
   const [search, setSearch] = useState("");
   const [expandedFeatureId, setExpandedFeatureId] = useState<string | null>(null);
 
-  // Only show features that have active modules — hide core (authorization) and legacy DB records
-  const ACTIVE_FEATURES = new Set(["people", "org_chart", "budgeting", "calendar", "dashboard", "capacity"]);
-  const features: FeatureRow[] = (companyFeatures ?? [])
-    .map(toFeatureRow)
-    .filter((r): r is FeatureRow => r !== null && ACTIVE_FEATURES.has(r.key));
-
-  const toggleEnabled = (featureId: string, currentEnabled: boolean, displayName: string) => {
-    toggleFeatureMutation.mutate(
-      { companyId, featureId, enabled: !currentEnabled },
-      {
-        onSuccess: () => toast.success(`"${displayName}" ${!currentEnabled ? "enabled" : "disabled"}`),
-        onError: (err) => toast.error(err.message || "Failed to toggle feature"),
-      },
-    );
-  };
-
-  const filteredFeatures = features.filter(
-    (f) =>
-      f.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      f.description.toLowerCase().includes(search.toLowerCase()) ||
-      f.key.toLowerCase().includes(search.toLowerCase()),
+  // ── Derived ────────────────────────────────────────────────────────────
+  const features = useMemo<FeatureRow[]>(
+    () =>
+      (companyFeatures ?? [])
+        .map(toFeatureRow)
+        .filter((r): r is FeatureRow => r !== null && ACTIVE_FEATURES.has(r.key)),
+    [companyFeatures],
   );
+
+  const filteredFeatures = useMemo(() => {
+    if (!search) return features;
+    const lower = search.toLowerCase();
+    return features.filter(
+      (f) =>
+        f.displayName.toLowerCase().includes(lower) ||
+        f.description.toLowerCase().includes(lower) ||
+        f.key.toLowerCase().includes(lower),
+    );
+  }, [features, search]);
 
   const enabledCount = features.filter((f) => f.enabled).length;
 
+  // ── Handlers ───────────────────────────────────────────────────────────
+
+  const handleToggle = useCallback(
+    (featureId: string, currentEnabled: boolean, displayName: string) => {
+      toggleFeatureMutation.mutate(
+        { companyId, featureId, enabled: !currentEnabled },
+        {
+          onSuccess: () => toast.success(`"${displayName}" ${!currentEnabled ? "enabled" : "disabled"}`),
+          onError: (err) => toast.error(err.message || "Failed to toggle feature"),
+        },
+      );
+    },
+    [companyId, toggleFeatureMutation, toast],
+  );
+
+  // ── Page header (shared across states) ─────────────────────────────────
+  const header = (
+    <PageBar>
+      <div>
+        <Typography variant="headline-medium">Features</Typography>
+        <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
+          Control which features are enabled for your workspace.
+          {!isLoading && features.length > 0 && (
+            <>
+              {" "}
+              <Typography variant="label-large" as="span">
+                {enabledCount} of {features.length}
+              </Typography>{" "}
+              active.
+            </>
+          )}
+        </Typography>
+      </div>
+    </PageBar>
+  );
+
+  // ── Loading ────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <AppBar>
-          <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              Control which features are enabled for your workspace.
-            </p>
-          </div>
-        </AppBar>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} variant="outlined">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start justify-between">
-                  <Skeleton className="h-12 w-12 rounded-xl" />
-                  <Skeleton className="h-7 w-12 rounded-full" />
-                </div>
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {header}
+        <GridSkeleton />
       </div>
     );
   }
 
+  // ── Error ──────────────────────────────────────────────────────────────
   if (error) {
     return (
       <div className="space-y-6">
-        <AppBar>
-          <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              Control which features are enabled for your workspace.
-            </p>
-          </div>
-        </AppBar>
-        <Card variant="elevated" className="max-w-lg mx-auto">
-          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-error" />
-            </div>
-            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">Unable to load features</h2>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">Something went wrong. Please try again.</p>
-            <Button variant="tonal" onClick={() => refetch()}>
-              <Icon name="refresh" size={18} /> Retry
-            </Button>
-          </CardContent>
-        </Card>
+        {header}
+        <ErrorState onRetry={() => refetch()} />
       </div>
     );
   }
 
+  // ── Main ───────────────────────────────────────────────────────────────
   return (
     <motion.div
       className="space-y-6"
@@ -160,114 +331,33 @@ export default function FeaturesPage() {
       exit="exit"
       transition={defaultTransition}
     >
-      {/* Header */}
-      <AppBar>
-        <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Features</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            Control which features are enabled for your workspace.{" "}
-            <span className="font-medium text-surface-foreground">
-              {enabledCount} of {features.length}
-            </span>{" "}
-            active.
-          </p>
-        </div>
-      </AppBar>
+      {header}
 
-      {/* Search */}
-      <Search className="max-w-sm" value={search} onValueChange={setSearch} placeholder="Search features..." />
+      {/* Toolbar */}
+      <div className="flex items-center gap-4">
+        <Search className="max-w-sm" value={search} onValueChange={setSearch} placeholder="Search features..." />
+        {enabledCount > 0 && (
+          <Chip variant="filter" selected className="shrink-0">
+            {enabledCount} enabled
+          </Chip>
+        )}
+      </div>
 
-      {/* Cards Grid */}
+      {/* Grid */}
       {filteredFeatures.length === 0 ? (
-        <Card variant="elevated">
-          <CardContent className="flex flex-col items-center py-12 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/20 mb-4">
-              <Icon name="extension" size={24} className="text-surface-variant-foreground" />
-            </div>
-            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">No features found</h2>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              {search ? "Try adjusting your search query." : "No features are registered yet."}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState hasSearch={!!search} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredFeatures.map((feature) => {
-            const meta = FEATURE_META[feature.key] ?? DEFAULT_META;
-            const isExpanded = expandedFeatureId === feature.id;
-
-            return (
-              <Card
-                key={feature.id}
-                variant="outlined"
-                className={`transition-all hover:shadow-md ${
-                  !feature.enabled ? "opacity-60" : ""
-                } ${isExpanded ? "ring-2 ring-primary/30" : ""}`}
-              >
-                <CardContent className="p-5">
-                  {/* Top row: icon + toggle */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${meta.bg}`}>
-                      <Icon name={meta.icon} size={28} className={meta.color} />
-                    </div>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <Switch
-                        checked={feature.enabled}
-                        onCheckedChange={() => toggleEnabled(feature.featureId, feature.enabled, feature.displayName)}
-                        disabled={toggleFeatureMutation.isPending}
-                        aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Title + key */}
-                  <h3 className="text-[16px] leading-6 font-medium text-surface-foreground">
-                    {feature.displayName}
-                  </h3>
-                  <p className="text-[12px] leading-4 text-surface-variant-foreground mt-0.5 font-mono">
-                    {feature.key}
-                  </p>
-
-                  {/* Description */}
-                  <p className="text-[13px] leading-5 text-surface-variant-foreground mt-2 line-clamp-2">
-                    {feature.description || "No description available."}
-                  </p>
-
-                  {/* Footer: permissions count + expand */}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
-                    <Chip variant="filter" selected={feature.enabled}>
-                      {feature.permissionsCount} permission{feature.permissionsCount !== 1 ? "s" : ""}
-                    </Chip>
-                    <button
-                      type="button"
-                      onClick={() => setExpandedFeatureId(isExpanded ? null : feature.id)}
-                      className="flex items-center gap-1 text-[12px] font-medium text-primary hover:text-primary/80 transition-colors"
-                    >
-                      {isExpanded ? "Hide" : "Details"}
-                      <Icon name={isExpanded ? "expand_less" : "expand_more"} size={16} />
-                    </button>
-                  </div>
-
-                  {/* Expanded permissions */}
-                  {isExpanded && (
-                    <div className="mt-4 pt-3 border-t border-outline-variant/50 space-y-2">
-                      {feature.permissions.map((perm) => (
-                        <div key={perm.key} className="flex items-start gap-2">
-                          <Icon name="key" size={14} className="text-surface-variant-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[13px] font-medium text-surface-foreground">{perm.displayName}</p>
-                            <p className="text-[11px] text-surface-variant-foreground font-mono">
-                              {feature.key}:{perm.key}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+          {filteredFeatures.map((feature) => (
+            <FeatureCard
+              key={feature.id}
+              feature={feature}
+              isExpanded={expandedFeatureId === feature.id}
+              onToggle={() => handleToggle(feature.featureId, feature.enabled, feature.displayName)}
+              onExpand={() => setExpandedFeatureId(expandedFeatureId === feature.id ? null : feature.id)}
+              isToggling={toggleFeatureMutation.isPending}
+            />
+          ))}
         </div>
       )}
     </motion.div>

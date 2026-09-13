@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { Card, CardContent } from "@vkieu/mui";
 import { List, ListItem } from "@vkieu/mui";
 import { Icon } from "@vkieu/mui";
@@ -86,14 +86,14 @@ export default function SettingsPage() {
       transition={defaultTransition}
     >
       {/* Header */}
-      <AppBar>
+      <PageBar>
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
             Platform configuration and preferences.
           </p>
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* Settings List */}
       <Card variant="elevated">

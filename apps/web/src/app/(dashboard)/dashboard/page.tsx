@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { AppBar } from "@/components/layout/app-bar";
+import { PageBar } from "@vkieu/mui";
 import { usePeople } from "@/services";
 import { useLeaveRequests } from "@/services";
 import { useCalendarEvents } from "@/services";
@@ -158,13 +158,13 @@ export default function DashboardPage() {
   if (hasError) {
     return (
       <div className="flex flex-col gap-6">
-        <AppBar>
+        <PageBar>
           <div>
             <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
               Dashboard
             </h1>
           </div>
-        </AppBar>
+        </PageBar>
         <Card variant="filled" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
@@ -208,7 +208,7 @@ export default function DashboardPage() {
       transition={defaultTransition}
     >
       {/* ─── Page Header ─────────────────────────────────────────────────── */}
-      <AppBar>
+      <PageBar>
         <div className="flex flex-col gap-1">
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
             Dashboard
@@ -217,7 +217,7 @@ export default function DashboardPage() {
             Overview of your organization&apos;s key metrics
           </p>
         </div>
-      </AppBar>
+      </PageBar>
 
       {/* ─── KPI Stats Grid ──────────────────────────────────────────────── */}
       <section aria-label="Key metrics">
