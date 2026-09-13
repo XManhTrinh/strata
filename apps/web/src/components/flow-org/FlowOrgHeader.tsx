@@ -79,7 +79,7 @@ export default function FlowOrgHeader({
   return (
     <div className="shrink-0 z-10">
       <PageBar className="justify-between gap-4">
-        <h1 className="text-[22px] leading-7 font-normal text-on-surface shrink-0">
+        <h1 className="text-[22px] leading-7 font-normal text-surface-foreground shrink-0">
           Org Chart
         </h1>
 
@@ -91,7 +91,7 @@ export default function FlowOrgHeader({
             className={`px-4 py-1.5 text-[13px] font-medium rounded-full transition-colors ${
               viewMode === "reporting"
                 ? "bg-secondary-container text-secondary-container-foreground"
-                : "text-surface-variant-foreground hover:text-on-surface"
+                : "text-surface-variant-foreground hover:text-surface-foreground"
             }`}
           >
             Reporting
@@ -102,7 +102,7 @@ export default function FlowOrgHeader({
             className={`px-4 py-1.5 text-[13px] font-medium rounded-full transition-colors ${
               viewMode === "department"
                 ? "bg-secondary-container text-secondary-container-foreground"
-                : "text-surface-variant-foreground hover:text-on-surface"
+                : "text-surface-variant-foreground hover:text-surface-foreground"
             }`}
           >
             Departments
@@ -119,7 +119,7 @@ export default function FlowOrgHeader({
 
         {/* Search result count */}
         {search.trim() && searchResultCount !== undefined && (
-          <span className="text-[12px] text-on-surface-variant shrink-0">
+          <span className="text-[12px] text-surface-variant-foreground shrink-0">
             {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
           </span>
         )}
@@ -137,7 +137,7 @@ export default function FlowOrgHeader({
             onClick={() => setFilterOpen(!filterOpen)}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors border ${
               isAllView
-                ? "border-outline-variant text-on-surface hover:bg-surface-foreground/8"
+                ? "border-outline-variant text-surface-foreground hover:bg-surface-foreground/8"
                 : "border-primary bg-primary/8 text-primary"
             }`}
           >
@@ -155,7 +155,7 @@ export default function FlowOrgHeader({
                   value={filterSearch}
                   onChange={(e) => setFilterSearch(e.target.value)}
                   placeholder="Search teams..."
-                  className="w-full h-9 px-3 rounded-lg border border-outline-variant bg-transparent text-[13px] text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full h-9 px-3 rounded-lg border border-outline-variant bg-transparent text-[13px] text-surface-foreground placeholder:text-surface-variant-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   autoFocus
                 />
               </div>
@@ -169,7 +169,7 @@ export default function FlowOrgHeader({
                 >
                   Clear all
                 </button>
-                <span className="text-[11px] text-on-surface-variant">
+                <span className="text-[11px] text-surface-variant-foreground">
                   {selectedSquads.size} of {orgUnits.length} selected
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function FlowOrgHeader({
 
                   return (
                     <div key={typeName}>
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">
+                      <p className="px-4 pt-3 pb-1 text-[11px] font-medium text-surface-variant-foreground uppercase tracking-wider">
                         {typeName}
                       </p>
                       {filtered.map((unit) => {
@@ -195,16 +195,16 @@ export default function FlowOrgHeader({
                             className={`w-full flex items-center gap-3 px-4 py-2 text-[13px] transition-colors ${
                               isSelected
                                 ? "bg-primary/8 text-primary font-medium"
-                                : "text-on-surface hover:bg-surface-foreground/8"
+                                : "text-surface-foreground hover:bg-surface-foreground/8"
                             }`}
                           >
                             <Icon
                               name={isSelected ? "check_box" : "check_box_outline_blank"}
                               size={20}
-                              className={isSelected ? "text-primary" : "text-on-surface-variant"}
+                              className={isSelected ? "text-primary" : "text-surface-variant-foreground"}
                             />
                             <span className="flex-1 text-left">{unit.name}</span>
-                            <span className="text-[11px] text-on-surface-variant">
+                            <span className="text-[11px] text-surface-variant-foreground">
                               {squadCounts[unit.name] ?? 0}
                             </span>
                           </button>
@@ -246,11 +246,11 @@ export default function FlowOrgHeader({
       {/* Path to root breadcrumb */}
       {pathToRoot && pathToRoot.length > 0 && (
         <div className="px-6 py-2 border-b border-outline-variant">
-          <div className="text-[12px] text-on-surface-variant flex items-center gap-1 flex-wrap">
+          <div className="text-[12px] text-surface-variant-foreground flex items-center gap-1 flex-wrap">
             <Icon name="route" size={18} className="text-primary mr-1" />
             {pathToRoot.map((name, i) => (
               <span key={i} className="flex items-center gap-1">
-                {i > 0 && <Icon name="chevron_right" size={18} className="text-on-surface-variant" />}
+                {i > 0 && <Icon name="chevron_right" size={18} className="text-surface-variant-foreground" />}
                 <span className={i === pathToRoot.length - 1 ? "font-medium text-primary" : ""}>
                   {name}
                 </span>

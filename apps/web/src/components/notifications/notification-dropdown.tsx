@@ -100,7 +100,7 @@ export function NotificationDropdown() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3">
-              <h3 className="text-[14px] leading-5 font-medium text-on-surface">Notifications</h3>
+              <h3 className="text-[14px] leading-5 font-medium text-surface-foreground">Notifications</h3>
               {unreadCount > 0 && (
                 <Button
                   variant="text"
@@ -142,7 +142,7 @@ export function NotificationDropdown() {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className={`text-[13px] leading-5 ${!notification.read ? "font-medium text-on-surface" : "text-surface-variant-foreground"}`}>
+                        <p className={`text-[13px] leading-5 ${!notification.read ? "font-medium text-surface-foreground" : "text-surface-variant-foreground"}`}>
                           {notification.title}
                         </p>
                         <p className="text-[12px] leading-4 text-surface-variant-foreground mt-0.5">

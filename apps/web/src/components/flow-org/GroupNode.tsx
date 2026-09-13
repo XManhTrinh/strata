@@ -74,7 +74,7 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
         position={Position.Top}
         className="w-2! h-2! bg-outline-variant!! border-none!"
       />
-      <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+      <span className="text-[10px] font-semibold text-surface-variant-foreground uppercase tracking-wider">
         {label} · {persons.length}
       </span>
       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -99,10 +99,10 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} avatarUrl={person.avatarUrl} />
                   <div className="min-w-0 text-left">
-                    <p className="font-semibold text-on-surface text-sm">
+                    <p className="font-semibold text-surface-foreground text-sm">
                       {person.fullName}
                     </p>
-                    <p className="text-on-surface-variant text-xs">
+                    <p className="text-surface-variant-foreground text-xs">
                       {person.title}
                     </p>
                   </div>
@@ -114,7 +114,7 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
                     onEdit(person);
                   }}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="shrink-0 text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
+                  className="shrink-0 text-surface-variant-foreground hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
                   aria-label={`Edit ${person.fullName}`}
                 >
                   <PencilIcon />

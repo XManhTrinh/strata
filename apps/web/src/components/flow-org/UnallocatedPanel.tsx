@@ -68,12 +68,12 @@ export default function UnallocatedPanel({
           : "border-outline-variant bg-transparent",
       ].join(" ")}
     >
-      <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
+      <h3 className="text-xs font-semibold text-surface-variant-foreground uppercase tracking-wider mb-3">
         {isDropTarget ? "✓ Drop to unallocate" : "Unallocated"}
       </h3>
 
       {persons.length === 0 ? (
-        <p className="text-on-surface-variant text-sm text-center py-8">
+        <p className="text-surface-variant-foreground text-sm text-center py-8">
           No unallocated people. Drag nodes here to remove from tree.
         </p>
       ) : (
@@ -101,10 +101,10 @@ export default function UnallocatedPanel({
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} avatarUrl={person.avatarUrl} />
                   <div className="min-w-0">
-                    <p className="font-semibold text-on-surface text-sm">
+                    <p className="font-semibold text-surface-foreground text-sm">
                       {person.fullName}
                     </p>
-                    <p className="text-on-surface-variant text-xs">
+                    <p className="text-surface-variant-foreground text-xs">
                       {person.title}
                     </p>
                     {person.squads.length > 0 && (
@@ -125,7 +125,7 @@ export default function UnallocatedPanel({
                   type="button"
                   onClick={() => onEdit(person)}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="shrink-0 text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
+                  className="shrink-0 text-surface-variant-foreground hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
                   aria-label={`Edit ${person.fullName}`}
                 >
                   <PencilIcon />

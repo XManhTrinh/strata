@@ -160,7 +160,7 @@ export function CommandPalette() {
           >
             {/* Search input */}
             <div className="flex items-center border-b border-outline-variant px-4">
-              <span className="text-on-surface-variant mr-2" aria-hidden="true">🔎</span>
+              <span className="text-surface-variant-foreground mr-2" aria-hidden="true">🔎</span>
               <input
                 ref={inputRef}
                 type="text"
@@ -168,7 +168,7 @@ export function CommandPalette() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 h-12 bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant outline-none"
+                className="flex-1 h-12 bg-transparent text-sm text-surface-foreground placeholder:text-surface-variant-foreground outline-none"
                 aria-label="Search commands"
                 aria-activedescendant={flatItems[selectedIndex]?.id}
                 role="combobox"
@@ -176,7 +176,7 @@ export function CommandPalette() {
                 aria-controls="command-list"
                 aria-autocomplete="list"
               />
-              <kbd className="hidden sm:inline-block text-[10px] text-on-surface-variant border border-outline-variant rounded px-1.5 py-0.5">
+              <kbd className="hidden sm:inline-block text-[10px] text-surface-variant-foreground border border-outline-variant rounded px-1.5 py-0.5">
                 ESC
               </kbd>
             </div>
@@ -189,13 +189,13 @@ export function CommandPalette() {
               role="listbox"
             >
               {filteredItems.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-on-surface-variant">
+                <p className="px-4 py-6 text-center text-sm text-surface-variant-foreground">
                   No results found.
                 </p>
               ) : (
                 Object.entries(sections).map(([section, items]) => (
                   <div key={section}>
-                    <div className="px-4 py-1.5 text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+                    <div className="px-4 py-1.5 text-xs font-semibold text-surface-variant-foreground uppercase tracking-wider">
                       {section}
                     </div>
                     {items.map((item) => {
@@ -209,7 +209,7 @@ export function CommandPalette() {
                           className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-left transition-colors ${
                             isSelected
                               ? "bg-primary/10 text-primary"
-                              : "text-on-surface hover:bg-secondary"
+                              : "text-surface-foreground hover:bg-secondary"
                           }`}
                           role="option"
                           aria-selected={isSelected}
@@ -227,7 +227,7 @@ export function CommandPalette() {
             </div>
 
             {/* Footer hint */}
-            <div className="flex items-center justify-between border-t border-outline-variant px-4 py-2 text-[11px] text-on-surface-variant">
+            <div className="flex items-center justify-between border-t border-outline-variant px-4 py-2 text-[11px] text-surface-variant-foreground">
               <span>↑↓ navigate</span>
               <span>↵ select</span>
               <span>esc close</span>

@@ -13,7 +13,7 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-on-surface">Leave Balances</h3>
+        <h3 className="text-sm font-semibold text-surface-foreground">Leave Balances</h3>
       </div>
 
       <div className="mt-4 space-y-4">
@@ -33,7 +33,7 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                     style={{ backgroundColor: balance.leaveType.color }}
                     aria-hidden="true"
                   />
-                  <span className="text-sm text-on-surface">{balance.leaveType.name}</span>
+                  <span className="text-sm text-surface-foreground">{balance.leaveType.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
@@ -46,13 +46,13 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                       Depleted
                     </span>
                   )}
-                  <span className="text-sm font-medium text-on-surface">
+                  <span className="text-sm font-medium text-surface-foreground">
                     {balance.used}/{total}
                   </span>
                 </div>
               </div>
               <ProgressBar value={usagePercent} />
-              <p className="text-xs text-on-surface-variant">
+              <p className="text-xs text-surface-variant-foreground">
                 {available} days remaining
               </p>
             </div>

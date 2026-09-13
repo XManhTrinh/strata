@@ -29,7 +29,7 @@ function VacancyNode({ data }: NodeProps & { data: VacancyNodeData }) {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="text-on-surface-variant"
+            className="text-surface-variant-foreground"
             aria-hidden="true"
           >
             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -39,10 +39,10 @@ function VacancyNode({ data }: NodeProps & { data: VacancyNodeData }) {
           </svg>
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-on-surface-variant text-sm">
+          <p className="font-semibold text-surface-variant-foreground text-sm">
             {vacancy.title}
           </p>
-          <p className="text-on-surface-variant text-xs">
+          <p className="text-surface-variant-foreground text-xs">
             {vacancy.departmentName} · Level {vacancy.level}
           </p>
         </div>

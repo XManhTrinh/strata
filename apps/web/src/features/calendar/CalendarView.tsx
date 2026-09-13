@@ -130,25 +130,25 @@ export function CalendarView() {
       {/* Header */}
       <PageBar className="justify-between gap-3 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-on-surface">Calendar</h1>
+          <h1 className="text-xl font-semibold text-surface-foreground">Calendar</h1>
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={goToPreviousMonth}
-              className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors"
+              className="rounded-md p-1.5 text-surface-variant-foreground hover:bg-surface-variant hover:text-surface-foreground transition-colors"
               aria-label="Previous month"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <span className="min-w-40 text-center text-sm font-medium text-on-surface">
+            <span className="min-w-40 text-center text-sm font-medium text-surface-foreground">
               {formatMonthYear(currentDate)}
             </span>
             <button
               type="button"
               onClick={goToNextMonth}
-              className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors"
+              className="rounded-md p-1.5 text-surface-variant-foreground hover:bg-surface-variant hover:text-surface-foreground transition-colors"
               aria-label="Next month"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -158,7 +158,7 @@ export function CalendarView() {
             <button
               type="button"
               onClick={goToToday}
-              className="ml-2 rounded-md border border-outline-variant px-2.5 py-1 text-xs font-medium text-on-surface hover:bg-surface-variant transition-colors"
+              className="ml-2 rounded-md border border-outline-variant px-2.5 py-1 text-xs font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
             >
               Today
             </button>
@@ -168,7 +168,7 @@ export function CalendarView() {
               className={`ml-2 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                 showWeekends
                   ? "border-primary/50 bg-primary/10 text-primary"
-                  : "border-outline-variant text-on-surface-variant hover:bg-surface-variant"
+                  : "border-outline-variant text-surface-variant-foreground hover:bg-surface-variant"
               }`}
             >
               {showWeekends ? "Hide weekends" : "Show weekends"}
@@ -189,7 +189,7 @@ export function CalendarView() {
               <button
                 type="button"
                 onClick={() => setShowEventForm(true)}
-                className="rounded-md border border-outline-variant px-3 py-1.5 text-sm font-medium text-on-surface hover:bg-surface-variant transition-colors"
+                className="rounded-md border border-outline-variant px-3 py-1.5 text-sm font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
               >
                 New Event
               </button>
@@ -232,14 +232,14 @@ export function CalendarView() {
           {/* Pending requests */}
           {pendingRequests.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-on-surface mb-3">
+              <h3 className="text-sm font-semibold text-surface-foreground mb-3">
                 {(canApprove || canReject) ? "Pending Approvals" : "Pending Requests"}
               </h3>
               <div className="space-y-2">
                 {pendingRequests.map((event) => (
                   <div key={event.id} className="rounded-md border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2">
-                    <p className="text-xs font-medium text-on-surface truncate">{event.title}</p>
-                    <p className="text-[11px] text-on-surface-variant mt-0.5">
+                    <p className="text-xs font-medium text-surface-foreground truncate">{event.title}</p>
+                    <p className="text-[11px] text-surface-variant-foreground mt-0.5">
                       {event.leaveRequest?.workingDays} days
                     </p>
                     <div className="mt-1.5 flex items-center gap-2">
@@ -286,13 +286,13 @@ export function CalendarView() {
           <div className="relative z-10 w-full max-w-sm rounded-lg border border-outline-variant bg-surface-container-low p-5 shadow-xl">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-base font-semibold text-on-surface">{selectedEvent.title}</h3>
-                <p className="text-sm text-on-surface-variant mt-1">{selectedEvent.ownerName}</p>
+                <h3 className="text-base font-semibold text-surface-foreground">{selectedEvent.title}</h3>
+                <p className="text-sm text-surface-variant-foreground mt-1">{selectedEvent.ownerName}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedEvent(null)}
-                className="text-on-surface-variant hover:text-on-surface"
+                className="text-surface-variant-foreground hover:text-surface-foreground"
                 aria-label="Close"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -301,34 +301,34 @@ export function CalendarView() {
               </button>
             </div>
             <div className="mt-3 space-y-2">
-              <p className="text-sm text-on-surface-variant">
-                <span className="font-medium text-on-surface">Type:</span> {selectedEvent.eventType.name}
+              <p className="text-sm text-surface-variant-foreground">
+                <span className="font-medium text-surface-foreground">Type:</span> {selectedEvent.eventType.name}
               </p>
-              <p className="text-sm text-on-surface-variant">
-                <span className="font-medium text-on-surface">Date:</span>{" "}
+              <p className="text-sm text-surface-variant-foreground">
+                <span className="font-medium text-surface-foreground">Date:</span>{" "}
                 {new Date(selectedEvent.startDate).toLocaleDateString()} – {new Date(selectedEvent.endDate).toLocaleDateString()}
               </p>
               {selectedEvent.leaveRequest && (
                 <>
-                  <p className="text-sm text-on-surface-variant">
-                    <span className="font-medium text-on-surface">Status:</span>{" "}
+                  <p className="text-sm text-surface-variant-foreground">
+                    <span className="font-medium text-surface-foreground">Status:</span>{" "}
                     <span className={
                       selectedEvent.leaveRequest.status === "APPROVED" ? "text-tertiary" :
                       selectedEvent.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
                       selectedEvent.leaveRequest.status === "REJECTED" ? "text-error" :
-                      "text-on-surface-variant"
+                      "text-surface-variant-foreground"
                     }>
                       {selectedEvent.leaveRequest.status}
                     </span>
                   </p>
-                  <p className="text-sm text-on-surface-variant">
-                    <span className="font-medium text-on-surface">Working Days:</span> {selectedEvent.leaveRequest.workingDays}
+                  <p className="text-sm text-surface-variant-foreground">
+                    <span className="font-medium text-surface-foreground">Working Days:</span> {selectedEvent.leaveRequest.workingDays}
                   </p>
                 </>
               )}
               {selectedEvent.notes && (
-                <p className="text-sm text-on-surface-variant">
-                  <span className="font-medium text-on-surface">Notes:</span> {selectedEvent.notes}
+                <p className="text-sm text-surface-variant-foreground">
+                  <span className="font-medium text-surface-foreground">Notes:</span> {selectedEvent.notes}
                 </p>
               )}
             </div>

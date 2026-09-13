@@ -88,7 +88,7 @@ function CapacityRing({ capacity }: { capacity: number }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-[8px] font-bold text-on-surface-variant z-10">
+      <span className="text-[8px] font-bold text-surface-variant-foreground z-10">
         {capacity}
       </span>
     </div>
@@ -148,10 +148,10 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
         <div className="flex items-center gap-2 min-w-0">
           <Avatar name={person.fullName} avatarUrl={person.avatarUrl} status={person.status} />
           <div className="min-w-0">
-            <p className="font-semibold text-on-surface text-sm">
+            <p className="font-semibold text-surface-foreground text-sm">
               {person.fullName}
             </p>
-            <p className="text-on-surface-variant text-xs">
+            <p className="text-surface-variant-foreground text-xs">
               {person.title}
             </p>
           </div>
@@ -165,7 +165,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
                 e.stopPropagation();
                 onEdit(person);
               }}
-              className="text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
+              className="text-surface-variant-foreground hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
               aria-label={`Edit ${person.fullName}`}
             >
               <svg
@@ -201,7 +201,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
       )}
 
       {(childCount > 0 || indirectCount > 0) && !inGroup && (
-        <div className="flex gap-3 mt-2 text-[10px] text-on-surface-variant">
+        <div className="flex gap-3 mt-2 text-[10px] text-surface-variant-foreground">
           {childCount > 0 && <span>{childCount} direct</span>}
           {indirectCount > 0 && <span>{indirectCount} indirect</span>}
         </div>
@@ -223,7 +223,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
             onToggleCollapse(person.id);
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-high hover:text-on-surface dark:hover:text-outline-variant transition-colors text-xs font-bold z-10"
+          className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-surface-variant-foreground hover:bg-surface-variant dark:hover:bg-surface-container-high hover:text-surface-foreground dark:hover:text-outline-variant transition-colors text-xs font-bold z-10"
           aria-label={collapsed ? "Expand reports" : "Collapse reports"}
           title={
             collapsed

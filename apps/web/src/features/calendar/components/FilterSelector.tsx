@@ -71,9 +71,9 @@ export function FilterSelector({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-md border border-outline-variant bg-surface px-3 py-1.5 text-sm text-on-surface hover:bg-surface-variant transition-colors"
+        className="flex items-center gap-2 rounded-md border border-outline-variant bg-surface px-3 py-1.5 text-sm text-surface-foreground hover:bg-surface-variant transition-colors"
       >
-        <svg className="h-4 w-4 text-on-surface-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg className="h-4 w-4 text-surface-variant-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         <span>
@@ -86,10 +86,10 @@ export function FilterSelector({
       {isOpen && (
         <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-lg border border-outline-variant bg-surface-container-low shadow-lg">
           <div className="flex items-center justify-between border-b border-outline-variant px-3 py-2">
-            <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wide">Filter by Team / Person</span>
+            <span className="text-xs font-medium text-surface-variant-foreground uppercase tracking-wide">Filter by Team / Person</span>
             <div className="flex gap-2">
               <button type="button" onClick={handleSelectAll} className="text-xs text-primary hover:underline">Select All</button>
-              <button type="button" onClick={handleClearAll} className="text-xs text-on-surface-variant hover:underline">Clear</button>
+              <button type="button" onClick={handleClearAll} className="text-xs text-surface-variant-foreground hover:underline">Clear</button>
             </div>
           </div>
           <div className="max-h-64 overflow-y-auto p-2">
@@ -102,8 +102,8 @@ export function FilterSelector({
                     onChange={() => toggleOrgUnit(orgUnit.id)}
                     className="h-3.5 w-3.5 rounded border-outline-variant text-primary focus:ring-primary"
                   />
-                  <span className="text-sm font-medium text-on-surface">{orgUnit.name}</span>
-                  <span className="text-xs text-on-surface-variant">({orgUnit.members.length})</span>
+                  <span className="text-sm font-medium text-surface-foreground">{orgUnit.name}</span>
+                  <span className="text-xs text-surface-variant-foreground">({orgUnit.members.length})</span>
                 </label>
                 <div className="ml-6 space-y-0.5">
                   {orgUnit.members.map((member) => (
@@ -114,7 +114,7 @@ export function FilterSelector({
                         onChange={() => toggleMember(member.id)}
                         className="h-3 w-3 rounded border-outline-variant text-primary focus:ring-primary"
                       />
-                      <span className="text-xs text-on-surface">{member.name}</span>
+                      <span className="text-xs text-surface-foreground">{member.name}</span>
                     </label>
                   ))}
                 </div>

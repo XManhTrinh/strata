@@ -62,7 +62,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen items-center justify-center bg-surface">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-on-surface-variant">Loading workspace...</p>
+          <p className="text-sm text-surface-variant-foreground">Loading workspace...</p>
         </div>
       </div>
     );

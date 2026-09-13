@@ -97,7 +97,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-scrim/50" onClick={handleClose} aria-hidden="true" />
       <div className="relative z-10 w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-low p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-on-surface">Request Leave</h2>
+        <h2 className="text-lg font-semibold text-surface-foreground">Request Leave</h2>
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {errors.length > 0 && (
             <div className="rounded-md bg-error-container p-3 dark:bg-error-container/20">
@@ -108,12 +108,12 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
           )}
 
           <div>
-            <label htmlFor="leave-type" className="block text-sm font-medium text-on-surface">Leave Type</label>
+            <label htmlFor="leave-type" className="block text-sm font-medium text-surface-foreground">Leave Type</label>
             <select
               id="leave-type"
               value={leaveTypeId}
               onChange={(e) => setLeaveTypeId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             >
               {LEAVE_TYPES.map((type) => (
                 <option key={type.id} value={type.id}>{type.name}</option>
@@ -123,31 +123,31 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
 
           {selectedBalance && (
             <div className="rounded-md bg-surface-variant/50 p-3">
-              <p className="text-sm text-on-surface-variant">
-                Remaining balance: <span className="font-medium text-on-surface">{available} days</span>
+              <p className="text-sm text-surface-variant-foreground">
+                Remaining balance: <span className="font-medium text-surface-foreground">{available} days</span>
               </p>
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="leave-start-date" className="block text-sm font-medium text-on-surface">Start Date</label>
+              <label htmlFor="leave-start-date" className="block text-sm font-medium text-surface-foreground">Start Date</label>
               <input
                 id="leave-start-date"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
-              <label htmlFor="leave-end-date" className="block text-sm font-medium text-on-surface">End Date</label>
+              <label htmlFor="leave-end-date" className="block text-sm font-medium text-surface-foreground">End Date</label>
               <input
                 id="leave-end-date"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>
@@ -159,13 +159,13 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
           </div>
 
           <div>
-            <label htmlFor="leave-notes" className="block text-sm font-medium text-on-surface">Notes (optional)</label>
+            <label htmlFor="leave-notes" className="block text-sm font-medium text-surface-foreground">Notes (optional)</label>
             <textarea
               id="leave-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+              className="mt-1 w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm text-surface-foreground placeholder:text-surface-variant-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               placeholder="Reason for leave..."
             />
           </div>
@@ -174,7 +174,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, balances, defaultD
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-md border border-outline-variant px-4 py-2 text-sm font-medium text-on-surface hover:bg-surface-variant transition-colors"
+              className="rounded-md border border-outline-variant px-4 py-2 text-sm font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
             >
               Cancel
             </button>
