@@ -3,7 +3,19 @@
 import { useState, useMemo } from "react";
 import type { CalendarEvent, CalendarFilter, OrgUnit } from "./types/calendar.types";
 import { formatMonthYear } from "./utils/calendar.utils";
-import { PageBar } from "@vkieu/mui";
+import {
+  PageBar,
+  Icon,
+  Chip,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@vkieu/mui";
+import { Button, IconButton } from "@vkieu/mui/buttons";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import { useLeaveBalances } from "./hooks/useLeaveBalances";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -42,6 +54,105 @@ const MOCK_ORG_UNITS: OrgUnit[] = [
   },
 ];
 
+// ─── Event detail dialog ──────────────────────────────────────────────────────
+
+function EventDetailDialog({
+  event,
+  onClose,
+  canApprove,
+  canReject,
+  canCancel,
+  onApprove,
+  onReject,
+  onCancel,
+}: {
+  event: CalendarEvent | null;
+  onClose: () => void;
+  canApprove: boolean;
+  canReject: boolean;
+  canCancel: boolean;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+  onCancel: (id: string) => void;
+}) {
+  if (!event) return null;
+
+  const isPending = event.leaveRequest?.status === "PENDING";
+
+  return (
+    <Dialog open={!!event} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{event.title}</DialogTitle>
+          <DialogDescription>{event.ownerName}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Typography variant="label-large" as="span">Type:</Typography>
+            <Typography variant="body-medium" as="span" color="surface-variant-foreground">{event.eventType.name}</Typography>
+          </div>
+          <div className="flex items-center gap-2">
+            <Typography variant="label-large" as="span">Date:</Typography>
+            <Typography variant="body-medium" as="span" color="surface-variant-foreground">
+              {new Date(event.startDate).toLocaleDateString()} – {new Date(event.endDate).toLocaleDateString()}
+            </Typography>
+          </div>
+          {event.leaveRequest && (
+            <>
+              <div className="flex items-center gap-2">
+                <Typography variant="label-large" as="span">Status:</Typography>
+                <Chip
+                  variant="filter"
+                  selected={event.leaveRequest.status === "APPROVED"}
+                  className={
+                    event.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
+                    event.leaveRequest.status === "REJECTED" ? "text-error" : ""
+                  }
+                >
+                  {event.leaveRequest.status}
+                </Chip>
+              </div>
+              <div className="flex items-center gap-2">
+                <Typography variant="label-large" as="span">Working Days:</Typography>
+                <Typography variant="body-medium" as="span" color="surface-variant-foreground">{event.leaveRequest.workingDays}</Typography>
+              </div>
+            </>
+          )}
+          {event.notes && (
+            <div>
+              <Typography variant="label-large">Notes:</Typography>
+              <Typography variant="body-medium" color="surface-variant-foreground">{event.notes}</Typography>
+            </div>
+          )}
+        </div>
+
+        {isPending && (canApprove || canReject || canCancel) && (
+          <DialogFooter>
+            {canCancel && (
+              <Button variant="text" className="text-error" onClick={() => onCancel(event.id)}>
+                Cancel
+              </Button>
+            )}
+            {canReject && (
+              <Button variant="text" className="text-error" onClick={() => onReject(event.id)}>
+                Reject
+              </Button>
+            )}
+            {canApprove && (
+              <Button variant="text" onClick={() => onApprove(event.id)}>
+                Approve
+              </Button>
+            )}
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Calendar view ────────────────────────────────────────────────────────────
+
 export function CalendarView() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -54,7 +165,7 @@ export function CalendarView() {
   // Filters
   const [selectedOrgUnitIds, setSelectedOrgUnitIds] = useState<string[]>(["ou-1"]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>(
-    MOCK_ORG_UNITS[0].members.map((m) => m.id)
+    MOCK_ORG_UNITS[0].members.map((m) => m.id),
   );
 
   const filters: CalendarFilter = {
@@ -75,104 +186,51 @@ export function CalendarView() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Pending leave requests that the current user (manager) can act on
-  const pendingRequests = useMemo(() => {
-    return events.filter((ev) => ev.leaveRequest?.status === "PENDING");
-  }, [events]);
+  const pendingRequests = useMemo(
+    () => events.filter((ev) => ev.leaveRequest?.status === "PENDING"),
+    [events],
+  );
 
-  function goToPreviousMonth() {
-    setCurrentDate(new Date(year, month - 1, 1));
-  }
-
-  function goToNextMonth() {
-    setCurrentDate(new Date(year, month + 1, 1));
-  }
-
-  function goToToday() {
-    setCurrentDate(new Date());
-  }
+  function goToPreviousMonth() { setCurrentDate(new Date(year, month - 1, 1)); }
+  function goToNextMonth() { setCurrentDate(new Date(year, month + 1, 1)); }
+  function goToToday() { setCurrentDate(new Date()); }
 
   function handleDateClick(date: Date) {
     setSelectedDate(date);
-    // Show a choice - for simplicity, we'll show leave form by default
     setShowLeaveForm(true);
   }
 
-  function handleEventClick(event: CalendarEvent) {
-    setSelectedEvent(event);
-  }
-
-  function handleLeaveSubmit(event: CalendarEvent) {
-    addEvent(event);
-  }
-
-  function handleEventSubmit(event: CalendarEvent) {
-    addEvent(event);
-  }
-
-  function handleApprove(eventId: string) {
-    updateEventStatus(eventId, "APPROVED");
-    setSelectedEvent(null);
-  }
-
-  function handleReject(eventId: string) {
-    updateEventStatus(eventId, "REJECTED");
-    setSelectedEvent(null);
-  }
-
-  function handleCancel(eventId: string) {
-    updateEventStatus(eventId, "CANCELLED");
-    setSelectedEvent(null);
-  }
+  function handleApprove(eventId: string) { updateEventStatus(eventId, "APPROVED"); setSelectedEvent(null); }
+  function handleReject(eventId: string) { updateEventStatus(eventId, "REJECTED"); setSelectedEvent(null); }
+  function handleCancel(eventId: string) { updateEventStatus(eventId, "CANCELLED"); setSelectedEvent(null); }
 
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <PageBar className="justify-between gap-3 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-surface-foreground">Calendar</h1>
+          <Typography variant="title-large">Calendar</Typography>
           <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={goToPreviousMonth}
-              className="rounded-md p-1.5 text-surface-variant-foreground hover:bg-surface-variant hover:text-surface-foreground transition-colors"
-              aria-label="Previous month"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <span className="min-w-40 text-center text-sm font-medium text-surface-foreground">
+            <IconButton variant="standard" size="xs" onClick={goToPreviousMonth} aria-label="Previous month">
+              <Icon name="chevron_left" size={20} />
+            </IconButton>
+            <Typography variant="label-large" as="span" className="min-w-40 text-center">
               {formatMonthYear(currentDate)}
-            </span>
-            <button
-              type="button"
-              onClick={goToNextMonth}
-              className="rounded-md p-1.5 text-surface-variant-foreground hover:bg-surface-variant hover:text-surface-foreground transition-colors"
-              aria-label="Next month"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={goToToday}
-              className="ml-2 rounded-md border border-outline-variant px-2.5 py-1 text-xs font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
-            >
+            </Typography>
+            <IconButton variant="standard" size="xs" onClick={goToNextMonth} aria-label="Next month">
+              <Icon name="chevron_right" size={20} />
+            </IconButton>
+            <Button variant="outlined" size="xs" onClick={goToToday} className="ml-2">
               Today
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant={showWeekends ? "tonal" : "outlined"}
+              size="xs"
               onClick={() => setShowWeekends(!showWeekends)}
-              className={`ml-2 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                showWeekends
-                  ? "border-primary/50 bg-primary/10 text-primary"
-                  : "border-outline-variant text-surface-variant-foreground hover:bg-surface-variant"
-              }`}
+              className="ml-2"
             >
               {showWeekends ? "Hide weekends" : "Show weekends"}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -186,28 +244,21 @@ export function CalendarView() {
           />
           {canCreate && (
             <>
-              <button
-                type="button"
-                onClick={() => setShowEventForm(true)}
-                className="rounded-md border border-outline-variant px-3 py-1.5 text-sm font-medium text-surface-foreground hover:bg-surface-variant transition-colors"
-              >
+              <Button variant="outlined" onClick={() => setShowEventForm(true)}>
+                <Icon name="event" size={18} />
                 New Event
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowLeaveForm(true)}
-                className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
+              </Button>
+              <Button onClick={() => setShowLeaveForm(true)}>
+                <Icon name="event_available" size={18} />
                 Request Leave
-              </button>
+              </Button>
             </>
           )}
         </div>
       </PageBar>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div className="flex flex-1 justify-between gap-3 min-h-0 overflow-hidden">
-        {/* Calendar Grid */}
         <main className="flex-1 min-h-0 overflow-auto">
           <CalendarGrid
             year={year}
@@ -218,57 +269,43 @@ export function CalendarView() {
             onDateRangeSelect={(start, end) => {
               setSelectedDate(start);
               setShowLeaveForm(true);
-              // The LeaveRequestForm will receive these as defaultStart/defaultEnd
               setDragRange({ start, end });
             }}
-            onEventClick={handleEventClick}
+            onEventClick={(event) => setSelectedEvent(event)}
           />
         </main>
 
-        {/* Sidebar (right side) */}
+        {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 overflow-y-auto lg:block">
           <LeaveBalancePanel balances={balances} onRequestLeave={() => setShowLeaveForm(true)} />
 
-          {/* Pending requests */}
           {pendingRequests.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-surface-foreground mb-3">
-                {(canApprove || canReject) ? "Pending Approvals" : "Pending Requests"}
-              </h3>
+              <Typography variant="title-small" className="mb-3">
+                {canApprove || canReject ? "Pending Approvals" : "Pending Requests"}
+              </Typography>
               <div className="space-y-2">
                 {pendingRequests.map((event) => (
-                  <div key={event.id} className="rounded-md border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2">
-                    <p className="text-xs font-medium text-surface-foreground truncate">{event.title}</p>
-                    <p className="text-[11px] text-surface-variant-foreground mt-0.5">
+                  <div key={event.id} className="rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2.5">
+                    <Typography variant="label-large" className="truncate">{event.title}</Typography>
+                    <Typography variant="body-small" color="surface-variant-foreground" className="mt-0.5">
                       {event.leaveRequest?.workingDays} days
-                    </p>
+                    </Typography>
                     <div className="mt-1.5 flex items-center gap-2">
                       {canApprove && (
-                        <button
-                          type="button"
-                          onClick={() => handleApprove(event.id)}
-                          className="text-[11px] font-medium text-tertiary hover:underline"
-                        >
+                        <Button variant="text" size="xs" onClick={() => handleApprove(event.id)} className="text-tertiary h-auto p-0">
                           Approve
-                        </button>
+                        </Button>
                       )}
                       {canReject && (
-                        <button
-                          type="button"
-                          onClick={() => handleReject(event.id)}
-                          className="text-[11px] font-medium text-error hover:underline"
-                        >
+                        <Button variant="text" size="xs" onClick={() => handleReject(event.id)} className="text-error h-auto p-0">
                           Reject
-                        </button>
+                        </Button>
                       )}
                       {canCancel && !(canApprove || canReject) && (
-                        <button
-                          type="button"
-                          onClick={() => handleCancel(event.id)}
-                          className="text-[11px] font-medium text-error hover:underline"
-                        >
+                        <Button variant="text" size="xs" onClick={() => handleCancel(event.id)} className="text-error h-auto p-0">
                           Cancel Request
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -279,103 +316,23 @@ export function CalendarView() {
         </aside>
       </div>
 
-      {/* Event Detail Popover */}
-      {selectedEvent && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center">
-          <div className="fixed inset-0 bg-inverse-surface/30" onClick={() => setSelectedEvent(null)} aria-hidden="true" />
-          <div className="relative z-10 w-full max-w-sm rounded-lg border border-outline-variant bg-surface-container-low p-5 shadow-xl">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-base font-semibold text-surface-foreground">{selectedEvent.title}</h3>
-                <p className="text-sm text-surface-variant-foreground mt-1">{selectedEvent.ownerName}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedEvent(null)}
-                className="text-surface-variant-foreground hover:text-surface-foreground"
-                aria-label="Close"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="mt-3 space-y-2">
-              <p className="text-sm text-surface-variant-foreground">
-                <span className="font-medium text-surface-foreground">Type:</span> {selectedEvent.eventType.name}
-              </p>
-              <p className="text-sm text-surface-variant-foreground">
-                <span className="font-medium text-surface-foreground">Date:</span>{" "}
-                {new Date(selectedEvent.startDate).toLocaleDateString()} – {new Date(selectedEvent.endDate).toLocaleDateString()}
-              </p>
-              {selectedEvent.leaveRequest && (
-                <>
-                  <p className="text-sm text-surface-variant-foreground">
-                    <span className="font-medium text-surface-foreground">Status:</span>{" "}
-                    <span className={
-                      selectedEvent.leaveRequest.status === "APPROVED" ? "text-tertiary" :
-                      selectedEvent.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
-                      selectedEvent.leaveRequest.status === "REJECTED" ? "text-error" :
-                      "text-surface-variant-foreground"
-                    }>
-                      {selectedEvent.leaveRequest.status}
-                    </span>
-                  </p>
-                  <p className="text-sm text-surface-variant-foreground">
-                    <span className="font-medium text-surface-foreground">Working Days:</span> {selectedEvent.leaveRequest.workingDays}
-                  </p>
-                </>
-              )}
-              {selectedEvent.notes && (
-                <p className="text-sm text-surface-variant-foreground">
-                  <span className="font-medium text-surface-foreground">Notes:</span> {selectedEvent.notes}
-                </p>
-              )}
-            </div>
-            {selectedEvent.leaveRequest?.status === "PENDING" && (
-              <div className="mt-4 border-t border-outline-variant pt-3 flex items-center gap-3">
-                {canApprove && (
-                  <button
-                    type="button"
-                    onClick={() => handleApprove(selectedEvent.id)}
-                    className="rounded-md bg-tertiary px-3 py-1.5 text-sm font-medium text-on-primary hover:bg-tertiary transition-colors"
-                  >
-                    Approve
-                  </button>
-                )}
-                {canReject && (
-                  <button
-                    type="button"
-                    onClick={() => handleReject(selectedEvent.id)}
-                    className="rounded-md border border-error px-3 py-1.5 text-sm font-medium text-error hover:bg-error-container dark:hover:bg-error-container/20 transition-colors"
-                  >
-                    Reject
-                  </button>
-                )}
-                {canCancel && (
-                  <button
-                    type="button"
-                    onClick={() => handleCancel(selectedEvent.id)}
-                    className="text-sm font-medium text-error hover:underline"
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Event detail dialog */}
+      <EventDetailDialog
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        canApprove={canApprove}
+        canReject={canReject}
+        canCancel={canCancel}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onCancel={handleCancel}
+      />
 
       {/* Leave Request Form Modal */}
       <LeaveRequestForm
         isOpen={showLeaveForm}
-        onClose={() => {
-          setShowLeaveForm(false);
-          setSelectedDate(null);
-          setDragRange(null);
-        }}
-        onSubmit={handleLeaveSubmit}
+        onClose={() => { setShowLeaveForm(false); setSelectedDate(null); setDragRange(null); }}
+        onSubmit={(event) => addEvent(event)}
         balances={balances}
         defaultDate={selectedDate ?? undefined}
         defaultEndDate={dragRange?.end ?? undefined}
@@ -384,11 +341,8 @@ export function CalendarView() {
       {/* Event Form Modal */}
       <EventForm
         isOpen={showEventForm}
-        onClose={() => {
-          setShowEventForm(false);
-          setSelectedDate(null);
-        }}
-        onSubmit={handleEventSubmit}
+        onClose={() => { setShowEventForm(false); setSelectedDate(null); }}
+        onSubmit={(event) => addEvent(event)}
         defaultDate={selectedDate ?? undefined}
       />
     </div>

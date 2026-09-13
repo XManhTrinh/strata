@@ -1,6 +1,8 @@
 "use client";
 
 import { ProgressBar } from "@strata/ui";
+import { Typography, Chip } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import type { LeaveBalance } from "../types/calendar.types";
 import { getAvailableBalance } from "../utils/calendar.utils";
 
@@ -12,9 +14,7 @@ interface LeaveBalancePanelProps {
 export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePanelProps) {
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-surface-foreground">Leave Balances</h3>
-      </div>
+      <Typography variant="title-small">Leave Balances</Typography>
 
       <div className="mt-4 space-y-4">
         {balances.map((balance) => {
@@ -33,40 +33,36 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                     style={{ backgroundColor: balance.leaveType.color }}
                     aria-hidden="true"
                   />
-                  <span className="text-sm text-surface-foreground">{balance.leaveType.name}</span>
+                  <Typography variant="body-medium" as="span">{balance.leaveType.name}</Typography>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    <Chip variant="filter" className="h-5 text-[10px] px-1.5 text-amber-800 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300">
                       Low
-                    </span>
+                    </Chip>
                   )}
                   {isDepleted && (
-                    <span className="inline-flex items-center rounded-full bg-error-container px-1.5 py-0.5 text-[10px] font-medium text-error dark:bg-error-container/30">
+                    <Chip variant="filter" className="h-5 text-[10px] px-1.5 text-error bg-error-container dark:bg-error-container/30">
                       Depleted
-                    </span>
+                    </Chip>
                   )}
-                  <span className="text-sm font-medium text-surface-foreground">
+                  <Typography variant="label-large" as="span">
                     {balance.used}/{total}
-                  </span>
+                  </Typography>
                 </div>
               </div>
               <ProgressBar value={usagePercent} />
-              <p className="text-xs text-surface-variant-foreground">
+              <Typography variant="body-small" color="surface-variant-foreground">
                 {available} days remaining
-              </p>
+              </Typography>
             </div>
           );
         })}
       </div>
 
-      <button
-        type="button"
-        onClick={onRequestLeave}
-        className="mt-4 w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-      >
+      <Button variant="filled" onClick={onRequestLeave} className="w-full mt-4">
         Request Leave
-      </button>
+      </Button>
     </div>
   );
 }
