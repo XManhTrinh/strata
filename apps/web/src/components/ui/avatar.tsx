@@ -57,7 +57,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         className={cn(
           "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full font-medium select-none",
           sizeClasses[size],
-          !showImage && !name && "bg-muted text-muted-foreground",
+          !showImage && !name && "bg-surface-variant text-on-surface-variant",
           className
         )}
         style={!showImage && name ? { backgroundColor: bgColor, color: textColor } : undefined}
@@ -125,7 +125,7 @@ function AvatarGroup({
       {overflow > 0 && (
         <div
           className={cn(
-            "flex items-center justify-center rounded-full bg-muted text-muted-foreground font-medium ring-2 ring-background",
+            "flex items-center justify-center rounded-full bg-surface-variant text-on-surface-variant font-medium ring-2 ring-background",
             sizeClasses[size]
           )}
           style={{ marginLeft: `${overlap}px`, zIndex: 0 }}

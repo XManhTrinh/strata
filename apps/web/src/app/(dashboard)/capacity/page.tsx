@@ -122,6 +122,7 @@ export default function CapacityPage() {
   const [fiscalYear, setFiscalYear] = useState(currentYear);
   const [selectedSquadIds, setSelectedSquadIds] = useState<Set<string>>(new Set());
   const [employmentFilter, setEmploymentFilter] = useState<"all" | "Perm" | "SubCon">("all");
+  const [groupBy, setGroupBy] = useState<"squad" | "all" | string>("squad");
   const [activeTab, setActiveTab] = useState<"phasing" | "rate-cards">("phasing");
   const [showRateCardDialog, setShowRateCardDialog] = useState(false);
   const [rateCardForm, setRateCardForm] = useState({ division: "", location: "", grade: "", annualCost: "" });
@@ -232,6 +233,132 @@ export default function CapacityPage() {
     return result;
   }, [squads, selectedSquadIds, employmentFilter, localDraft, serverDraft]);
 
+  // ─── Group By ─────────────────────────────────────────────────────────────
+
+  /** Derive available org levels from breadcrumb data (e.g. Division, Cluster, Tribe, Squad). */
+  const groupByOptions = useMemo(() => {
+    if (!squads || squads.length === 0) return [{ value: "squad", label: "Squad" }, { value: "all", label: "All" }];
+
+    // Find the max breadcrumb depth and collect names at each level
+    const levelNames = new Map<number, Set<string>>();
+    for (const sq of squads) {
+      for (let i = 0; i < sq.breadcrumb.length; i++) {
+        if (!levelNames.has(i)) levelNames.set(i, new Set());
+        levelNames.get(i)!.add(sq.breadcrumb[i]);
+      }
+    }
+
+    // Build options from highest level to lowest
+    const maxDepth = Math.max(...Array.from(levelNames.keys()));
+    const options: { value: string; label: string }[] = [];
+
+    // Add a labelled option for each breadcrumb level (except the leaf, which is "Squad" default)
+    for (let i = 0; i <= maxDepth; i++) {
+      if (i === maxDepth) {
+        options.push({ value: "squad", label: "Squad" });
+      } else {
+        // Use the breadcrumb level index as the value (e.g. "level-0" = Division)
+        // We'll infer a label from the org unit types or fall back to generic names
+        const genericLabels = ["Division", "Cluster", "Tribe", "Team"];
+        const label = i < genericLabels.length ? genericLabels[i] : `Level ${i + 1}`;
+        options.push({ value: `level-${i}`, label });
+      }
+    }
+
+    options.push({ value: "all", label: "All" });
+    return options;
+  }, [squads]);
+
+  /** Regroup filteredSquads based on groupBy selection. */
+  const groupedData = useMemo((): SquadCapacitySummary[] => {
+    if (groupBy === "squad") return filteredSquads;
+
+    if (groupBy === "all") {
+      // Merge all members into a single flat table
+      const allMembers: MemberAllocation[] = [];
+      const seenMemberships = new Set<string>();
+      let permCount = 0;
+      let subConCount = 0;
+
+      for (const sq of filteredSquads) {
+        for (const m of sq.members) {
+          // Deduplicate: a person in multiple squads appears once in "All" view
+          if (seenMemberships.has(m.membershipId)) continue;
+          seenMemberships.add(m.membershipId);
+          allMembers.push(m);
+          if (m.employmentType === "Perm") permCount++;
+          if (m.employmentType === "SubCon") subConCount++;
+        }
+      }
+
+      if (allMembers.length === 0) return [];
+
+      return [{
+        orgUnitId: "all",
+        orgUnitName: "All Members",
+        parentName: null,
+        breadcrumb: ["All"],
+        members: allMembers,
+        totals: zeroPeriods(),
+        fteTotals: zeroPeriods(),
+        permCount,
+        subConCount,
+      }];
+    }
+
+    // Group by breadcrumb level (e.g. "level-0" → breadcrumb[0] = Division)
+    const levelIndex = parseInt(groupBy.replace("level-", ""), 10);
+    if (isNaN(levelIndex)) return filteredSquads;
+
+    const groups = new Map<string, {
+      members: MemberAllocation[];
+      seenMemberships: Set<string>;
+      breadcrumb: string[];
+      permCount: number;
+      subConCount: number;
+      sourceOrgUnitIds: string[];
+    }>();
+
+    for (const sq of filteredSquads) {
+      const groupName = sq.breadcrumb[levelIndex] ?? sq.breadcrumb[sq.breadcrumb.length - 1];
+      const groupKey = groupName;
+
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          members: [],
+          seenMemberships: new Set(),
+          breadcrumb: sq.breadcrumb.slice(0, levelIndex + 1),
+          permCount: 0,
+          subConCount: 0,
+          sourceOrgUnitIds: [],
+        });
+      }
+
+      const group = groups.get(groupKey)!;
+      group.sourceOrgUnitIds.push(sq.orgUnitId);
+
+      for (const m of sq.members) {
+        if (group.seenMemberships.has(m.membershipId)) continue;
+        group.seenMemberships.add(m.membershipId);
+        group.members.push(m);
+        if (m.employmentType === "Perm") group.permCount++;
+        if (m.employmentType === "SubCon") group.subConCount++;
+      }
+    }
+
+    return Array.from(groups.entries()).map(([name, g]) => ({
+      orgUnitId: g.sourceOrgUnitIds[0],
+      orgUnitName: name,
+      parentName: g.breadcrumb.length > 1 ? g.breadcrumb[g.breadcrumb.length - 2] : null,
+      breadcrumb: g.breadcrumb,
+      members: g.members,
+      totals: zeroPeriods(),
+      fteTotals: zeroPeriods(),
+      permCount: g.permCount,
+      subConCount: g.subConCount,
+    })).sort((a, b) => a.orgUnitName.localeCompare(b.orgUnitName));
+  }, [filteredSquads, groupBy]);
+
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
   const handleFTEChange = useCallback((membershipId: string, orgUnitId: string, period: PeriodKey, value: number) => {
@@ -313,18 +440,18 @@ export default function CapacityPage() {
 
   const totalFTE = useMemo(() => {
     const t = zeroPeriods();
-    for (const sq of filteredSquads) {
+    for (const sq of groupedData) {
       for (const m of sq.members) {
         const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
         for (const pk of PERIODS) t[pk] += alloc[pk];
       }
     }
     return t;
-  }, [filteredSquads, localDraft]);
+  }, [groupedData, localDraft]);
 
   const totalCost = useMemo(() => {
     const t = zeroPeriods();
-    for (const sq of filteredSquads) {
+    for (const sq of groupedData) {
       for (const m of sq.members) {
         const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
         const monthlyCost = m.annualCost ? m.annualCost / 12 : 0;
@@ -332,18 +459,18 @@ export default function CapacityPage() {
       }
     }
     return t;
-  }, [filteredSquads, localDraft]);
+  }, [groupedData, localDraft]);
 
   // Deduplicate members across squads (a person in 2 squads counts once)
   const uniqueMembers = useMemo(() => {
     const seen = new Map<string, MemberAllocation>();
-    for (const sq of filteredSquads) {
+    for (const sq of groupedData) {
       for (const m of sq.members) {
         if (!seen.has(m.membershipId)) seen.set(m.membershipId, m);
       }
     }
     return seen;
-  }, [filteredSquads]);
+  }, [groupedData]);
 
   const totalMembers = uniqueMembers.size;
   const totalPerm = Array.from(uniqueMembers.values()).filter((m) => m.employmentType === "Perm").length;
@@ -382,7 +509,7 @@ export default function CapacityPage() {
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
-            <p className="text-[14px] text-muted-foreground">{error?.message || "Failed to load"}</p>
+            <p className="text-[14px] text-on-surface-variant">{error?.message || "Failed to load"}</p>
           </CardContent>
         </Card>
       </div>
@@ -396,7 +523,7 @@ export default function CapacityPage() {
         <div>
           <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1>
           <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            FTE allocation per squad · P1–P12 monthly phasing
+            FTE allocation {groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -415,18 +542,28 @@ export default function CapacityPage() {
           className="w-1/4"
         />
 
-        {/* Right: Employment type select */}
-        <Select
-          variant="outlined"
-          value={employmentFilter}
-          onValueChange={(v) => setEmploymentFilter(v as "all" | "Perm" | "SubCon")}
-          options={[
-            { value: "all", label: "All Types" },
-            { value: "Perm", label: "Permanent" },
-            { value: "SubCon", label: "Contractors" },
-          ]}
-          className="w-40 shrink-0"
-        />
+        {/* Right: Group by + Employment type selects */}
+        <div className="flex items-center gap-3 shrink-0">
+          <Select
+            variant="outlined"
+            value={groupBy}
+            onValueChange={setGroupBy}
+            options={groupByOptions}
+            className="w-40"
+            label="Group by"
+          />
+          <Select
+            variant="outlined"
+            value={employmentFilter}
+            onValueChange={(v) => setEmploymentFilter(v as "all" | "Perm" | "SubCon")}
+            options={[
+              { value: "all", label: "All Types" },
+              { value: "Perm", label: "Permanent" },
+              { value: "SubCon", label: "Contractors" },
+            ]}
+            className="w-40"
+          />
+        </div>
       </div>
 
       {/* Applied org unit filters */}
@@ -459,14 +596,14 @@ export default function CapacityPage() {
         <button
           type="button"
           onClick={() => setActiveTab("phasing")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "phasing" ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "phasing" ? "text-primary border-primary" : "text-on-surface-variant border-transparent hover:text-on-surface"}`}
         >
           FTE Phasing
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("rate-cards")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "rate-cards" ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "rate-cards" ? "text-primary border-primary" : "text-on-surface-variant border-transparent hover:text-on-surface"}`}
         >
           Rate Cards ({rateCards.length})
         </button>
@@ -476,16 +613,16 @@ export default function CapacityPage() {
       {activeTab === "phasing" ? (
         <>
           {/* FTE Phasing Table per Squad */}
-          {filteredSquads.length === 0 ? (
+          {groupedData.length === 0 ? (
             <Card variant="elevated">
               <CardContent className="flex flex-col items-center py-16 text-center">
-                <Icon name="stacked_bar_chart" size={40} className="text-muted-foreground/30 mb-4" />
-                <p className="text-base font-medium text-foreground mb-1">No capacity data</p>
-                <p className="text-[14px] text-muted-foreground">Import members to generate default allocations.</p>
+                <Icon name="stacked_bar_chart" size={40} className="text-on-surface-variant/30 mb-4" />
+                <p className="text-base font-medium text-on-surface mb-1">No capacity data</p>
+                <p className="text-[14px] text-on-surface-variant">Import members to generate default allocations.</p>
               </CardContent>
             </Card>
           ) : (
-            filteredSquads.map((squad) => {
+            groupedData.map((squad) => {
               // Compute squad FTE totals from local draft
               const squadFTETotals = zeroPeriods();
               const squadCostTotals = zeroPeriods();
@@ -499,7 +636,7 @@ export default function CapacityPage() {
               }
 
               return (
-                <Card key={squad.orgUnitId} variant="elevated">
+                <Card key={`${groupBy}-${squad.orgUnitId}-${squad.orgUnitName}`} variant="elevated">
                   <CardContent className="p-0">
                     <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
                       <div>
@@ -549,8 +686,8 @@ export default function CapacityPage() {
                                     }}
                                     className="cursor-context-menu"
                                   >
-                                    <p className="text-[13px] font-medium text-foreground truncate max-w-45">{member.fullName}</p>
-                                    <p className="text-[11px] text-muted-foreground">{member.position ?? ""}</p>
+                                    <p className="text-[13px] font-medium text-on-surface truncate max-w-45">{member.fullName}</p>
+                                    <p className="text-[11px] text-on-surface-variant">{member.position ?? ""}</p>
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-center">
@@ -558,7 +695,7 @@ export default function CapacityPage() {
                                     {member.employmentType === "Perm" ? "P" : "C"}
                                   </span>
                                 </TableCell>
-                                <TableCell className="text-center text-[12px] text-muted-foreground">{member.grade ?? "—"}</TableCell>
+                                <TableCell className="text-center text-[12px] text-on-surface-variant">{member.grade ?? "—"}</TableCell>
                                 {PERIODS.map((pk) => (
                                   <TableCell key={pk} className="text-center p-1">
                                     {(() => {
@@ -621,11 +758,11 @@ export default function CapacityPage() {
 
                           {/* Squad cost totals */}
                           <TableRow className="bg-surface-container-low/30">
-                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/30 text-[12px] text-muted-foreground">Monthly Cost</TableCell>
+                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/30 text-[12px] text-on-surface-variant">Monthly Cost</TableCell>
                             <TableCell />
                             <TableCell />
                             {PERIODS.map((pk) => (
-                              <TableCell key={pk} className="text-center text-[11px] text-muted-foreground">{fmtGBP(squadCostTotals[pk])}</TableCell>
+                              <TableCell key={pk} className="text-center text-[11px] text-on-surface-variant">{fmtGBP(squadCostTotals[pk])}</TableCell>
                             ))}
                             <TableCell />
                           </TableRow>
@@ -639,7 +776,7 @@ export default function CapacityPage() {
           )}
 
           {/* Grand Total Row */}
-          {filteredSquads.length > 1 && (
+          {groupedData.length > 1 && (
             <Card variant="elevated">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
@@ -663,12 +800,12 @@ export default function CapacityPage() {
                         ))}
                         <TableCell className="text-right">{fmtFTE(sumPeriods(totalFTE))}</TableCell>
                       </TableRow>
-                      <TableRow className="text-muted-foreground">
+                      <TableRow className="text-on-surface-variant">
                         <TableCell>Cost</TableCell><TableCell /><TableCell />
                         {PERIODS.map((pk) => (
                           <TableCell key={pk} className="text-center text-[12px]">{fmtGBP(totalCost[pk])}</TableCell>
                         ))}
-                        <TableCell className="text-right font-semibold text-foreground">{fmtGBP(annualCostTotal)}</TableCell>
+                        <TableCell className="text-right font-semibold text-on-surface">{fmtGBP(annualCostTotal)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -688,7 +825,7 @@ export default function CapacityPage() {
                 className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-container border border-outline-variant rounded-full px-6 py-3 shadow-xl flex items-center gap-4"
               >
                 <p className="text-[13px] text-surface-variant-foreground">
-                  <span className="font-medium text-foreground">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
+                  <span className="font-medium text-on-surface">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
                 </p>
                 <Button variant="text" onClick={handleDiscard} disabled={saveAllocationsMutation.isPending}>Discard</Button>
                 <Button onClick={handleSave} disabled={saveAllocationsMutation.isPending}>
@@ -716,9 +853,9 @@ export default function CapacityPage() {
             </div>
             {rateCards.length === 0 ? (
               <div className="flex flex-col items-center py-16 text-center">
-                <Icon name="credit_card" size={40} className="text-muted-foreground/30 mb-4" />
-                <p className="text-base font-medium text-foreground mb-1">No rate cards</p>
-                <p className="text-[14px] text-muted-foreground">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</p>
+                <Icon name="credit_card" size={40} className="text-on-surface-variant/30 mb-4" />
+                <p className="text-base font-medium text-on-surface mb-1">No rate cards</p>
+                <p className="text-[14px] text-on-surface-variant">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -740,7 +877,7 @@ export default function CapacityPage() {
                         <TableCell>{rc.location}</TableCell>
                         <TableCell>{rc.grade}</TableCell>
                         <TableCell className="text-right font-medium">{fmtGBP(Number(rc.annualCost))}</TableCell>
-                        <TableCell className="text-right text-muted-foreground">{fmtGBP(Math.round(Number(rc.annualCost) / 12))}</TableCell>
+                        <TableCell className="text-right text-on-surface-variant">{fmtGBP(Math.round(Number(rc.annualCost) / 12))}</TableCell>
                         <TableCell className="text-right">
                           <button
                             type="button"
@@ -748,7 +885,7 @@ export default function CapacityPage() {
                               onSuccess: () => toast.success("Rate card deleted"),
                               onError: (err) => toast.error(err.message || "Failed to delete"),
                             })}
-                            className="text-muted-foreground hover:text-error transition-colors"
+                            className="text-on-surface-variant hover:text-error transition-colors"
                             aria-label="Delete"
                           >
                             <Icon name="delete" size={18} />
@@ -796,7 +933,7 @@ export default function CapacityPage() {
           >
             <div className="px-3 py-2 border-b border-outline-variant">
               <p className="text-[12px] font-medium text-surface-variant-foreground">Allocate to squad</p>
-              <p className="text-[13px] text-foreground truncate">{contextMenu.fullName}</p>
+              <p className="text-[13px] text-on-surface truncate">{contextMenu.fullName}</p>
             </div>
             <div className="max-h-75 overflow-y-auto py-1">
               {(squads ?? [])
@@ -817,7 +954,7 @@ export default function CapacityPage() {
                 .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
                 .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
                 .length === 0 && (
-                <p className="px-3 py-2 text-[12px] text-muted-foreground">Already in all squads</p>
+                <p className="px-3 py-2 text-[12px] text-on-surface-variant">Already in all squads</p>
               )}
             </div>
           </div>

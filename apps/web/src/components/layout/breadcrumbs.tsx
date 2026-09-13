@@ -10,8 +10,8 @@ export function Breadcrumbs() {
   if (segments.length === 0) {
     return (
       <nav aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <li className="font-medium text-foreground">Dashboard</li>
+        <ol className="flex items-center gap-1.5 text-sm text-on-surface-variant">
+          <li className="font-medium text-on-surface">Dashboard</li>
         </ol>
       </nav>
     );
@@ -19,9 +19,9 @@ export function Breadcrumbs() {
 
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <ol className="flex items-center gap-1.5 text-sm text-on-surface-variant">
         <li>
-          <Link href="/" className="hover:text-foreground transition-colors">
+          <Link href="/" className="hover:text-on-surface transition-colors">
             Dashboard
           </Link>
         </li>
@@ -34,11 +34,11 @@ export function Breadcrumbs() {
             <li key={href} className="flex items-center gap-1.5">
               <span aria-hidden="true">/</span>
               {isLast ? (
-                <span className="font-medium text-foreground" aria-current="page">
+                <span className="font-medium text-on-surface" aria-current="page">
                   {label}
                 </span>
               ) : (
-                <Link href={href} className="hover:text-foreground transition-colors">
+                <Link href={href} className="hover:text-on-surface transition-colors">
                   {label}
                 </Link>
               )}

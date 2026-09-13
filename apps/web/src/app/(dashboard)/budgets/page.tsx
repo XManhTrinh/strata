@@ -211,7 +211,7 @@ export default function BudgetsPage() {
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
-            <p className="text-[14px] text-muted-foreground">{error?.message || "Failed to load"}</p>
+            <p className="text-[14px] text-on-surface-variant">{error?.message || "Failed to load"}</p>
           </CardContent>
         </Card>
       </div>

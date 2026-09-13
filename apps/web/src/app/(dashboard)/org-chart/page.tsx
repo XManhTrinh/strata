@@ -200,13 +200,13 @@ export default function OrgChartPage() {
         {/* Status bar */}
         <div className="px-6 flex items-center gap-3 h-8 shrink-0">
           {!isAllView && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-on-surface-variant">
               Showing{" "}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-on-surface">
                 {selectedMemberCount}
               </span>{" "}
               {selectedMemberCount === 1 ? "person" : "people"} in{" "}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-on-surface">
                 {Array.from(selectedUnits).join(", ")}
               </span>{" "}
               —{" "}

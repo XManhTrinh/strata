@@ -168,7 +168,7 @@ export default function DashboardPage() {
         <Card variant="filled" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+              <Icon name="error" size={24} className="text-error" />
             </div>
             <p className="text-[16px] leading-6 font-medium text-surface-foreground mb-2">
               Something went wrong

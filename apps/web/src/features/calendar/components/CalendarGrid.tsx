@@ -171,19 +171,19 @@ export function CalendarGrid({
 
   return (
     <div
-      className="flex flex-col h-full select-none overflow-auto border border-border rounded-lg"
+      className="flex flex-col h-full select-none overflow-auto border border-outline-variant rounded-lg"
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
       {/* Weekday headers */}
-      <div className={`grid sticky top-0 z-10 bg-background border-b border-border ${colCount === 5 ? "grid-cols-5" : "grid-cols-7"}`}>
+      <div className={`grid sticky top-0 z-10 bg-surface border-b border-outline-variant ${colCount === 5 ? "grid-cols-5" : "grid-cols-7"}`}>
         {weekdayLabels.map((label) => (
           <div
             key={label}
             className={`px-2 py-2 text-center text-xs font-medium uppercase tracking-wider ${
               label === "Sat" || label === "Sun"
-                ? "text-muted-foreground/60 bg-muted/30"
-                : "text-muted-foreground"
+                ? "text-on-surface-variant/60 bg-surface-variant/30"
+                : "text-on-surface-variant"
             }`}
           >
             {label}
@@ -199,7 +199,7 @@ export function CalendarGrid({
         const eventRowCount = maxRow + 1;
 
         return (
-          <div key={weekIdx} className="border-b border-border last:border-b-0 flex-1 min-h-20 relative">
+          <div key={weekIdx} className="border-b border-outline-variant last:border-b-0 flex-1 min-h-20 relative">
             {/* Day cells - fill full height */}
             <div className={`grid h-full ${colCount === 5 ? "grid-cols-5" : "grid-cols-7"}`}>
               {weekDays.map((date, dayIdx) => {
@@ -211,11 +211,11 @@ export function CalendarGrid({
                 return (
                   <div
                     key={dayIdx}
-                    className={`border-border px-1.5 pt-1 pb-0.5 cursor-pointer transition-colors ${
+                    className={`border-outline-variant px-1.5 pt-1 pb-0.5 cursor-pointer transition-colors ${
                       dayIdx < colCount - 1 ? "border-r" : ""
-                    } ${!isCurrentMonth ? "bg-muted/20" : ""
+                    } ${!isCurrentMonth ? "bg-surface-variant/20" : ""
                     } ${isWeekend && showWeekends ? "bg-orange-50/40 dark:bg-orange-950/10" : ""} ${
-                      inDragRange ? "bg-primary/10" : "hover:bg-muted/30"
+                      inDragRange ? "bg-primary/10" : "hover:bg-surface-variant/30"
                     }`}
                     onMouseDown={(e) => {
                       e.preventDefault();
@@ -228,8 +228,8 @@ export function CalendarGrid({
                         todayHighlight
                           ? "bg-primary text-primary-foreground"
                           : isCurrentMonth
-                            ? "text-foreground"
-                            : "text-muted-foreground"
+                            ? "text-on-surface"
+                            : "text-on-surface-variant"
                       }`}
                     >
                       {date.getDate()}

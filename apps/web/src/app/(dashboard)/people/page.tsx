@@ -432,7 +432,7 @@ export default function PeoplePage() {
             {person.isSuperAdmin && <Chip variant="filter" selected>Admin</Chip>}
             {(person.roles ?? []).map((r) => <Chip key={r.id} variant="filter">{r.name}</Chip>)}
             {!person.isSuperAdmin && (person.roles ?? []).length === 0 && (
-              <span className="text-[12px] text-muted-foreground">No role</span>
+              <span className="text-[12px] text-on-surface-variant">No role</span>
             )}
           </div>
         );
@@ -449,17 +449,17 @@ export default function PeoplePage() {
       <div className="space-y-6">
         <AppBar className="justify-between">
           <div>
-            <h1 className="text-[28px] leading-9 font-normal text-foreground">Members</h1>
-            <p className="text-[14px] leading-5 text-muted-foreground">Manage workspace members and their roles.</p>
+            <h1 className="text-[28px] leading-9 font-normal text-on-surface">Members</h1>
+            <p className="text-[14px] leading-5 text-on-surface-variant">Manage workspace members and their roles.</p>
           </div>
         </AppBar>
         <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
-              <Icon name="error" size={24} className="text-destructive" />
+              <Icon name="error" size={24} className="text-error" />
             </div>
-            <h2 className="text-base font-medium leading-6 text-foreground mb-2">Unable to load members</h2>
-            <p className="text-[14px] leading-5 text-muted-foreground mb-6">
+            <h2 className="text-base font-medium leading-6 text-on-surface mb-2">Unable to load members</h2>
+            <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
               {error?.message || "Something went wrong while fetching member data."}
             </p>
             <Button variant="tonal" onClick={() => refetch()}>
@@ -484,8 +484,8 @@ export default function PeoplePage() {
       {/* Page Header */}
       <AppBar className="justify-between">
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-foreground">Members</h1>
-          <p className="text-[14px] leading-5 text-muted-foreground">{data?.total ?? 0} members · Manage workspace members and their roles.</p>
+          <h1 className="text-[28px] leading-9 font-normal text-on-surface">Members</h1>
+          <p className="text-[14px] leading-5 text-on-surface-variant">{data?.total ?? 0} members · Manage workspace members and their roles.</p>
         </div>
         <div className="flex items-center gap-2">
           <Tooltip content="Export visible columns to CSV">
@@ -619,8 +619,8 @@ export default function PeoplePage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/8 mb-6">
               <Icon name="people" size={40} className="text-primary" />
             </div>
-            <h2 className="text-[22px] font-normal leading-7 text-foreground mb-2">No members yet</h2>
-            <p className="text-[14px] leading-5 text-muted-foreground mb-6 max-w-sm">
+            <h2 className="text-[22px] font-normal leading-7 text-on-surface mb-2">No members yet</h2>
+            <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-sm">
               Import your org data from a CSV in Settings, or add members one by one.
             </p>
             <div className="flex gap-3">
@@ -682,7 +682,7 @@ export default function PeoplePage() {
                           <Button variant="text" size="xs" className="rounded-full" onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`}>
                             <Icon name="edit" size={18} />
                           </Button>
-                          <Button variant="text" size="xs" className="rounded-full text-destructive hover:text-destructive" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
+                          <Button variant="text" size="xs" className="rounded-full text-error hover:text-error" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
                             <Icon name="delete" size={18} />
                           </Button>
                         </div>
@@ -701,17 +701,17 @@ export default function PeoplePage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <Avatar name={person.fullName} size="l" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium leading-6 text-foreground truncate">{person.fullName}</p>
-                    <p className="text-[14px] leading-5 text-muted-foreground truncate">{person.email}</p>
+                    <p className="text-base font-medium leading-6 text-on-surface truncate">{person.fullName}</p>
+                    <p className="text-[14px] leading-5 text-on-surface-variant truncate">{person.email}</p>
                     {person.orgUnitName && (
-                      <p className="text-[12px] leading-4 text-muted-foreground mt-0.5">{person.orgUnitName}</p>
+                      <p className="text-[12px] leading-4 text-on-surface-variant mt-0.5">{person.orgUnitName}</p>
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button variant="text" size="xs" className="rounded-full" onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`}>
                       <Icon name="edit" size={18} />
                     </Button>
-                    <Button variant="text" size="xs" className="rounded-full text-destructive hover:text-destructive" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
+                    <Button variant="text" size="xs" className="rounded-full text-error hover:text-error" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
                       <Icon name="delete" size={18} />
                     </Button>
                   </div>
@@ -723,7 +723,7 @@ export default function PeoplePage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-2">
-              <p className="text-[14px] leading-5 text-muted-foreground">
+              <p className="text-[14px] leading-5 text-on-surface-variant">
                 Page {page} of {totalPages} · {data?.total ?? 0} total
               </p>
               <div className="flex gap-2">
@@ -847,7 +847,7 @@ export default function PeoplePage() {
           <div className="px-6 py-2">
             <TextField variant="outlined" label="View Name" required value={newViewName} onChange={(e) => setNewViewName(e.target.value)} placeholder="e.g. Engineering View" />
             <div className="mt-3">
-              <p className="text-[12px] text-muted-foreground mb-1">Visible columns:</p>
+              <p className="text-[12px] text-on-surface-variant mb-1">Visible columns:</p>
               <div className="flex flex-wrap gap-1">
                 {visibleColumns.map((col) => <Chip key={col.key} variant="filter">{col.label}</Chip>)}
               </div>

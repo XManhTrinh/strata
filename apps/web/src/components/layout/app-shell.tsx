@@ -15,7 +15,7 @@ export function AppShell({ children }: AppShellProps) {
     <>
       <SkipToContent />
       <RouteAnnouncer />
-      <div className="h-screen bg-background overflow-hidden">
+      <div className="h-screen bg-surface overflow-hidden">
         <Sidebar />
         <div className="flex flex-col h-screen md:ml-24">
           <Header />

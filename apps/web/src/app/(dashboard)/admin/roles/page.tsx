@@ -357,10 +357,10 @@ export default function RolesPage() {
           <Card variant="outlined" className="max-w-sm w-full">
             <CardContent className="flex flex-col items-center py-12 px-8 text-center">
               <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
-                <Icon name="error" size={24} className="text-destructive" />
+                <Icon name="error" size={24} className="text-error" />
               </div>
-              <p className="text-[16px] leading-6 font-medium text-foreground mb-1">Unable to load roles</p>
-              <p className="text-[14px] leading-5 text-muted-foreground">Something went wrong. Please try again later.</p>
+              <p className="text-[16px] leading-6 font-medium text-on-surface mb-1">Unable to load roles</p>
+              <p className="text-[14px] leading-5 text-on-surface-variant">Something went wrong. Please try again later.</p>
             </CardContent>
           </Card>
         </div>
@@ -378,8 +378,8 @@ export default function RolesPage() {
             <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
               <Icon name="shield" size={40} className="text-primary" />
             </div>
-            <h2 className="text-[22px] leading-7 font-normal text-foreground mb-2">No roles yet</h2>
-            <p className="text-[14px] leading-5 text-muted-foreground mb-6">Create your first role to start managing permissions.</p>
+            <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">No roles yet</h2>
+            <p className="text-[14px] leading-5 text-on-surface-variant mb-6">Create your first role to start managing permissions.</p>
             <Button onClick={() => setShowCreateModal(true)}><Icon name="add" size={18} />Create your first role</Button>
           </div>
         </div>
@@ -424,8 +424,8 @@ export default function RolesPage() {
             </List>
             {filteredRoles.length === 0 && roleSearch && (
               <div className="flex flex-col items-center py-8 text-center px-4">
-                <Icon name="search_off" size={24} className="text-muted-foreground/40 mb-2" />
-                <p className="text-[14px] leading-5 text-muted-foreground">No roles matching &ldquo;{roleSearch}&rdquo;</p>
+                <Icon name="search_off" size={24} className="text-on-surface-variant/40 mb-2" />
+                <p className="text-[14px] leading-5 text-on-surface-variant">No roles matching &ldquo;{roleSearch}&rdquo;</p>
               </div>
             )}
           </div>
@@ -443,11 +443,11 @@ export default function RolesPage() {
                       <button type="button" onClick={() => setMobileShowPermissions(false)} className="lg:hidden flex items-center justify-center h-10 w-10 -ml-2 rounded-full hover:bg-surface-foreground/8 transition-colors" aria-label="Back to roles">
                         <Icon name="arrow_back" size={20} />
                       </button>
-                      <h2 className="text-[22px] leading-7 font-normal text-foreground truncate">{selectedRole.name}</h2>
+                      <h2 className="text-[22px] leading-7 font-normal text-on-surface truncate">{selectedRole.name}</h2>
                       {selectedRole.isSystem && <Chip variant="filter" selected className="shrink-0">System</Chip>}
                     </div>
                     {selectedRole.description && (
-                      <p className="text-[14px] leading-5 text-muted-foreground lg:pl-0 pl-10">{selectedRole.description}</p>
+                      <p className="text-[14px] leading-5 text-on-surface-variant lg:pl-0 pl-10">{selectedRole.description}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -502,8 +502,8 @@ export default function RolesPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center text-center px-4">
-                <Icon name="shield" size={48} className="text-muted-foreground/30 mb-3" />
-                <p className="text-[14px] leading-5 text-muted-foreground">Select a role to view permissions</p>
+                <Icon name="shield" size={48} className="text-on-surface-variant/30 mb-3" />
+                <p className="text-[14px] leading-5 text-on-surface-variant">Select a role to view permissions</p>
               </div>
             </div>
           )}
@@ -546,8 +546,8 @@ function PageHeader({ onCreateClick }: { onCreateClick: () => void }) {
   return (
     <div className="flex items-center justify-between gap-4 shrink-0">
       <div>
-        <h1 className="text-[24px] leading-8 font-normal text-foreground">Roles & Permissions</h1>
-        <p className="text-[14px] leading-5 text-muted-foreground mt-1">Define roles and manage feature-level access with granular scope control.</p>
+        <h1 className="text-[24px] leading-8 font-normal text-on-surface">Roles & Permissions</h1>
+        <p className="text-[14px] leading-5 text-on-surface-variant mt-1">Define roles and manage feature-level access with granular scope control.</p>
       </div>
       <Button onClick={onCreateClick} className="shrink-0"><Icon name="add" size={18} />Create Role</Button>
     </div>
@@ -613,14 +613,16 @@ function PermissionMatrix({
   onExpandAll,
   onCollapseAll,
 }: PermissionMatrixProps) {
+  const [showScopeGuide, setShowScopeGuide] = useState(false);
+
   if (!features.length) {
     return (
       <div className="flex flex-col items-center py-16 text-center">
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/50 mb-4">
-          <Icon name="lock" size={24} className="text-muted-foreground/60" />
+          <Icon name="lock" size={24} className="text-on-surface-variant/60" />
         </div>
-        <p className="text-[16px] leading-6 font-medium text-foreground mb-1">No features available</p>
-        <p className="text-[14px] leading-5 text-muted-foreground">Features will appear here once configured.</p>
+        <p className="text-[16px] leading-6 font-medium text-on-surface mb-1">No features available</p>
+        <p className="text-[14px] leading-5 text-on-surface-variant">Features will appear here once configured.</p>
       </div>
     );
   }
@@ -630,9 +632,21 @@ function PermissionMatrix({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[12px] leading-4 font-medium text-muted-foreground uppercase tracking-wide">
-          {features.length} {features.length === 1 ? "feature" : "features"}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[12px] leading-4 font-medium text-on-surface-variant uppercase tracking-wide">
+            {features.length} {features.length === 1 ? "feature" : "features"}
+          </p>
+          <Tooltip content="What do the scopes mean?" side="right">
+            <button
+              type="button"
+              onClick={() => setShowScopeGuide(true)}
+              className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-surface-foreground/8 transition-colors"
+              aria-label="Permission scope guide"
+            >
+              <Icon name="help" size={16} className="text-on-surface-variant" />
+            </button>
+          </Tooltip>
+        </div>
         <Button variant="text" onClick={allExpanded ? onCollapseAll : onExpandAll} className="text-[12px] h-8">
           {allExpanded ? "Collapse all" : "Expand all"}
         </Button>
@@ -649,14 +663,14 @@ function PermissionMatrix({
             <button type="button" onClick={() => onToggleFeature(feature.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-foreground/4 transition-colors text-left">
               <Icon name="extension" size={20} className="text-primary shrink-0" />
               <div className="flex-1 min-w-0">
-                <span className="text-[14px] leading-5 font-medium text-foreground">{feature.displayName}</span>
+                <span className="text-[14px] leading-5 font-medium text-on-surface">{feature.displayName}</span>
               </div>
               {assignedCount > 0 && (
                 <span className="inline-flex items-center justify-center h-6 px-2 rounded-full bg-secondary-container text-secondary-container-foreground text-[11px] font-medium">
                   {assignedCount}/{feature.permissions.length}
                 </span>
               )}
-              <Icon name={isExpanded ? "expand_less" : "expand_more"} size={20} className="text-muted-foreground shrink-0" />
+              <Icon name={isExpanded ? "expand_less" : "expand_more"} size={20} className="text-on-surface-variant shrink-0" />
             </button>
 
             <AnimatePresence initial={false}>
@@ -694,7 +708,7 @@ function PermissionMatrix({
                             checked={isEnabled}
                             onCheckedChange={(checked) => onToggle(feature.key, fp.key, checked === true)}
                           />
-                          <span className={`flex-1 text-[14px] leading-5 min-w-0 truncate ${isEnabled ? "text-foreground" : "text-muted-foreground"}`}>
+                          <span className={`flex-1 text-[14px] leading-5 min-w-0 truncate ${isEnabled ? "text-on-surface" : "text-on-surface-variant"}`}>
                             {fp.displayName}
                           </span>
                           <Select
@@ -715,6 +729,85 @@ function PermissionMatrix({
           </Card>
         );
       })}
+
+      {/* Scope Guide Dialog */}
+      <Dialog open={showScopeGuide} onOpenChange={setShowScopeGuide}>
+        <DialogContent icon="help" className="max-w-lg">
+          <DialogHeader centered>
+            <DialogTitle>Permission Scopes</DialogTitle>
+            <DialogDescription>
+              Scopes control how far a permission reaches in your organization hierarchy.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5">
+            {/* Visual hierarchy */}
+            <div className="rounded-xl border border-outline-variant bg-surface-container-low/50 p-4">
+              <p className="text-[11px] font-medium text-on-surface-variant uppercase tracking-wide mb-3">Example hierarchy</p>
+              <div className="space-y-1.5 font-mono text-[13px]">
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <span className="material-symbols-rounded text-[16px]">public</span>
+                  <span>Global <span className="text-[11px] text-on-surface-variant/60">(multi-tenant)</span></span>
+                </div>
+                <div className="flex items-center gap-2 pl-5 text-on-surface-variant">
+                  <span className="material-symbols-rounded text-[16px]">apartment</span>
+                  <span>Company</span>
+                </div>
+                <div className="flex items-center gap-2 pl-10 text-on-surface-variant">
+                  <span className="material-symbols-rounded text-[16px]">account_tree</span>
+                  <span>Division <span className="text-[11px] text-on-surface-variant/60">(branch)</span></span>
+                </div>
+                <div className="flex items-center gap-2 pl-15 text-on-surface-variant">
+                  <span className="material-symbols-rounded text-[16px]">workspaces</span>
+                  <span>Tribe <span className="text-[11px] text-on-surface-variant/60">(branch)</span></span>
+                </div>
+                <div className="flex items-center gap-2 pl-20 text-primary font-medium">
+                  <span className="material-symbols-rounded text-[16px]">group</span>
+                  <span>Squad <span className="text-[11px] font-normal text-primary/60">(org unit)</span></span>
+                </div>
+                <div className="flex items-center gap-2 pl-25 text-on-surface-variant">
+                  <span className="material-symbols-rounded text-[16px]">person</span>
+                  <span>Member</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Scope descriptions */}
+            <div className="divide-y divide-outline-variant">
+              {[
+                { scope: "Own", icon: "person", desc: "Only the user's own data. Every employee typically gets this." },
+                { scope: "Direct Reports", icon: "supervisor_account", desc: "The user's data plus anyone who reports directly to them." },
+                { scope: "Org Unit", icon: "group", desc: "Everyone in the user's assigned org unit (e.g., their squad or team)." },
+                { scope: "Branch", icon: "account_tree", desc: "The user's org unit and all children below it. A tribe lead sees all squads in their tribe." },
+                { scope: "Company", icon: "apartment", desc: "Everyone in the company. Typically for HR admins and finance." },
+                { scope: "Global", icon: "public", desc: "Cross-company access for platform admins in multi-tenant setups." },
+              ].map((item) => (
+                <div key={item.scope} className="flex gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/8 shrink-0">
+                    <span className="material-symbols-rounded text-[18px] text-primary">{item.icon}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-medium text-on-surface">{item.scope}</p>
+                    <p className="text-[13px] leading-5 text-on-surface-variant">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tip */}
+            <div className="flex gap-3 rounded-xl bg-secondary-container/30 p-3">
+              <span className="material-symbols-rounded text-[18px] text-secondary shrink-0 mt-0.5">lightbulb</span>
+              <p className="text-[13px] leading-5 text-secondary">
+                <span className="font-medium">Tip:</span> For small teams with only squads and tribes, you only need 3 scopes: Own (employees), Branch (leads), and Company (admins).
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="text" onClick={() => setShowScopeGuide(false)}>Got it</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

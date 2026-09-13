@@ -11,9 +11,9 @@ interface LeaveBalancePanelProps {
 
 export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePanelProps) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">Leave Balances</h3>
+        <h3 className="text-sm font-semibold text-on-surface">Leave Balances</h3>
       </div>
 
       <div className="mt-4 space-y-4">
@@ -33,7 +33,7 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                     style={{ backgroundColor: balance.leaveType.color }}
                     aria-hidden="true"
                   />
-                  <span className="text-sm text-foreground">{balance.leaveType.name}</span>
+                  <span className="text-sm text-on-surface">{balance.leaveType.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
@@ -46,13 +46,13 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                       Depleted
                     </span>
                   )}
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-medium text-on-surface">
                     {balance.used}/{total}
                   </span>
                 </div>
               </div>
               <ProgressBar value={usagePercent} />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-on-surface-variant">
                 {available} days remaining
               </p>
             </div>

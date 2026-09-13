@@ -4,7 +4,7 @@ import { Icon } from "@vkieu/mui";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
       <header className="border-b border-outline-variant bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
