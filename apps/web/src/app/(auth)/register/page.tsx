@@ -34,7 +34,7 @@ export default function RegisterPage() {
       checked.current = true;
       checkSession();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function RegisterPage() {
           <div className="w-full space-y-5">
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               {error && (
-                <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
+                <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3">
                   <Icon name="error" size={20} className="text-error shrink-0" />
                   <Typography variant="body-medium" color="error">{error}</Typography>
                 </div>

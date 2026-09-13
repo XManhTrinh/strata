@@ -452,7 +452,7 @@ export default function RolesPage() {
       setServerDraft(ns);
       setLocalDraft(new Map(ns));
     }
-  }, [rolePermissionDetail]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rolePermissionDetail]);
 
   const isDirty = !draftsEqual(serverDraft, localDraft);
   const diff = useMemo(() => computeDiff(serverDraft, localDraft), [serverDraft, localDraft]);

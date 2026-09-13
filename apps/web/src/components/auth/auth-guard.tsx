@@ -26,7 +26,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       initialized.current = true;
       checkSession();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, []);
 
   // Redirect if not authenticated after session check completes
