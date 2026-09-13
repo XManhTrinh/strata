@@ -3,8 +3,7 @@
 import { motion } from "motion/react";
 import { CalendarView } from "@/features/calendar/CalendarView";
 import { Button } from "@vkieu/mui/buttons";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
+import { Icon, Card, CardContent, Typography } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCalendarEvents,
@@ -64,12 +63,12 @@ export default function CalendarPage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+            <Typography variant="title-large" className="mb-2">
               Unable to load calendar
-            </h2>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+            </Typography>
+            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
               {error?.message || "Failed to load calendar data. Please try again."}
-            </p>
+            </Typography>
             <Button variant="tonal" onClick={() => refetch()}>
               <Icon name="refresh" size={18} />
               Retry

@@ -2,19 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { PageBar } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { TextField } from "@vkieu/mui";
-import { Select } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
-import { Chip } from "@vkieu/mui";
-import { Divider } from "@vkieu/mui";
-import { List, ListItem } from "@vkieu/mui";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
+  PageBar, Icon, Card, CardContent, TextField, Select, Chip,
+  Divider, List, ListItem, Typography,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -143,8 +137,8 @@ export default function SettingsPage() {
       <div className="flex flex-col h-full">
         <PageBar>
           <div>
-            <h1 className="text-headline-small text-surface-foreground">Settings</h1>
-            <p className="text-body-medium text-surface-variant-foreground">Workspace configuration.</p>
+            <Typography variant="headline-small">Settings</Typography>
+            <Typography variant="body-medium" color="surface-variant-foreground">Workspace configuration.</Typography>
           </div>
         </PageBar>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
@@ -168,15 +162,15 @@ export default function SettingsPage() {
   if (isError) {
     return (
       <div className="flex flex-col h-full">
-        <PageBar><div><h1 className="text-headline-small text-surface-foreground">Settings</h1></div></PageBar>
+        <PageBar><div><Typography variant="headline-small">Settings</Typography></div></PageBar>
         <div className="flex-1 flex items-center justify-center">
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
               <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error-container mb-4">
                 <Icon name="error" size={28} className="text-on-error-container" />
               </div>
-              <p className="text-title-medium text-surface-foreground mb-1">Unable to load settings</p>
-              <p className="text-body-medium text-surface-variant-foreground">{error?.message || "Something went wrong."}</p>
+              <Typography variant="title-medium" className="mb-1">Unable to load settings</Typography>
+              <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Something went wrong."}</Typography>
             </CardContent>
           </Card>
         </div>
@@ -190,8 +184,8 @@ export default function SettingsPage() {
       {/* Header */}
       <PageBar className="justify-between shrink-0">
         <div>
-          <h1 className="text-headline-small text-surface-foreground">Settings</h1>
-          <p className="text-body-medium text-surface-variant-foreground">Workspace configuration and preferences.</p>
+          <Typography variant="headline-small">Settings</Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">Workspace configuration and preferences.</Typography>
         </div>
         {isDirty && (
           <div className="flex items-center gap-2">
@@ -213,8 +207,8 @@ export default function SettingsPage() {
                 <Icon name={stat.icon} size={20} className={stat.iconColor} />
               </div>
               <div className="min-w-0">
-                <p className="text-headline-small text-surface-foreground leading-tight">{statValues[i]}</p>
-                <p className="text-label-small text-surface-variant-foreground">{stat.label}</p>
+                <Typography variant="headline-small" className="leading-tight">{statValues[i]}</Typography>
+                <Typography variant="label-small" color="surface-variant-foreground">{stat.label}</Typography>
               </div>
             </CardContent>
           </Card>
@@ -256,8 +250,8 @@ export default function SettingsPage() {
           {activeSection === "general" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-title-large text-surface-foreground">General</h2>
-                <p className="text-body-medium text-surface-variant-foreground mt-1">Basic workspace information.</p>
+                <Typography variant="title-large">General</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Basic workspace information.</Typography>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -268,7 +262,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
                         <Icon name="edit" size={20} className="text-on-primary-container" />
                       </div>
-                      <p className="text-title-small text-surface-foreground">Company Profile</p>
+                      <Typography variant="title-small">Company Profile</Typography>
                     </div>
                     <TextField
                       variant="outlined"
@@ -295,7 +289,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
                         <Icon name="info" size={20} className="text-on-secondary-container" />
                       </div>
-                      <p className="text-title-small text-surface-foreground">Workspace Details</p>
+                      <Typography variant="title-small">Workspace Details</Typography>
                     </div>
                     <List className="py-0">
                       <ListItem
@@ -308,11 +302,11 @@ export default function SettingsPage() {
                         Identifier
                       </ListItem>
                       <Divider />
-                      <ListItem lines={1} supporting="When this workspace was created" trailing={<span className="text-body-small text-surface-foreground">{company ? fmtDate(company.createdAt) : "—"}</span>}>
+                      <ListItem lines={1} supporting="When this workspace was created" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.createdAt) : "—"}</Typography>}>
                         Created
                       </ListItem>
                       <Divider />
-                      <ListItem lines={1} supporting="Last settings update" trailing={<span className="text-body-small text-surface-foreground">{company ? fmtDate(company.updatedAt) : "—"}</span>}>
+                      <ListItem lines={1} supporting="Last settings update" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.updatedAt) : "—"}</Typography>}>
                         Updated
                       </ListItem>
                     </List>
@@ -326,8 +320,8 @@ export default function SettingsPage() {
           {activeSection === "financial" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-title-large text-surface-foreground">Financial Settings</h2>
-                <p className="text-body-medium text-surface-variant-foreground mt-1">Currency, fiscal year, and cost calculation parameters.</p>
+                <Typography variant="title-large">Financial Settings</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Currency, fiscal year, and cost calculation parameters.</Typography>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -337,7 +331,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
                         <Icon name="currency_exchange" size={20} className="text-on-tertiary-container" />
                       </div>
-                      <p className="text-title-small text-surface-foreground">Currency & Fiscal Year</p>
+                      <Typography variant="title-small">Currency & Fiscal Year</Typography>
                     </div>
                     <TextField
                       variant="outlined"
@@ -363,7 +357,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
                         <Icon name="schedule" size={20} className="text-on-primary-container" />
                       </div>
-                      <p className="text-title-small text-surface-foreground">Working Days</p>
+                      <Typography variant="title-small">Working Days</Typography>
                     </div>
                     <TextField
                       variant="outlined"
@@ -391,10 +385,10 @@ export default function SettingsPage() {
           {activeSection === "import" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-title-large text-surface-foreground">Data Import</h2>
-                <p className="text-body-medium text-surface-variant-foreground mt-1">
+                <Typography variant="title-large">Data Import</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
                   Import members, org structure, positions, and roles from a CSV file.
-                </p>
+                </Typography>
               </div>
 
               <Card variant="outlined">
@@ -404,13 +398,13 @@ export default function SettingsPage() {
                       <Icon name="upload_file" size={24} className="text-on-primary-container" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-title-small text-surface-foreground">CSV Import</p>
-                      <p className="text-body-medium text-surface-variant-foreground mt-1">
+                      <Typography variant="title-small">CSV Import</Typography>
+                      <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
                         Upload a CSV file to bulk-import members and automatically create your
                         org hierarchy (divisions, tribes, squads), positions, grades, and role
                         assignments. The import wizard will guide you through column mapping and
                         preview before committing.
-                      </p>
+                      </Typography>
                       <div className="flex flex-wrap gap-2 mt-3">
                         <Chip variant="filter" leadingIcon="group">Members</Chip>
                         <Chip variant="filter" leadingIcon="lan">Org Structure</Chip>
@@ -433,7 +427,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
                       <Icon name="lightbulb" size={20} className="text-on-tertiary-container" />
                     </div>
-                    <p className="text-title-small text-surface-foreground">Import Tips</p>
+                    <Typography variant="title-small">Import Tips</Typography>
                   </div>
                   <List className="py-0">
                     <ListItem
@@ -477,8 +471,8 @@ export default function SettingsPage() {
           {activeSection === "danger" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-title-large text-error">Danger Zone</h2>
-                <p className="text-body-medium text-surface-variant-foreground mt-1">Destructive actions that cannot be undone.</p>
+                <Typography variant="title-large" color="error">Danger Zone</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Destructive actions that cannot be undone.</Typography>
               </div>
 
               <Card variant="outlined">
@@ -550,9 +544,9 @@ export default function SettingsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-body-small text-surface-variant-foreground">
+            <Typography variant="body-small" color="surface-variant-foreground">
               Type <strong className="text-error">RESET</strong> to confirm:
-            </p>
+            </Typography>
             <TextField
               variant="outlined"
               value={resetConfirmText}

@@ -13,6 +13,7 @@ import {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  Typography,
 } from "@vkieu/mui";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnits } from "@/services";
@@ -200,13 +201,13 @@ export default function OrgChartPage() {
         {/* Status bar */}
         <div className="px-6 flex items-center gap-3 h-8 shrink-0">
           {!isAllView && (
-            <p className="text-xs text-on-surface-variant">
+            <Typography variant="body-small" color="surface-variant-foreground">
               Showing{" "}
-              <span className="font-medium text-on-surface">
+              <span className="font-medium text-surface-foreground">
                 {selectedMemberCount}
               </span>{" "}
               {selectedMemberCount === 1 ? "person" : "people"} in{" "}
-              <span className="font-medium text-on-surface">
+              <span className="font-medium text-surface-foreground">
                 {Array.from(selectedUnits).join(", ")}
               </span>{" "}
               —{" "}
@@ -217,14 +218,14 @@ export default function OrgChartPage() {
               >
                 clear
               </button>
-            </p>
+            </Typography>
           )}
           {search.trim() && (
-            <p className="text-xs text-on-surface-variant">
+            <Typography variant="body-small" color="surface-variant-foreground">
               {matchedIds.size === 0
                 ? "No matches"
                 : `${matchedIds.size} ${matchedIds.size === 1 ? "person" : "people"} highlighted`}
-            </p>
+            </Typography>
           )}
         </div>
 
@@ -236,9 +237,9 @@ export default function OrgChartPage() {
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-error text-sm bg-error-container border border-error rounded-lg px-4 py-3">
+              <Typography variant="body-medium" color="error" className="bg-error-container border border-error rounded-lg px-4 py-3">
                 {error}
-              </p>
+              </Typography>
             </div>
           ) : (
             <OrgFlow

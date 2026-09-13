@@ -6,10 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@vkieu/mui/buttons";
-import { TextField } from "@vkieu/mui";
-import { Divider } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
+import { TextField, Divider, Icon, Card, CardContent, Typography } from "@vkieu/mui";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -126,13 +123,13 @@ export default function RegisterPage() {
               <Icon name="mark_email_read" size={40} className="text-primary" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-[24px] font-normal leading-8 text-surface-foreground">
+              <Typography variant="headline-small">
                 Check your email
-              </h1>
-              <p className="text-[14px] leading-5 text-surface-variant-foreground max-w-xs">
+              </Typography>
+              <Typography variant="body-medium" color="surface-variant-foreground" className="max-w-xs">
                 We sent a confirmation link to <strong>{email}</strong>. Click the link to
                 activate your account.
-              </p>
+              </Typography>
             </div>
             <Link href="/login" className="text-[14px] font-medium text-primary hover:text-primary/80 transition-colors">
               Back to sign in
@@ -152,12 +149,12 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center space-y-1">
-            <h1 className="text-[24px] font-normal leading-8 text-surface-foreground">
+            <Typography variant="headline-small">
               Create your account
-            </h1>
-            <p className="text-[16px] leading-6 tracking-[0.5px] text-surface-variant-foreground">
+            </Typography>
+            <Typography variant="body-large" color="surface-variant-foreground">
               Get started with Strata for free
-            </p>
+            </Typography>
           </div>
 
           <div className="w-full space-y-5">
@@ -165,7 +162,7 @@ export default function RegisterPage() {
               {error && (
                 <div className="flex items-center gap-2 rounded-[12px] bg-error/10 px-4 py-3">
                   <Icon name="error" size={20} className="text-error shrink-0" />
-                  <p className="text-[14px] leading-5 text-error">{error}</p>
+                  <Typography variant="body-medium" color="error">{error}</Typography>
                 </div>
               )}
 
@@ -246,7 +243,7 @@ export default function RegisterPage() {
 
             <div className="relative flex items-center gap-4">
               <Divider className="flex-1" />
-              <span className="text-[12px] leading-4 tracking-[0.5px] text-surface-variant-foreground uppercase">Or continue with</span>
+              <Typography variant="label-small" as="span" color="surface-variant-foreground" className="uppercase">Or continue with</Typography>
               <Divider className="flex-1" />
             </div>
 
@@ -254,10 +251,10 @@ export default function RegisterPage() {
               Sign up with Google
             </Button>
 
-            <p className="text-center text-[14px] text-surface-variant-foreground">
+            <Typography variant="body-medium" color="surface-variant-foreground" className="text-center">
               Already have an account?{" "}
               <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">Sign in</Link>
-            </p>
+            </Typography>
           </div>
         </CardContent>
       </Card>

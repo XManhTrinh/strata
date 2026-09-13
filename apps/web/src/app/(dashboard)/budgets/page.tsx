@@ -2,10 +2,14 @@
 
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { PageBar } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
+import {
+  PageBar,
+  Icon,
+  Card,
+  CardContent,
+  Chip,
+  Typography,
+} from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -119,16 +123,16 @@ function StatCard({
         <div className={`flex items-center justify-center w-10 h-10 rounded-full ${color} mb-3`}>
           <Icon name={icon} size={24} className="text-on-primary-container" />
         </div>
-        <p className="text-[12px] leading-4 text-surface-variant-foreground uppercase tracking-wide">
+        <Typography variant="label-medium" color="surface-variant-foreground" className="uppercase tracking-wide">
           {label}
-        </p>
-        <p className="text-[28px] leading-9 font-normal text-surface-foreground mt-1">
+        </Typography>
+        <Typography variant="headline-medium" className="mt-1">
           {value}
-        </p>
+        </Typography>
         {sub && (
-          <p className="text-[12px] leading-4 text-surface-variant-foreground mt-1">
+          <Typography variant="body-small" color="surface-variant-foreground" className="mt-1">
             {sub}
-          </p>
+          </Typography>
         )}
       </CardContent>
     </Card>
@@ -175,12 +179,12 @@ export default function BudgetsPage() {
       <div className="space-y-6">
         <PageBar>
           <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
+            <Typography variant="headline-medium">
               Budget & Cost
-            </h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
+            </Typography>
+            <Typography variant="body-medium" color="surface-variant-foreground">
               Headcount costs across divisions and squads.
-            </p>
+            </Typography>
           </div>
         </PageBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -203,15 +207,17 @@ export default function BudgetsPage() {
       <div className="space-y-6">
         <PageBar>
           <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
+            <Typography variant="headline-medium">
               Budget & Cost
-            </h1>
+            </Typography>
           </div>
         </PageBar>
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
-            <p className="text-[14px] text-on-surface-variant">{error?.message || "Failed to load"}</p>
+            <Typography variant="body-medium" color="surface-variant-foreground">
+              {error?.message || "Failed to load"}
+            </Typography>
           </CardContent>
         </Card>
       </div>
@@ -229,12 +235,12 @@ export default function BudgetsPage() {
     >
       <PageBar>
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
+          <Typography variant="headline-medium">
             Budget & Cost
-          </h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
+          </Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">
             Headcount costs across divisions and squads · {fmtNum(members.length)} members
-          </p>
+          </Typography>
         </div>
       </PageBar>
 
@@ -273,9 +279,9 @@ export default function BudgetsPage() {
       {/* Division Cost Breakdown */}
       <Card variant="elevated">
         <CardContent className="p-5">
-          <h2 className="text-[16px] leading-6 font-medium text-surface-foreground mb-4">
+          <Typography variant="title-medium" className="mb-4">
             Cost by Division
-          </h2>
+          </Typography>
           <div className="space-y-3">
             {divisionStats.map((stat, idx) => {
               const pct = totalAnnualCost > 0 ? (stat.totalAnnualCost / totalAnnualCost) * 100 : 0;
@@ -285,14 +291,14 @@ export default function BudgetsPage() {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <div className={`w-3 h-3 rounded-full ${barColor}`} />
-                      <span className="text-[14px] font-medium text-surface-foreground">
+                      <Typography variant="body-medium" as="span">
                         {stat.name}
-                      </span>
+                      </Typography>
                       <Chip variant="filter">{stat.headcount} people</Chip>
                     </div>
-                    <span className="text-[14px] font-medium text-surface-foreground">
+                    <Typography variant="body-medium" as="span">
                       {fmtGBP(stat.totalAnnualCost)}
-                    </span>
+                    </Typography>
                   </div>
                   <div className="h-2 bg-surface-variant/30 rounded-full overflow-hidden">
                     <div
@@ -301,12 +307,12 @@ export default function BudgetsPage() {
                     />
                   </div>
                   <div className="flex justify-between mt-1">
-                    <span className="text-[11px] text-surface-variant-foreground">
+                    <Typography variant="label-small" color="surface-variant-foreground" as="span">
                       {stat.permCount} perm · {stat.subConCount} contractors
-                    </span>
-                    <span className="text-[11px] text-surface-variant-foreground">
+                    </Typography>
+                    <Typography variant="label-small" color="surface-variant-foreground" as="span">
                       Avg {fmtGBP(stat.avgCost)}/head
-                    </span>
+                    </Typography>
                   </div>
                 </div>
               );
@@ -319,9 +325,9 @@ export default function BudgetsPage() {
       <Card variant="elevated">
         <CardContent className="p-0">
           <div className="px-5 py-4 border-b border-outline-variant">
-            <h2 className="text-[16px] leading-6 font-medium text-surface-foreground">
+            <Typography variant="title-medium">
               Cost by Squad
-            </h2>
+            </Typography>
           </div>
           <div className="max-h-100 overflow-y-auto">
             <Table>

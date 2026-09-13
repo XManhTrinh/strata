@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Card, CardContent } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
+import { Card, CardContent, Icon, Typography } from "@vkieu/mui";
 
 export default function LandingPage() {
   return (
@@ -12,7 +11,7 @@ export default function LandingPage() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">S</span>
             </div>
-            <span className="text-lg font-bold text-surface-foreground">Strata</span>
+            <Typography variant="title-medium" as="span">Strata</Typography>
           </div>
           <nav className="flex items-center gap-3">
             <Link
@@ -35,14 +34,14 @@ export default function LandingPage() {
       <main>
         <section className="max-w-6xl mx-auto px-6 py-24 lg:py-32">
           <div className="max-w-3xl">
-            <h1 className="text-4xl lg:text-6xl font-bold text-surface-foreground tracking-tight">
+            <Typography variant="display-medium" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
               Enterprise Workforce Management,{" "}
               <span className="text-primary">Simplified</span>
-            </h1>
-            <p className="mt-6 text-lg lg:text-xl text-surface-variant-foreground leading-relaxed max-w-2xl">
+            </Typography>
+            <Typography variant="body-large" color="surface-variant-foreground" className="mt-6 text-lg lg:text-xl leading-relaxed max-w-2xl">
               Strata helps organizations manage their people, teams, capacity, and budgets
               in one unified platform. Built for enterprises with complex organizational structures.
-            </p>
+            </Typography>
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/register"
@@ -63,12 +62,12 @@ export default function LandingPage() {
         {/* Features */}
         <section id="features" className="border-t border-outline-variant bg-surface-container-low/50 py-24">
           <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-surface-foreground text-center">
+            <Typography variant="headline-large" className="text-center">
               Everything you need to manage your workforce
-            </h2>
-            <p className="mt-4 text-center text-surface-variant-foreground max-w-xl mx-auto">
+            </Typography>
+            <Typography variant="body-large" color="surface-variant-foreground" className="mt-4 text-center max-w-xl mx-auto">
               From org charts to capacity planning, Strata covers the full spectrum of workforce operations.
-            </p>
+            </Typography>
 
             <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature) => (
@@ -77,12 +76,12 @@ export default function LandingPage() {
                     <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
                       <Icon name={feature.icon} size={24} className="text-primary-container-foreground" />
                     </div>
-                    <h3 className="text-[16px] leading-6 font-medium text-surface-foreground">
+                    <Typography variant="title-medium">
                       {feature.title}
-                    </h3>
-                    <p className="mt-2 text-[14px] leading-5 text-surface-variant-foreground">
+                    </Typography>
+                    <Typography variant="body-medium" color="surface-variant-foreground" className="mt-2">
                       {feature.description}
-                    </p>
+                    </Typography>
                   </CardContent>
                 </Card>
               ))}
@@ -93,12 +92,12 @@ export default function LandingPage() {
         {/* CTA */}
         <section className="py-24">
           <div className="max-w-6xl mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold text-surface-foreground">
+            <Typography variant="headline-large" className="text-center">
               Ready to streamline your workforce management?
-            </h2>
-            <p className="mt-4 text-surface-variant-foreground max-w-lg mx-auto">
+            </Typography>
+            <Typography variant="body-large" color="surface-variant-foreground" className="mt-4 max-w-lg mx-auto">
               Join organizations that trust Strata to manage their teams, budgets, and organizational structures.
-            </p>
+            </Typography>
             <div className="mt-8">
               <Link
                 href="/register"
@@ -118,11 +117,11 @@ export default function LandingPage() {
             <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xs">S</span>
             </div>
-            <span className="text-sm font-medium text-surface-foreground">Strata</span>
+            <Typography variant="title-small" as="span">Strata</Typography>
           </div>
-          <p className="text-xs text-surface-variant-foreground">
+          <Typography variant="body-small" color="surface-variant-foreground">
             © {new Date().getFullYear()} Strata. Enterprise Workforce Management.
-          </p>
+          </Typography>
         </div>
       </footer>
     </div>

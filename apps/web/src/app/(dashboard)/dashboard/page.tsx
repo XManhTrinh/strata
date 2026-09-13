@@ -1,17 +1,22 @@
 "use client";
 
 import { motion } from "motion/react";
-import { PageBar } from "@vkieu/mui";
-import { usePeople } from "@/services";
-import { useLeaveRequests } from "@/services";
-import { useCalendarEvents } from "@/services";
+import {
+  PageBar,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Icon,
+  List,
+  ListItem,
+  Divider,
+  Chip,
+  Typography,
+} from "@vkieu/mui";
+import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
 import { Button } from "@vkieu/mui/buttons";
-import { Card, CardContent, CardHeader, CardTitle } from "@vkieu/mui";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@vkieu/mui";
-import { List, ListItem } from "@vkieu/mui";
-import { Divider } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -69,12 +74,12 @@ function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData
           <Icon name={icon} size={20} className={iconColor} />
         </div>
         <div>
-          <p className="text-[32px] leading-10 font-normal tracking-tight text-surface-foreground">
+          <Typography variant="headline-large">
             {value}
-          </p>
-          <p className="text-[14px] leading-5 font-normal text-surface-variant-foreground mt-1">
+          </Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
             {label}
-          </p>
+          </Typography>
         </div>
       </CardContent>
     </Card>
@@ -160,9 +165,9 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-6">
         <PageBar>
           <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
+            <Typography variant="headline-medium">
               Dashboard
-            </h1>
+            </Typography>
           </div>
         </PageBar>
         <Card variant="filled" className="max-w-lg mx-auto">
@@ -170,15 +175,15 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <p className="text-[16px] leading-6 font-medium text-surface-foreground mb-2">
+            <Typography variant="title-medium" className="mb-2">
               Something went wrong
-            </p>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+            </Typography>
+            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
               {employeesErr?.message ||
                 leaveErr?.message ||
                 eventsErr?.message ||
                 "Failed to load dashboard data. Please try again."}
-            </p>
+            </Typography>
             <Button
               variant="filled"
               onClick={() => {
@@ -210,12 +215,12 @@ export default function DashboardPage() {
       {/* ─── Page Header ─────────────────────────────────────────────────── */}
       <PageBar>
         <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
+          <Typography variant="headline-medium">
             Dashboard
-          </h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
+          </Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">
             Overview of your organization&apos;s key metrics
-          </p>
+          </Typography>
         </div>
       </PageBar>
 
@@ -259,12 +264,12 @@ export default function DashboardPage() {
                       className="text-surface-variant-foreground"
                     />
                   </div>
-                  <p className="text-[16px] leading-6 font-medium text-surface-foreground mb-1">
+                  <Typography variant="title-medium" className="mb-1">
                     All clear
-                  </p>
-                  <p className="text-[14px] leading-5 text-surface-variant-foreground">
+                  </Typography>
+                  <Typography variant="body-medium" color="surface-variant-foreground">
                     No upcoming events in the next 30 days
-                  </p>
+                  </Typography>
                 </div>
               ) : (
                 <List>

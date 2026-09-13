@@ -2,17 +2,24 @@
 
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { PageBar } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
+import {
+  PageBar,
+  Icon,
+  Card,
+  CardContent,
+  Chip,
+  Select,
+  TextField,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select } from "@vkieu/mui";
-import { TextField } from "@vkieu/mui";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
-} from "@vkieu/mui";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
@@ -106,9 +113,9 @@ function StatCard({ label, value, sub, icon, color }: {
         <div className={`flex items-center justify-center w-10 h-10 rounded-full ${color} mb-3`}>
           <Icon name={icon} size={24} className="text-on-primary-container" />
         </div>
-        <p className="text-[12px] leading-4 text-surface-variant-foreground uppercase tracking-wide">{label}</p>
-        <p className="text-[28px] leading-9 font-normal text-surface-foreground mt-1">{value}</p>
-        {sub && <p className="text-[12px] leading-4 text-surface-variant-foreground mt-1">{sub}</p>}
+        <Typography variant="body-small" color="surface-variant-foreground" className="uppercase tracking-wide">{label}</Typography>
+        <Typography variant="headline-medium" className="mt-1">{value}</Typography>
+        {sub && <Typography variant="body-small" color="surface-variant-foreground" className="mt-1">{sub}</Typography>}
       </CardContent>
     </Card>
   );
@@ -489,8 +496,8 @@ export default function CapacityPage() {
     return (
       <div className="space-y-6">
         <PageBar><div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">Team allocation and monthly phasing.</p>
+          <Typography variant="headline-medium">Capacity Planning</Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">Team allocation and monthly phasing.</Typography>
         </div></PageBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -506,11 +513,11 @@ export default function CapacityPage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageBar><div><h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1></div></PageBar>
+        <PageBar><div><Typography variant="headline-medium">Capacity Planning</Typography></div></PageBar>
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
-            <p className="text-[14px] text-on-surface-variant">{error?.message || "Failed to load"}</p>
+            <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Failed to load"}</Typography>
           </CardContent>
         </Card>
       </div>
@@ -522,10 +529,10 @@ export default function CapacityPage() {
       {/* Header */}
       <PageBar className="justify-between">
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Capacity Planning</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
+          <Typography variant="headline-medium">Capacity Planning</Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">
             FTE allocation {groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing
-          </p>
+          </Typography>
         </div>
         <div className="flex items-center gap-3">
           <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
@@ -597,14 +604,14 @@ export default function CapacityPage() {
         <button
           type="button"
           onClick={() => setActiveTab("phasing")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "phasing" ? "text-primary border-primary" : "text-on-surface-variant border-transparent hover:text-on-surface"}`}
+          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "phasing" ? "text-primary border-primary" : "text-surface-variant-foreground border-transparent hover:text-surface-foreground"}`}
         >
           FTE Phasing
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("rate-cards")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "rate-cards" ? "text-primary border-primary" : "text-on-surface-variant border-transparent hover:text-on-surface"}`}
+          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "rate-cards" ? "text-primary border-primary" : "text-surface-variant-foreground border-transparent hover:text-surface-foreground"}`}
         >
           Rate Cards ({rateCards.length})
         </button>
@@ -617,9 +624,9 @@ export default function CapacityPage() {
           {groupedData.length === 0 ? (
             <Card variant="elevated">
               <CardContent className="flex flex-col items-center py-16 text-center">
-                <Icon name="stacked_bar_chart" size={40} className="text-on-surface-variant/30 mb-4" />
-                <p className="text-base font-medium text-on-surface mb-1">No capacity data</p>
-                <p className="text-[14px] text-on-surface-variant">Import members to generate default allocations.</p>
+                <Icon name="stacked_bar_chart" size={40} className="text-surface-variant-foreground/30 mb-4" />
+                <Typography variant="title-medium" className="mb-1">No capacity data</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground">Import members to generate default allocations.</Typography>
               </CardContent>
             </Card>
           ) : (
@@ -641,10 +648,10 @@ export default function CapacityPage() {
                   <CardContent className="p-0">
                     <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
                       <div>
-                        <h3 className="text-base font-medium text-surface-foreground">{squad.orgUnitName}</h3>
-                        <p className="text-[12px] text-surface-variant-foreground">
+                        <Typography variant="title-medium">{squad.orgUnitName}</Typography>
+                        <Typography variant="body-small" color="surface-variant-foreground">
                           {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
-                        </p>
+                        </Typography>
                       </div>
                       <Chip variant="filter" selected>{fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE</Chip>
                     </div>
@@ -687,8 +694,8 @@ export default function CapacityPage() {
                                     }}
                                     className="cursor-context-menu"
                                   >
-                                    <p className="text-[13px] font-medium text-on-surface truncate max-w-45">{member.fullName}</p>
-                                    <p className="text-[11px] text-on-surface-variant">{member.position ?? ""}</p>
+                                    <p className="text-[13px] font-medium text-surface-foreground truncate max-w-45">{member.fullName}</p>
+                                    <p className="text-[11px] text-surface-variant-foreground">{member.position ?? ""}</p>
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-center">
@@ -696,7 +703,7 @@ export default function CapacityPage() {
                                     {member.employmentType === "Perm" ? "P" : "C"}
                                   </span>
                                 </TableCell>
-                                <TableCell className="text-center text-[12px] text-on-surface-variant">{member.grade ?? "—"}</TableCell>
+                                <TableCell className="text-center text-[12px] text-surface-variant-foreground">{member.grade ?? "—"}</TableCell>
                                 {PERIODS.map((pk) => (
                                   <TableCell key={pk} className="text-center p-1">
                                     {(() => {
@@ -759,11 +766,11 @@ export default function CapacityPage() {
 
                           {/* Squad cost totals */}
                           <TableRow className="bg-surface-container-low/30">
-                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/30 text-[12px] text-on-surface-variant">Monthly Cost</TableCell>
+                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/30 text-[12px] text-surface-variant-foreground">Monthly Cost</TableCell>
                             <TableCell />
                             <TableCell />
                             {PERIODS.map((pk) => (
-                              <TableCell key={pk} className="text-center text-[11px] text-on-surface-variant">{fmtGBP(squadCostTotals[pk])}</TableCell>
+                              <TableCell key={pk} className="text-center text-[11px] text-surface-variant-foreground">{fmtGBP(squadCostTotals[pk])}</TableCell>
                             ))}
                             <TableCell />
                           </TableRow>
@@ -801,12 +808,12 @@ export default function CapacityPage() {
                         ))}
                         <TableCell className="text-right">{fmtFTE(sumPeriods(totalFTE))}</TableCell>
                       </TableRow>
-                      <TableRow className="text-on-surface-variant">
+                      <TableRow className="text-surface-variant-foreground">
                         <TableCell>Cost</TableCell><TableCell /><TableCell />
                         {PERIODS.map((pk) => (
                           <TableCell key={pk} className="text-center text-[12px]">{fmtGBP(totalCost[pk])}</TableCell>
                         ))}
-                        <TableCell className="text-right font-semibold text-on-surface">{fmtGBP(annualCostTotal)}</TableCell>
+                        <TableCell className="text-right font-semibold text-surface-foreground">{fmtGBP(annualCostTotal)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -825,9 +832,9 @@ export default function CapacityPage() {
                 transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
                 className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-container border border-outline-variant rounded-full px-6 py-3 shadow-xl flex items-center gap-4"
               >
-                <p className="text-[13px] text-surface-variant-foreground">
-                  <span className="font-medium text-on-surface">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
-                </p>
+                <Typography variant="body-small" color="surface-variant-foreground">
+                  <span className="font-medium text-surface-foreground">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
+                </Typography>
                 <Button variant="text" onClick={handleDiscard} disabled={saveAllocationsMutation.isPending}>Discard</Button>
                 <Button onClick={handleSave} disabled={saveAllocationsMutation.isPending}>
                   <Icon name="save" size={18} />
@@ -843,10 +850,10 @@ export default function CapacityPage() {
           <CardContent className="p-0">
             <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
               <div>
-                <h3 className="text-base font-medium text-surface-foreground">Perm Rate Cards</h3>
-                <p className="text-[12px] text-surface-variant-foreground">
+                <Typography variant="title-medium">Perm Rate Cards</Typography>
+                <Typography variant="body-small" color="surface-variant-foreground">
                   Annual cost lookup by Division × Location × Grade. SubCon uses day rate × 228.
-                </p>
+                </Typography>
               </div>
               <Button onClick={() => setShowRateCardDialog(true)}>
                 <Icon name="add" size={18} />Add Rate Card
@@ -854,9 +861,9 @@ export default function CapacityPage() {
             </div>
             {rateCards.length === 0 ? (
               <div className="flex flex-col items-center py-16 text-center">
-                <Icon name="credit_card" size={40} className="text-on-surface-variant/30 mb-4" />
-                <p className="text-base font-medium text-on-surface mb-1">No rate cards</p>
-                <p className="text-[14px] text-on-surface-variant">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</p>
+                <Icon name="credit_card" size={40} className="text-surface-variant-foreground/30 mb-4" />
+                <Typography variant="title-medium" className="mb-1">No rate cards</Typography>
+                <Typography variant="body-medium" color="surface-variant-foreground">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</Typography>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -878,7 +885,7 @@ export default function CapacityPage() {
                         <TableCell>{rc.location}</TableCell>
                         <TableCell>{rc.grade}</TableCell>
                         <TableCell className="text-right font-medium">{fmtGBP(Number(rc.annualCost))}</TableCell>
-                        <TableCell className="text-right text-on-surface-variant">{fmtGBP(Math.round(Number(rc.annualCost) / 12))}</TableCell>
+                        <TableCell className="text-right text-surface-variant-foreground">{fmtGBP(Math.round(Number(rc.annualCost) / 12))}</TableCell>
                         <TableCell className="text-right">
                           <button
                             type="button"
@@ -886,7 +893,7 @@ export default function CapacityPage() {
                               onSuccess: () => toast.success("Rate card deleted"),
                               onError: (err) => toast.error(err.message || "Failed to delete"),
                             })}
-                            className="text-on-surface-variant hover:text-error transition-colors"
+                            className="text-surface-variant-foreground hover:text-error transition-colors"
                             aria-label="Delete"
                           >
                             <Icon name="delete" size={18} />
@@ -933,8 +940,8 @@ export default function CapacityPage() {
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <div className="px-3 py-2 border-b border-outline-variant">
-              <p className="text-[12px] font-medium text-surface-variant-foreground">Allocate to squad</p>
-              <p className="text-[13px] text-on-surface truncate">{contextMenu.fullName}</p>
+              <Typography variant="body-small" color="surface-variant-foreground" className="font-medium">Allocate to squad</Typography>
+              <Typography variant="body-small" className="truncate">{contextMenu.fullName}</Typography>
             </div>
             <div className="max-h-75 overflow-y-auto py-1">
               {(squads ?? [])
@@ -955,7 +962,7 @@ export default function CapacityPage() {
                 .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
                 .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
                 .length === 0 && (
-                <p className="px-3 py-2 text-[12px] text-on-surface-variant">Already in all squads</p>
+                <Typography variant="body-small" color="surface-variant-foreground" className="px-3 py-2">Already in all squads</Typography>
               )}
             </div>
           </div>

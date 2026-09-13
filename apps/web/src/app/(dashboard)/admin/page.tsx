@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { PageBar } from "@vkieu/mui";
-import { Card, CardContent } from "@vkieu/mui";
-import { List, ListItem } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
+import {
+  PageBar,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  Icon,
+  Typography,
+} from "@vkieu/mui";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -88,10 +93,10 @@ export default function SettingsPage() {
       {/* Header */}
       <PageBar>
         <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Settings</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
+          <Typography variant="headline-medium">Settings</Typography>
+          <Typography variant="body-medium" color="surface-variant-foreground">
             Platform configuration and preferences.
-          </p>
+          </Typography>
         </div>
       </PageBar>
 
