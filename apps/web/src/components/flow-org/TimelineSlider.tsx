@@ -13,7 +13,7 @@ export default function TimelineSlider({
 
   return (
     <div className="flex items-center gap-2">
-      <label htmlFor="timeline-date" className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+      <label htmlFor="timeline-date" className="text-xs text-on-surface-variant whitespace-nowrap">
         View as of:
       </label>
       <input
@@ -29,7 +29,7 @@ export default function TimelineSlider({
             onDateChange(val);
           }
         }}
-        className="text-xs border border-gray-200 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="text-xs border border-outline-variant rounded px-2 py-1 bg-surfacetext-on-surface focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
       {selectedDate && (
         <>

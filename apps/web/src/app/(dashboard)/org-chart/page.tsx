@@ -220,7 +220,7 @@ export default function OrgChartPage() {
             </p>
           )}
           {search.trim() && (
-            <p className="text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-on-surface-variant">
               {matchedIds.size === 0
                 ? "No matches"
                 : `${matchedIds.size} ${matchedIds.size === 1 ? "person" : "people"} highlighted`}
@@ -232,11 +232,11 @@ export default function OrgChartPage() {
         <main className="flex-1 min-h-0">
           {(peopleLoading || loading) ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+              <p className="text-error text-sm bg-error-container border border-error rounded-lg px-4 py-3">
                 {error}
               </p>
             </div>

@@ -19,7 +19,7 @@ import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 // ─── Feature icon & color mapping ─────────────────────────────────────────────
 
 const FEATURE_META: Record<string, { icon: string; color: string; bg: string }> = {
-  calendar:      { icon: "calendar_month",       color: "text-blue-600",    bg: "bg-blue-100 dark:bg-blue-900/30" },
+  calendar:      { icon: "calendar_month",       color: "text-primary",    bg: "bg-primary-container dark:bg-primary-container/30" },
   people:        { icon: "group",                color: "text-violet-600",  bg: "bg-violet-100 dark:bg-violet-900/30" },
   org_chart:     { icon: "lan",                  color: "text-lime-600",    bg: "bg-lime-100 dark:bg-lime-900/30" },
   budgeting:     { icon: "payments",             color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/30" },

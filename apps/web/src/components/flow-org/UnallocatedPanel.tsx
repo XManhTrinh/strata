@@ -64,16 +64,16 @@ export default function UnallocatedPanel({
       className={[
         "rounded-2xl border-2 border-dashed p-4 min-h-50 transition-all duration-150",
         isDropTarget
-          ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 scale-[1.02] shadow-md"
-          : "border-gray-200 dark:border-gray-700 bg-transparent",
+          ? "border-primary bg-primary-container dark:bg-primary-container/20 scale-[1.02] shadow-md"
+          : "border-outline-variant bg-transparent",
       ].join(" ")}
     >
-      <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+      <h3 className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
         {isDropTarget ? "✓ Drop to unallocate" : "Unallocated"}
       </h3>
 
       {persons.length === 0 ? (
-        <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-8">
+        <p className="text-on-surface-variant text-sm text-center py-8">
           No unallocated people. Drag nodes here to remove from tree.
         </p>
       ) : (
@@ -89,22 +89,22 @@ export default function UnallocatedPanel({
                   onDragStart(person, e);
                 }}
                 className={[
-                  "flex items-start justify-between gap-2 bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
+                  "flex items-start justify-between gap-2 bg-surfaceborder rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
                   "transition-all duration-150",
                   isMatched
                     ? "ring-2 ring-amber-400 border-amber-400 bg-amber-50 dark:bg-amber-900/30 shadow-md"
                     : dimmed
-                      ? "opacity-40 border-gray-200 dark:border-gray-700"
-                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
+                      ? "opacity-40 border-outline-variant"
+                      : "border-outline-variant hover:border-outline-variant dark:hover:border-outline",
                 ].join(" ")}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} avatarUrl={person.avatarUrl} />
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                    <p className="font-semibold text-on-surface text-sm">
                       {person.fullName}
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">
+                    <p className="text-on-surface-variant text-xs">
                       {person.title}
                     </p>
                     {person.squads.length > 0 && (
@@ -125,7 +125,7 @@ export default function UnallocatedPanel({
                   type="button"
                   onClick={() => onEdit(person)}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="shrink-0 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded"
+                  className="shrink-0 text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
                   aria-label={`Edit ${person.fullName}`}
                 >
                   <PencilIcon />

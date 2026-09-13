@@ -95,14 +95,14 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-scrim/50" onClick={handleClose} aria-hidden="true" />
       <div className="relative z-10 w-full max-w-md rounded-lg border border-outline-variant bg-surface-container-low p-6 shadow-xl">
         <h2 className="text-lg font-semibold text-on-surface">Create Event</h2>
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           {errors.length > 0 && (
-            <div className="rounded-md bg-red-50 p-3 dark:bg-red-900/20">
+            <div className="rounded-md bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
-                <p key={err} className="text-sm text-red-700 dark:text-red-300">{err}</p>
+                <p key={err} className="text-sm text-error">{err}</p>
               ))}
             </div>
           )}

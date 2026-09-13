@@ -290,7 +290,7 @@ export default function PositionsPage() {
                         <Icon
                           name={row.canHaveDirectReports ? "check_circle" : "remove_circle_outline"}
                           size={18}
-                          className={row.canHaveDirectReports ? "text-green-600 dark:text-green-400" : "text-surface-variant-foreground"}
+                          className={row.canHaveDirectReports ? "text-tertiary" : "text-surface-variant-foreground"}
                         />
                         <span className="text-[14px]">{row.canHaveDirectReports ? "Yes" : "No"}</span>
                       </span>

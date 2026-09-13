@@ -3,12 +3,12 @@
  * Maps event type names to Tailwind color classes.
  */
 export const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Leave: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-800 dark:text-green-300", border: "border-green-300 dark:border-green-700", dot: "bg-green-500" },
-  "Sick Leave": { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-800 dark:text-red-300", border: "border-red-300 dark:border-red-700", dot: "bg-red-500" },
+  Leave: { bg: "bg-tertiary-container dark:bg-tertiary-container/30", text: "text-tertiary", border: "border-green-300 dark:border-green-700", dot: "bg-tertiary" },
+  "Sick Leave": { bg: "bg-error-container dark:bg-error-container/30", text: "text-error", border: "border-error", dot: "bg-error" },
   Conference: { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-800 dark:text-purple-300", border: "border-purple-300 dark:border-purple-700", dot: "bg-purple-500" },
   Training: { bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-800 dark:text-amber-300", border: "border-amber-300 dark:border-amber-700", dot: "bg-amber-500" },
-  Meeting: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-800 dark:text-blue-300", border: "border-blue-300 dark:border-blue-700", dot: "bg-blue-500" },
-  "Out of Office": { bg: "bg-gray-100 dark:bg-gray-800/50", text: "text-gray-800 dark:text-gray-300", border: "border-gray-300 dark:border-gray-600", dot: "bg-gray-500" },
+  Meeting: { bg: "bg-primary-container dark:bg-primary-container/30", text: "text-primary", border: "border-primary", dot: "bg-primary" },
+  "Out of Office": { bg: "bg-surface-container-low dark:bg-surface-container/50", text: "text-on-surface", border: "border-outline-variant", dot: "bg-surface-container-highest" },
   "Work From Home": { bg: "bg-cyan-100 dark:bg-cyan-900/30", text: "text-cyan-800 dark:text-cyan-300", border: "border-cyan-300 dark:border-cyan-700", dot: "bg-cyan-500" },
 };
 
@@ -17,10 +17,10 @@ export const EVENT_TYPE_COLORS: Record<string, { bg: string; text: string; borde
  */
 export function getEventTypeColors(eventTypeName: string) {
   return EVENT_TYPE_COLORS[eventTypeName] ?? {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-800 dark:text-blue-300",
-    border: "border-blue-300 dark:border-blue-700",
-    dot: "bg-blue-500",
+    bg: "bg-primary-container dark:bg-primary-container/30",
+    text: "text-primary",
+    border: "border-primary",
+    dot: "bg-primary",
   };
 }
 

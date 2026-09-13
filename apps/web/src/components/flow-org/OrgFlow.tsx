@@ -239,15 +239,15 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
       }}
     >
       {isGroup ? (
-        <div className="bg-white dark:bg-gray-800 border-2 border-blue-400 rounded-2xl px-4 py-3 shadow-2xl opacity-90">
-          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+        <div className="bg-surfaceborder-2 border-primary rounded-2xl px-4 py-3 shadow-2xl opacity-90">
+          <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
             Direct reports · {info.groupPersons!.length}
           </p>
           <div className="flex -space-x-2 items-center">
             {info.groupPersons!.slice(0, 10).map((p) => (
               <div
                 key={p.id}
-                className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-2 ring-white dark:ring-gray-800 overflow-hidden"
+                className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-2 ring-white ring-outline overflow-hidden"
               >
                 {p.avatarUrl ? (
                   <img
@@ -261,14 +261,14 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
               </div>
             ))}
             {info.groupPersons!.length > 10 && (
-              <span className="ml-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+              <span className="ml-2 text-xs font-semibold text-on-surface-variant">
                 +{info.groupPersons!.length - 10}
               </span>
             )}
           </div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 border-2 border-blue-400 rounded-xl px-4 py-3 shadow-2xl opacity-90">
+        <div className="bg-surfaceborder-2 border-primary rounded-xl px-4 py-3 shadow-2xl opacity-90">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0 overflow-hidden">
               {info.person.avatarUrl ? (
@@ -282,10 +282,10 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+              <p className="font-semibold text-on-surface text-sm">
                 {info.person.fullName}
               </p>
-              <p className="text-gray-500 dark:text-gray-400 text-xs">
+              <p className="text-on-surface-variant text-xs">
                 {info.person.title}
               </p>
             </div>
@@ -833,7 +833,7 @@ function OrgFlowInner({
           minZoom={0.1}
           maxZoom={2}
           proOptions={{ hideAttribution: true }}
-          className="bg-gray-50 dark:bg-gray-900"
+          className="bg-surface-container-lowest dark:bg-surface-container"
           autoPanOnNodeDrag={autoPanEnabled}
           edgesFocusable={false}
           edgesReconnectable={false}
@@ -855,7 +855,7 @@ function OrgFlowInner({
 
       <div
         ref={unallocatedRef}
-        className="w-80 shrink-0 border-l border-gray-200 dark:border-gray-700 overflow-y-auto bg-gray-50/50 dark:bg-gray-800/50 p-4"
+        className="w-80 shrink-0 border-l border-outline-variant overflow-y-auto bg-surface-container-lowest/50 dark:bg-surface-container/50 p-4"
       >
         <UnallocatedPanel
           persons={unallocated}

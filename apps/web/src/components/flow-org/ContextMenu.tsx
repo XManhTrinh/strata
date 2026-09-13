@@ -62,11 +62,11 @@ export default function ContextMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed z-100 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1 min-w-45"
+      className="fixed z-100 bg-surfaceborder border-outline-variant rounded-lg shadow-xl py-1 min-w-45"
       style={{ left: x, top: y }}
     >
-      <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
-        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 truncate">
+      <div className="px-3 py-2 border-b border-outline-variant">
+        <p className="text-xs font-semibold text-on-surface-variant truncate">
           {title}
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function ContextMenu({
             onAction(action.id, targetId);
             onClose();
           }}
-          className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="w-full text-left px-3 py-2 text-sm text-on-surface hover:bg-surface-container-lowest dark:hover:bg-surface-container-high transition-colors"
         >
           {action.label}
         </button>

@@ -19,13 +19,13 @@ export interface PersonNodeData {
   canEdit?: boolean;
 }
 
-const HANDLE_CLASS = "!w-2 !h-2 !bg-gray-300 dark:!bg-gray-600 !border-none";
+const HANDLE_CLASS = "!w-2 !h-2 !bg-outline-variant dark:!bg-surface-container-high !border-none";
 
 function getCardStyle(matched: boolean, dimmed: boolean) {
   if (matched)
     return "ring-2 ring-amber-400 border-amber-400 bg-amber-50 dark:bg-amber-900/30 shadow-md";
-  if (dimmed) return "opacity-40 border-gray-200 dark:border-gray-700";
-  return "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600";
+  if (dimmed) return "opacity-40 border-outline-variant";
+  return "border-outline-variant hover:border-outline-variant dark:hover:border-outline";
 }
 
 function getInitials(name: string) {
@@ -39,15 +39,15 @@ function getInitials(name: string) {
 function getStatusColor(status: Person["status"]): string {
   switch (status) {
     case "ACTIVE":
-      return "bg-green-500";
+      return "bg-tertiary";
     case "ON_LEAVE":
       return "bg-yellow-400";
     case "SUSPENDED":
       return "bg-orange-500";
     case "TERMINATED":
-      return "bg-gray-400";
+      return "bg-surface-container-highest";
     default:
-      return "bg-green-500";
+      return "bg-tertiary";
   }
 }
 
@@ -88,7 +88,7 @@ function CapacityRing({ capacity }: { capacity: number }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-[8px] font-bold text-gray-600 dark:text-gray-300 z-10">
+      <span className="text-[8px] font-bold text-on-surface-variant z-10">
         {capacity}
       </span>
     </div>
@@ -107,7 +107,7 @@ function Avatar({ name, avatarUrl, status }: { name: string; avatarUrl?: string;
         )}
       </div>
       <span
-        className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-gray-800 ${getStatusColor(status)}`}
+        className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${getStatusColor(status)}`}
       />
     </div>
   );
@@ -133,7 +133,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
   return (
     <div
       className={[
-        "person-node-card relative bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 shadow-sm min-w-70 w-full transition-all duration-150",
+        "person-node-card relative bg-surfaceborder rounded-xl px-4 py-3 shadow-sm min-w-70 w-full transition-all duration-150",
         canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-default",
         inGroup ? "h-full" : "",
         isTerminated ? "opacity-50" : "",
@@ -148,10 +148,10 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
         <div className="flex items-center gap-2 min-w-0">
           <Avatar name={person.fullName} avatarUrl={person.avatarUrl} status={person.status} />
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+            <p className="font-semibold text-on-surface text-sm">
               {person.fullName}
             </p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs">
+            <p className="text-on-surface-variant text-xs">
               {person.title}
             </p>
           </div>
@@ -165,7 +165,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
                 e.stopPropagation();
                 onEdit(person);
               }}
-              className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded"
+              className="text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
               aria-label={`Edit ${person.fullName}`}
             >
               <svg
@@ -201,7 +201,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
       )}
 
       {(childCount > 0 || indirectCount > 0) && !inGroup && (
-        <div className="flex gap-3 mt-2 text-[10px] text-gray-400 dark:text-gray-500">
+        <div className="flex gap-3 mt-2 text-[10px] text-on-surface-variant">
           {childCount > 0 && <span>{childCount} direct</span>}
           {indirectCount > 0 && <span>{indirectCount} indirect</span>}
         </div>
@@ -223,7 +223,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
             onToggleCollapse(person.id);
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors text-xs font-bold z-10"
+          className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-high hover:text-on-surface dark:hover:text-outline-variant transition-colors text-xs font-bold z-10"
           aria-label={collapsed ? "Expand reports" : "Collapse reports"}
           title={
             collapsed

@@ -42,7 +42,7 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                     </span>
                   )}
                   {isDepleted && (
-                    <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    <span className="inline-flex items-center rounded-full bg-error-container px-1.5 py-0.5 text-[10px] font-medium text-error dark:bg-error-container/30">
                       Depleted
                     </span>
                   )}

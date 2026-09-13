@@ -64,13 +64,13 @@ export default function ReparentModal({
   if (showPicker) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="absolute inset-0 bg-inverse-surface/40" onClick={onCancel} />
+        <div className="relative bg-surfacerounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+          <h3 className="text-base font-semibold text-on-surface mb-2">
             Reassign {directReportCount}{" "}
             {directReportCount === 1 ? "report" : "reports"}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+          <p className="text-sm text-on-surface-variant mb-3">
             Choose who should manage {personName}&apos;s direct reports:
           </p>
 
@@ -80,12 +80,12 @@ export default function ReparentModal({
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or title..."
             autoFocus
-            className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            className="w-full border border-outline-variant rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface text-on-surface placeholder:text-on-surface-variant dark:placeholder:text-on-surface-variant"
           />
 
           <div className="max-h-52 overflow-y-auto space-y-1 mb-4">
             {filteredPersons.length === 0 ? (
-              <p className="text-gray-400 dark:text-gray-500 text-sm text-center py-4">
+              <p className="text-on-surface-variant text-sm text-center py-4">
                 No matches
               </p>
             ) : (
@@ -94,14 +94,14 @@ export default function ReparentModal({
                   key={p.id}
                   type="button"
                   onClick={() => onReassignReports(p.id)}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary-container dark:hover:bg-primary-container/30 transition-colors flex items-center gap-2"
                 >
                   <Avatar name={p.fullName} avatarUrl={p.avatarUrl} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-on-surface truncate">
                       {p.fullName}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-on-surface-variant truncate">
                       {p.title}
                     </p>
                   </div>
@@ -113,7 +113,7 @@ export default function ReparentModal({
           <button
             type="button"
             onClick={() => setShowPicker(false)}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-on-surface-variant hover:text-on-surface dark:hover:text-outline-variant transition-colors"
           >
             Back
           </button>
@@ -124,14 +124,14 @@ export default function ReparentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
-        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onCancel} />
+      <div className="relative bg-surfacerounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
+        <h3 className="text-base font-semibold text-on-surface mb-2">
           Move {personName}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        <p className="text-sm text-on-surface-variant mb-5">
           {personName} has{" "}
-          <span className="font-medium text-gray-700 dark:text-gray-200">
+          <span className="font-medium text-on-surface">
             {directReportCount}
           </span>{" "}
           direct {directReportCount === 1 ? "report" : "reports"}. What should
@@ -141,14 +141,14 @@ export default function ReparentModal({
           <button
             type="button"
             onClick={onMoveWithReports}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-on-primary transition-colors"
           >
             Move together with reports
           </button>
           <button
             type="button"
             onClick={onLeaveReports}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-surface-container-low hover:bg-surface-variant dark:hover:bg-surface-container-high text-on-surface transition-colors"
           >
             Leave reports under current parent
           </button>
@@ -156,7 +156,7 @@ export default function ReparentModal({
             <button
               type="button"
               onClick={() => setShowPicker(true)}
-              className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors"
+              className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-surface-container-low hover:bg-surface-variant dark:hover:bg-surface-container-high text-on-surface transition-colors"
             >
               Reassign reports to a specific person
             </button>
@@ -164,7 +164,7 @@ export default function ReparentModal({
           <button
             type="button"
             onClick={onCancel}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-on-surface-variant hover:text-on-surface dark:hover:text-outline-variant transition-colors"
           >
             Cancel
           </button>

@@ -691,7 +691,7 @@ export default function CapacityPage() {
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                  <span className={`text-[11px] font-medium ${member.employmentType === "Perm" ? "text-emerald-600" : "text-blue-600"}`}>
+                                  <span className={`text-[11px] font-medium ${member.employmentType === "Perm" ? "text-emerald-600" : "text-primary"}`}>
                                     {member.employmentType === "Perm" ? "P" : "C"}
                                   </span>
                                 </TableCell>
@@ -723,7 +723,7 @@ export default function CapacityPage() {
                                           }}
                                           className={`w-14 h-7 text-[12px] text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none bg-transparent border rounded focus:border-primary focus:outline-none ${
                                             isOver
-                                              ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold"
+                                              ? "border-error bg-error-container dark:bg-error-container/20 text-error font-semibold"
                                               : isUnder
                                               ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400"
                                               : "border-outline-variant/50"

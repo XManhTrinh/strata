@@ -15,7 +15,7 @@ export function ApprovalActions({ eventId, onApprove, onReject }: ApprovalAction
           e.stopPropagation();
           onApprove(eventId);
         }}
-        className="rounded px-2 py-1 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:text-green-300 dark:bg-green-900/30 dark:hover:bg-green-900/50 transition-colors"
+        className="rounded px-2 py-1 text-xs font-medium text-tertiary bg-tertiary-container hover:bg-tertiary-container dark:bg-tertiary-container/30 dark:hover:bg-tertiary-container/50 transition-colors"
         aria-label="Approve leave request"
       >
         Approve
@@ -26,7 +26,7 @@ export function ApprovalActions({ eventId, onApprove, onReject }: ApprovalAction
           e.stopPropagation();
           onReject(eventId);
         }}
-        className="rounded px-2 py-1 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:text-red-300 dark:bg-red-900/30 dark:hover:bg-red-900/50 transition-colors"
+        className="rounded px-2 py-1 text-xs font-medium text-error bg-error-container hover:bg-error-container dark:bg-error-container/30 dark:hover:bg-error-container/50 transition-colors"
         aria-label="Reject leave request"
       >
         Reject

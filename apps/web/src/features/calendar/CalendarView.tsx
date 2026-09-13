@@ -247,7 +247,7 @@ export function CalendarView() {
                         <button
                           type="button"
                           onClick={() => handleApprove(event.id)}
-                          className="text-[11px] font-medium text-green-600 dark:text-green-400 hover:underline"
+                          className="text-[11px] font-medium text-tertiary hover:underline"
                         >
                           Approve
                         </button>
@@ -256,7 +256,7 @@ export function CalendarView() {
                         <button
                           type="button"
                           onClick={() => handleReject(event.id)}
-                          className="text-[11px] font-medium text-red-600 dark:text-red-400 hover:underline"
+                          className="text-[11px] font-medium text-error hover:underline"
                         >
                           Reject
                         </button>
@@ -265,7 +265,7 @@ export function CalendarView() {
                         <button
                           type="button"
                           onClick={() => handleCancel(event.id)}
-                          className="text-[11px] font-medium text-red-600 dark:text-red-400 hover:underline"
+                          className="text-[11px] font-medium text-error hover:underline"
                         >
                           Cancel Request
                         </button>
@@ -282,7 +282,7 @@ export function CalendarView() {
       {/* Event Detail Popover */}
       {selectedEvent && (
         <div className="fixed inset-0 z-40 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/30" onClick={() => setSelectedEvent(null)} aria-hidden="true" />
+          <div className="fixed inset-0 bg-inverse-surface/30" onClick={() => setSelectedEvent(null)} aria-hidden="true" />
           <div className="relative z-10 w-full max-w-sm rounded-lg border border-outline-variant bg-surface-container-low p-5 shadow-xl">
             <div className="flex items-start justify-between">
               <div>
@@ -313,9 +313,9 @@ export function CalendarView() {
                   <p className="text-sm text-on-surface-variant">
                     <span className="font-medium text-on-surface">Status:</span>{" "}
                     <span className={
-                      selectedEvent.leaveRequest.status === "APPROVED" ? "text-green-600 dark:text-green-400" :
+                      selectedEvent.leaveRequest.status === "APPROVED" ? "text-tertiary" :
                       selectedEvent.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
-                      selectedEvent.leaveRequest.status === "REJECTED" ? "text-red-600 dark:text-red-400" :
+                      selectedEvent.leaveRequest.status === "REJECTED" ? "text-error" :
                       "text-on-surface-variant"
                     }>
                       {selectedEvent.leaveRequest.status}
@@ -338,7 +338,7 @@ export function CalendarView() {
                   <button
                     type="button"
                     onClick={() => handleApprove(selectedEvent.id)}
-                    className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                    className="rounded-md bg-tertiary px-3 py-1.5 text-sm font-medium text-on-primary hover:bg-tertiary transition-colors"
                   >
                     Approve
                   </button>
@@ -347,7 +347,7 @@ export function CalendarView() {
                   <button
                     type="button"
                     onClick={() => handleReject(selectedEvent.id)}
-                    className="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    className="rounded-md border border-error px-3 py-1.5 text-sm font-medium text-error hover:bg-error-container dark:hover:bg-error-container/20 transition-colors"
                   >
                     Reject
                   </button>
@@ -356,7 +356,7 @@ export function CalendarView() {
                   <button
                     type="button"
                     onClick={() => handleCancel(selectedEvent.id)}
-                    className="text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+                    className="text-sm font-medium text-error hover:underline"
                   >
                     Cancel
                   </button>

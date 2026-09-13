@@ -9,17 +9,17 @@ export function TeamAvailabilityBar({ available, total }: TeamAvailabilityBarPro
   const percentage = total > 0 ? (available / total) * 100 : 100;
   const colorClass =
     percentage > 75
-      ? "bg-green-500"
+      ? "bg-tertiary"
       : percentage >= 50
         ? "bg-yellow-500"
-        : "bg-red-500";
+        : "bg-error";
 
   const textColor =
     percentage > 75
-      ? "text-green-700 dark:text-green-300"
+      ? "text-tertiary"
       : percentage >= 50
         ? "text-yellow-700 dark:text-yellow-300"
-        : "text-red-700 dark:text-red-300";
+        : "text-error";
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2">

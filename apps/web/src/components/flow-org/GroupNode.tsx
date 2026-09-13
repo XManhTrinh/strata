@@ -68,13 +68,13 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
   const hasMatch = matchedIds.size > 0;
 
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/50 p-5 w-full text-left">
+    <div className="rounded-2xl border border-outline-variant bg-surface-container-lowest/80 dark:bg-surface-container/50 p-5 w-full text-left">
       <Handle
         type="target"
         position={Position.Top}
-        className="w-2! h-2! bg-gray-300! dark:bg-gray-600! border-none!"
+        className="w-2! h-2! bg-outline-variant!! border-none!"
       />
-      <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+      <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
         {label} · {persons.length}
       </span>
       <div className="grid grid-cols-2 gap-4 mt-4">
@@ -86,23 +86,23 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
               key={person.id}
               data-person-id={person.id}
               className={[
-                "bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
+                "bg-surfaceborder rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
                 "transition-all duration-150",
                 isMatched
                   ? "ring-2 ring-amber-400 border-amber-400 bg-amber-50 dark:bg-amber-900/30 shadow-md"
                   : dimmed
-                    ? "opacity-40 border-gray-200 dark:border-gray-700"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
+                    ? "opacity-40 border-outline-variant"
+                    : "border-outline-variant hover:border-outline-variant dark:hover:border-outline",
               ].join(" ")}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} avatarUrl={person.avatarUrl} />
                   <div className="min-w-0 text-left">
-                    <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                    <p className="font-semibold text-on-surface text-sm">
                       {person.fullName}
                     </p>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs">
+                    <p className="text-on-surface-variant text-xs">
                       {person.title}
                     </p>
                   </div>
@@ -114,7 +114,7 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
                     onEdit(person);
                   }}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="shrink-0 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded"
+                  className="shrink-0 text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors p-1 rounded"
                   aria-label={`Edit ${person.fullName}`}
                 >
                   <PencilIcon />
