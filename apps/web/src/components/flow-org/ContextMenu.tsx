@@ -62,7 +62,7 @@ export default function ContextMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed z-100 bg-surfaceborder border-outline-variant rounded-lg shadow-xl py-1 min-w-45"
+      className="fixed z-100 bg-surface border border-outline-variant rounded-lg shadow-xl py-1 min-w-45"
       style={{ left: x, top: y }}
     >
       <div className="px-3 py-2 border-b border-outline-variant">

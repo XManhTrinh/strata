@@ -29,7 +29,7 @@ export default function TimelineSlider({
             onDateChange(val);
           }
         }}
-        className="text-xs border border-outline-variant rounded px-2 py-1 bg-surfacetext-surface-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="text-xs border border-outline-variant rounded px-2 py-1 bg-surface text-surface-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
       {selectedDate && (
         <>

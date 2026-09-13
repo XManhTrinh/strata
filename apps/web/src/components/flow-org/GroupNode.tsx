@@ -86,7 +86,7 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
               key={person.id}
               data-person-id={person.id}
               className={[
-                "bg-surfaceborder rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
+                "bg-surface border rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
                 "transition-all duration-150",
                 isMatched
                   ? "ring-2 ring-amber-400 border-amber-400 bg-amber-50 dark:bg-amber-900/30 shadow-md"

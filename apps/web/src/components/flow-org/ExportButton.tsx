@@ -35,7 +35,7 @@ export default function ExportButton() {
     <button
       type="button"
       onClick={handleExport}
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-surface-variant-foreground bg-surfaceborder border-outline-variant rounded-lg hover:bg-surface-container-lowest dark:hover:bg-surface-container-high transition-colors"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-surface-variant-foreground bg-surface border border-outline-variant rounded-lg hover:bg-surface-container-lowest dark:hover:bg-surface-container-high transition-colors"
       title="Export org chart as PNG"
     >
       <svg

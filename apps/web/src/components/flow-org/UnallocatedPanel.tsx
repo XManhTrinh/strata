@@ -89,7 +89,7 @@ export default function UnallocatedPanel({
                   onDragStart(person, e);
                 }}
                 className={[
-                  "flex items-start justify-between gap-2 bg-surfaceborder rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
+                  "flex items-start justify-between gap-2 bg-surface border rounded-xl px-4 py-3 shadow-sm cursor-grab active:cursor-grabbing select-none",
                   "transition-all duration-150",
                   isMatched
                     ? "ring-2 ring-amber-400 border-amber-400 bg-amber-50 dark:bg-amber-900/30 shadow-md"

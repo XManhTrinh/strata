@@ -133,7 +133,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
   return (
     <div
       className={[
-        "person-node-card relative bg-surfaceborder rounded-xl px-4 py-3 shadow-sm min-w-70 w-full transition-all duration-150",
+        "person-node-card relative bg-surface border rounded-xl px-4 py-3 shadow-sm min-w-70 w-full transition-all duration-150",
         canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-default",
         inGroup ? "h-full" : "",
         isTerminated ? "opacity-50" : "",

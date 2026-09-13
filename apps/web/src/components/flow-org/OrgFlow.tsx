@@ -239,7 +239,7 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
       }}
     >
       {isGroup ? (
-        <div className="bg-surfaceborder-2 border-primary rounded-2xl px-4 py-3 shadow-2xl opacity-90">
+        <div className="bg-surface border-2 border-primary rounded-2xl px-4 py-3 shadow-2xl opacity-90">
           <p className="text-[10px] font-semibold text-surface-variant-foreground uppercase tracking-wider mb-3">
             Direct reports · {info.groupPersons!.length}
           </p>
@@ -268,7 +268,7 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
           </div>
         </div>
       ) : (
-        <div className="bg-surfaceborder-2 border-primary rounded-xl px-4 py-3 shadow-2xl opacity-90">
+        <div className="bg-surface border-2 border-primary rounded-xl px-4 py-3 shadow-2xl opacity-90">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0 overflow-hidden">
               {info.person.avatarUrl ? (
