@@ -141,7 +141,7 @@ export default function ReparentModal({
           <button
             type="button"
             onClick={onMoveWithReports}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-on-primary transition-colors"
+            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-primary-foreground transition-colors"
           >
             Move together with reports
           </button>

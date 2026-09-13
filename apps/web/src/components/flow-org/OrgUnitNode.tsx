@@ -48,26 +48,26 @@ function OrgUnitNodeComponent({ data }: NodeProps) {
         {/* Actions — top-right overlay, visible on hover */}
         <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(unit); }} className="flex items-center justify-center w-6 h-6 rounded-full bg-inverse-surface/20 hover:bg-inverse-surface/30 backdrop-blur-sm" title="Edit">
-            <Icon name="edit" size={13} className="text-on-primary" />
+            <Icon name="edit" size={13} className="text-primary-foreground" />
           </button>
           <button type="button" onClick={(e) => { e.stopPropagation(); onAddChild(unit.id); }} className="flex items-center justify-center w-6 h-6 rounded-full bg-inverse-surface/20 hover:bg-inverse-surface/30 backdrop-blur-sm" title="Add child">
-            <Icon name="add" size={13} className="text-on-primary" />
+            <Icon name="add" size={13} className="text-primary-foreground" />
           </button>
           <button type="button" onClick={(e) => { e.stopPropagation(); onArchive(unit.id); }} className="flex items-center justify-center w-6 h-6 rounded-full bg-inverse-surface/20 hover:bg-inverse-surface/30 backdrop-blur-sm" title="Archive">
-            <Icon name="archive" size={13} className="text-on-primary" />
+            <Icon name="archive" size={13} className="text-primary-foreground" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex items-center gap-3 px-3.5 py-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-surface/20 backdrop-blur-sm shrink-0">
-            <Icon name={typeIcon} size={20} className="text-on-primary" />
+            <Icon name={typeIcon} size={20} className="text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold leading-tight truncate text-on-primary">
+            <p className="text-[13px] font-semibold leading-tight truncate text-primary-foreground">
               {unit.name}
             </p>
-            <p className="text-[10px] leading-tight mt-0.5 text-on-primary/70">
+            <p className="text-[10px] leading-tight mt-0.5 text-primary-foreground/70">
               {typeName}
               {childCount > 0 && ` · ${childCount}`}
             </p>

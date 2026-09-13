@@ -111,7 +111,7 @@ function StatCard({ label, value, sub, icon, color }: {
     <Card variant="elevated">
       <CardContent className="p-5">
         <div className={`flex items-center justify-center w-10 h-10 rounded-full ${color} mb-3`}>
-          <Icon name={icon} size={24} className="text-on-primary-container" />
+          <Icon name={icon} size={24} className="text-primary-container-foreground" />
         </div>
         <Typography variant="body-small" color="surface-variant-foreground" className="uppercase tracking-wide">{label}</Typography>
         <Typography variant="headline-medium" className="mt-1">{value}</Typography>

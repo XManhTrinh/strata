@@ -540,15 +540,15 @@ function MappingStep({
           <div className="sticky -top-px z-10 bg-surface-container-high">
             <div className="py-2.5 bg-error-container flex items-start gap-3">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-error shrink-0">
-                <Icon name="error" size={18} className="text-on-error" />
+                <Icon name="error" size={18} className="text-error-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-on-error-container">
+                <p className="text-[13px] font-semibold text-error-container-foreground">
                   {mappingErrors.length} mapping issue{mappingErrors.length !== 1 ? "s" : ""} — fix before continuing
                 </p>
                 <div className="space-y-0.5 mt-1">
                   {mappingErrors.map((err, i) => (
-                    <p key={i} className="text-[12px] text-on-error-container/80">{err}</p>
+                    <p key={i} className="text-[12px] text-error-container-foreground/80">{err}</p>
                   ))}
                 </div>
               </div>
@@ -769,7 +769,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
           <Card key={stat.label} variant="elevated">
             <CardContent className="flex items-center gap-3 p-3">
               <div className={`flex items-center justify-center w-9 h-9 rounded-full ${stat.color} shrink-0`}>
-                <Icon name={stat.icon} size={18} className="text-on-primary-container" />
+                <Icon name={stat.icon} size={18} className="text-primary-container-foreground" />
               </div>
               <div>
                 <p className="text-title-large text-surface-foreground leading-tight">{stat.value}</p>
@@ -785,7 +785,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
         <Card variant="outlined" className="border-secondary/30">
           <CardContent className="flex items-start gap-3 p-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container shrink-0">
-              <Icon name="workspaces" size={16} className="text-on-secondary-container" />
+              <Icon name="workspaces" size={16} className="text-secondary-container-foreground" />
             </div>
             <div>
               <p className="text-label-medium text-surface-foreground">{duplicateRows} multi-squad allocation{duplicateRows !== 1 ? "s" : ""}</p>

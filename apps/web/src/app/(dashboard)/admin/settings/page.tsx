@@ -35,11 +35,11 @@ const NAV_ITEMS: { id: SettingsSection; label: string; icon: string }[] = [
 ];
 
 const STAT_CONFIG = [
-  { label: "Members", icon: "group", color: "bg-primary-container", iconColor: "text-on-primary-container" },
-  { label: "Roles", icon: "shield", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
-  { label: "Positions", icon: "work", color: "bg-tertiary-container", iconColor: "text-on-tertiary-container" },
-  { label: "Org Units", icon: "lan", color: "bg-primary-container", iconColor: "text-on-primary-container" },
-  { label: "Unit Types", icon: "label", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
+  { label: "Members", icon: "group", color: "bg-primary-container", iconColor: "text-primary-container-foreground" },
+  { label: "Roles", icon: "shield", color: "bg-secondary-container", iconColor: "text-secondary-container-foreground" },
+  { label: "Positions", icon: "work", color: "bg-tertiary-container", iconColor: "text-tertiary-container-foreground" },
+  { label: "Org Units", icon: "lan", color: "bg-primary-container", iconColor: "text-primary-container-foreground" },
+  { label: "Unit Types", icon: "label", color: "bg-secondary-container", iconColor: "text-secondary-container-foreground" },
 ];
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ export default function SettingsPage() {
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
               <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error-container mb-4">
-                <Icon name="error" size={28} className="text-on-error-container" />
+                <Icon name="error" size={28} className="text-error-container-foreground" />
               </div>
               <Typography variant="title-medium" className="mb-1">Unable to load settings</Typography>
               <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Something went wrong."}</Typography>
@@ -260,7 +260,7 @@ export default function SettingsPage() {
                   <CardContent className="p-6 space-y-5">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
-                        <Icon name="edit" size={20} className="text-on-primary-container" />
+                        <Icon name="edit" size={20} className="text-primary-container-foreground" />
                       </div>
                       <Typography variant="title-small">Company Profile</Typography>
                     </div>
@@ -287,7 +287,7 @@ export default function SettingsPage() {
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
-                        <Icon name="info" size={20} className="text-on-secondary-container" />
+                        <Icon name="info" size={20} className="text-secondary-container-foreground" />
                       </div>
                       <Typography variant="title-small">Workspace Details</Typography>
                     </div>
@@ -329,7 +329,7 @@ export default function SettingsPage() {
                   <CardContent className="p-6 space-y-5">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
-                        <Icon name="currency_exchange" size={20} className="text-on-tertiary-container" />
+                        <Icon name="currency_exchange" size={20} className="text-tertiary-container-foreground" />
                       </div>
                       <Typography variant="title-small">Currency & Fiscal Year</Typography>
                     </div>
@@ -355,7 +355,7 @@ export default function SettingsPage() {
                   <CardContent className="p-6 space-y-5">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
-                        <Icon name="schedule" size={20} className="text-on-primary-container" />
+                        <Icon name="schedule" size={20} className="text-primary-container-foreground" />
                       </div>
                       <Typography variant="title-small">Working Days</Typography>
                     </div>
@@ -395,7 +395,7 @@ export default function SettingsPage() {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-container shrink-0">
-                      <Icon name="upload_file" size={24} className="text-on-primary-container" />
+                      <Icon name="upload_file" size={24} className="text-primary-container-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <Typography variant="title-small">CSV Import</Typography>
@@ -425,7 +425,7 @@ export default function SettingsPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
-                      <Icon name="lightbulb" size={20} className="text-on-tertiary-container" />
+                      <Icon name="lightbulb" size={20} className="text-tertiary-container-foreground" />
                     </div>
                     <Typography variant="title-small">Import Tips</Typography>
                   </div>
@@ -498,7 +498,7 @@ export default function SettingsPage() {
                     lines={2}
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
-                        <Icon name="restart_alt" size={20} className="text-on-error-container" />
+                        <Icon name="restart_alt" size={20} className="text-error-container-foreground" />
                       </div>
                     }
                     supporting="Delete all members, org structure, roles, capacity data. Preserves super admin accounts."
@@ -518,7 +518,7 @@ export default function SettingsPage() {
                     lines={2}
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
-                        <Icon name="delete_forever" size={20} className="text-on-error-container" />
+                        <Icon name="delete_forever" size={20} className="text-error-container-foreground" />
                       </div>
                     }
                     supporting="Permanently delete this workspace and all its data."

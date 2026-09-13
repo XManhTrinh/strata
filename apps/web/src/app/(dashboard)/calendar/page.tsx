@@ -88,11 +88,7 @@ export default function CalendarPage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <Card variant="elevated" className="h-full overflow-hidden">
-        <CardContent className="p-0 h-full">
-          <CalendarView />
-        </CardContent>
-      </Card>
+      <CalendarView />
     </motion.div>
   );
 }

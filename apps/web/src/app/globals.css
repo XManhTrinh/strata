@@ -8,3 +8,12 @@ button,
 [role="button"] {
   cursor: pointer;
 }
+
+/* Fix native date/time picker icon color in dark mode */
+::-webkit-calendar-picker-indicator {
+  filter: var(--calendar-picker-filter, none);
+}
+
+.dark ::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
