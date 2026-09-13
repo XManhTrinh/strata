@@ -1,28 +1,24 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Search,
+  List,
+  ListItem,
+  Icon,
+  Typography,
+} from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import { Person } from "@/lib/org-tree/types";
+import { Avatar } from "@/components/ui/avatar";
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2);
-}
-
-function Avatar({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
-  const initials = getInitials(name);
-  return (
-    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0 overflow-hidden">
-      {avatarUrl ? (
-        <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-      ) : (
-        initials
-      )}
-    </div>
-  );
-}
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface ReparentModalProps {
   personName: string;
@@ -35,6 +31,8 @@ interface ReparentModalProps {
   onReassignReports: (newParentId: string) => void;
   onCancel: () => void;
 }
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ReparentModal({
   personName,
@@ -57,119 +55,104 @@ export default function ReparentModal({
         p.id !== draggedId &&
         (q === "" ||
           p.fullName.toLowerCase().includes(q) ||
-          p.title.toLowerCase().includes(q))
+          p.title.toLowerCase().includes(q)),
     );
   }, [persons, draggedId, search]);
 
+  // ── Person picker view ─────────────────────────────────────────────────
   if (showPicker) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-inverse-surface/40" onClick={onCancel} />
-        <div className="relative bg-surfacerounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
-          <h3 className="text-base font-semibold text-surface-foreground mb-2">
-            Reassign {directReportCount}{" "}
-            {directReportCount === 1 ? "report" : "reports"}
-          </h3>
-          <p className="text-sm text-surface-variant-foreground mb-3">
-            Choose who should manage {personName}&apos;s direct reports:
-          </p>
+      <Dialog open onOpenChange={(open) => !open && onCancel()}>
+        <DialogContent icon="swap_horiz">
+          <DialogHeader centered>
+            <DialogTitle>
+              Reassign {directReportCount} {directReportCount === 1 ? "report" : "reports"}
+            </DialogTitle>
+            <DialogDescription>
+              Choose who should manage {personName}&apos;s direct reports.
+            </DialogDescription>
+          </DialogHeader>
 
-          <input
-            type="text"
+          <Search
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onValueChange={setSearch}
             placeholder="Search by name or title..."
-            autoFocus
-            className="w-full border border-outline-variant rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface text-surface-foreground placeholder:text-surface-variant-foreground dark:placeholder:text-surface-variant-foreground"
+            className="w-full"
           />
 
-          <div className="max-h-52 overflow-y-auto space-y-1 mb-4">
+          <div className="max-h-64 overflow-y-auto -mx-6">
             {filteredPersons.length === 0 ? (
-              <p className="text-surface-variant-foreground text-sm text-center py-4">
-                No matches
-              </p>
+              <div className="flex flex-col items-center py-8 text-center">
+                <Icon name="search_off" size={24} className="text-surface-variant-foreground/40 mb-2" />
+                <Typography variant="body-medium" color="surface-variant-foreground">
+                  No matches
+                </Typography>
+              </div>
             ) : (
-              filteredPersons.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onReassignReports(p.id)}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-primary-container dark:hover:bg-primary-container/30 transition-colors flex items-center gap-2"
-                >
-                  <Avatar name={p.fullName} avatarUrl={p.avatarUrl} />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-surface-foreground truncate">
-                      {p.fullName}
-                    </p>
-                    <p className="text-xs text-surface-variant-foreground truncate">
-                      {p.title}
-                    </p>
-                  </div>
-                </button>
-              ))
+              <List className="py-0">
+                {filteredPersons.map((p) => (
+                  <ListItem
+                    key={p.id}
+                    interactive
+                    onClick={() => onReassignReports(p.id)}
+                    leading={<Avatar name={p.fullName} size="s" />}
+                    lines={2}
+                    supporting={p.title}
+                  >
+                    {p.fullName}
+                  </ListItem>
+                ))}
+              </List>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowPicker(false)}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-surface-variant-foreground hover:text-surface-foreground dark:hover:text-outline-variant transition-colors"
-          >
-            Back
-          </button>
-        </div>
-      </div>
+          <DialogFooter>
+            <Button variant="text" onClick={() => setShowPicker(false)}>
+              Back
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     );
   }
 
+  // ── Main choice view ───────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-inverse-surface/40" onClick={onCancel} />
-      <div className="relative bg-surfacerounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4">
-        <h3 className="text-base font-semibold text-surface-foreground mb-2">
-          Move {personName}
-        </h3>
-        <p className="text-sm text-surface-variant-foreground mb-5">
-          {personName} has{" "}
-          <span className="font-medium text-surface-foreground">
-            {directReportCount}
-          </span>{" "}
-          direct {directReportCount === 1 ? "report" : "reports"}. What should
-          happen to them?
-        </p>
+    <Dialog open onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent icon="drag_indicator">
+        <DialogHeader centered>
+          <DialogTitle>Move {personName}</DialogTitle>
+          <DialogDescription>
+            {personName} has{" "}
+            <strong>{directReportCount}</strong>{" "}
+            direct {directReportCount === 1 ? "report" : "reports"}.
+            What should happen to them?
+          </DialogDescription>
+        </DialogHeader>
+
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={onMoveWithReports}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-primary hover:bg-primary text-primary-foreground transition-colors"
-          >
+          <Button variant="filled" onClick={onMoveWithReports} className="w-full justify-start gap-3">
+            <Icon name="group" size={20} />
             Move together with reports
-          </button>
-          <button
-            type="button"
-            onClick={onLeaveReports}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-surface-container-low hover:bg-surface-variant dark:hover:bg-surface-container-high text-surface-foreground transition-colors"
-          >
+          </Button>
+          <Button variant="tonal" onClick={onLeaveReports} className="w-full justify-start gap-3">
+            <Icon name="person_remove" size={20} />
             Leave reports under current parent
-          </button>
+          </Button>
           {targetIsUnallocated && (
-            <button
-              type="button"
-              onClick={() => setShowPicker(true)}
-              className="w-full px-4 py-2.5 text-sm font-medium rounded-lg bg-surface-container-low hover:bg-surface-variant dark:hover:bg-surface-container-high text-surface-foreground transition-colors"
-            >
-              Reassign reports to a specific person
-            </button>
+            <Button variant="tonal" onClick={() => setShowPicker(true)} className="w-full justify-start gap-3">
+              <Icon name="swap_horiz" size={20} />
+              Reassign reports to someone else
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={onCancel}
-            className="w-full px-4 py-2.5 text-sm font-medium rounded-lg text-surface-variant-foreground hover:text-surface-foreground dark:hover:text-outline-variant transition-colors"
-          >
-            Cancel
-          </button>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button variant="text" onClick={onCancel}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

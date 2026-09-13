@@ -5,7 +5,6 @@ import { ApiPersonRepository } from "@/lib/org-tree/ApiPersonRepository";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
 import { buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
-import { Button } from "@vkieu/mui/buttons";
 import {
   Dialog,
   DialogContent,
@@ -14,14 +13,20 @@ import {
   DialogTitle,
   DialogDescription,
   Typography,
+  Icon,
+  Card,
+  CardContent,
 } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnits } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
+import { Skeleton } from "@/components/ui/skeleton";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";
-import ExportButton from "@/components/flow-org/ExportButton";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PendingDrop {
   draggedId: string;
@@ -36,6 +41,8 @@ interface PendingGroupMove {
   persons: Person[];
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function OrgChartPage() {
   const companyId = useCompanyId();
   const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople(companyId);
@@ -43,220 +50,204 @@ export default function OrgChartPage() {
 
   const repository = useMemo(
     () => new ApiPersonRepository(orgChartPeople ?? [], companyId),
-    [orgChartPeople, companyId]
+    [orgChartPeople, companyId],
   );
-  const { unallocated, persons, loading, error, reparent } =
-    useOrgTree(repository);
+  const { unallocated, persons, loading, error, reparent } = useOrgTree(repository);
 
+  // ── Local state ────────────────────────────────────────────────────────
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
-  const [pendingGroupMove, setPendingGroupMove] =
-    useState<PendingGroupMove | null>(null);
+  const [pendingGroupMove, setPendingGroupMove] = useState<PendingGroupMove | null>(null);
   const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<OrgChartViewMode>("reporting");
-  const [timelineDate] = useState<string | null>(null);
 
+  // ── Handlers ───────────────────────────────────────────────────────────
   const toggleUnit = useCallback((unitName: string) => {
     setSelectedUnits((prev) => {
       const next = new Set(prev);
-      if (next.has(unitName)) {
-        next.delete(unitName);
-      } else {
-        next.add(unitName);
-      }
+      if (next.has(unitName)) next.delete(unitName);
+      else next.add(unitName);
       return next;
     });
   }, []);
 
   const clearUnits = useCallback(() => setSelectedUnits(new Set()), []);
 
+  // ── Derived ────────────────────────────────────────────────────────────
   const isAllView = selectedUnits.size === 0;
 
-  // Filter persons by timeline date
-  const filteredPersons = useMemo(() => {
-    if (!timelineDate) return persons;
-    return persons.filter((p) => {
-      if (!p.startDate) return true;
-      return p.startDate <= timelineDate;
-    });
-  }, [persons, timelineDate]);
+  const filteredPersons = useMemo(() => persons, [persons]);
 
   const activeTree = useMemo(() => {
     if (viewMode === "department") {
       return buildDepartmentTree(filteredPersons.filter((p) => p.parentId !== null));
     }
-
     if (isAllView) {
       const roots = filteredPersons.filter((p) => p.parentId === null);
-      const trueRoot = roots.reduce(
-        (best: Person | null, p: Person) => {
-          if (!best) return p;
-          const bestCount = filteredPersons.filter((x) => x.parentId === best.id).length;
-          const pCount = filteredPersons.filter((x) => x.parentId === p.id).length;
-          return pCount > bestCount ? p : best;
-        },
-        null as Person | null
-      );
+      const trueRoot = roots.reduce<Person | null>((best, p) => {
+        if (!best) return p;
+        const bestCount = filteredPersons.filter((x) => x.parentId === best.id).length;
+        const pCount = filteredPersons.filter((x) => x.parentId === p.id).length;
+        return pCount > bestCount ? p : best;
+      }, null);
       if (!trueRoot) return [];
       const reachable = new Set<string>();
       const queue = [trueRoot.id];
       while (queue.length) {
         const cur = queue.shift()!;
         reachable.add(cur);
-        filteredPersons
-          .filter((p) => p.parentId === cur)
-          .forEach((p) => queue.push(p.id));
+        filteredPersons.filter((p) => p.parentId === cur).forEach((p) => queue.push(p.id));
       }
       return buildTree(filteredPersons.filter((p) => reachable.has(p.id)));
     }
-    // Filter by selected org units (match on departmentName)
-    const unitFilteredPersons = filteredPersons.filter(
-      (p) => p.departmentName && selectedUnits.has(p.departmentName)
-    );
-    return buildTree(unitFilteredPersons);
+    return buildTree(filteredPersons.filter((p) => p.departmentName && selectedUnits.has(p.departmentName)));
   }, [isAllView, selectedUnits, filteredPersons, viewMode]);
 
   const selectedMemberCount = useMemo(() => {
     if (isAllView) return filteredPersons.length;
-    return filteredPersons.filter(
-      (p) => p.departmentName && selectedUnits.has(p.departmentName)
-    ).length;
+    return filteredPersons.filter((p) => p.departmentName && selectedUnits.has(p.departmentName)).length;
   }, [isAllView, selectedUnits, filteredPersons]);
 
-  // Enhanced search
   const matchedIds = useMemo<Set<string>>(() => {
     const q = search.trim().toLowerCase();
     if (!q) return new Set();
     return new Set(
       filteredPersons
-        .filter((p) => {
-          if (p.fullName.toLowerCase().includes(q)) return true;
-          if (p.uin && p.uin.toLowerCase().includes(q)) return true;
-          if (p.title.toLowerCase().includes(q)) return true;
-          if (p.departmentName && p.departmentName.toLowerCase().includes(q)) return true;
-          if (p.status.toLowerCase().includes(q)) return true;
-          return false;
-        })
-        .map((p) => p.id)
+        .filter((p) =>
+          p.fullName.toLowerCase().includes(q) ||
+          (p.uin && p.uin.toLowerCase().includes(q)) ||
+          p.title.toLowerCase().includes(q) ||
+          (p.departmentName && p.departmentName.toLowerCase().includes(q)) ||
+          p.status.toLowerCase().includes(q),
+        )
+        .map((p) => p.id),
     );
   }, [filteredPersons, search]);
 
-  // Path to root for single search result
   const pathToRoot = useMemo(() => {
     if (matchedIds.size !== 1) return undefined;
-    const targetId = Array.from(matchedIds)[0];
-    return getPathToRoot(filteredPersons, targetId);
+    return getPathToRoot(filteredPersons, Array.from(matchedIds)[0]);
   }, [matchedIds, filteredPersons]);
 
-  // Count people per org unit name
   const unitCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const unit of orgUnits) {
-      counts[unit.name] = filteredPersons.filter((p) => p.departmentName === unit.name).length;
-    }
+    for (const unit of orgUnits) counts[unit.name] = filteredPersons.filter((p) => p.departmentName === unit.name).length;
     return counts;
   }, [filteredPersons, orgUnits]);
 
-  const onEdit = useCallback((person: Person) => {
-    console.log("Edit person:", person.fullName);
+  // ── Callbacks ──────────────────────────────────────────────────────────
+  const onEdit = useCallback((_person: Person) => {
+    // TODO: open person detail panel
   }, []);
 
   const wrappedReparent = useCallback(
     async (draggedId: string, newParentId: string | null, moveWithChildren?: boolean) => {
       await reparent(draggedId, newParentId, moveWithChildren);
     },
-    [reparent]
+    [reparent],
   );
 
-  const onPendingDrop = useCallback((info: PendingDrop) => {
-    setPendingDrop(info);
-  }, []);
+  const onPendingDrop = useCallback((info: PendingDrop) => setPendingDrop(info), []);
+  const onPendingGroupMove = useCallback((info: PendingGroupMove) => setPendingGroupMove(info), []);
 
-  const onPendingGroupMove = useCallback((info: PendingGroupMove) => {
-    setPendingGroupMove(info);
-  }, []);
+  // ── Status text for header ─────────────────────────────────────────────
+  const statusText = useMemo(() => {
+    const parts: React.ReactNode[] = [];
 
-  const onContextMenuAction = useCallback((action: string, targetId: string) => {
-    console.log("Context menu action:", action, "on", targetId);
-  }, []);
+    if (!isAllView) {
+      parts.push(
+        <Typography key="filter" variant="body-small" color="surface-variant-foreground" as="span">
+          Showing <strong className="text-surface-foreground">{selectedMemberCount}</strong>{" "}
+          {selectedMemberCount === 1 ? "person" : "people"}
+        </Typography>,
+      );
+    }
 
-  return (
-    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 64px - 12px - 24px)" }}>
-        <FlowOrgHeader
-          search={search}
-          onSearchChange={setSearch}
-          selectedSquads={selectedUnits}
-          onToggleSquad={toggleUnit}
-          onClearSquads={clearUnits}
-          squadCounts={unitCounts}
-          totalCount={filteredPersons.length}
-          orgUnits={orgUnits}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          searchResultCount={search.trim() ? matchedIds.size : undefined}
-          pathToRoot={pathToRoot}
-          exportButton={<ExportButton />}
-        />
+    if (search.trim() && matchedIds.size > 0) {
+      parts.push(
+        <Typography key="search" variant="body-small" color="surface-variant-foreground" as="span">
+          {matchedIds.size} {matchedIds.size === 1 ? "match" : "matches"} highlighted
+        </Typography>,
+      );
+    }
 
-        {/* Status bar */}
-        <div className="px-6 flex items-center gap-3 h-8 shrink-0">
-          {!isAllView && (
-            <Typography variant="body-small" color="surface-variant-foreground">
-              Showing{" "}
-              <span className="font-medium text-surface-foreground">
-                {selectedMemberCount}
-              </span>{" "}
-              {selectedMemberCount === 1 ? "person" : "people"} in{" "}
-              <span className="font-medium text-surface-foreground">
-                {Array.from(selectedUnits).join(", ")}
-              </span>{" "}
-              —{" "}
-              <button
-                type="button"
-                onClick={clearUnits}
-                className="text-primary hover:underline"
-              >
-                clear
-              </button>
-            </Typography>
-          )}
-          {search.trim() && (
-            <Typography variant="body-small" color="surface-variant-foreground">
-              {matchedIds.size === 0
-                ? "No matches"
-                : `${matchedIds.size} ${matchedIds.size === 1 ? "person" : "people"} highlighted`}
-            </Typography>
-          )}
+    if (parts.length === 0) return undefined;
+    return <div className="flex items-center gap-3">{parts}</div>;
+  }, [isAllView, selectedMemberCount, search, matchedIds]);
+
+  // ── Loading ────────────────────────────────────────────────────────────
+  if (peopleLoading || loading) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-100px)]">
+        <div className="flex items-center gap-4 px-6 h-16 border-b border-outline-variant">
+          <Skeleton className="h-6 w-24" />
+          <Skeleton className="h-8 w-48 rounded-full" />
+          <div className="flex-1" />
+          <Skeleton className="h-10 w-64 rounded-full" />
+          <Skeleton className="h-8 w-32 rounded-full" />
         </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
-        {/* Main content */}
-        <main className="flex-1 min-h-0">
-          {(peopleLoading || loading) ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+  // ── Error ──────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-100px)] items-center justify-center">
+        <Card variant="elevated" className="max-w-sm">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-error" />
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full">
-              <Typography variant="body-medium" color="error" className="bg-error-container border border-error rounded-lg px-4 py-3">
-                {error}
-              </Typography>
-            </div>
-          ) : (
-            <OrgFlow
-              tree={activeTree}
-              unallocated={unallocated}
-              persons={filteredPersons}
-              matchedIds={matchedIds}
-              onEdit={onEdit}
-              reparent={wrappedReparent}
-              onPendingDrop={onPendingDrop}
-              onPendingGroupMove={onPendingGroupMove}
-              vacancies={MOCK_VACANCIES}
-              onContextMenuAction={onContextMenuAction}
-            />
-          )}
-        </main>
+            <Typography variant="title-medium" className="mb-2">Unable to load org chart</Typography>
+            <Typography variant="body-medium" color="surface-variant-foreground">
+              {error}
+            </Typography>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
+  // ── Main ───────────────────────────────────────────────────────────────
+  return (
+    <div className="flex flex-col overflow-hidden h-[calc(100vh-100px)]">
+      <FlowOrgHeader
+        search={search}
+        onSearchChange={setSearch}
+        selectedSquads={selectedUnits}
+        onToggleSquad={toggleUnit}
+        onClearSquads={clearUnits}
+        squadCounts={unitCounts}
+        totalCount={filteredPersons.length}
+        orgUnits={orgUnits}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        searchResultCount={search.trim() ? matchedIds.size : undefined}
+        pathToRoot={pathToRoot}
+        statusText={statusText}
+      />
+
+      {/* Canvas */}
+      <main className="flex-1 min-h-0">
+        <OrgFlow
+          tree={activeTree}
+          unallocated={unallocated}
+          persons={filteredPersons}
+          matchedIds={matchedIds}
+          onEdit={onEdit}
+          reparent={wrappedReparent}
+          onPendingDrop={onPendingDrop}
+          onPendingGroupMove={onPendingGroupMove}
+          vacancies={MOCK_VACANCIES}
+          onContextMenuAction={() => {}}
+        />
+      </main>
+
+      {/* Reparent modal */}
       {pendingDrop && (
         <ReparentModal
           personName={pendingDrop.personName}
@@ -272,48 +263,35 @@ export default function OrgChartPage() {
             void wrappedReparent(pendingDrop.draggedId, pendingDrop.newParentId, false);
             setPendingDrop(null);
           }}
-          onReassignReports={(newParentId: string) => {
-            void wrappedReparent(
-              pendingDrop.draggedId,
-              pendingDrop.newParentId,
-              false
-            );
+          onReassignReports={(newParentId) => {
+            void wrappedReparent(pendingDrop.draggedId, pendingDrop.newParentId, false);
             setPendingDrop(null);
             filteredPersons
               .filter((p) => p.parentId === pendingDrop.draggedId)
-              .forEach((p) => {
-                void wrappedReparent(p.id, newParentId, true);
-              });
+              .forEach((p) => void wrappedReparent(p.id, newParentId, true));
           }}
           onCancel={() => setPendingDrop(null)}
         />
       )}
 
+      {/* Group move dialog */}
       {pendingGroupMove && (
-        <Dialog open={!!pendingGroupMove} onOpenChange={() => {}}>
-          <DialogContent alert>
-            <DialogHeader>
+        <Dialog open onOpenChange={() => setPendingGroupMove(null)}>
+          <DialogContent icon="group" alert>
+            <DialogHeader centered>
               <DialogTitle>Move {pendingGroupMove.persons.length} people</DialogTitle>
               <DialogDescription>
                 Move all {pendingGroupMove.persons.length} direct reports{" "}
                 {pendingGroupMove.targetId
                   ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
-                  : "to unallocated"}
-                ?
+                  : "to unallocated"}?
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
-                variant="text"
-                onClick={() => setPendingGroupMove(null)}
-              >
-                Cancel
-              </Button>
+              <Button variant="text" onClick={() => setPendingGroupMove(null)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  for (const p of pendingGroupMove.persons) {
-                    void wrappedReparent(p.id, pendingGroupMove.targetId, true);
-                  }
+                  for (const p of pendingGroupMove.persons) void wrappedReparent(p.id, pendingGroupMove.targetId, true);
                   setPendingGroupMove(null);
                 }}
               >

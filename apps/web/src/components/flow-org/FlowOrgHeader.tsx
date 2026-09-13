@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import { PageBar } from "@vkieu/mui";
-import { Icon } from "@vkieu/mui";
-import { Chip } from "@vkieu/mui";
-import { Search } from "@vkieu/mui";
+import {
+  PageBar,
+  Icon,
+  Chip,
+  Search,
+  Typography,
+  Checkbox,
+  Divider,
+} from "@vkieu/mui";
+import { Button, IconButton } from "@vkieu/mui/buttons";
 import type { OrganizationUnit } from "@/services";
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface FlowOrgHeaderProps {
   search: string;
@@ -16,14 +24,134 @@ interface FlowOrgHeaderProps {
   onClearSquads: () => void;
   squadCounts: Record<string, number>;
   totalCount: number;
-  /** Real org units from the API */
   orgUnits: OrganizationUnit[];
   viewMode: OrgChartViewMode;
   onViewModeChange: (mode: OrgChartViewMode) => void;
   searchResultCount?: number;
   pathToRoot?: string[];
-  exportButton?: React.ReactNode;
+  /** Status text for filter/search (rendered below the toolbar) */
+  statusText?: React.ReactNode;
 }
+
+// ─── Filter dropdown ──────────────────────────────────────────────────────────
+
+function TeamFilterDropdown({
+  orgUnits,
+  selectedSquads,
+  onToggleSquad,
+  onClearSquads,
+  squadCounts,
+  totalCount,
+}: {
+  orgUnits: OrganizationUnit[];
+  selectedSquads: Set<string>;
+  onToggleSquad: (squad: string) => void;
+  onClearSquads: () => void;
+  squadCounts: Record<string, number>;
+  totalCount: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [filterSearch, setFilterSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  const isAllView = selectedSquads.size === 0;
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const grouped = orgUnits.reduce<Record<string, OrganizationUnit[]>>((acc, u) => {
+    const type = u.type?.name ?? "Other";
+    (acc[type] ??= []).push(u);
+    return acc;
+  }, {});
+
+  const matchesFilter = (u: OrganizationUnit) => {
+    if (!filterSearch) return true;
+    const q = filterSearch.toLowerCase();
+    return u.name.toLowerCase().includes(q) || (u.type?.name ?? "").toLowerCase().includes(q);
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <Button
+        variant={isAllView ? "outlined" : "tonal"}
+        size="xs"
+        onClick={() => setOpen(!open)}
+      >
+        <Icon name="filter_list" size={18} />
+        {isAllView ? `All teams (${totalCount})` : `${selectedSquads.size} selected`}
+        <Icon name={open ? "expand_less" : "expand_more"} size={18} />
+      </Button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-surface shadow-xl border border-outline-variant/50 z-50 overflow-hidden">
+          {/* Search */}
+          <div className="p-3 border-b border-outline-variant/50">
+            <Search
+              value={filterSearch}
+              onValueChange={setFilterSearch}
+              placeholder="Search teams..."
+              className="w-full"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="px-3 py-2 flex items-center justify-between border-b border-outline-variant/50">
+            <Button variant="text" size="xs" onClick={onClearSquads}>
+              Clear all
+            </Button>
+            <Typography variant="label-small" color="surface-variant-foreground">
+              {selectedSquads.size} of {orgUnits.length}
+            </Typography>
+          </div>
+
+          {/* Grouped list */}
+          <div className="max-h-64 overflow-y-auto py-1">
+            {Object.entries(grouped).map(([typeName, units]) => {
+              const filtered = units.filter(matchesFilter);
+              if (filtered.length === 0) return null;
+              return (
+                <div key={typeName}>
+                  <Typography variant="label-small" color="surface-variant-foreground" className="px-4 pt-3 pb-1 uppercase tracking-wider">
+                    {typeName}
+                  </Typography>
+                  {filtered.map((unit) => {
+                    const isSelected = selectedSquads.has(unit.name);
+                    return (
+                      <button
+                        key={unit.id}
+                        type="button"
+                        onClick={() => onToggleSquad(unit.name)}
+                        className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                          isSelected
+                            ? "bg-primary/8 text-primary font-medium"
+                            : "text-surface-foreground hover:bg-surface-foreground/8"
+                        }`}
+                      >
+                        <Checkbox checked={isSelected} onCheckedChange={() => onToggleSquad(unit.name)} />
+                        <span className="flex-1 text-left">{unit.name}</span>
+                        <Typography variant="label-small" color="surface-variant-foreground" as="span">
+                          {squadCounts[unit.name] ?? 0}
+                        </Typography>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
 
 export default function FlowOrgHeader({
   search,
@@ -38,78 +166,40 @@ export default function FlowOrgHeader({
   onViewModeChange,
   searchResultCount,
   pathToRoot,
-  exportButton,
+  statusText,
 }: FlowOrgHeaderProps) {
   const isAllView = selectedSquads.size === 0;
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterSearch, setFilterSearch] = useState("");
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setFilterOpen(false);
-      }
-    }
-    if (filterOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [filterOpen]);
-
-  // Group org units by type name
-  const groupedUnits = orgUnits.reduce<Record<string, OrganizationUnit[]>>((acc, unit) => {
-    const typeName = unit.type?.name ?? "Other";
-    if (!acc[typeName]) acc[typeName] = [];
-    acc[typeName].push(unit);
-    return acc;
-  }, {});
-
-  // Filter by search
-  const matchesFilter = (unit: OrganizationUnit) => {
-    if (!filterSearch) return true;
-    const q = filterSearch.toLowerCase();
-    return (
-      unit.name.toLowerCase().includes(q) ||
-      (unit.type?.name ?? "").toLowerCase().includes(q)
-    );
-  };
 
   return (
     <div className="shrink-0 z-10">
+      {/* ── Main toolbar ───────────────────────────────────────────────── */}
       <PageBar className="justify-between gap-4">
-        <h1 className="text-[22px] leading-7 font-normal text-surface-foreground shrink-0">
-          Org Chart
-        </h1>
+        {/* Left: title + view toggle */}
+        <div className="flex items-center gap-4 shrink-0">
+          <Typography variant="title-large">Org Chart</Typography>
 
-        {/* View mode toggle */}
-        <div className="flex items-center bg-surface-variant rounded-full p-1 shrink-0">
-          <button
-            type="button"
-            onClick={() => onViewModeChange("reporting")}
-            className={`px-4 py-1.5 text-[13px] font-medium rounded-full transition-colors ${
-              viewMode === "reporting"
-                ? "bg-secondary-container text-secondary-container-foreground"
-                : "text-surface-variant-foreground hover:text-surface-foreground"
-            }`}
-          >
-            Reporting
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewModeChange("department")}
-            className={`px-4 py-1.5 text-[13px] font-medium rounded-full transition-colors ${
-              viewMode === "department"
-                ? "bg-secondary-container text-secondary-container-foreground"
-                : "text-surface-variant-foreground hover:text-surface-foreground"
-            }`}
-          >
-            Departments
-          </button>
+          {/* Segmented toggle */}
+          <div className="flex items-center bg-surface-container-highest/50 rounded-full p-1">
+            <Button
+              variant={viewMode === "reporting" ? "tonal" : "text"}
+              size="xs"
+              onClick={() => onViewModeChange("reporting")}
+              className="rounded-full"
+            >
+              Reporting
+            </Button>
+            <Button
+              variant={viewMode === "department" ? "tonal" : "text"}
+              size="xs"
+              onClick={() => onViewModeChange("department")}
+              className="rounded-full"
+            >
+              Departments
+            </Button>
+          </div>
         </div>
 
-        {/* Search */}
+        {/* Center: search */}
         <Search
           className="flex-1 max-w-xs"
           value={search}
@@ -117,146 +207,70 @@ export default function FlowOrgHeader({
           placeholder="Search name, title, dept..."
         />
 
-        {/* Search result count */}
-        {search.trim() && searchResultCount !== undefined && (
-          <span className="text-[12px] text-surface-variant-foreground shrink-0">
-            {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
-          </span>
-        )}
+        {/* Right: filter + count */}
+        <div className="flex items-center gap-3 shrink-0">
+          {search.trim() && searchResultCount !== undefined && (
+            <Chip variant="filter" selected>
+              {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
+            </Chip>
+          )}
 
-        {/* Export */}
-        {exportButton}
+          <TeamFilterDropdown
+            orgUnits={orgUnits}
+            selectedSquads={selectedSquads}
+            onToggleSquad={onToggleSquad}
+            onClearSquads={onClearSquads}
+            squadCounts={squadCounts}
+            totalCount={totalCount}
+          />
+        </div>
       </PageBar>
 
-      {/* Filter bar: squad selector + selected chips */}
-      <div className="flex items-center gap-3 px-6 py-2 border-b border-outline-variant min-h-12">
-        {/* Team filter dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            type="button"
-            onClick={() => setFilterOpen(!filterOpen)}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors border ${
-              isAllView
-                ? "border-outline-variant text-surface-foreground hover:bg-surface-foreground/8"
-                : "border-primary bg-primary/8 text-primary"
-            }`}
-          >
-            <Icon name="filter_list" size={18} />
-            {isAllView ? `All teams (${totalCount})` : `${selectedSquads.size} selected`}
-            <Icon name={filterOpen ? "expand_less" : "expand_more"} size={18} />
-          </button>
-
-          {filterOpen && (
-            <div className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-[hsl(var(--surface))] shadow-xl border border-outline-variant/50 z-50 overflow-hidden">
-              {/* Dropdown search */}
-              <div className="p-3 border-b border-outline-variant/50">
-                <input
-                  type="text"
-                  value={filterSearch}
-                  onChange={(e) => setFilterSearch(e.target.value)}
-                  placeholder="Search teams..."
-                  className="w-full h-9 px-3 rounded-lg border border-outline-variant bg-transparent text-[13px] text-surface-foreground placeholder:text-surface-variant-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  autoFocus
-                />
-              </div>
-
-              {/* Quick actions */}
-              <div className="px-3 py-2 flex items-center justify-between border-b border-outline-variant/50">
-                <button
-                  type="button"
-                  onClick={onClearSquads}
-                  className="text-[12px] text-primary font-medium hover:underline"
+      {/* ── Filter chips + status + path ───────────────────────────────── */}
+      {(!isAllView || statusText || (pathToRoot && pathToRoot.length > 0)) && (
+        <div className="flex items-center gap-3 px-6 py-2 border-b border-outline-variant flex-wrap min-h-10">
+          {/* Selected team chips */}
+          {!isAllView && (
+            <>
+              {Array.from(selectedSquads).map((squad) => (
+                <Chip
+                  key={squad}
+                  variant="filter"
+                  selected
+                  trailingIcon="close"
+                  onClick={() => onToggleSquad(squad)}
                 >
-                  Clear all
-                </button>
-                <span className="text-[11px] text-surface-variant-foreground">
-                  {selectedSquads.size} of {orgUnits.length} selected
+                  {squad}
+                </Chip>
+              ))}
+              <Button variant="text" size="xs" onClick={onClearSquads}>
+                Clear
+              </Button>
+            </>
+          )}
+
+          {/* Status text (filter count, search feedback) */}
+          {statusText}
+
+          {/* Path to root */}
+          {pathToRoot && pathToRoot.length > 0 && (
+            <div className="flex items-center gap-1 ml-auto">
+              <Icon name="route" size={16} className="text-primary" />
+              {pathToRoot.map((name, i) => (
+                <span key={i} className="flex items-center gap-1">
+                  {i > 0 && <Icon name="chevron_right" size={16} className="text-outline" />}
+                  <Typography
+                    variant="label-small"
+                    as="span"
+                    color={i === pathToRoot.length - 1 ? "primary" : "surface-variant-foreground"}
+                    className={i === pathToRoot.length - 1 ? "font-medium" : ""}
+                  >
+                    {name}
+                  </Typography>
                 </span>
-              </div>
-
-              {/* Org units list grouped by type */}
-              <div className="max-h-64 overflow-y-auto py-1">
-                {Object.entries(groupedUnits).map(([typeName, units]) => {
-                  const filtered = units.filter(matchesFilter);
-                  if (filtered.length === 0) return null;
-
-                  return (
-                    <div key={typeName}>
-                      <p className="px-4 pt-3 pb-1 text-[11px] font-medium text-surface-variant-foreground uppercase tracking-wider">
-                        {typeName}
-                      </p>
-                      {filtered.map((unit) => {
-                        const isSelected = selectedSquads.has(unit.name);
-                        return (
-                          <button
-                            key={unit.id}
-                            type="button"
-                            onClick={() => onToggleSquad(unit.name)}
-                            className={`w-full flex items-center gap-3 px-4 py-2 text-[13px] transition-colors ${
-                              isSelected
-                                ? "bg-primary/8 text-primary font-medium"
-                                : "text-surface-foreground hover:bg-surface-foreground/8"
-                            }`}
-                          >
-                            <Icon
-                              name={isSelected ? "check_box" : "check_box_outline_blank"}
-                              size={20}
-                              className={isSelected ? "text-primary" : "text-surface-variant-foreground"}
-                            />
-                            <span className="flex-1 text-left">{unit.name}</span>
-                            <span className="text-[11px] text-surface-variant-foreground">
-                              {squadCounts[unit.name] ?? 0}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
+              ))}
             </div>
           )}
-        </div>
-
-        {/* Selected squad chips */}
-        {!isAllView && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {Array.from(selectedSquads).map((squad) => (
-              <Chip
-                key={squad}
-                variant="filter"
-                selected
-                trailingIcon="close"
-                onClick={() => onToggleSquad(squad)}
-              >
-                {squad}
-              </Chip>
-            ))}
-            <button
-              type="button"
-              onClick={onClearSquads}
-              className="text-[12px] text-primary font-medium hover:underline ml-1"
-            >
-              Clear
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Path to root breadcrumb */}
-      {pathToRoot && pathToRoot.length > 0 && (
-        <div className="px-6 py-2 border-b border-outline-variant">
-          <div className="text-[12px] text-surface-variant-foreground flex items-center gap-1 flex-wrap">
-            <Icon name="route" size={18} className="text-primary mr-1" />
-            {pathToRoot.map((name, i) => (
-              <span key={i} className="flex items-center gap-1">
-                {i > 0 && <Icon name="chevron_right" size={18} className="text-surface-variant-foreground" />}
-                <span className={i === pathToRoot.length - 1 ? "font-medium text-primary" : ""}>
-                  {name}
-                </span>
-              </span>
-            ))}
-          </div>
         </div>
       )}
     </div>
