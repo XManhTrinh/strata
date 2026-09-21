@@ -236,7 +236,7 @@ export default function RegisterPage() {
                 aria-invalid={!!confirmError}
               />
 
-              <Button type="submit" variant="filled" disabled={isSubmitting} loading={isSubmitting} size="l" className="w-full">
+              <Button type="submit" variant="filled" disabled={isSubmitting} loading={isSubmitting} className="w-full">
                 {isSubmitting ? "Creating account..." : "Create account"}
               </Button>
             </form>
@@ -247,7 +247,7 @@ export default function RegisterPage() {
               <Divider className="flex-1" />
             </div>
 
-            <Button type="button" variant="tonal" size="l" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+            <Button type="button" variant="tonal" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
               Sign up with Google
             </Button>
 

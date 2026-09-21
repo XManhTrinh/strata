@@ -4,7 +4,13 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: true,
+  });
+
+  // Increase JSON body size limit for large CSV imports
+  app.use(require('express').json({ limit: '50mb' }));
+  app.use(require('express').urlencoded({ extended: true, limit: '50mb' }));
 
   app.enableCors({
     origin: (origin, callback) => {

@@ -22,7 +22,7 @@ export class LeaveTypeController {
   constructor(private readonly leaveService: LeaveService) {}
 
   @Get()
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getLeaveTypes(
     @Param('companyId') companyId: string,
     @Query('includeArchived') includeArchived?: string,
@@ -31,7 +31,7 @@ export class LeaveTypeController {
   }
 
   @Post()
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async createLeaveType(
     @Param('companyId') companyId: string,
     @Body() body: any,
@@ -44,7 +44,7 @@ export class LeaveTypeController {
   }
 
   @Patch(':id')
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async updateLeaveType(
     @Param('companyId') companyId: string,
     @Param('id') leaveTypeId: string,
@@ -58,7 +58,7 @@ export class LeaveTypeController {
   }
 
   @Delete(':id')
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async archiveLeaveType(
     @Param('companyId') companyId: string,
     @Param('id') leaveTypeId: string,

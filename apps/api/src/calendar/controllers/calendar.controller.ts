@@ -26,7 +26,7 @@ export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}
 
   @Get('events')
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getEvents(
     @Param('companyId') companyId: string,
     @Query() query: Record<string, any>,
@@ -55,7 +55,7 @@ export class CalendarController {
   }
 
   @Get('accessible-scope')
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getAccessibleScope(
     @Param('companyId') companyId: string,
     @Req() req: Request,
@@ -66,7 +66,7 @@ export class CalendarController {
   }
 
   @Post('events')
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'create')
   async createEvent(
     @Param('companyId') companyId: string,
     @Body() body: any,
@@ -83,7 +83,7 @@ export class CalendarController {
   }
 
   @Patch('events/:id')
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'create')
   async updateEvent(
     @Param('companyId') companyId: string,
     @Param('id') eventId: string,
@@ -101,7 +101,7 @@ export class CalendarController {
   }
 
   @Delete('events/:id')
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'cancel')
   async deleteEvent(
     @Param('companyId') companyId: string,
     @Param('id') eventId: string,
@@ -115,7 +115,7 @@ export class CalendarController {
   }
 
   @Get('availability')
-  @RequireFeaturePermission('calendar', 'view_team')
+  @RequireFeaturePermission('calendar', 'read')
   async getTeamAvailability(
     @Param('companyId') companyId: string,
     @Query('startDate') startDate: string,

@@ -182,7 +182,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
       next[index] = { ...next[index], target };
 
       // Revalidate duplicates live
-      const uniqueTargets: MappingTarget[] = ["fullName", "email", "position", "grade", "employmentType", "salary", "dayRate", "lineManager"];
+      const uniqueTargets: MappingTarget[] = ["fullName", "email", "position", "grade", "employmentType", "salary", "dayRate", "lineManager", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12"];
       const newErrors: string[] = [];
       const newBadIndices = new Set<number>();
       for (const t of uniqueTargets) {
@@ -223,7 +223,7 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
       .map((m, i) => (m.target === "extra" ? i : -1))
       .filter((i) => i >= 0);
 
-    if (nameIdx === -1 || emailIdx === -1) return null;
+    if (nameIdx === -1) return null;
 
     const rows: ImportMemberRow[] = [];
     const errors: { row: number; message: string }[] = [];
@@ -231,14 +231,10 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     for (let i = 0; i < csvRows.length; i++) {
       const fields = csvRows[i];
       const fullName = fields[nameIdx]?.trim() ?? "";
-      const email = fields[emailIdx]?.trim() ?? "";
+      const email = emailIdx >= 0 ? (fields[emailIdx]?.trim() ?? "") : "";
 
       if (!fullName) {
         errors.push({ row: i + 2, message: "Missing name" });
-        continue;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push({ row: i + 2, message: `Invalid email: "${email || ""}"` });
         continue;
       }
 
@@ -246,6 +242,16 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
       for (const idx of extraIdxs) {
         const val = fields[idx]?.trim();
         if (val) metadata[columnMappings[idx].csvHeader] = val;
+      }
+
+      // P1–P12 columns → metadata
+      for (const mapping of columnMappings) {
+        const m = mapping.target;
+        if (m.startsWith("p") && /^p([1-9]|1[0-2])$/.test(m)) {
+          const idx = columnMappings.indexOf(mapping);
+          const val = fields[idx]?.trim();
+          if (val) metadata[m.toUpperCase()] = val;
+        }
       }
 
       // Build org structure from multiple columns, skipping empty values
@@ -299,9 +305,8 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
   // ── Step navigation ─────────────────────────────────────────────────────
   const handleMappingNext = useCallback(() => {
     const hasName = columnMappings.some((m) => m.target === "fullName");
-    const hasEmail = columnMappings.some((m) => m.target === "email");
-    if (!hasName || !hasEmail) {
-      setMappingErrors(["You must map at least a Full Name and Email column"]);
+    if (!hasName) {
+      setMappingErrors(["You must map at least a Full Name column"]);
       // Scroll to top to show errors
       document.querySelector("[data-mapping-scroll]")?.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -587,6 +592,7 @@ function MappingStep({
                   value={mapping.target}
                   onValueChange={(val) => onMappingChange(idx, val as MappingTarget)}
                   options={MAPPING_OPTIONS}
+                  searchable
                   className="w-full text-[11px]"
                 />
               </div>
@@ -726,7 +732,7 @@ interface PreviewStepProps {
 
 function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }: PreviewStepProps) {
   const rows = importPreview.rows;
-  const uniqueEmails = new Set(rows.map((r) => r.email.toLowerCase()));
+  const uniqueEmails = new Set(rows.map((r) => (r.email ?? "").toLowerCase()).filter(Boolean));
   const duplicateRows = rows.length - uniqueEmails.size;
   const positions = new Set(rows.map((r) => r.position).filter(Boolean));
   const grades = new Set(rows.map((r) => r.grade).filter(Boolean));

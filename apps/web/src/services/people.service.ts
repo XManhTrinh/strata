@@ -62,7 +62,7 @@ export interface UpdatePersonRequest {
 
 export interface ImportMemberRow {
   fullName: string;
-  email: string;
+  email?: string;
   orgStructure?: string;
   orgLevelTypes?: string[]; // ["Division", "Tribe", "Squad"] — type name per level
   orgLevelIcons?: string[]; // ["domain", "hub", "lan"] — icon per level

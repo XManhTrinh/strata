@@ -26,7 +26,7 @@ export class LeaveController {
   ) {}
 
   @Get()
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getLeaveRequests(
     @Param('companyId') companyId: string,
     @Query() query: Record<string, any>,
@@ -51,7 +51,7 @@ export class LeaveController {
   }
 
   @Post()
-  @RequireFeaturePermission('calendar', 'submit_leave')
+  @RequireFeaturePermission('calendar', 'create')
   async submitRequest(
     @Param('companyId') companyId: string,
     @Body() body: any,
@@ -73,7 +73,7 @@ export class LeaveController {
   }
 
   @Post(':id/approve')
-  @RequireFeaturePermission('calendar', 'approve_leave')
+  @RequireFeaturePermission('calendar', 'approve')
   async approveRequest(
     @Param('companyId') companyId: string,
     @Param('id') requestId: string,
@@ -85,7 +85,7 @@ export class LeaveController {
   }
 
   @Post(':id/reject')
-  @RequireFeaturePermission('calendar', 'approve_leave')
+  @RequireFeaturePermission('calendar', 'reject')
   async rejectRequest(
     @Param('companyId') companyId: string,
     @Param('id') requestId: string,
@@ -97,7 +97,7 @@ export class LeaveController {
   }
 
   @Post(':id/cancel')
-  @RequireFeaturePermission('calendar', 'submit_leave')
+  @RequireFeaturePermission('calendar', 'cancel')
   async cancelRequest(
     @Param('companyId') companyId: string,
     @Param('id') requestId: string,

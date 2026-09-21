@@ -149,7 +149,7 @@ export default function LoginPage() {
                   aria-invalid={!!passwordError}
                 />
 
-                <Button type="submit" variant="filled" disabled={isLoading} loading={isLoading} size="l" className="w-full">
+                <Button type="submit" variant="filled" disabled={isLoading} loading={isLoading} className="w-full">
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
@@ -160,7 +160,7 @@ export default function LoginPage() {
                 <Divider className="flex-1" />
               </div>
 
-              <Button type="button" variant="tonal" size="l" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+              <Button type="button" variant="tonal" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
                 Sign in with Google
               </Button>
 

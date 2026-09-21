@@ -29,7 +29,7 @@ export interface UpdateMemberDto {
 
 export interface ImportMemberDto {
   fullName: string;
-  email: string;
+  email?: string;
   orgStructure?: string; // pipe-delimited: "Digital | Marketplace | PLP"
   orgLevelTypes?: string[]; // type name per level: ["Division", "Tribe", "Squad"]
   orgLevelIcons?: string[]; // icon per level: ["domain", "hub", "lan"]
@@ -311,8 +311,14 @@ export class CompanyPeopleService {
       positionId = await this.resolvePosition(companyId, dto.position, careerLevelId);
     }
 
-    // Check for existing user
-    const existingUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    // Check for existing user (only if email is a valid email address)
+    const isValidEmail = !!dto.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dto.email.trim());
+    const hasEmail = isValidEmail;
+    const effectiveEmail: string = hasEmail ? dto.email!.trim() : `import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@placeholder.local`;
+
+    const existingUser = hasEmail
+      ? await this.prisma.user.findUnique({ where: { email: dto.email } })
+      : null;
     if (existingUser) {
       const existing = await this.prisma.userCompanyMembership.findFirst({
         where: { userId: existingUser.id, companyId },
@@ -344,7 +350,7 @@ export class CompanyPeopleService {
             },
           });
 
-          return { status: 'updated', email: dto.email, note: `split ${splitFTE} FTE across ${existingAllocations + 1} squads` };
+          return { status: 'updated', email: dto.email ?? effectiveEmail, note: `split ${splitFTE} FTE across ${existingAllocations + 1} squads` };
         }
 
         // Update metadata for existing member (primary squad)
@@ -393,7 +399,7 @@ export class CompanyPeopleService {
           await this.capacityService.createDefaultAllocation(companyId, existing.id, effectiveOrgUnitId);
         }
 
-        return { status: 'updated', email: dto.email };
+        return { status: 'updated', email: dto.email ?? effectiveEmail };
       }
     }
 
@@ -401,7 +407,7 @@ export class CompanyPeopleService {
     const person = await this.prisma.person.create({
       data: {
         fullName: dto.fullName,
-        email: dto.email,
+        email: effectiveEmail,
         dateOfBirth: new Date('1970-01-01'),
       },
     });
@@ -409,7 +415,7 @@ export class CompanyPeopleService {
     let user = existingUser;
     if (!user) {
       user = await this.prisma.user.create({
-        data: { email: dto.email, personId: person.id },
+        data: { email: effectiveEmail, personId: person.id },
       });
     }
 
@@ -443,7 +449,7 @@ export class CompanyPeopleService {
       }
     }
 
-    return { status: 'created', email: dto.email };
+    return { status: 'created', email: effectiveEmail };
   }
 
   /**
@@ -456,11 +462,11 @@ export class CompanyPeopleService {
     for (const row of rows) {
       try {
         const result = await this.importMember(companyId, row);
-        results.push(result);
+        results.push({ ...result, email: result.email ?? '' });
       } catch (err: any) {
         results.push({
           status: 'error',
-          email: row.email,
+          email: row.email ?? '',
           error: err.message || 'Unknown error',
         });
       }
@@ -473,7 +479,7 @@ export class CompanyPeopleService {
       if (!identifier) continue;
       const matchField = row.lineManagerMatchField || 'email';
       try {
-        await this.resolveLineManager(companyId, row.email, identifier, matchField);
+        await this.resolveLineManager(companyId, row.email ?? '', identifier, matchField);
       } catch {
         // Silently skip — manager might not exist
       }

@@ -22,7 +22,7 @@ export class BalanceController {
   constructor(private readonly balanceService: BalanceService) {}
 
   @Get()
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getOwnBalances(
     @Param('companyId') companyId: string,
     @Query('year') year: string | undefined,
@@ -34,7 +34,7 @@ export class BalanceController {
   }
 
   @Get(':userId')
-  @RequireFeaturePermission('calendar', 'manage_balances')
+  @RequireFeaturePermission('calendar', 'read')
   async getUserBalances(
     @Param('companyId') companyId: string,
     @Param('userId') userId: string,
@@ -45,7 +45,7 @@ export class BalanceController {
   }
 
   @Post(':userId/adjust')
-  @RequireFeaturePermission('calendar', 'manage_balances')
+  @RequireFeaturePermission('calendar', 'approve')
   async adjustBalance(
     @Param('companyId') companyId: string,
     @Param('userId') targetUserId: string,

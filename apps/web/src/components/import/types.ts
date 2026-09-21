@@ -17,6 +17,7 @@ export type MappingTarget =
   | "employmentType"
   | "salary"
   | "dayRate"
+  | "p1" | "p2" | "p3" | "p4" | "p5" | "p6" | "p7" | "p8" | "p9" | "p10" | "p11" | "p12"
   | "extra"
   | "skip";
 
@@ -45,6 +46,18 @@ export const MAPPING_OPTIONS: { value: MappingTarget; label: string }[] = [
   { value: "employmentType", label: "Employment Type (Perm/SubCon)" },
   { value: "salary", label: "Annual Salary (Perm)" },
   { value: "dayRate", label: "Day Rate (SubCon)" },
+  { value: "p1", label: "P1" },
+  { value: "p2", label: "P2" },
+  { value: "p3", label: "P3" },
+  { value: "p4", label: "P4" },
+  { value: "p5", label: "P5" },
+  { value: "p6", label: "P6" },
+  { value: "p7", label: "P7" },
+  { value: "p8", label: "P8" },
+  { value: "p9", label: "P9" },
+  { value: "p10", label: "P10" },
+  { value: "p11", label: "P11" },
+  { value: "p12", label: "P12" },
   { value: "extra", label: "Extra Column" },
   { value: "skip", label: "Skip" },
 ];

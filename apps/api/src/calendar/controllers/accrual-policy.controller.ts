@@ -21,13 +21,13 @@ export class AccrualPolicyController {
   constructor(private readonly accrualService: AccrualService) {}
 
   @Get()
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async getAccrualPolicies(@Param('companyId') companyId: string) {
     return this.accrualService.getAccrualPolicies(companyId);
   }
 
   @Post()
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async createAccrualPolicy(
     @Param('companyId') companyId: string,
     @Body() body: any,
@@ -40,7 +40,7 @@ export class AccrualPolicyController {
   }
 
   @Patch(':id')
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async updateAccrualPolicy(
     @Param('companyId') companyId: string,
     @Param('id') policyId: string,
@@ -54,7 +54,7 @@ export class AccrualPolicyController {
   }
 
   @Delete(':id')
-  @RequireFeaturePermission('calendar', 'manage_policies')
+  @RequireFeaturePermission('calendar', 'approve')
   async deleteAccrualPolicy(
     @Param('companyId') companyId: string,
     @Param('id') policyId: string,

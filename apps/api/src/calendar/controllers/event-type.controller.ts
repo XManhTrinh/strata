@@ -22,7 +22,7 @@ export class EventTypeController {
   constructor(private readonly calendarService: CalendarService) {}
 
   @Get()
-  @RequireFeaturePermission('calendar', 'view_own')
+  @RequireFeaturePermission('calendar', 'read')
   async getEventTypes(
     @Param('companyId') companyId: string,
     @Query('includeArchived') includeArchived?: string,
@@ -31,7 +31,7 @@ export class EventTypeController {
   }
 
   @Post()
-  @RequireFeaturePermission('calendar', 'manage_event_types')
+  @RequireFeaturePermission('calendar', 'approve')
   async createEventType(
     @Param('companyId') companyId: string,
     @Body() body: any,
@@ -44,7 +44,7 @@ export class EventTypeController {
   }
 
   @Patch(':id')
-  @RequireFeaturePermission('calendar', 'manage_event_types')
+  @RequireFeaturePermission('calendar', 'approve')
   async updateEventType(
     @Param('companyId') companyId: string,
     @Param('id') eventTypeId: string,
@@ -58,7 +58,7 @@ export class EventTypeController {
   }
 
   @Delete(':id')
-  @RequireFeaturePermission('calendar', 'manage_event_types')
+  @RequireFeaturePermission('calendar', 'approve')
   async archiveEventType(
     @Param('companyId') companyId: string,
     @Param('id') eventTypeId: string,

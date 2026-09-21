@@ -41,7 +41,7 @@ const UpdateMemberSchema = z.object({
 
 const ImportMemberSchema = z.object({
   fullName: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().optional().default(""),
   orgStructure: z.string().optional(),
   orgLevelTypes: z.array(z.string()).optional(),
   orgLevelIcons: z.array(z.string()).optional(),
@@ -120,7 +120,12 @@ export class CompanyPeopleController {
   ) {
     const parsed = BulkImportSchema.safeParse(body);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.flatten().fieldErrors);
+      const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+      throw new BadRequestException({
+        error: 'Validation failed',
+        message: issues.join('; '),
+        details: parsed.error.flatten(),
+      });
     }
     const supabaseUserId = req?.user?.sub;
     return this.service.bulkImport(companyId, parsed.data.rows, supabaseUserId);

@@ -26,7 +26,7 @@
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.115.0",
     "@tanstack/react-query": "^5.64.0",
-    "@vkieu/mui": "github:XManhTrinh/mui#af9670e71f80e8398d4ae9fda35c88624949603c",
+    "@vkieu/mui": "github:XManhTrinh/mui",
     "@xyflow/react": "^12.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

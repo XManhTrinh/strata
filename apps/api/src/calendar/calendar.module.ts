@@ -21,14 +21,11 @@ import { NotificationWorker } from './workers/notification.worker';
   displayName: 'Calendar & Leave Management',
   description: 'Unified calendar, leave requests, balance tracking, and scheduling',
   permissions: [
-    { key: 'view_own', displayName: 'View Own Calendar', description: 'View own events and leave' },
-    { key: 'view_team', displayName: 'View Team Calendar', description: 'View team members events' },
-    { key: 'view_company', displayName: 'View Company Calendar', description: 'View all company events' },
-    { key: 'submit_leave', displayName: 'Submit Leave', description: 'Submit leave requests' },
-    { key: 'approve_leave', displayName: 'Approve Leave', description: 'Approve/reject leave requests' },
-    { key: 'manage_balances', displayName: 'Manage Balances', description: 'Adjust leave balances' },
-    { key: 'manage_policies', displayName: 'Manage Policies', description: 'Configure leave types and accrual' },
-    { key: 'manage_event_types', displayName: 'Manage Event Types', description: 'Configure event types' },
+    { key: 'read', displayName: 'View Calendar', description: 'View calendar events and leave requests' },
+    { key: 'create', displayName: 'Create Leave Requests', description: 'Submit new leave requests' },
+    { key: 'cancel', displayName: 'Cancel Leave Requests', description: 'Cancel own leave requests' },
+    { key: 'approve', displayName: 'Approve Leave Requests', description: 'Approve leave requests for direct reports' },
+    { key: 'reject', displayName: 'Reject Leave Requests', description: 'Reject leave requests for direct reports' },
   ],
 })
 @Module({

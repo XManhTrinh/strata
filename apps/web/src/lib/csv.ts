@@ -65,7 +65,7 @@ import type { MappingTarget } from "@/components/import/types";
 export function autoDetectMapping(header: string): MappingTarget {
   const h = header.toLowerCase();
 
-  if (h.includes("name") && !h.includes("unit") && !h.includes("vendor") && !h.includes("company") && !h.includes("type")) return "fullName";
+  if (h.includes("name") && !h.includes("unit") && !h.includes("vendor") && !h.includes("company") && !h.includes("type") && !h.includes("supervisor") && !h.includes("manager")) return "fullName";
 
   if (h.includes("email") || h.includes("e-mail")) {
     // "line manager email" should map to lineManager, not the member's email
@@ -79,12 +79,19 @@ export function autoDetectMapping(header: string): MappingTarget {
     return "orgLevel";
   }
 
-  if (h.includes("position") || h.includes("title") || h.includes("role")) return "position";
-  if (h.includes("grade") || h.includes("level") || h.includes("career")) return "grade";
+  if (h.includes("position") || h.includes("title") || h.includes("business title")) return "position";
+  if (h.includes("grade") || h.includes("level") || h.includes("career") || h.includes("band") || h.includes("sfia")) return "grade";
   if (h.includes("manager") || h.includes("reports to") || h.includes("supervisor")) return "lineManager";
-  if (h.includes("employment") || h === "type" || h === "emp type") return "employmentType";
+  if (h.includes("employment") || h === "type" || h === "emp type" || h.includes("regular") || h.includes("temporary")) return "employmentType";
   if (h.includes("salary") || h.includes("annual")) return "salary";
   if (h.includes("day rate") || h.includes("dayrate") || h.includes("daily rate")) return "dayRate";
+
+  // P1–P12 pay band / permission level columns
+  const pMatch = h.match(/^p(\d{1,2})$/) || h.match(/phasing\s+p(\d{1,2})$/);
+  if (pMatch) {
+    const num = parseInt(pMatch[1], 10);
+    if (num >= 1 && num <= 12) return `p${num}` as MappingTarget;
+  }
 
   return "extra";
 }
