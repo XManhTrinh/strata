@@ -190,7 +190,7 @@ export class CapacityService {
     fiscalYear: number,
     orgUnitId?: string,
   ): Promise<SquadCapacitySummary[]> {
-    // Fetch allocations with member + org unit data
+    // Fetch allocations with membership + position + careerLevel + org unit in one query.
     const allocations = await this.prisma.capacityAllocation.findMany({
       where: {
         companyId,
@@ -204,7 +204,7 @@ export class CapacityService {
             careerLevel: true,
           },
         },
-        orgUnit: { include: { parent: true, type: true } },
+        orgUnit: { include: { parent: true } },
       },
     });
 
@@ -218,26 +218,15 @@ export class CapacityService {
       rateCardMap.set(key, Number(rc.annualCost));
     }
 
-    // Fetch user data (name, email) for each membership
-    const membershipIds = [...new Set(allocations.map((a) => a.membershipId))];
-    const memberships = await this.prisma.userCompanyMembership.findMany({
-      where: { id: { in: membershipIds } },
-      include: {
-        position: true,
-        careerLevel: true,
-      },
-    });
-
-    // Get user info via userId
-    const userIds = memberships.map((m) => m.userId);
+    // Fetch user data (name, email) once for all memberships — batched, not N+1
+    const userIds = [...new Set(allocations.map((a) => a.membership.userId))];
     const users = await this.prisma.user.findMany({
       where: { id: { in: userIds } },
       include: { person: true },
     });
     const userMap = new Map(users.map((u) => [u.id, u]));
-    const membershipMap = new Map(memberships.map((m) => [m.id, m]));
 
-    // Fetch all org units for breadcrumb resolution
+    // Fetch org unit id→name map for breadcrumb resolution (lightweight — id + name only)
     const allOrgUnits = await this.prisma.organizationUnit.findMany({
       where: { companyId },
       select: { id: true, name: true },
@@ -264,7 +253,7 @@ export class CapacityService {
       const memberAllocations: MemberAllocation[] = [];
 
       for (const alloc of unitAllocations) {
-        const membership = membershipMap.get(alloc.membershipId);
+        const membership = alloc.membership;
         if (!membership) continue;
 
         const user = userMap.get(membership.userId);

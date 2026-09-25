@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   PageBar,
@@ -121,6 +121,96 @@ function StatCard({ label, value, sub, icon, color }: {
   );
 }
 
+// ─── Member Row (memoized) ──────────────────────────────────────────────────
+
+interface MemberRowProps {
+  member: MemberAllocation;
+  orgUnitId: string;
+  /** Current values from localDraft for this member+squad. */
+  alloc: PeriodValues;
+  /** This member's cross-squad total per period (for over/under-allocation). */
+  personTotalByPeriod: PeriodValues;
+  /** Monthly cost for this member (annualCost / 12). */
+  monthlyCost: number;
+  /** Precomputed annual cost from current allocations. */
+  memberAnnualCost: number;
+  onFTEChange: (membershipId: string, orgUnitId: string, period: PeriodKey, value: number) => void;
+  onContextMenu: (e: React.MouseEvent, member: MemberAllocation, orgUnitId: string) => void;
+}
+
+const MemberRow = React.memo(function MemberRow({
+  member,
+  orgUnitId,
+  alloc,
+  personTotalByPeriod,
+  monthlyCost: _monthlyCost,
+  memberAnnualCost,
+  onFTEChange,
+  onContextMenu,
+}: MemberRowProps) {
+  return (
+    <TableRow>
+      <TableCell className="sticky left-0 z-10 bg-surface">
+        <div
+          onContextMenu={(e) => onContextMenu(e, member, orgUnitId)}
+          className="cursor-context-menu"
+        >
+          <p className="text-[13px] font-medium text-surface-foreground truncate max-w-45">{member.fullName}</p>
+          <p className="text-[11px] text-surface-variant-foreground">{member.position ?? ""}</p>
+        </div>
+      </TableCell>
+      <TableCell className="text-center">
+        <span className={`text-[11px] font-medium ${member.employmentType === "Perm" ? "text-emerald-600" : "text-primary"}`}>
+          {member.employmentType === "Perm" ? "P" : "C"}
+        </span>
+      </TableCell>
+      <TableCell className="text-center text-[12px] text-surface-variant-foreground">{member.grade ?? "—"}</TableCell>
+      {PERIODS.map((pk) => {
+        const totalFte = personTotalByPeriod[pk];
+        const isOver = totalFte > 1;
+        const isUnder = totalFte > 0 && totalFte < 1;
+        return (
+          <TableCell key={pk} className="text-center p-1">
+            <input
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              value={alloc[pk]}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val >= 0 && val <= 1) {
+                  onFTEChange(member.membershipId, orgUnitId, pk, Math.round(val * 100) / 100);
+                }
+              }}
+              onBlur={(e) => {
+                const val = parseFloat(e.target.value);
+                if (isNaN(val) || val < 0) onFTEChange(member.membershipId, orgUnitId, pk, 0);
+                else if (val > 1) onFTEChange(member.membershipId, orgUnitId, pk, 1);
+              }}
+              className={`w-14 h-7 text-[12px] text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none bg-transparent border rounded focus:border-primary focus:outline-none ${
+                isOver
+                  ? "border-error bg-error-container dark:bg-error-container/20 text-error font-semibold"
+                  : isUnder
+                  ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400"
+                  : "border-outline-variant/50"
+              }`}
+              title={
+                isOver ? `Overallocated: ${totalFte.toFixed(2)} FTE total` :
+                isUnder ? `Underallocated: ${totalFte.toFixed(2)} FTE total (${((1 - totalFte) * 100).toFixed(0)}% unaccounted)` :
+                undefined
+              }
+            />
+          </TableCell>
+        );
+      })}
+      <TableCell className="text-right text-[12px] font-medium">
+        {member.annualCost ? fmtGBP(Math.round(memberAnnualCost)) : "—"}
+      </TableCell>
+    </TableRow>
+  );
+});
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CapacityPage() {
@@ -134,6 +224,12 @@ export default function CapacityPage() {
   const [activeTab, setActiveTab] = useState<"phasing" | "rate-cards">("phasing");
   const [showRateCardDialog, setShowRateCardDialog] = useState(false);
   const [rateCardForm, setRateCardForm] = useState({ division: "", location: "", grade: "", annualCost: "" });
+
+  // Collapsible squad tables — only expanded squads mount their table DOM
+  const [expandedSquads, setExpandedSquads] = useState<Set<string>>(new Set());
+  // Track the last data identity we computed an initial expand state for, so we
+  // only set the default expansion once per data load.
+  const initialExpandRef = useRef<SquadCapacitySummary[] | null>(null);
 
   // Context menu for allocating member to another squad
   const [contextMenu, setContextMenu] = useState<{
@@ -367,6 +463,42 @@ export default function CapacityPage() {
     })).sort((a, b) => a.orgUnitName.localeCompare(b.orgUnitName));
   }, [filteredSquads, groupBy]);
 
+  /** Stable expansion key for a rendered squad card. */
+  const squadExpandKey = useCallback(
+    (squad: SquadCapacitySummary) => `${groupBy}-${squad.orgUnitId}-${squad.orgUnitName}`,
+    [groupBy],
+  );
+
+  // Thresholds for deciding whether to default-expand or default-collapse.
+  const MANY_SQUADS = 3;
+  const MANY_MEMBERS = 200;
+
+  // Set the initial expanded set once per data load (per groupedData identity).
+  // With many squads or many total members, default everything collapsed so we
+  // don't mount tens of thousands of inputs at once.
+  useEffect(() => {
+    if (initialExpandRef.current === groupedData) return;
+    initialExpandRef.current = groupedData;
+
+    const totalMemberRows = groupedData.reduce((s, sq) => s + sq.members.length, 0);
+    const collapseByDefault = groupedData.length > MANY_SQUADS || totalMemberRows > MANY_MEMBERS;
+
+    if (collapseByDefault) {
+      setExpandedSquads(new Set());
+    } else {
+      setExpandedSquads(new Set(groupedData.map(squadExpandKey)));
+    }
+  }, [groupedData, squadExpandKey]);
+
+  const allExpanded = groupedData.length > 0 && groupedData.every((sq) => expandedSquads.has(squadExpandKey(sq)));
+
+  const handleToggleAll = useCallback(() => {
+    setExpandedSquads((prev) => {
+      const everyExpanded = groupedData.length > 0 && groupedData.every((sq) => prev.has(squadExpandKey(sq)));
+      return everyExpanded ? new Set() : new Set(groupedData.map(squadExpandKey));
+    });
+  }, [groupedData, squadExpandKey]);
+
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
   const handleFTEChange = useCallback((membershipId: string, orgUnitId: string, period: PeriodKey, value: number) => {
@@ -378,6 +510,28 @@ export default function CapacityPage() {
       return next;
     });
   }, []);
+
+  const toggleSquad = useCallback((orgUnitKey: string) => {
+    setExpandedSquads((prev) => {
+      const next = new Set(prev);
+      if (next.has(orgUnitKey)) next.delete(orgUnitKey);
+      else next.add(orgUnitKey);
+      return next;
+    });
+  }, []);
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent, member: MemberAllocation, orgUnitId: string) => {
+      e.preventDefault();
+      setContextMenu({
+        x: e.clientX, y: e.clientY,
+        membershipId: member.membershipId,
+        fullName: member.fullName,
+        currentSquadId: orgUnitId,
+      });
+    },
+    [],
+  );
 
   const handleDiscard = () => {
     setLocalDraft(new Map(serverDraft.entries()));
@@ -620,6 +774,16 @@ export default function CapacityPage() {
       {/* Tab Content */}
       {activeTab === "phasing" ? (
         <>
+          {/* Bulk expand / collapse */}
+          {groupedData.length > 0 && (
+            <div className="flex justify-end">
+              <Button variant="text" onClick={handleToggleAll}>
+                <Icon name={allExpanded ? "unfold_less" : "unfold_more"} size={18} />
+                {allExpanded ? "Collapse all" : "Expand all"}
+              </Button>
+            </div>
+          )}
+
           {/* FTE Phasing Table per Squad */}
           {groupedData.length === 0 ? (
             <Card variant="elevated">
@@ -643,18 +807,34 @@ export default function CapacityPage() {
                 }
               }
 
+              const expandKey = squadExpandKey(squad);
+              const isExpanded = expandedSquads.has(expandKey);
+
               return (
-                <Card key={`${groupBy}-${squad.orgUnitId}-${squad.orgUnitName}`} variant="elevated">
+                <Card key={expandKey} variant="elevated">
                   <CardContent className="p-0">
-                    <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
-                      <div>
-                        <Typography variant="title-medium">{squad.orgUnitName}</Typography>
-                        <Typography variant="body-small" color="surface-variant-foreground">
-                          {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
-                        </Typography>
+                    <button
+                      type="button"
+                      onClick={() => toggleSquad(expandKey)}
+                      aria-expanded={isExpanded}
+                      className="w-full px-5 py-4 border-b border-outline-variant flex items-center justify-between gap-3 text-left hover:bg-surface-foreground/4 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Icon
+                          name={isExpanded ? "expand_less" : "expand_more"}
+                          size={22}
+                          className="text-surface-variant-foreground shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <Typography variant="title-medium">{squad.orgUnitName}</Typography>
+                          <Typography variant="body-small" color="surface-variant-foreground">
+                            {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
+                          </Typography>
+                        </div>
                       </div>
                       <Chip variant="filter" selected>{fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE</Chip>
-                    </div>
+                    </button>
+                    {isExpanded && (
                     <div className="overflow-x-auto">
                       <Table className="table-fixed">
                         <TableHeader className="sticky top-0 z-10 bg-surface">
@@ -680,76 +860,17 @@ export default function CapacityPage() {
                             const memberAnnualCost = PERIODS.reduce((s, pk) => s + alloc[pk] * monthlyCost, 0);
 
                             return (
-                              <TableRow key={member.membershipId}>
-                                <TableCell className="sticky left-0 z-10 bg-surface">
-                                  <div
-                                    onContextMenu={(e) => {
-                                      e.preventDefault();
-                                      setContextMenu({
-                                        x: e.clientX, y: e.clientY,
-                                        membershipId: member.membershipId,
-                                        fullName: member.fullName,
-                                        currentSquadId: squad.orgUnitId,
-                                      });
-                                    }}
-                                    className="cursor-context-menu"
-                                  >
-                                    <p className="text-[13px] font-medium text-surface-foreground truncate max-w-45">{member.fullName}</p>
-                                    <p className="text-[11px] text-surface-variant-foreground">{member.position ?? ""}</p>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <span className={`text-[11px] font-medium ${member.employmentType === "Perm" ? "text-emerald-600" : "text-primary"}`}>
-                                    {member.employmentType === "Perm" ? "P" : "C"}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-center text-[12px] text-surface-variant-foreground">{member.grade ?? "—"}</TableCell>
-                                {PERIODS.map((pk) => (
-                                  <TableCell key={pk} className="text-center p-1">
-                                    {(() => {
-                                      const personTotal = personTotalFTE.get(member.membershipId);
-                                      const totalFte = personTotal ? personTotal[pk] : 0;
-                                      const isOver = totalFte > 1;
-                                      const isUnder = totalFte > 0 && totalFte < 1;
-                                      return (
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          max="1"
-                                          step="0.05"
-                                          value={alloc[pk]}
-                                          onChange={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            if (!isNaN(val) && val >= 0 && val <= 1) {
-                                              handleFTEChange(member.membershipId, squad.orgUnitId, pk, Math.round(val * 100) / 100);
-                                            }
-                                          }}
-                                          onBlur={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            if (isNaN(val) || val < 0) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 0);
-                                            else if (val > 1) handleFTEChange(member.membershipId, squad.orgUnitId, pk, 1);
-                                          }}
-                                          className={`w-14 h-7 text-[12px] text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none bg-transparent border rounded focus:border-primary focus:outline-none ${
-                                            isOver
-                                              ? "border-error bg-error-container dark:bg-error-container/20 text-error font-semibold"
-                                              : isUnder
-                                              ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400"
-                                              : "border-outline-variant/50"
-                                          }`}
-                                          title={
-                                            isOver ? `Overallocated: ${totalFte.toFixed(2)} FTE total` :
-                                            isUnder ? `Underallocated: ${totalFte.toFixed(2)} FTE total (${((1 - totalFte) * 100).toFixed(0)}% unaccounted)` :
-                                            undefined
-                                          }
-                                        />
-                                      );
-                                    })()}
-                                  </TableCell>
-                                ))}
-                                <TableCell className="text-right text-[12px] font-medium">
-                                  {member.annualCost ? fmtGBP(Math.round(memberAnnualCost)) : "—"}
-                                </TableCell>
-                              </TableRow>
+                              <MemberRow
+                                key={member.membershipId}
+                                member={member}
+                                orgUnitId={squad.orgUnitId}
+                                alloc={alloc}
+                                personTotalByPeriod={personTotalFTE.get(member.membershipId) ?? zeroPeriods()}
+                                monthlyCost={monthlyCost}
+                                memberAnnualCost={memberAnnualCost}
+                                onFTEChange={handleFTEChange}
+                                onContextMenu={handleContextMenu}
+                              />
                             );
                           })}
 
@@ -777,6 +898,7 @@ export default function CapacityPage() {
                         </TableBody>
                       </Table>
                     </div>
+                    )}
                   </CardContent>
                 </Card>
               );
