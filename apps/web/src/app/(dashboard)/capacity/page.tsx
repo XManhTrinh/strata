@@ -832,7 +832,9 @@ export default function CapacityPage() {
                           </Typography>
                         </div>
                       </div>
-                      <Chip variant="filter" selected>{fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE</Chip>
+                      <span className="shrink-0 inline-flex items-center h-8 rounded-lg bg-secondary-container px-3 text-sm font-medium text-secondary-container-foreground">
+                        {fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE
+                      </span>
                     </button>
                     {isExpanded && (
                     <div className="overflow-x-auto">
