@@ -30,6 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   useRoles,
   useCreateRole,
+  useCreateAdminRole,
+  useDeleteRole,
   useRolePermissions,
   useBulkRolePermissions,
   useAllFeatures,
@@ -92,7 +94,17 @@ function computeDiff(server: DraftPermissions, local: DraftPermissions): { add: 
 
 // ─── Page header ──────────────────────────────────────────────────────────────
 
-function PageHeader({ onCreateClick }: { onCreateClick: () => void }) {
+function PageHeader({
+  onCreateClick,
+  onAddAdmin,
+  isAddingAdmin,
+  showAddAdmin,
+}: {
+  onCreateClick: () => void;
+  onAddAdmin: () => void;
+  isAddingAdmin: boolean;
+  showAddAdmin: boolean;
+}) {
   return (
     <PageBar className="justify-between shrink-0">
       <div>
@@ -101,10 +113,18 @@ function PageHeader({ onCreateClick }: { onCreateClick: () => void }) {
           Define roles and manage feature-level access with granular scope control.
         </Typography>
       </div>
-      <Button onClick={onCreateClick} className="shrink-0">
-        <Icon name="add" size={18} />
-        Create Role
-      </Button>
+      <div className="flex items-center gap-2 shrink-0">
+        {showAddAdmin && (
+          <Button variant="tonal" onClick={onAddAdmin} disabled={isAddingAdmin}>
+            <Icon name="shield_person" size={18} />
+            {isAddingAdmin ? "Adding…" : "Add Admin"}
+          </Button>
+        )}
+        <Button onClick={onCreateClick}>
+          <Icon name="add" size={18} />
+          Create Role
+        </Button>
+      </div>
     </PageBar>
   );
 }
@@ -207,6 +227,37 @@ function CreateRoleDialog({
   );
 }
 
+// ─── Delete role dialog ───────────────────────────────────────────────────────
+
+function DeleteRoleDialog({
+  open, onOpenChange, roleName, affectedUsers, onConfirm, isPending,
+}: {
+  open: boolean; onOpenChange: (o: boolean) => void;
+  roleName: string; affectedUsers: number;
+  onConfirm: () => void; isPending: boolean;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent icon="delete">
+        <DialogHeader centered>
+          <DialogTitle>Delete “{roleName}”?</DialogTitle>
+          <DialogDescription>
+            {affectedUsers > 0
+              ? `${affectedUsers} member${affectedUsers !== 1 ? "s" : ""} will lose this role and its permissions. This can't be undone.`
+              : "This role isn't assigned to anyone. This can't be undone."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="text" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="text" onClick={onConfirm} disabled={isPending} className="text-error">
+            {isPending ? "Deleting..." : "Delete role"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Unsaved changes dialog ───────────────────────────────────────────────────
 
 function UnsavedChangesDialog({
@@ -284,7 +335,7 @@ function ScopeGuideDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 // ─── Permission matrix ────────────────────────────────────────────────────────
 
 function PermissionMatrix({
-  features, localDraft, onToggle, onScopeChange, onSelectAll, expandedFeatures, onToggleFeature, onExpandAll, onCollapseAll,
+  features, localDraft, onToggle, onScopeChange, onSelectAll, expandedFeatures, onToggleFeature, onExpandAll, onCollapseAll, readOnly = false,
 }: {
   features: AdminFeature[]; localDraft: DraftPermissions;
   onToggle: (fk: string, pk: string, checked: boolean) => void;
@@ -293,6 +344,7 @@ function PermissionMatrix({
   expandedFeatures: Set<string>;
   onToggleFeature: (id: string) => void;
   onExpandAll: () => void; onCollapseAll: () => void;
+  readOnly?: boolean;
 }) {
   const [showScopeGuide, setShowScopeGuide] = useState(false);
 
@@ -356,30 +408,32 @@ function PermissionMatrix({
                 >
                   <Divider />
                   <div className="divide-y divide-outline-variant">
-                    <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low/50">
-                      <Checkbox
-                        checked={assignedCount === feature.permissions.length && assignedCount > 0}
-                        indeterminate={assignedCount > 0 && assignedCount < feature.permissions.length}
-                        onCheckedChange={(c) => onSelectAll(feature, c === true)}
-                      />
-                      <Typography variant="body-small" color="surface-variant-foreground" as="span" className="font-medium">
-                        {assignedCount === feature.permissions.length ? "Deselect all" : "Select all"}
-                      </Typography>
-                    </div>
+                    {!readOnly && (
+                      <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low/50">
+                        <Checkbox
+                          checked={assignedCount === feature.permissions.length && assignedCount > 0}
+                          indeterminate={assignedCount > 0 && assignedCount < feature.permissions.length}
+                          onCheckedChange={(c) => onSelectAll(feature, c === true)}
+                        />
+                        <Typography variant="body-small" color="surface-variant-foreground" as="span" className="font-medium">
+                          {assignedCount === feature.permissions.length ? "Deselect all" : "Select all"}
+                        </Typography>
+                      </div>
+                    )}
                     {feature.permissions.map((fp) => {
                       const key = draftKey(feature.key, fp.key);
                       const isEnabled = localDraft.has(key);
                       const scope = (localDraft.get(key) as Scope) ?? "OWN";
                       return (
                         <div key={fp.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-foreground/4 transition-colors">
-                          <Checkbox checked={isEnabled} onCheckedChange={(c) => onToggle(feature.key, fp.key, c === true)} />
+                          <Checkbox checked={isEnabled} disabled={readOnly} onCheckedChange={(c) => onToggle(feature.key, fp.key, c === true)} />
                           <Typography variant="body-medium" as="span" color={isEnabled ? "surface-foreground" : "surface-variant-foreground"} className="flex-1 min-w-0 truncate">
                             {fp.displayName}
                           </Typography>
                           <Select
-                            value={scope} disabled={!isEnabled}
+                            value={scope} disabled={readOnly || !isEnabled}
                             onValueChange={(v) => onScopeChange(feature.key, fp.key, v as Scope)}
-                            className={`h-8 w-35 text-xs border-outline-variant ${!isEnabled ? "opacity-40" : ""}`}
+                            className={`h-8 w-35 text-xs border-outline-variant ${readOnly || !isEnabled ? "opacity-40" : ""}`}
                             variant="outlined"
                             options={SCOPE_OPTIONS.map((s) => ({ value: s, label: SCOPE_LABELS[s] }))}
                           />
@@ -408,6 +462,9 @@ export default function RolesPage() {
   const { data: backendRoles, isLoading, error } = useRoles(companyId);
   const { data: allFeatures, isLoading: featuresLoading } = useAllFeatures();
   const createRoleMutation = useCreateRole();
+  const createAdminRoleMutation = useCreateAdminRole();
+  const deleteRoleMutation = useDeleteRole();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const bulkPermissionMutation = useBulkRolePermissions();
 
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
@@ -422,6 +479,7 @@ export default function RolesPage() {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   const roles: AdminRole[] = backendRoles ?? [];
+  const hasAdminRole = roles.some((r) => r.isSystem);
   const effectiveSelectedId = selectedRoleId ?? roles[0]?.id ?? null;
   const selectedRole = roles.find((r) => r.id === effectiveSelectedId) ?? roles[0];
 
@@ -515,11 +573,37 @@ export default function RolesPage() {
     );
   }, [selectedRole, companyId, createRoleMutation, toast]);
 
+  const handleAddAdmin = useCallback(() => {
+    createAdminRoleMutation.mutate(
+      { companyId },
+      {
+        onSuccess: (r) => { toast.success("Admin role created with all permissions"); lastSyncedRoleId.current = null; setSelectedRoleId(r.id); },
+        onError: (e) => toast.error(e.message || "Failed to create Admin role"),
+      },
+    );
+  }, [companyId, createAdminRoleMutation, toast]);
+
+  const handleDeleteRole = useCallback(() => {
+    if (!selectedRole) return;
+    deleteRoleMutation.mutate(
+      { companyId, id: selectedRole.id },
+      {
+        onSuccess: () => {
+          toast.success("Role deleted");
+          setShowDeleteDialog(false);
+          lastSyncedRoleId.current = null;
+          setSelectedRoleId(null);
+        },
+        onError: (e) => toast.error(e.message || "Failed to delete role"),
+      },
+    );
+  }, [selectedRole, companyId, deleteRoleMutation, toast]);
+
   // ── Loading ────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
-        <PageHeader onCreateClick={() => {}} />
+        <PageHeader onCreateClick={() => {}} onAddAdmin={() => {}} isAddingAdmin={false} showAddAdmin={false} />
         <LoadingSkeleton />
       </motion.div>
     );
@@ -529,7 +613,7 @@ export default function RolesPage() {
   if (error) {
     return (
       <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
-        <PageHeader onCreateClick={() => {}} />
+        <PageHeader onCreateClick={() => {}} onAddAdmin={() => {}} isAddingAdmin={false} showAddAdmin={false} />
         <ErrorState />
       </motion.div>
     );
@@ -539,7 +623,7 @@ export default function RolesPage() {
   if (roles.length === 0) {
     return (
       <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
-        <PageHeader onCreateClick={() => setShowCreateModal(true)} />
+        <PageHeader onCreateClick={() => setShowCreateModal(true)} onAddAdmin={handleAddAdmin} isAddingAdmin={createAdminRoleMutation.isPending} showAddAdmin={!hasAdminRole} />
         <EmptyState onCreateClick={() => setShowCreateModal(true)} />
         <CreateRoleDialog open={showCreateModal} onOpenChange={setShowCreateModal} name={newRoleName} onNameChange={setNewRoleName} description={newRoleDescription} onDescriptionChange={setNewRoleDescription} onSubmit={handleCreateRole} isPending={createRoleMutation.isPending} />
       </motion.div>
@@ -551,7 +635,7 @@ export default function RolesPage() {
 
   return (
     <motion.div className="flex flex-col h-[calc(100vh-100px)]" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
-      <PageHeader onCreateClick={() => setShowCreateModal(true)} />
+      <PageHeader onCreateClick={() => setShowCreateModal(true)} onAddAdmin={handleAddAdmin} isAddingAdmin={createAdminRoleMutation.isPending} showAddAdmin={!hasAdminRole} />
 
       {/* Master-Detail */}
       <div className="flex-1 grid grid-cols-[420px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
@@ -571,7 +655,7 @@ export default function RolesPage() {
                     interactive
                     selected={isSelected}
                     lines={2}
-                    leading={<Icon name="shield" size={24} className={isSelected ? "text-primary" : "text-surface-variant-foreground"} />}
+                    leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-surface-variant-foreground"} />}
                     trailing={role.isSystem ? <Chip variant="filter" selected className="text-[11px] h-6 px-2">System</Chip> : undefined}
                     supporting={role.description ?? undefined}
                     onClick={() => handleRoleSelect(role.id)}
@@ -620,12 +704,20 @@ export default function RolesPage() {
                       </Button>
                     </>
                   ) : (
-                    <Tooltip content="Duplicate this role" side="bottom">
-                      <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
-                        <Icon name="content_copy" size={18} />
-                        Duplicate
-                      </Button>
-                    </Tooltip>
+                    <>
+                      <Tooltip content="Duplicate this role" side="bottom">
+                        <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
+                          <Icon name="content_copy" size={18} />
+                          Duplicate
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Delete this role" side="bottom">
+                        <Button variant="text" onClick={() => setShowDeleteDialog(true)} className="text-error">
+                          <Icon name="delete" size={18} />
+                          Delete
+                        </Button>
+                      </Tooltip>
+                    </>
                   )}
                 </div>
               </div>
@@ -642,17 +734,30 @@ export default function RolesPage() {
                     ))}
                   </div>
                 ) : (
-                  <PermissionMatrix
-                    features={featureCatalog.filter((f) => !disabledFeatureKeys.has(f.key))}
-                    localDraft={localDraft}
-                    onToggle={handleTogglePermission}
-                    onScopeChange={handleScopeChange}
-                    onSelectAll={handleSelectAll}
-                    expandedFeatures={expandedFeatures}
-                    onToggleFeature={toggleFeatureExpanded}
-                    onExpandAll={expandAll}
-                    onCollapseAll={collapseAll}
-                  />
+                  <>
+                    {selectedRole.isSystem && (
+                      <div className="flex items-start gap-2 mb-4 rounded-lg bg-secondary-container/40 px-4 py-3">
+                        <Icon name="lock" size={18} className="text-secondary shrink-0 mt-0.5" />
+                        <Typography variant="body-small" color="surface-variant-foreground">
+                          The Admin role always has full access to every enabled feature, so its
+                          permissions can&apos;t be edited. To limit what Admin can reach, disable a
+                          feature on the Features page, or create a custom role instead.
+                        </Typography>
+                      </div>
+                    )}
+                    <PermissionMatrix
+                      features={featureCatalog.filter((f) => !disabledFeatureKeys.has(f.key))}
+                      localDraft={localDraft}
+                      onToggle={handleTogglePermission}
+                      onScopeChange={handleScopeChange}
+                      onSelectAll={handleSelectAll}
+                      expandedFeatures={expandedFeatures}
+                      onToggleFeature={toggleFeatureExpanded}
+                      onExpandAll={expandAll}
+                      onCollapseAll={collapseAll}
+                      readOnly={selectedRole.isSystem}
+                    />
+                  </>
                 )}
               </div>
             </>
@@ -669,6 +774,14 @@ export default function RolesPage() {
 
       {/* Dialogs */}
       <CreateRoleDialog open={showCreateModal} onOpenChange={setShowCreateModal} name={newRoleName} onNameChange={setNewRoleName} description={newRoleDescription} onDescriptionChange={setNewRoleDescription} onSubmit={handleCreateRole} isPending={createRoleMutation.isPending} />
+      <DeleteRoleDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        roleName={selectedRole?.name ?? ""}
+        affectedUsers={selectedRole?._count?.assignments ?? 0}
+        onConfirm={handleDeleteRole}
+        isPending={deleteRoleMutation.isPending}
+      />
       <UnsavedChangesDialog
         open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}
         changeCount={changeCount} roleName={selectedRole?.name ?? ""}

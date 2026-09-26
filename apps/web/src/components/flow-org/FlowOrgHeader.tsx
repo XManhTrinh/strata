@@ -1,154 +1,61 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import {
-  PageBar,
-  Icon,
-  Chip,
-  Search,
-  Typography,
-  Checkbox,
-  Divider,
-} from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+import { PageBar, Icon, Chip, Search, Typography } from "@vkieu/mui";
+import { Button } from "@vkieu/mui/buttons";
 import type { OrganizationUnit } from "@/services";
+import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface FlowOrgHeaderProps {
   search: string;
   onSearchChange: (value: string) => void;
-  selectedSquads: Set<string>;
-  onToggleSquad: (squad: string) => void;
+  /** Hierarchical org unit tree (Division → Cluster → Squad …). */
+  orgUnitTree: OrganizationUnit[];
+  /** Selected org unit ids (cascades to descendants). */
+  selectedUnitIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
   onClearSquads: () => void;
-  squadCounts: Record<string, number>;
   totalCount: number;
-  orgUnits: OrganizationUnit[];
   viewMode: OrgChartViewMode;
   onViewModeChange: (mode: OrgChartViewMode) => void;
   searchResultCount?: number;
-  pathToRoot?: string[];
+  /** Ancestor path (root → matched person) shown as a clickable breadcrumb. */
+  pathToRoot?: { id: string; name: string }[];
+  /** Click a breadcrumb segment to focus the chart on that person. */
+  onFocusPerson?: (personId: string) => void;
   /** Status text for filter/search (rendered below the toolbar) */
   statusText?: React.ReactNode;
 }
 
-// ─── Filter dropdown ──────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────────
 
-function TeamFilterDropdown({
-  orgUnits,
-  selectedSquads,
-  onToggleSquad,
-  onClearSquads,
-  squadCounts,
-  totalCount,
-}: {
-  orgUnits: OrganizationUnit[];
-  selectedSquads: Set<string>;
-  onToggleSquad: (squad: string) => void;
-  onClearSquads: () => void;
-  squadCounts: Record<string, number>;
-  totalCount: number;
-}) {
-  const [open, setOpen] = useState(false);
-  const [filterSearch, setFilterSearch] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
-  const isAllView = selectedSquads.size === 0;
+/** Flatten the tree into id → name for resolving chip labels. */
+function buildNameMap(nodes: OrganizationUnit[], map: Map<string, string> = new Map()): Map<string, string> {
+  for (const node of nodes) {
+    map.set(node.id, node.name);
+    if (node.children?.length) buildNameMap(node.children, map);
+  }
+  return map;
+}
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  const grouped = orgUnits.reduce<Record<string, OrganizationUnit[]>>((acc, u) => {
-    const type = u.type?.name ?? "Other";
-    (acc[type] ??= []).push(u);
-    return acc;
-  }, {});
-
-  const matchesFilter = (u: OrganizationUnit) => {
-    if (!filterSearch) return true;
-    const q = filterSearch.toLowerCase();
-    return u.name.toLowerCase().includes(q) || (u.type?.name ?? "").toLowerCase().includes(q);
-  };
-
-  return (
-    <div className="relative" ref={ref}>
-      <Button
-        variant={isAllView ? "outlined" : "tonal"}
-        size="xs"
-        onClick={() => setOpen(!open)}
-      >
-        <Icon name="filter_list" size={18} />
-        {isAllView ? `All teams (${totalCount})` : `${selectedSquads.size} selected`}
-        <Icon name={open ? "expand_less" : "expand_more"} size={18} />
-      </Button>
-
-      {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-surface shadow-xl border border-outline-variant/50 z-50 overflow-hidden">
-          {/* Search */}
-          <div className="p-3 border-b border-outline-variant/50">
-            <Search
-              value={filterSearch}
-              onValueChange={setFilterSearch}
-              placeholder="Search teams..."
-              className="w-full"
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="px-3 py-2 flex items-center justify-between border-b border-outline-variant/50">
-            <Button variant="text" size="xs" onClick={onClearSquads}>
-              Clear all
-            </Button>
-            <Typography variant="label-small" color="surface-variant-foreground">
-              {selectedSquads.size} of {orgUnits.length}
-            </Typography>
-          </div>
-
-          {/* Grouped list */}
-          <div className="max-h-64 overflow-y-auto py-1">
-            {Object.entries(grouped).map(([typeName, units]) => {
-              const filtered = units.filter(matchesFilter);
-              if (filtered.length === 0) return null;
-              return (
-                <div key={typeName}>
-                  <Typography variant="label-small" color="surface-variant-foreground" className="px-4 pt-3 pb-1 uppercase tracking-wider">
-                    {typeName}
-                  </Typography>
-                  {filtered.map((unit) => {
-                    const isSelected = selectedSquads.has(unit.name);
-                    return (
-                      <button
-                        key={unit.id}
-                        type="button"
-                        onClick={() => onToggleSquad(unit.name)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                          isSelected
-                            ? "bg-primary/8 text-primary font-medium"
-                            : "text-surface-foreground hover:bg-surface-foreground/8"
-                        }`}
-                      >
-                        <Checkbox checked={isSelected} onCheckedChange={() => onToggleSquad(unit.name)} />
-                        <span className="flex-1 text-left">{unit.name}</span>
-                        <Typography variant="label-small" color="surface-variant-foreground" as="span">
-                          {squadCounts[unit.name] ?? 0}
-                        </Typography>
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+/**
+ * The "top" selected units: selected nodes whose parent isn't also selected.
+ * Selecting a Division cascades every descendant id into the set, so we only
+ * show a chip for the branch root to keep the chip row concise.
+ */
+function topSelectedIds(nodes: OrganizationUnit[], selected: Set<string>, parentSelected = false): string[] {
+  const result: string[] = [];
+  for (const node of nodes) {
+    const isSelected = selected.has(node.id);
+    if (isSelected && !parentSelected) result.push(node.id);
+    if (node.children?.length) {
+      result.push(...topSelectedIds(node.children, selected, parentSelected || isSelected));
+    }
+  }
+  return result;
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -156,19 +63,45 @@ function TeamFilterDropdown({
 export default function FlowOrgHeader({
   search,
   onSearchChange,
-  selectedSquads,
-  onToggleSquad,
+  orgUnitTree,
+  selectedUnitIds,
+  onSelectionChange,
   onClearSquads,
-  squadCounts,
   totalCount,
-  orgUnits,
   viewMode,
   onViewModeChange,
   searchResultCount,
   pathToRoot,
+  onFocusPerson,
   statusText,
 }: FlowOrgHeaderProps) {
-  const isAllView = selectedSquads.size === 0;
+  const isAllView = selectedUnitIds.size === 0;
+  const nameById = useMemo(() => buildNameMap(orgUnitTree), [orgUnitTree]);
+  const chipIds = useMemo(
+    () => topSelectedIds(orgUnitTree, selectedUnitIds),
+    [orgUnitTree, selectedUnitIds],
+  );
+
+  // Find a node by id, then deselect it and its whole subtree.
+  const deselectBranch = (id: string) => {
+    const findNode = (nodes: OrganizationUnit[]): OrganizationUnit | null => {
+      for (const n of nodes) {
+        if (n.id === id) return n;
+        const hit = n.children?.length ? findNode(n.children) : null;
+        if (hit) return hit;
+      }
+      return null;
+    };
+    const collect = (node: OrganizationUnit, acc: string[] = []): string[] => {
+      acc.push(node.id);
+      for (const c of node.children ?? []) collect(c, acc);
+      return acc;
+    };
+    const node = findNode(orgUnitTree);
+    const next = new Set(selectedUnitIds);
+    for (const rid of node ? collect(node) : [id]) next.delete(rid);
+    onSelectionChange(next);
+  };
 
   return (
     <div className="shrink-0 z-10">
@@ -215,13 +148,13 @@ export default function FlowOrgHeader({
             </Chip>
           )}
 
-          <TeamFilterDropdown
-            orgUnits={orgUnits}
-            selectedSquads={selectedSquads}
-            onToggleSquad={onToggleSquad}
-            onClearSquads={onClearSquads}
-            squadCounts={squadCounts}
-            totalCount={totalCount}
+          {/* Hierarchy-aware org unit filter (Division → Cluster → Squad …) */}
+          <OrgUnitTreeSelect
+            tree={orgUnitTree}
+            selectedIds={selectedUnitIds}
+            onSelectionChange={onSelectionChange}
+            placeholder={isAllView ? `Filter teams (${totalCount})…` : "Filter teams…"}
+            className="w-64"
           />
         </div>
       </PageBar>
@@ -232,15 +165,15 @@ export default function FlowOrgHeader({
           {/* Selected team chips */}
           {!isAllView && (
             <>
-              {Array.from(selectedSquads).map((squad) => (
+              {chipIds.map((id) => (
                 <Chip
-                  key={squad}
+                  key={id}
                   variant="filter"
                   selected
                   trailingIcon="close"
-                  onClick={() => onToggleSquad(squad)}
+                  onClick={() => deselectBranch(id)}
                 >
-                  {squad}
+                  {nameById.get(id) ?? id}
                 </Chip>
               ))}
               <Button variant="text" size="xs" onClick={onClearSquads}>
@@ -252,23 +185,32 @@ export default function FlowOrgHeader({
           {/* Status text (filter count, search feedback) */}
           {statusText}
 
-          {/* Path to root */}
+          {/* Path to root — each segment focuses the chart on that person */}
           {pathToRoot && pathToRoot.length > 0 && (
             <div className="flex items-center gap-1 ml-auto">
               <Icon name="route" size={16} className="text-primary" />
-              {pathToRoot.map((name, i) => (
-                <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <Icon name="chevron_right" size={16} className="text-outline" />}
-                  <Typography
-                    variant="label-small"
-                    as="span"
-                    color={i === pathToRoot.length - 1 ? "primary" : "surface-variant-foreground"}
-                    className={i === pathToRoot.length - 1 ? "font-medium" : ""}
-                  >
-                    {name}
-                  </Typography>
-                </span>
-              ))}
+              {pathToRoot.map((node, i) => {
+                const isLast = i === pathToRoot.length - 1;
+                return (
+                  <span key={node.id} className="flex items-center gap-1">
+                    {i > 0 && <Icon name="chevron_right" size={16} className="text-outline" />}
+                    <button
+                      type="button"
+                      onClick={() => onFocusPerson?.(node.id)}
+                      className="cursor-pointer hover:underline"
+                    >
+                      <Typography
+                        variant="label-small"
+                        as="span"
+                        color={isLast ? "primary" : "surface-variant-foreground"}
+                        className={isLast ? "font-medium" : ""}
+                      >
+                        {node.name}
+                      </Typography>
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>

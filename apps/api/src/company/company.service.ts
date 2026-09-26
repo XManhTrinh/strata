@@ -21,7 +21,6 @@ export class CompanyService {
       include: {
         _count: {
           select: {
-            users: true,
             roles: true,
             positions: true,
             organizationUnits: true,
@@ -32,6 +31,11 @@ export class CompanyService {
     });
     if (!company) throw new NotFoundException('Company not found');
 
+    // Members excludes the super admin (account creator) — they are not staff.
+    const members = await this.prisma.userCompanyMembership.count({
+      where: { companyId, isSuperAdmin: false },
+    });
+
     return {
       id: company.id,
       name: company.name,
@@ -40,7 +44,7 @@ export class CompanyService {
       createdAt: company.createdAt,
       updatedAt: company.updatedAt,
       stats: {
-        members: company._count.users,
+        members,
         roles: company._count.roles,
         positions: company._count.positions,
         orgUnits: company._count.organizationUnits,

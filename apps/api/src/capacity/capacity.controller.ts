@@ -1,9 +1,7 @@
 import {
   Controller,
   Get,
-  Post,
   Put,
-  Delete,
   Param,
   Body,
   Query,
@@ -29,17 +27,6 @@ const UpsertAllocationSchema = z.object({
 
 const BulkAllocationsSchema = z.object({
   allocations: z.array(UpsertAllocationSchema).min(1).max(5000),
-});
-
-const RateCardSchema = z.object({
-  division: z.string().min(1),
-  location: z.string().min(1),
-  grade: z.string().min(1),
-  annualCost: z.number().positive(),
-});
-
-const BulkRateCardsSchema = z.object({
-  cards: z.array(RateCardSchema).min(1).max(1000),
 });
 
 // ─── Controller ─────────────────────────────────────────────────────────────────
@@ -101,59 +88,5 @@ export class CapacityController {
       throw new BadRequestException('fiscalYear query param is required');
     }
     return this.service.getSquadSummary(companyId, fiscalYear, orgUnitId);
-  }
-
-  // ─── Rate Cards ───────────────────────────────────────────────────────────
-
-  /**
-   * GET /companies/:companyId/capacity/rate-cards
-   */
-  @Get('rate-cards')
-  async getRateCards(@Param('companyId') companyId: string) {
-    return this.service.getRateCards(companyId);
-  }
-
-  /**
-   * POST /companies/:companyId/capacity/rate-cards
-   * Create or update a single rate card.
-   */
-  @Post('rate-cards')
-  async upsertRateCard(
-    @Param('companyId') companyId: string,
-    @Body() body: unknown,
-  ) {
-    const parsed = RateCardSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new BadRequestException(parsed.error.flatten().fieldErrors);
-    }
-    return this.service.upsertRateCard(companyId, parsed.data);
-  }
-
-  /**
-   * PUT /companies/:companyId/capacity/rate-cards/bulk
-   * Bulk upsert rate cards.
-   */
-  @Put('rate-cards/bulk')
-  @HttpCode(HttpStatus.OK)
-  async bulkUpsertRateCards(
-    @Param('companyId') companyId: string,
-    @Body() body: unknown,
-  ) {
-    const parsed = BulkRateCardsSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new BadRequestException(parsed.error.flatten().fieldErrors);
-    }
-    return this.service.bulkUpsertRateCards(companyId, parsed.data.cards);
-  }
-
-  /**
-   * DELETE /companies/:companyId/capacity/rate-cards/:id
-   */
-  @Delete('rate-cards/:id')
-  async deleteRateCard(
-    @Param('companyId') companyId: string,
-    @Param('id') id: string,
-  ) {
-    return this.service.deleteRateCard(companyId, id);
   }
 }

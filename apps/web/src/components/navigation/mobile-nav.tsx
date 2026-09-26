@@ -8,7 +8,7 @@ import { NavigationBar } from "@vkieu/mui/navigation";
 /**
  * Mobile bottom navigation using M3 Navigation Bar.
  *
- * Shows 5 items max: Dashboard, People, Engineering, Calendar, More.
+ * Shows 5 items max: Dashboard, People, Finance, Calendar, More.
  * The "More" item opens the full navigation drawer (Sheet) via useSidebar.
  */
 export function MobileNav() {
@@ -20,7 +20,7 @@ export function MobileNav() {
   const routes: Record<string, string> = {
     dashboard: "/dashboard",
     people: "/people",
-    engineering: "/engineering",
+    finance: "/finance",
     calendar: "/calendar",
   };
 
@@ -44,7 +44,7 @@ export function MobileNav() {
       <NavigationBar value={activeValue} onValueChange={handleValueChange}>
         <NavigationBar.Item value="dashboard" icon="dashboard" label="Dashboard" />
         <NavigationBar.Item value="people" icon="person" label="People" />
-        <NavigationBar.Item value="engineering" icon="engineering" label="Engineering" />
+        <NavigationBar.Item value="finance" icon="account_balance" label="Finance" />
         <NavigationBar.Item value="calendar" icon="calendar_month" label="Calendar" />
         <NavigationBar.Item value="more" icon="more_horiz" label="More" />
       </NavigationBar>

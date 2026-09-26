@@ -6,6 +6,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
 import { CompanyModule } from './company/company.module';
 import { PeopleModule } from './people/people.module';
 import { CapacityModule } from './capacity/capacity.module';
+import { RateCardsModule } from './rate-cards/rate-cards.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { OrgChartModule } from './org-chart/org-chart.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -17,6 +18,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CompanyModule,
     PeopleModule,
     CapacityModule,
+    RateCardsModule,
     CalendarModule,
     OrgChartModule,
     NotificationsModule,

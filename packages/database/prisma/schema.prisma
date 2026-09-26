@@ -102,6 +102,8 @@ model Company {
   // Capacity planning
   capacityAllocations    CapacityAllocation[]
   rateCards              RateCard[]
+  rateCardGroups         RateCardGroup[]
+  rateCardSets           RateCardSet[]
   notifications          Notification[]
 }
 
@@ -266,6 +268,14 @@ model UserCompanyMembership {
   annualSalary   Decimal? @db.Decimal(12, 2) // for Perm employees
   dayRate        Decimal? @db.Decimal(10, 2) // for SubCon — annual cost = dayRate × 228
   metadata       Json?    @default("{}") // flexible key-value store for CSV import fields
+
+  // Rate card application snapshot (set by "apply rate cards"). The capacity
+  // view reads these; they only change when rate cards are re-applied.
+  appliedRateCardId String?
+  /// Snapshot of the applied per-period monthly cost at 1.0 FTE:
+  /// { "p1": 3800, ..., "p12": 3800 }. Null until a card is applied.
+  appliedCost       Json?
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -590,24 +600,109 @@ model CapacityAllocation {
   @@index([companyId, fiscalYear])
 }
 
-// ─── Rate Card (Perm cost lookup: Division × Location × Grade) ──────────────────
-// Used to compute annual cost for permanent staff based on their attributes.
-// SubCon cost is always: dayRate × 228 (from membership).
+// ─── Rate Cards (self-contained: conditions + per-quarter day rate × days) ──────
+//
+// A rate card is a single rule that both SELECTS members (via `conditions`) and
+// COMPUTES their cost (via per-quarter day rate × working days). No separate
+// lookup table.
+//
+//   conditions — [{ column, operator, value }] ANDed together, matched against a
+//                member's imported columns (typed fields + CSV metadata).
+//   qN rate    — each quarter has a day rate and working-days-per-month; the
+//                quarter's monthly cost = dayRate × workingDays, and the annual
+//                cost = sum of (each quarter's monthly cost × 3).
+//
+// Users manage cards on the rate-cards page, then APPLY selected cards to
+// matching members. Applying snapshots the resolved per-period cost onto the
+// membership (`appliedCost`), which the capacity view reads. Editing a card does
+// not change capacity numbers until it is re-applied.
+
+/// Condition operator for a rate card's matching conditions.
+enum RateCardRuleOperator {
+  EQUALS
+  NOT_EQUALS
+  STARTS_WITH
+  ENDS_WITH
+  CONTAINS
+  IN
+}
+
+/// Top-level, UI-only container shown as a tab (e.g. "Digital"). Holds groups.
+/// Purely organizational — does not affect matching.
+model RateCardSet {
+  id           String   @id @default(cuid())
+  companyId    String
+  name         String
+  description  String?
+  color        String? // hex, e.g. "#3B82F6" — UI accent for the tab
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company         @relation(fields: [companyId], references: [id])
+  groups  RateCardGroup[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+/// A named, UI-only container for organizing rate cards (e.g. "Actuals",
+/// "Recharge"). Optionally nested inside a set (tab). Purely organizational —
+/// does not affect matching.
+model RateCardGroup {
+  id          String   @id @default(cuid())
+  companyId   String
+  /// Optional parent set (tab). Ungrouped-by-set when null.
+  setId       String?
+  name        String
+  description String?
+  color       String?  // hex, e.g. "#3B82F6" — UI accent for the group
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company      @relation(fields: [companyId], references: [id])
+  set     RateCardSet? @relation(fields: [setId], references: [id], onDelete: SetNull)
+  cards   RateCard[]
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([setId])
+}
 
 model RateCard {
-  id         String   @id @default(cuid())
-  companyId  String
-  division   String   // e.g. "Digital", "Operations"
-  location   String   // e.g. "UK", "AMEA", "US"
-  grade      String   // e.g. "L4", "L5", "L6"
-  annualCost Decimal  @db.Decimal(12, 2)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  /// Optional UI grouping. Ungrouped when null.
+  groupId   String?
+  /// Lower runs first. Cards are evaluated top-down; first match wins.
+  priority  Int     @default(0)
+  /// When true this card matches any member not matched by an earlier card.
+  isDefault Boolean @default(false)
 
-  company Company @relation(fields: [companyId], references: [id])
+  /// Array of conditions ANDed together:
+  /// [{ "column": "Capex/Opex", "operator": "EQUALS", "value": "Opex" }, ...]
+  conditions Json @default("[]")
 
-  @@unique([companyId, division, location, grade])
-  @@index([companyId])
+  // Per-quarter inputs. Monthly cost for a quarter = dayRate × workingDays.
+  q1DayRate     Decimal? @db.Decimal(12, 2)
+  q1WorkingDays Decimal? @db.Decimal(6, 2)
+  q2DayRate     Decimal? @db.Decimal(12, 2)
+  q2WorkingDays Decimal? @db.Decimal(6, 2)
+  q3DayRate     Decimal? @db.Decimal(12, 2)
+  q3WorkingDays Decimal? @db.Decimal(6, 2)
+  q4DayRate     Decimal? @db.Decimal(12, 2)
+  q4WorkingDays Decimal? @db.Decimal(6, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company        @relation(fields: [companyId], references: [id])
+  group   RateCardGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, name])
+  @@index([companyId, priority])
+  @@index([groupId])
 }
 
 

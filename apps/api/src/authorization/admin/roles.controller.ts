@@ -40,6 +40,13 @@ export class RolesController {
     return this.service.create(companyId, parsed.data);
   }
 
+  @Post('roles/admin')
+  @RequireFeaturePermission('authorization', 'manage_roles')
+  @HttpCode(HttpStatus.CREATED)
+  async createAdmin(@Param('companyId') companyId: string) {
+    return this.service.createAdmin(companyId);
+  }
+
   @Get('roles')
   async findAll(@Param('companyId') companyId: string) {
     return this.service.findAll(companyId);

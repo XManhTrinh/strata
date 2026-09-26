@@ -153,7 +153,7 @@ function TreeNode({
         }
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
-        <div className="flex items-center gap-3">
+        <span className="inline-flex items-center gap-3">
           <span className="shrink-0" style={{ color: unit.typeColor }}>
             <Icon name={unit.typeIcon} size={18} />
           </span>
@@ -164,7 +164,7 @@ function TreeNode({
           >
             {unit.typeName}
           </span>
-        </div>
+        </span>
       </ListItem>
       </div>
 

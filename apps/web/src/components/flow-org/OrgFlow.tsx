@@ -12,6 +12,7 @@ import {
   type NodeChange,
   useReactFlow,
   useViewport,
+  useNodesInitialized,
   ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -323,6 +324,7 @@ function OrgFlowInner({
 }: OrgFlowInnerProps) {
   const { fitView } = useReactFlow();
   const { zoom } = useViewport();
+  const nodesInitialized = useNodesInitialized();
   const [ghost, setGhost] = useState<OverlayInfo | null>(null);
   const [isOverUnallocated, setIsOverUnallocated] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -423,16 +425,42 @@ function OrgFlowInner({
 
   const layoutRef = useRef(layout);
 
+  // A signature of the current node set — changes whenever the tree changes
+  // (e.g. entering/leaving focus). Used to trigger exactly one fitView per set.
+  const layoutSignature = useMemo(
+    () => layout.nodes.map((n) => n.id).join(","),
+    [layout.nodes],
+  );
+  const fittedSignatureRef = useRef<string | null>(null);
+
   useEffect(() => {
     layoutRef.current = layout;
     const shouldSkip = skipFitViewRef.current;
     skipFitViewRef.current = false;
     setNodes(layout.nodes);
     setEdges(layout.edges);
-    if (!shouldSkip) {
-      setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50);
+    if (shouldSkip) {
+      fittedSignatureRef.current = layoutSignature;
     }
-  }, [layout, fitView]);
+  }, [layout, layoutSignature]);
+
+  // Fit whenever ReactFlow reports the current node set as measured
+  // (nodesInitialized flips true after a layout change). Guarded by the layout
+  // signature so we fit once per distinct tree — reliable across the big→small
+  // focus transition where a fixed timeout races the measurement.
+  useEffect(() => {
+    if (!nodesInitialized) return;
+    if (fittedSignatureRef.current === layoutSignature) return;
+    fittedSignatureRef.current = layoutSignature;
+    // Wait two frames so ReactFlow has committed node measurements — this
+    // matches the timing of the manual "fit view" control, which works.
+    const raf1 = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        fitView({ padding: 0.2, duration: 300, maxZoom: 1 });
+      });
+    });
+    return () => cancelAnimationFrame(raf1);
+  }, [nodesInitialized, layoutSignature, fitView]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
     setNodes((nds) => {
@@ -829,7 +857,7 @@ function OrgFlowInner({
           onNodeContextMenu={onNodeContextMenu}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
           minZoom={0.1}
           maxZoom={2}
           proOptions={{ hideAttribution: true }}

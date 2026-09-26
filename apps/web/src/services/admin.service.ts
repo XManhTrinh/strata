@@ -44,6 +44,7 @@ export interface AdminRole {
   archived: boolean;
   createdAt: string;
   updatedAt: string;
+  _count?: { assignments: number; permissions: number };
 }
 
 export interface AdminFeature {
@@ -285,6 +286,20 @@ export function useCreateRole() {
       apiClient<AdminRole>(
         `/companies/${data.companyId}/roles`,
         { method: "POST", body: data }
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+}
+
+export function useCreateAdminRole() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId }: { companyId: string }) =>
+      apiClient<AdminRole>(
+        `/companies/${companyId}/roles/admin`,
+        { method: "POST" }
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });

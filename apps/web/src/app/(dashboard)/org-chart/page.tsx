@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from "react";
 import { ApiPersonRepository } from "@/lib/org-tree/ApiPersonRepository";
 import { useOrgTree } from "@/lib/org-tree/useOrgTree";
 import { Person, OrgChartViewMode } from "@/lib/org-tree/types";
-import { buildTree, buildDepartmentTree, getPathToRoot } from "@/lib/org-tree/tree";
+import { buildTree, buildDepartmentTree, getPathToRootNodes } from "@/lib/org-tree/tree";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
 } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
-import { useOrgChartPeople, useOrgUnits } from "@/services";
+import { useOrgChartPeople, useOrgUnitTree } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { Skeleton } from "@/components/ui/skeleton";
 import OrgFlow from "@/components/flow-org/OrgFlow";
@@ -46,7 +46,7 @@ interface PendingGroupMove {
 export default function OrgChartPage() {
   const companyId = useCompanyId();
   const { data: orgChartPeople, isLoading: peopleLoading } = useOrgChartPeople(companyId);
-  const { data: orgUnits = [] } = useOrgUnits(companyId);
+  const { data: orgUnitTree = [] } = useOrgUnitTree(companyId);
 
   const repository = useMemo(
     () => new ApiPersonRepository(orgChartPeople ?? [], companyId),
@@ -57,56 +57,84 @@ export default function OrgChartPage() {
   // ── Local state ────────────────────────────────────────────────────────
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
   const [pendingGroupMove, setPendingGroupMove] = useState<PendingGroupMove | null>(null);
-  const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
+  const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<OrgChartViewMode>("reporting");
+  const [focusedId, setFocusedId] = useState<string | null>(null);
 
   // ── Handlers ───────────────────────────────────────────────────────────
-  const toggleUnit = useCallback((unitName: string) => {
-    setSelectedUnits((prev) => {
-      const next = new Set(prev);
-      if (next.has(unitName)) next.delete(unitName);
-      else next.add(unitName);
-      return next;
-    });
-  }, []);
-
-  const clearUnits = useCallback(() => setSelectedUnits(new Set()), []);
+  const clearUnits = useCallback(() => setSelectedUnitIds(new Set()), []);
+  const focusPerson = useCallback((id: string) => setFocusedId(id), []);
+  const clearFocus = useCallback(() => setFocusedId(null), []);
 
   // ── Derived ────────────────────────────────────────────────────────────
-  const isAllView = selectedUnits.size === 0;
+  // The tree-select cascades parent → descendants into selectedUnitIds, so a
+  // person matches when their org unit id is in the selected set (selecting a
+  // Division automatically includes all its clusters/squads).
+  const isAllView = selectedUnitIds.size === 0;
 
-  const filteredPersons = useMemo(() => persons, [persons]);
+  // Unallocated people (no manager AND no reports) belong in the right panel,
+  // not the reporting canvas — exclude them from the chart trees.
+  const unallocatedIds = useMemo(
+    () => new Set(unallocated.map((p) => p.id)),
+    [unallocated],
+  );
+
+  const filteredPersons = useMemo(
+    () => persons.filter((p) => !unallocatedIds.has(p.id)),
+    [persons, unallocatedIds],
+  );
+
+  const focusedPerson = useMemo(
+    () => (focusedId ? persons.find((p) => p.id === focusedId) ?? null : null),
+    [focusedId, persons],
+  );
 
   const activeTree = useMemo(() => {
+    // Focus mode: the clicked person, their full ancestor chain up to the root,
+    // and their direct children.
+    if (focusedPerson) {
+      const byId = new Map(persons.map((p) => [p.id, p]));
+      const slice: Person[] = [];
+
+      // Walk up from the focused person to the root, collecting ancestors.
+      let cur: Person | undefined = focusedPerson;
+      const ancestorGuard = new Set<string>();
+      while (cur && !ancestorGuard.has(cur.id)) {
+        ancestorGuard.add(cur.id);
+        slice.push(cur);
+        cur = cur.parentId ? byId.get(cur.parentId) : undefined;
+      }
+
+      // Add the focused person's direct children.
+      for (const p of persons) {
+        if (p.parentId === focusedPerson.id) slice.push(p);
+      }
+
+      // Root the slice: any member whose parent isn't in the slice becomes a
+      // root (handles the true root and any data gaps in the ancestor chain).
+      const sliceIds = new Set(slice.map((p) => p.id));
+      const rooted = slice.map((p) =>
+        p.parentId && sliceIds.has(p.parentId) ? p : { ...p, parentId: null },
+      );
+
+      return buildTree(rooted);
+    }
     if (viewMode === "department") {
       return buildDepartmentTree(filteredPersons.filter((p) => p.parentId !== null));
     }
     if (isAllView) {
-      const roots = filteredPersons.filter((p) => p.parentId === null);
-      const trueRoot = roots.reduce<Person | null>((best, p) => {
-        if (!best) return p;
-        const bestCount = filteredPersons.filter((x) => x.parentId === best.id).length;
-        const pCount = filteredPersons.filter((x) => x.parentId === p.id).length;
-        return pCount > bestCount ? p : best;
-      }, null);
-      if (!trueRoot) return [];
-      const reachable = new Set<string>();
-      const queue = [trueRoot.id];
-      while (queue.length) {
-        const cur = queue.shift()!;
-        reachable.add(cur);
-        filteredPersons.filter((p) => p.parentId === cur).forEach((p) => queue.push(p.id));
-      }
-      return buildTree(filteredPersons.filter((p) => reachable.has(p.id)));
+      // Show the full forest: every reporting tree (each top-level person and
+      // their subtree), not just the single biggest root.
+      return buildTree(filteredPersons);
     }
-    return buildTree(filteredPersons.filter((p) => p.departmentName && selectedUnits.has(p.departmentName)));
-  }, [isAllView, selectedUnits, filteredPersons, viewMode]);
+    return buildTree(filteredPersons.filter((p) => p.departmentId && selectedUnitIds.has(p.departmentId)));
+  }, [focusedPerson, persons, isAllView, selectedUnitIds, filteredPersons, viewMode]);
 
   const selectedMemberCount = useMemo(() => {
     if (isAllView) return filteredPersons.length;
-    return filteredPersons.filter((p) => p.departmentName && selectedUnits.has(p.departmentName)).length;
-  }, [isAllView, selectedUnits, filteredPersons]);
+    return filteredPersons.filter((p) => p.departmentId && selectedUnitIds.has(p.departmentId)).length;
+  }, [isAllView, selectedUnitIds, filteredPersons]);
 
   const matchedIds = useMemo<Set<string>>(() => {
     const q = search.trim().toLowerCase();
@@ -126,14 +154,8 @@ export default function OrgChartPage() {
 
   const pathToRoot = useMemo(() => {
     if (matchedIds.size !== 1) return undefined;
-    return getPathToRoot(filteredPersons, Array.from(matchedIds)[0]);
+    return getPathToRootNodes(filteredPersons, Array.from(matchedIds)[0]);
   }, [matchedIds, filteredPersons]);
-
-  const unitCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const unit of orgUnits) counts[unit.name] = filteredPersons.filter((p) => p.departmentName === unit.name).length;
-    return counts;
-  }, [filteredPersons, orgUnits]);
 
   // ── Callbacks ──────────────────────────────────────────────────────────
   const onEdit = useCallback((_person: Person) => {
@@ -218,21 +240,21 @@ export default function OrgChartPage() {
       <FlowOrgHeader
         search={search}
         onSearchChange={setSearch}
-        selectedSquads={selectedUnits}
-        onToggleSquad={toggleUnit}
+        orgUnitTree={orgUnitTree}
+        selectedUnitIds={selectedUnitIds}
+        onSelectionChange={setSelectedUnitIds}
         onClearSquads={clearUnits}
-        squadCounts={unitCounts}
         totalCount={filteredPersons.length}
-        orgUnits={orgUnits}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         searchResultCount={search.trim() ? matchedIds.size : undefined}
         pathToRoot={pathToRoot}
+        onFocusPerson={focusPerson}
         statusText={statusText}
       />
 
       {/* Canvas */}
-      <main className="flex-1 min-h-0">
+      <main className="flex-1 min-h-0 relative">
         <OrgFlow
           tree={activeTree}
           unallocated={unallocated}
@@ -245,6 +267,20 @@ export default function OrgChartPage() {
           vacancies={MOCK_VACANCIES}
           onContextMenuAction={() => {}}
         />
+
+        {/* Focus mode banner */}
+        {focusedPerson && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-surface-container border border-outline-variant px-4 py-2 shadow-lg">
+            <Icon name="center_focus_strong" size={18} className="text-primary" />
+            <Typography variant="body-small" color="surface-variant-foreground">
+              Focused on <span className="font-medium text-surface-foreground">{focusedPerson.fullName}</span>
+            </Typography>
+            <Button variant="text" size="xs" onClick={clearFocus}>
+              <Icon name="close" size={16} />
+              Exit focus
+            </Button>
+          </div>
+        )}
       </main>
 
       {/* Reparent modal */}

@@ -73,6 +73,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { escapeCsvField } from "@/lib/csv";
+import { displayEmail, isPlaceholderEmail } from "@/lib/utils";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -352,7 +353,7 @@ export default function PeoplePage() {
     const rows = people.map((p) =>
       visibleColumns.map((col) => {
         if (col.key === "name") return escapeCsvField(p.fullName);
-        if (col.key === "email") return escapeCsvField(p.email);
+        if (col.key === "email") return escapeCsvField(isPlaceholderEmail(p.email) ? "" : p.email);
         if (col.key === "orgUnit") return escapeCsvField(p.orgUnitName ?? "");
         if (col.key === "position") return escapeCsvField(p.positionName ?? "");
         if (col.key === "roles") return escapeCsvField((p.roles ?? []).map((r) => r.name).join(", "));
@@ -423,7 +424,11 @@ export default function PeoplePage() {
           </div>
         );
       case "email":
-        return person.email;
+        return isPlaceholderEmail(person.email) ? (
+          <span className="text-surface-variant-foreground">No email</span>
+        ) : (
+          person.email
+        );
       case "orgUnit":
         return person.orgUnitName ?? "—";
       case "position":
@@ -704,7 +709,7 @@ export default function PeoplePage() {
                   <Avatar name={person.fullName} size="l" />
                   <div className="flex-1 min-w-0">
                     <Typography variant="title-medium" className="truncate">{person.fullName}</Typography>
-                    <Typography variant="body-medium" color="surface-variant-foreground" className="truncate">{person.email}</Typography>
+                    <Typography variant="body-medium" color="surface-variant-foreground" className="truncate">{displayEmail(person.email)}</Typography>
                     {person.orgUnitName && (
                       <Typography variant="body-small" color="surface-variant-foreground" className="mt-0.5">{person.orgUnitName}</Typography>
                     )}

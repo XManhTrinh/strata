@@ -40,6 +40,74 @@ export class RolesService {
     });
   }
 
+  /**
+   * Create an "Admin" role granting every permission (all feature permissions
+   * for the company's enabled features) at COMPANY scope.
+   */
+  async createAdmin(companyId: string) {
+    // Only one admin role per company.
+    const existingAdmin = await this.prisma.role.findFirst({
+      where: { companyId, isSystem: true, archivedAt: null },
+    });
+    if (existingAdmin) {
+      throw new ConflictException('An Admin role already exists');
+    }
+
+    // Unique name — fall back to "Admin (2)", etc. if one already exists.
+    let name = 'Admin';
+    let counter = 1;
+    while (
+      await this.prisma.role.findUnique({
+        where: { companyId_name: { companyId, name } },
+      })
+    ) {
+      counter++;
+      name = `Admin (${counter})`;
+    }
+
+    const role = await this.prisma.role.create({
+      data: {
+        companyId,
+        name,
+        description: 'Full access to all features',
+        isSystem: true,
+      },
+    });
+
+    // Features are enabled by default; a feature is only "off" if it has a
+    // CompanyFeature row explicitly set to enabled=false. Grant all permissions
+    // except those on explicitly-disabled features (skip deprecated).
+    const disabled = await this.prisma.companyFeature.findMany({
+      where: { companyId, enabled: false },
+      select: { featureId: true },
+    });
+    const disabledFeatureIds = disabled.map((f) => f.featureId);
+
+    const permissions = await this.prisma.featurePermission.findMany({
+      where: {
+        deprecatedAt: null,
+        ...(disabledFeatureIds.length > 0
+          ? { featureId: { notIn: disabledFeatureIds } }
+          : {}),
+      },
+      select: { id: true },
+    });
+
+    if (permissions.length > 0) {
+      await this.prisma.rolePermission.createMany({
+        data: permissions.map((p) => ({
+          roleId: role.id,
+          featurePermissionId: p.id,
+          scope: PermissionScope.COMPANY,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    this.permissionCache.invalidateCompany(companyId);
+    return this.findOne(companyId, role.id);
+  }
+
   async findAll(companyId: string) {
     return this.prisma.role.findMany({
       where: { companyId, archivedAt: null },
@@ -155,23 +223,22 @@ export class RolesService {
       throw new NotFoundException('Role not found');
     }
 
-    // Check if role is assigned to any user
-    const assignedCount = await this.prisma.roleAssignment.count({
-      where: { roleId: id },
-    });
-    if (assignedCount > 0) {
-      throw new BadRequestException(
-        'Cannot delete role: it is currently assigned to users',
-      );
-    }
-
-    // Delete permission assignments first
-    await this.prisma.rolePermission.deleteMany({
+    // Members assigned this role lose it. Remove assignments + permission grants
+    // alongside the role in a single transaction.
+    const affectedUsers = await this.prisma.roleAssignment.count({
       where: { roleId: id },
     });
 
-    await this.prisma.role.delete({ where: { id } });
-    return { deleted: true };
+    await this.prisma.$transaction([
+      this.prisma.roleAssignment.deleteMany({ where: { roleId: id } }),
+      this.prisma.rolePermission.deleteMany({ where: { roleId: id } }),
+      this.prisma.role.delete({ where: { id } }),
+    ]);
+
+    // Users who held this role need their permission cache refreshed.
+    await this.permissionCache.invalidateCompany(companyId);
+
+    return { deleted: true, affectedUsers };
   }
 
   // ─── Permission Assignment ──────────────────────────────────────────────────
@@ -286,6 +353,13 @@ export class RolesService {
     });
     if (!role) {
       throw new NotFoundException('Role not found');
+    }
+    // The Admin (system) role always has full access; its permissions are managed
+    // via feature toggles, not edited directly.
+    if (role.isSystem) {
+      throw new BadRequestException(
+        'The Admin role has full access and cannot be edited. Disable features or create a custom role instead.',
+      );
     }
 
     let added = 0;

@@ -36,15 +36,6 @@ export interface SquadCapacitySummary {
   subConCount: number;
 }
 
-export interface RateCard {
-  id: string;
-  companyId: string;
-  division: string;
-  location: string;
-  grade: string;
-  annualCost: number;
-}
-
 export interface UpsertAllocationDto {
   membershipId: string;
   orgUnitId: string;
@@ -84,54 +75,4 @@ export function useSaveAllocations() {
   });
 }
 
-export function useRateCards(companyId: string) {
-  return useQuery({
-    queryKey: ["rate-cards", companyId],
-    queryFn: () => apiClient<RateCard[]>(`/companies/${companyId}/capacity/rate-cards`),
-    enabled: !!companyId,
-  });
-}
 
-export function useUpsertRateCard() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ companyId, ...card }: { companyId: string; division: string; location: string; grade: string; annualCost: number }) =>
-      apiClient(`/companies/${companyId}/capacity/rate-cards`, {
-        method: "POST",
-        body: card,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rate-cards"] });
-      queryClient.invalidateQueries({ queryKey: ["capacity-summary"] });
-    },
-  });
-}
-
-export function useBulkUpsertRateCards() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ companyId, cards }: { companyId: string; cards: Array<{ division: string; location: string; grade: string; annualCost: number }> }) =>
-      apiClient(`/companies/${companyId}/capacity/rate-cards/bulk`, {
-        method: "PUT",
-        body: { cards },
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rate-cards"] });
-      queryClient.invalidateQueries({ queryKey: ["capacity-summary"] });
-    },
-  });
-}
-
-export function useDeleteRateCard() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ companyId, id }: { companyId: string; id: string }) =>
-      apiClient(`/companies/${companyId}/capacity/rate-cards/${id}`, {
-        method: "DELETE",
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rate-cards"] });
-      queryClient.invalidateQueries({ queryKey: ["capacity-summary"] });
-    },
-  });
-}

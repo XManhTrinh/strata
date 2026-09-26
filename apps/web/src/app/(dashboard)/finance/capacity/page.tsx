@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import React, { useMemo, useState, useCallback, useEffect, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   PageBar,
@@ -9,14 +9,7 @@ import {
   CardContent,
   Chip,
   Select,
-  TextField,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,9 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   useCapacitySummary,
   useSaveAllocations,
-  useRateCards,
-  useUpsertRateCard,
-  useDeleteRateCard,
   useOrgUnitTree,
   useCompanySettings,
 } from "@/services";
@@ -37,6 +27,7 @@ import type { SquadCapacitySummary, PeriodValues, MemberAllocation, UpsertAlloca
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
+import { VirtualizedAllocationTable } from "@/components/capacity/virtualized-allocation-table";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -121,96 +112,6 @@ function StatCard({ label, value, sub, icon, color }: {
   );
 }
 
-// ─── Member Row (memoized) ──────────────────────────────────────────────────
-
-interface MemberRowProps {
-  member: MemberAllocation;
-  orgUnitId: string;
-  /** Current values from localDraft for this member+squad. */
-  alloc: PeriodValues;
-  /** This member's cross-squad total per period (for over/under-allocation). */
-  personTotalByPeriod: PeriodValues;
-  /** Monthly cost for this member (annualCost / 12). */
-  monthlyCost: number;
-  /** Precomputed annual cost from current allocations. */
-  memberAnnualCost: number;
-  onFTEChange: (membershipId: string, orgUnitId: string, period: PeriodKey, value: number) => void;
-  onContextMenu: (e: React.MouseEvent, member: MemberAllocation, orgUnitId: string) => void;
-}
-
-const MemberRow = React.memo(function MemberRow({
-  member,
-  orgUnitId,
-  alloc,
-  personTotalByPeriod,
-  monthlyCost: _monthlyCost,
-  memberAnnualCost,
-  onFTEChange,
-  onContextMenu,
-}: MemberRowProps) {
-  return (
-    <TableRow>
-      <TableCell className="sticky left-0 z-10 bg-surface">
-        <div
-          onContextMenu={(e) => onContextMenu(e, member, orgUnitId)}
-          className="cursor-context-menu"
-        >
-          <p className="text-[13px] font-medium text-surface-foreground truncate max-w-45">{member.fullName}</p>
-          <p className="text-[11px] text-surface-variant-foreground">{member.position ?? ""}</p>
-        </div>
-      </TableCell>
-      <TableCell className="text-center">
-        <span className={`text-[11px] font-medium ${member.employmentType === "Perm" ? "text-emerald-600" : "text-primary"}`}>
-          {member.employmentType === "Perm" ? "P" : "C"}
-        </span>
-      </TableCell>
-      <TableCell className="text-center text-[12px] text-surface-variant-foreground">{member.grade ?? "—"}</TableCell>
-      {PERIODS.map((pk) => {
-        const totalFte = personTotalByPeriod[pk];
-        const isOver = totalFte > 1;
-        const isUnder = totalFte > 0 && totalFte < 1;
-        return (
-          <TableCell key={pk} className="text-center p-1">
-            <input
-              type="number"
-              min="0"
-              max="1"
-              step="0.05"
-              value={alloc[pk]}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val >= 0 && val <= 1) {
-                  onFTEChange(member.membershipId, orgUnitId, pk, Math.round(val * 100) / 100);
-                }
-              }}
-              onBlur={(e) => {
-                const val = parseFloat(e.target.value);
-                if (isNaN(val) || val < 0) onFTEChange(member.membershipId, orgUnitId, pk, 0);
-                else if (val > 1) onFTEChange(member.membershipId, orgUnitId, pk, 1);
-              }}
-              className={`w-14 h-7 text-[12px] text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none bg-transparent border rounded focus:border-primary focus:outline-none ${
-                isOver
-                  ? "border-error bg-error-container dark:bg-error-container/20 text-error font-semibold"
-                  : isUnder
-                  ? "border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400"
-                  : "border-outline-variant/50"
-              }`}
-              title={
-                isOver ? `Overallocated: ${totalFte.toFixed(2)} FTE total` :
-                isUnder ? `Underallocated: ${totalFte.toFixed(2)} FTE total (${((1 - totalFte) * 100).toFixed(0)}% unaccounted)` :
-                undefined
-              }
-            />
-          </TableCell>
-        );
-      })}
-      <TableCell className="text-right text-[12px] font-medium">
-        {member.annualCost ? fmtGBP(Math.round(memberAnnualCost)) : "—"}
-      </TableCell>
-    </TableRow>
-  );
-});
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CapacityPage() {
@@ -221,15 +122,14 @@ export default function CapacityPage() {
   const [selectedSquadIds, setSelectedSquadIds] = useState<Set<string>>(new Set());
   const [employmentFilter, setEmploymentFilter] = useState<"all" | "Perm" | "SubCon">("all");
   const [groupBy, setGroupBy] = useState<"squad" | "all" | string>("squad");
-  const [activeTab, setActiveTab] = useState<"phasing" | "rate-cards">("phasing");
-  const [showRateCardDialog, setShowRateCardDialog] = useState(false);
-  const [rateCardForm, setRateCardForm] = useState({ division: "", location: "", grade: "", annualCost: "" });
 
   // Collapsible squad tables — only expanded squads mount their table DOM
   const [expandedSquads, setExpandedSquads] = useState<Set<string>>(new Set());
-  // Track the last data identity we computed an initial expand state for, so we
-  // only set the default expansion once per data load.
-  const initialExpandRef = useRef<SquadCapacitySummary[] | null>(null);
+  // Signature of the squad SET (group mode + squad ids) we last computed a
+  // default expansion for. Keyed on structure — NOT allocation values — so that
+  // editing a cell (which changes groupedData's identity but not which squads
+  // exist) never resets the user's expand/collapse state.
+  const initialExpandRef = useRef<string | null>(null);
 
   // Context menu for allocating member to another squad
   const [contextMenu, setContextMenu] = useState<{
@@ -240,14 +140,11 @@ export default function CapacityPage() {
 
   const { data: squads, isLoading, isError, error } = useCapacitySummary(companyId, fiscalYear);
   const { data: orgUnits = [] } = useOrgUnitTree(companyId);
-  const { data: rateCards = [] } = useRateCards(companyId);
   const { data: companySettings } = useCompanySettings(companyId);
 
   const fiscalYearStartMonth = (companySettings?.settings as Record<string, unknown>)?.fiscalYearStart as number ?? 1;
   const MONTH_LABELS = useMemo(() => buildMonthLabels(fiscalYearStartMonth), [fiscalYearStartMonth]);
   const saveAllocationsMutation = useSaveAllocations();
-  const upsertRateCardMutation = useUpsertRateCard();
-  const deleteRateCardMutation = useDeleteRateCard();
 
   // Local draft for allocations
   const [localDraft, setLocalDraft] = useState<DraftMap>(new Map());
@@ -473,12 +370,21 @@ export default function CapacityPage() {
   const MANY_SQUADS = 3;
   const MANY_MEMBERS = 200;
 
-  // Set the initial expanded set once per data load (per groupedData identity).
-  // With many squads or many total members, default everything collapsed so we
-  // don't mount tens of thousands of inputs at once.
+  // Structural signature of the current squad set: group mode + the sorted list
+  // of expand keys. This changes when squads load, the filter changes, or the
+  // group-by mode changes — but NOT when allocation values are edited.
+  const squadSetSignature = useMemo(
+    () => `${groupBy}::${groupedData.map(squadExpandKey).sort().join("|")}`,
+    [groupBy, groupedData, squadExpandKey],
+  );
+
+  // Compute the default expansion ONCE per squad set. With many squads or many
+  // total members, default everything collapsed so we don't mount huge tables at
+  // once. Because the guard is keyed on the structural signature, editing a cell
+  // never re-runs this and never resets the user's expand/collapse choices.
   useEffect(() => {
-    if (initialExpandRef.current === groupedData) return;
-    initialExpandRef.current = groupedData;
+    if (initialExpandRef.current === squadSetSignature) return;
+    initialExpandRef.current = squadSetSignature;
 
     const totalMemberRows = groupedData.reduce((s, sq) => s + sq.members.length, 0);
     const collapseByDefault = groupedData.length > MANY_SQUADS || totalMemberRows > MANY_MEMBERS;
@@ -488,7 +394,7 @@ export default function CapacityPage() {
     } else {
       setExpandedSquads(new Set(groupedData.map(squadExpandKey)));
     }
-  }, [groupedData, squadExpandKey]);
+  }, [squadSetSignature, groupedData, squadExpandKey]);
 
   const allExpanded = groupedData.length > 0 && groupedData.every((sq) => expandedSquads.has(squadExpandKey(sq)));
 
@@ -567,61 +473,63 @@ export default function CapacityPage() {
     );
   };
 
-  const handleCreateRateCard = () => {
-    const cost = parseFloat(rateCardForm.annualCost);
-    if (!rateCardForm.division || !rateCardForm.location || !rateCardForm.grade || isNaN(cost) || cost <= 0) {
-      toast.error("All fields are required"); return;
-    }
-    upsertRateCardMutation.mutate(
-      { companyId, division: rateCardForm.division, location: rateCardForm.location, grade: rateCardForm.grade, annualCost: cost },
-      {
-        onSuccess: () => {
-          toast.success("Rate card saved");
-          setShowRateCardDialog(false);
-          setRateCardForm({ division: "", location: "", grade: "", annualCost: "" });
-        },
-        onError: (err) => toast.error(err.message || "Failed to save"),
-      },
-    );
-  };
-
   // ─── Aggregations ─────────────────────────────────────────────────────────
+
+  // Heavy, dataset-wide aggregates are driven off a DEFERRED copy of the draft.
+  // While a user types into a cell, `localDraft` updates immediately (so the
+  // edited input stays responsive), but these O(n) reductions over the whole
+  // dataset run at a lower priority and are allowed to lag a frame behind. This
+  // keeps typing smooth even with thousands of members.
+  const deferredDraft = useDeferredValue(localDraft);
 
   // Cross-squad FTE totals per person (for overallocation detection)
   // Scans ALL draft entries, not just server squad members
   const personTotalFTE = useMemo(() => {
     const map = new Map<string, PeriodValues>();
-    for (const [key, alloc] of localDraft) {
+    for (const [key, alloc] of deferredDraft) {
       const [membershipId] = key.split("|");
       const existing = map.get(membershipId) ?? zeroPeriods();
       for (const pk of PERIODS) existing[pk] += alloc[pk];
       map.set(membershipId, existing);
     }
     return map;
-  }, [localDraft]);
+  }, [deferredDraft]);
 
   const totalFTE = useMemo(() => {
     const t = zeroPeriods();
     for (const sq of groupedData) {
       for (const m of sq.members) {
-        const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
+        const alloc = deferredDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
         for (const pk of PERIODS) t[pk] += alloc[pk];
       }
     }
     return t;
-  }, [groupedData, localDraft]);
+  }, [groupedData, deferredDraft]);
 
   const totalCost = useMemo(() => {
     const t = zeroPeriods();
     for (const sq of groupedData) {
       for (const m of sq.members) {
-        const alloc = localDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
+        const alloc = deferredDraft.get(draftKey(m.membershipId, sq.orgUnitId)) ?? m.allocations;
         const monthlyCost = m.annualCost ? m.annualCost / 12 : 0;
         for (const pk of PERIODS) t[pk] += Math.round(alloc[pk] * monthlyCost);
       }
     }
     return t;
-  }, [groupedData, localDraft]);
+  }, [groupedData, deferredDraft]);
+
+  // Stable resolvers passed to the virtualized table. `getAlloc` returns the
+  // live draft value for a member+squad; `getPersonTotals` returns the deferred
+  // cross-squad totals used for over/under-allocation cell coloring.
+  const getAlloc = useCallback(
+    (membershipId: string, orgUnitId: string): PeriodValues =>
+      localDraft.get(draftKey(membershipId, orgUnitId)) ?? zeroPeriods(),
+    [localDraft],
+  );
+  const getPersonTotals = useCallback(
+    (membershipId: string): PeriodValues => personTotalFTE.get(membershipId) ?? zeroPeriods(),
+    [personTotalFTE],
+  );
 
   // Deduplicate members across squads (a person in 2 squads counts once)
   const uniqueMembers = useMemo(() => {
@@ -753,27 +661,8 @@ export default function CapacityPage() {
         <StatCard label="Annual Cost" value={fmtGBP(annualCostTotal)} sub={`FY ${fiscalYear}`} icon="payments" color="bg-error-container" />
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-outline-variant">
-        <button
-          type="button"
-          onClick={() => setActiveTab("phasing")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "phasing" ? "text-primary border-primary" : "text-surface-variant-foreground border-transparent hover:text-surface-foreground"}`}
-        >
-          FTE Phasing
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("rate-cards")}
-          className={`px-4 py-2.5 text-[14px] font-medium transition-colors border-b-2 ${activeTab === "rate-cards" ? "text-primary border-primary" : "text-surface-variant-foreground border-transparent hover:text-surface-foreground"}`}
-        >
-          Rate Cards ({rateCards.length})
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === "phasing" ? (
-        <>
+      {/* FTE Phasing */}
+      <>
           {/* Bulk expand / collapse */}
           {groupedData.length > 0 && (
             <div className="flex justify-end">
@@ -837,69 +726,17 @@ export default function CapacityPage() {
                       </span>
                     </button>
                     {isExpanded && (
-                    <div className="overflow-x-auto">
-                      <Table className="table-fixed">
-                        <TableHeader className="sticky top-0 z-10 bg-surface">
-                          <TableRow>
-                            <TableHead className="sticky left-0 z-20 bg-surface w-50">Member</TableHead>
-                            <TableHead className="w-12 text-center">Type</TableHead>
-                            <TableHead className="w-12 text-center">Grade</TableHead>
-                            {PERIODS.map((pk, i) => (
-                              <TableHead key={pk} className="text-center w-14">
-                                <div className="text-[11px]">
-                                  <span className="font-medium">{pk.toUpperCase()}</span><br/>
-                                  <span className="text-surface-variant-foreground font-normal">{MONTH_LABELS[i]}</span>
-                                </div>
-                              </TableHead>
-                            ))}
-                            <TableHead className="text-right w-24">Annual Cost</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {squad.members.map((member) => {
-                            const alloc = localDraft.get(draftKey(member.membershipId, squad.orgUnitId)) ?? member.allocations;
-                            const monthlyCost = member.annualCost ? member.annualCost / 12 : 0;
-                            const memberAnnualCost = PERIODS.reduce((s, pk) => s + alloc[pk] * monthlyCost, 0);
-
-                            return (
-                              <MemberRow
-                                key={member.membershipId}
-                                member={member}
-                                orgUnitId={squad.orgUnitId}
-                                alloc={alloc}
-                                personTotalByPeriod={personTotalFTE.get(member.membershipId) ?? zeroPeriods()}
-                                monthlyCost={monthlyCost}
-                                memberAnnualCost={memberAnnualCost}
-                                onFTEChange={handleFTEChange}
-                                onContextMenu={handleContextMenu}
-                              />
-                            );
-                          })}
-
-                          {/* Squad FTE totals */}
-                          <TableRow className="border-t-2 border-outline-variant bg-surface-container-low/50 font-medium">
-                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/50 text-[12px]">FTE Total</TableCell>
-                            <TableCell />
-                            <TableCell />
-                            {PERIODS.map((pk) => (
-                              <TableCell key={pk} className="text-center text-[12px] font-semibold">{fmtFTE(squadFTETotals[pk])}</TableCell>
-                            ))}
-                            <TableCell className="text-right text-[12px] font-semibold">{fmtGBP(sumPeriods(squadCostTotals))}</TableCell>
-                          </TableRow>
-
-                          {/* Squad cost totals */}
-                          <TableRow className="bg-surface-container-low/30">
-                            <TableCell className="sticky left-0 z-10 bg-surface-container-low/30 text-[12px] text-surface-variant-foreground">Monthly Cost</TableCell>
-                            <TableCell />
-                            <TableCell />
-                            {PERIODS.map((pk) => (
-                              <TableCell key={pk} className="text-center text-[11px] text-surface-variant-foreground">{fmtGBP(squadCostTotals[pk])}</TableCell>
-                            ))}
-                            <TableCell />
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </div>
+                      <VirtualizedAllocationTable
+                        members={squad.members}
+                        orgUnitId={squad.orgUnitId}
+                        monthLabels={MONTH_LABELS}
+                        getAlloc={getAlloc}
+                        getPersonTotals={getPersonTotals}
+                        onFTEChange={handleFTEChange}
+                        onContextMenu={handleContextMenu}
+                        squadFTETotals={squadFTETotals}
+                        squadCostTotals={squadCostTotals}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -967,93 +804,7 @@ export default function CapacityPage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </>
-      ) : (
-        /* Rate Cards Tab */
-        <Card variant="elevated">
-          <CardContent className="p-0">
-            <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
-              <div>
-                <Typography variant="title-medium">Perm Rate Cards</Typography>
-                <Typography variant="body-small" color="surface-variant-foreground">
-                  Annual cost lookup by Division × Location × Grade. SubCon uses day rate × 228.
-                </Typography>
-              </div>
-              <Button onClick={() => setShowRateCardDialog(true)}>
-                <Icon name="add" size={18} />Add Rate Card
-              </Button>
-            </div>
-            {rateCards.length === 0 ? (
-              <div className="flex flex-col items-center py-16 text-center">
-                <Icon name="credit_card" size={40} className="text-surface-variant-foreground/30 mb-4" />
-                <Typography variant="title-medium" className="mb-1">No rate cards</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground">Add rate cards to compute Perm staff costs by Division, Location, and Grade.</Typography>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Division</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Grade</TableHead>
-                      <TableHead className="text-right">Annual Cost</TableHead>
-                      <TableHead className="text-right">Monthly</TableHead>
-                      <TableHead className="w-12" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rateCards.map((rc) => (
-                      <TableRow key={rc.id}>
-                        <TableCell className="font-medium">{rc.division}</TableCell>
-                        <TableCell>{rc.location}</TableCell>
-                        <TableCell>{rc.grade}</TableCell>
-                        <TableCell className="text-right font-medium">{fmtGBP(Number(rc.annualCost))}</TableCell>
-                        <TableCell className="text-right text-surface-variant-foreground">{fmtGBP(Math.round(Number(rc.annualCost) / 12))}</TableCell>
-                        <TableCell className="text-right">
-                          <button
-                            type="button"
-                            onClick={() => deleteRateCardMutation.mutate({ companyId, id: rc.id }, {
-                              onSuccess: () => toast.success("Rate card deleted"),
-                              onError: (err) => toast.error(err.message || "Failed to delete"),
-                            })}
-                            className="text-surface-variant-foreground hover:text-error transition-colors"
-                            aria-label="Delete"
-                          >
-                            <Icon name="delete" size={18} />
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Add Rate Card Dialog */}
-      <Dialog open={showRateCardDialog} onOpenChange={setShowRateCardDialog}>
-        <DialogContent icon="credit_card">
-          <DialogHeader centered>
-            <DialogTitle>Add Rate Card</DialogTitle>
-            <DialogDescription>Define annual cost for a Division × Location × Grade combination.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <TextField variant="outlined" label="Division" value={rateCardForm.division} onChange={(e) => setRateCardForm({ ...rateCardForm, division: e.target.value })} placeholder="e.g. Digital" />
-            <TextField variant="outlined" label="Location" value={rateCardForm.location} onChange={(e) => setRateCardForm({ ...rateCardForm, location: e.target.value })} placeholder="e.g. UK, AMEA" />
-            <TextField variant="outlined" label="Grade" value={rateCardForm.grade} onChange={(e) => setRateCardForm({ ...rateCardForm, grade: e.target.value })} placeholder="e.g. L4, L5" />
-            <TextField variant="outlined" label="Annual Cost (£)" type="number" value={rateCardForm.annualCost} onChange={(e) => setRateCardForm({ ...rateCardForm, annualCost: e.target.value })} placeholder="e.g. 65000" />
-          </div>
-          <DialogFooter>
-            <Button variant="text" onClick={() => setShowRateCardDialog(false)}>Cancel</Button>
-            <Button variant="text" onClick={handleCreateRateCard} disabled={upsertRateCardMutation.isPending}>
-              {upsertRateCardMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </>
 
       {/* Context Menu: Allocate to Squad */}
       {contextMenu && (

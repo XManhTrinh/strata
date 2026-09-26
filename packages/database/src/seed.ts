@@ -106,6 +106,15 @@ const IDS = {
     annual: "lt_annual_001",
     sick: "lt_sick_001",
   },
+  // Rate Card Sets (tabs)
+  rateCardSets: {
+    digital: "rcs_digital_001",
+  },
+  // Rate Card Groups
+  rateCardGroups: {
+    opex: "rcg_opex_001",
+    capex: "rcg_capex_001",
+  },
 };
 
 // ─── Logging Helpers ──────────────────────────────────────────────────────────
@@ -1091,6 +1100,131 @@ async function seedLeaveRequests(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// Rate Cards & Groups
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function seedRateCards(companyId: string) {
+  logSection("Rate Card Sets, Groups & Cards");
+
+  // Top-level tab (set) that holds the Opex/Capex groups.
+  const set = await prisma.rateCardSet.upsert({
+    where: { companyId_name: { companyId, name: "Digital" } },
+    update: { description: "Digital rate cards.", color: "#6750A4", displayOrder: 0 },
+    create: {
+      id: IDS.rateCardSets.digital,
+      companyId,
+      name: "Digital",
+      description: "Digital rate cards.",
+      color: "#6750A4",
+      displayOrder: 0,
+    },
+  });
+  log(`RateCardSet: ${set.name} (${set.color})`);
+
+  // Two groups, per the Digital Rate Card principles:
+  //   Opex  → "Actuals"  rate card  (orange)
+  //   Capex → "Recharge" rate card  (green)
+  const groups = [
+    {
+      id: IDS.rateCardGroups.opex,
+      name: "Opex",
+      description: "Actuals rate cards — applied when Capex/Opex = Opex.",
+      color: "#F59E0B", // orange
+      capexOpex: "Opex",
+    },
+    {
+      id: IDS.rateCardGroups.capex,
+      name: "Capex",
+      description: "Recharge rate cards — applied when Capex/Opex = Capex.",
+      color: "#10B981", // green
+      capexOpex: "Capex",
+    },
+  ];
+
+  for (const g of groups) {
+    await prisma.rateCardGroup.upsert({
+      where: { companyId_name: { companyId, name: g.name } },
+      update: { description: g.description, color: g.color, setId: set.id },
+      create: { id: g.id, companyId, name: g.name, description: g.description, color: g.color, setId: set.id },
+    });
+    log(`RateCardGroup: ${g.name} (${g.color})`);
+  }
+
+  // Every group has one card per location (UK, Offshore) × band (A–E).
+  const locations = [
+    { label: "UK", country: "UK", premium: 1.0 },
+    { label: "Offshore", country: "OFFSHORE", premium: 0.55 },
+  ];
+  const bands = [
+    { label: "A", base: 900 }, // most senior
+    { label: "B", base: 720 },
+    { label: "C", base: 560 },
+    { label: "D", base: 420 },
+    { label: "E", base: 300 }, // most junior
+  ];
+
+  // Roughly one working quarter's billable days, nudged per quarter so the
+  // table shows some variety.
+  const quarterDays = { q1: 63, q2: 61, q3: 64, q4: 60 };
+
+  const round5 = (n: number) => Math.round(n / 5) * 5;
+
+  let priority = 0;
+  let created = 0;
+
+  for (const g of groups) {
+    // Capex (Recharge) carries a small uplift over Opex (Actuals).
+    const groupMultiplier = g.capexOpex === "Capex" ? 1.12 : 1.0;
+
+    for (const loc of locations) {
+      for (const band of bands) {
+        const dayRate = round5(band.base * loc.premium * groupMultiplier);
+        const name = `${loc.label} Band ${band.label}`;
+
+        const conditions = [
+          { column: "Capex/Opex", operator: "EQUALS", value: g.capexOpex },
+          { column: "Work Country", operator: "EQUALS", value: loc.country },
+          { column: "Mapped Band", operator: "EQUALS", value: band.label },
+        ];
+
+        await prisma.rateCard.upsert({
+          where: { companyId_name: { companyId, name: `${g.name} · ${name}` } },
+          update: {
+            groupId: g.id,
+            priority,
+            isDefault: false,
+            conditions,
+            q1DayRate: dayRate, q1WorkingDays: quarterDays.q1,
+            q2DayRate: dayRate, q2WorkingDays: quarterDays.q2,
+            q3DayRate: dayRate, q3WorkingDays: quarterDays.q3,
+            q4DayRate: dayRate, q4WorkingDays: quarterDays.q4,
+          },
+          create: {
+            companyId,
+            groupId: g.id,
+            // Name is unique per company, so prefix with the group to keep the
+            // UK/Offshore band cards distinct across Opex and Capex.
+            name: `${g.name} · ${name}`,
+            priority,
+            isDefault: false,
+            conditions,
+            q1DayRate: dayRate, q1WorkingDays: quarterDays.q1,
+            q2DayRate: dayRate, q2WorkingDays: quarterDays.q2,
+            q3DayRate: dayRate, q3WorkingDays: quarterDays.q3,
+            q4DayRate: dayRate, q4WorkingDays: quarterDays.q4,
+          },
+        });
+        priority += 1;
+        created += 1;
+      }
+    }
+    log(`  ${g.name}: ${locations.length * bands.length} cards (${locations.map((l) => l.label).join(", ")} × Band ${bands.map((b) => b.label).join("/")})`);
+  }
+
+  log(`Total rate cards: ${created}`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Main entry point
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1099,25 +1233,41 @@ async function logSummary() {
   console.log("  🎉 Seed complete! Summary:");
   console.log("═══════════════════════════════════════════════════════════════");
 
+  // Count each model defensively: some entries below may reference models that
+  // no longer exist in the schema, and a missing model shouldn't fail the run
+  // (all data is already committed by the time we reach the summary).
+  const countOf = async (model: { count: () => Promise<number> } | undefined) => {
+    if (!model || typeof model.count !== "function") return "—";
+    try {
+      return await model.count();
+    } catch {
+      return "—";
+    }
+  };
+
+  const p = prisma as unknown as Record<string, { count: () => Promise<number> } | undefined>;
   const counts = {
-    Companies: await prisma.company.count(),
-    Organizations: await prisma.organization.count(),
-    OrgUnitTypes: await prisma.organizationUnitType.count(),
-    OrgUnits: await prisma.organizationUnit.count(),
-    "Positions (V2)": await prisma.position.count(),
-    Persons: await prisma.person.count(),
-    Users: await prisma.user.count(),
-    Employees: await prisma.employee.count(),
-    Memberships: await prisma.userCompanyMembership.count(),
-    "Roles (V2)": await prisma.role.count(),
-    RoleAssignments: await prisma.roleAssignment.count(),
-    Features: await prisma.feature.count(),
-    ReportingRelationships: await prisma.reportingRelationship.count(),
-    EventTypes: await prisma.eventType.count(),
-    LeaveTypeConfigs: await prisma.leaveTypeConfig.count(),
-    CalendarEvents: await prisma.calendarEvent.count(),
-    LeaveBalances: await prisma.leaveBalance.count(),
-    LeaveRequests: await prisma.calendarLeaveRequest.count(),
+    Companies: await countOf(p.company),
+    Organizations: await countOf(p.organization),
+    OrgUnitTypes: await countOf(p.organizationUnitType),
+    OrgUnits: await countOf(p.organizationUnit),
+    "Positions (V2)": await countOf(p.position),
+    Persons: await countOf(p.person),
+    Users: await countOf(p.user),
+    Employees: await countOf(p.employee),
+    Memberships: await countOf(p.userCompanyMembership),
+    "Roles (V2)": await countOf(p.role),
+    RoleAssignments: await countOf(p.roleAssignment),
+    Features: await countOf(p.feature),
+    ReportingRelationships: await countOf(p.reportingRelationship),
+    EventTypes: await countOf(p.eventType),
+    LeaveTypeConfigs: await countOf(p.leaveTypeConfig),
+    CalendarEvents: await countOf(p.calendarEvent),
+    LeaveBalances: await countOf(p.leaveBalance),
+    LeaveRequests: await countOf(p.calendarLeaveRequest),
+    RateCardSets: await countOf(p.rateCardSet),
+    RateCardGroups: await countOf(p.rateCardGroup),
+    RateCards: await countOf(p.rateCard),
   };
 
   for (const [entity, count] of Object.entries(counts)) {
@@ -1224,6 +1374,9 @@ async function main() {
   await seedCalendarEvents(company.id, users, eventTypes);
   await seedLeaveBalances(company.id, users, leaveTypes);
   await seedLeaveRequests(company.id, users, leaveTypes, eventTypes);
+
+  // Finance
+  await seedRateCards(company.id);
 
   // Summary
   await logSummary();

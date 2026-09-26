@@ -77,7 +77,7 @@ export class OrgChartService {
     // 2. Three parallel queries
     const [memberships, relationships] = await Promise.all([
       this.prisma.userCompanyMembership.findMany({
-        where: { companyId },
+        where: { companyId, isSuperAdmin: false },
         include: {
           position: { select: { name: true } },
           orgUnit: { select: { name: true } },
@@ -141,9 +141,9 @@ export class OrgChartService {
       throw new NotFoundException('Organization unit not found');
     }
 
-    // Get employees in this unit
+    // Get employees in this unit (super admins are not org-chart members)
     const memberships = await this.prisma.userCompanyMembership.findMany({
-      where: { companyId, orgUnitId: unitId },
+      where: { companyId, orgUnitId: unitId, isSuperAdmin: false },
       include: {
         position: { select: { name: true } },
       },
@@ -236,8 +236,11 @@ export class OrgChartService {
     const requestingMembership = memberships.find(m => m.userId === requestingUserId);
     const isSuperAdmin = requestingMembership?.isSuperAdmin ?? false;
 
-    // 5. Map to OrgChartPerson[]
-    const people: OrgChartPerson[] = users.map(user => {
+    // 5. Map to OrgChartPerson[] — exclude super admins (account creators), who
+    // are not part of the org chart.
+    const people: OrgChartPerson[] = users
+      .filter(user => !memberMap.get(user.id)?.isSuperAdmin)
+      .map(user => {
       const membership = memberMap.get(user.id);
       const parentId = relMap.get(user.id) ?? null;
 

@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
     "@strata/config",
     "@strata/utils",
   ],
+  async redirects() {
+    // Finance routes were consolidated under /finance. Keep old links working.
+    return [
+      { source: "/budgets", destination: "/finance/budgets", permanent: true },
+      { source: "/capacity", destination: "/finance/capacity", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -209,3 +209,29 @@ export function getPathToRoot(persons: Person[], targetId: string): string[] {
 
   return path;
 }
+
+/**
+ * Like getPathToRoot, but returns { id, name } for each step so callers can
+ * make the breadcrumb interactive (e.g. click a segment to focus that person).
+ */
+export function getPathToRootNodes(
+  persons: Person[],
+  targetId: string,
+): { id: string; name: string }[] {
+  const path: { id: string; name: string }[] = [];
+  let currentId: string | null = targetId;
+  const seen = new Set<string>();
+
+  const personMap = new Map<string, Person>();
+  for (const p of persons) personMap.set(p.id, p);
+
+  while (currentId && !seen.has(currentId)) {
+    seen.add(currentId);
+    const person = personMap.get(currentId);
+    if (!person) break;
+    path.unshift({ id: person.id, name: person.fullName });
+    currentId = person.parentId;
+  }
+
+  return path;
+}

@@ -86,9 +86,40 @@ export class CompanyPeopleService {
     const page = options.page ?? 1;
     const pageSize = options.pageSize ?? 100;
     const skip = (page - 1) * pageSize;
+    const search = options.search?.trim();
+
+    // Search is by person name/email. Those live on Person/User (no direct
+    // relation from membership), so resolve matching userIds first and constrain
+    // the membership query to them — this makes search + pagination + total all
+    // operate on the FILTERED set (not just the current page).
+    let userIdFilter: string[] | undefined;
+    if (search) {
+      const matchingUsers = await this.prisma.user.findMany({
+        where: {
+          person: {
+            OR: [
+              { fullName: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
+            ],
+          },
+        },
+        select: { id: true },
+      });
+      userIdFilter = matchingUsers.map((u) => u.id);
+      // No matches → short-circuit with an empty page.
+      if (userIdFilter.length === 0) {
+        return { data: [], total: 0, page, pageSize };
+      }
+    }
+
+    const membershipWhere = {
+      companyId,
+      isSuperAdmin: false,
+      ...(userIdFilter ? { userId: { in: userIdFilter } } : {}),
+    };
 
     const memberships = await this.prisma.userCompanyMembership.findMany({
-      where: { companyId, isSuperAdmin: false },
+      where: membershipWhere,
       select: {
         id: true,
         userId: true,
@@ -118,7 +149,7 @@ export class CompanyPeopleService {
     });
     const userMap = new Map(users.map((u) => [u.id, u]));
 
-    let members: MemberResponse[] = memberships
+    const members: MemberResponse[] = memberships
       .map((m) => {
         const user = userMap.get(m.userId);
         const person = user?.person;
@@ -156,19 +187,10 @@ export class CompanyPeopleService {
       })
       .filter((m): m is MemberResponse => m !== null);
 
-    if (options.search) {
-      const q = options.search.toLowerCase();
-      members = members.filter(
-        (m) =>
-          m.fullName.toLowerCase().includes(q) ||
-          m.email.toLowerCase().includes(q),
-      );
-    }
-
     members.sort((a, b) => a.fullName.localeCompare(b.fullName));
 
     const total = await this.prisma.userCompanyMembership.count({
-      where: { companyId, isSuperAdmin: false },
+      where: membershipWhere,
     });
 
     return { data: members, total, page, pageSize };

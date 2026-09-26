@@ -575,7 +575,7 @@ function MappingStep({
           {columnMappings.map((mapping, idx) => {
             const isSkipped = mapping.target === "skip";
             return (
-            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""} ${errorIndices.has(idx) ? "bg-error/8 ring-1 ring-error/20 rounded" : ""}`}>
+            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_48px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""} ${errorIndices.has(idx) ? "bg-error/8 ring-1 ring-error/20 rounded" : ""}`}>
               <div className="flex items-center gap-1.5 min-w-0">
                 <Icon name="table_chart" size={12} className="text-surface-variant-foreground shrink-0" />
                 <span className={`text-[11px] font-medium truncate ${isSkipped ? "line-through text-surface-variant-foreground" : "text-surface-foreground"}`}>{mapping.csvHeader}</span>
@@ -596,14 +596,24 @@ function MappingStep({
                   className="w-full text-[11px]"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => onMappingChange(idx, isSkipped ? "extra" : "skip")}
-                className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors"
-                title={isSkipped ? "Restore column" : "Skip column"}
-              >
-                <Icon name={isSkipped ? "undo" : "close"} size={14} className="text-surface-variant-foreground" />
-              </button>
+              <div className="flex items-center justify-end gap-1">
+                <button
+                  type="button"
+                  onClick={() => onMappingChange(idx, "extra")}
+                  className={`flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors ${mapping.target === "extra" ? "text-primary" : "text-surface-variant-foreground"}`}
+                  title="Use as extra column (stored as metadata)"
+                >
+                  <Icon name="dataset" size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onMappingChange(idx, isSkipped ? "extra" : "skip")}
+                  className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors"
+                  title={isSkipped ? "Restore column" : "Skip column"}
+                >
+                  <Icon name={isSkipped ? "undo" : "close"} size={14} className="text-surface-variant-foreground" />
+                </button>
+              </div>
             </div>
             );
           })}

@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaClient, Prisma } from '@strata/database';
 
 // ─── DTOs ───────────────────────────────────────────────────────────────────────
@@ -24,13 +19,6 @@ export interface UpsertAllocationDto {
   p10: number;
   p11: number;
   p12: number;
-}
-
-export interface CreateRateCardDto {
-  division: string;
-  location: string;
-  grade: string;
-  annualCost: number;
 }
 
 export interface SquadCapacitySummary {
@@ -208,15 +196,8 @@ export class CapacityService {
       },
     });
 
-    // Fetch all rate cards for cost lookup
-    const rateCards = await this.prisma.rateCard.findMany({
-      where: { companyId },
-    });
-    const rateCardMap = new Map<string, number>();
-    for (const rc of rateCards) {
-      const key = `${rc.division}|${rc.location}|${rc.grade}`.toLowerCase();
-      rateCardMap.set(key, Number(rc.annualCost));
-    }
+    // Member costs come from the rate-card "apply" snapshot (membership.appliedCost),
+    // set on the rate-cards page. Falls back to salary / dayRate×228 when unset.
 
     // Fetch user data (name, email) once for all memberships — batched, not N+1
     const userIds = [...new Set(allocations.map((a) => a.membership.userId))];
@@ -264,23 +245,6 @@ export class CapacityService {
         const grade = membership.careerLevel?.label ?? metadata['Grade'] ?? null;
         const employmentType = membership.employmentType;
 
-        // Compute annual cost
-        let annualCost: number | null = null;
-        if (employmentType === 'SubCon' && membership.dayRate) {
-          annualCost = Number(membership.dayRate) * 228;
-        } else if (employmentType === 'Perm') {
-          // Try rate card first
-          if (division && location && grade) {
-            const rcKey = `${division}|${location}|${grade}`.toLowerCase();
-            const rcCost = rateCardMap.get(rcKey);
-            if (rcCost) annualCost = rcCost;
-          }
-          // Fall back to salary
-          if (!annualCost && membership.annualSalary) {
-            annualCost = Number(membership.annualSalary);
-          }
-        }
-
         if (employmentType === 'Perm') permCount++;
         if (employmentType === 'SubCon') subConCount++;
 
@@ -290,13 +254,16 @@ export class CapacityService {
           p9: Number(alloc.p9), p10: Number(alloc.p10), p11: Number(alloc.p11), p12: Number(alloc.p12),
         };
 
+        // Per-period monthly cost (at 1.0 FTE), then scaled by FTE per period.
         const monthlyCostPeriods = zeroPeriods();
-        const monthlyCostBase = annualCost ? annualCost / 12 : 0;
+        const perPeriodBase = this.resolveMemberPeriodCost(membership);
 
+        let annualCost = 0;
         for (const pk of PERIOD_KEYS) {
           const fte = allocPeriods[pk];
           fteTotals[pk] += fte;
-          const cost = fte * monthlyCostBase;
+          annualCost += perPeriodBase[pk];
+          const cost = fte * perPeriodBase[pk];
           monthlyCostPeriods[pk] = Math.round(cost);
           costTotals[pk] += Math.round(cost);
         }
@@ -345,63 +312,44 @@ export class CapacityService {
     return summaries.sort((a, b) => a.orgUnitName.localeCompare(b.orgUnitName));
   }
 
-  // ─── Rate Cards ───────────────────────────────────────────────────────────
+  /**
+   * Resolve a member's monthly cost per period (at 1.0 FTE).
+   *
+   * Prefers the rate-card "apply" snapshot (membership.appliedCost, a
+   * { p1..p12 } map). Falls back to the simple heuristic — SubCon = dayRate × 228,
+   * Perm = annualSalary — spread evenly across the year — when no card has been
+   * applied.
+   */
+  private resolveMemberPeriodCost(membership: {
+    appliedCost: Prisma.JsonValue | null;
+    dayRate: Prisma.Decimal | null;
+    annualSalary: Prisma.Decimal | null;
+    employmentType: string | null;
+  }): PeriodValues {
+    const applied = membership.appliedCost as Partial<
+      Record<(typeof PERIOD_KEYS)[number], number>
+    > | null;
+    if (applied && typeof applied === 'object') {
+      const periods = zeroPeriods();
+      let hasValue = false;
+      for (const pk of PERIOD_KEYS) {
+        const v = Number(applied[pk] ?? 0);
+        if (v) hasValue = true;
+        periods[pk] = isFinite(v) ? v : 0;
+      }
+      if (hasValue) return periods;
+    }
 
-  async getRateCards(companyId: string) {
-    return this.prisma.rateCard.findMany({
-      where: { companyId },
-      orderBy: [{ division: 'asc' }, { location: 'asc' }, { grade: 'asc' }],
-    });
-  }
-
-  async upsertRateCard(companyId: string, dto: CreateRateCardDto) {
-    return this.prisma.rateCard.upsert({
-      where: {
-        companyId_division_location_grade: {
-          companyId,
-          division: dto.division,
-          location: dto.location,
-          grade: dto.grade,
-        },
-      },
-      create: {
-        companyId,
-        division: dto.division,
-        location: dto.location,
-        grade: dto.grade,
-        annualCost: dto.annualCost,
-      },
-      update: {
-        annualCost: dto.annualCost,
-      },
-    });
-  }
-
-  async bulkUpsertRateCards(companyId: string, cards: CreateRateCardDto[]) {
-    const results = await this.prisma.$transaction(
-      cards.map((c) =>
-        this.prisma.rateCard.upsert({
-          where: {
-            companyId_division_location_grade: {
-              companyId,
-              division: c.division,
-              location: c.location,
-              grade: c.grade,
-            },
-          },
-          create: { companyId, ...c },
-          update: { annualCost: c.annualCost },
-        }),
-      ),
-    );
-    return { upserted: results.length };
-  }
-
-  async deleteRateCard(companyId: string, id: string) {
-    const card = await this.prisma.rateCard.findFirst({
-      where: { id, companyId },
-    });
-    if (!card) throw new NotFoundException('Rate card not found');
-    return this.prisma.rateCard.delete({ where: { id } });
+    // Fallback heuristic.
+    let annual = 0;
+    if (membership.employmentType === 'SubCon' && membership.dayRate) {
+      annual = Number(membership.dayRate) * 228;
+    } else if (membership.employmentType === 'Perm' && membership.annualSalary) {
+      annual = Number(membership.annualSalary);
+    }
+    const monthly = annual / 12;
+    const periods = zeroPeriods();
+    for (const pk of PERIOD_KEYS) periods[pk] = monthly;
+    return periods;
   }
 }
