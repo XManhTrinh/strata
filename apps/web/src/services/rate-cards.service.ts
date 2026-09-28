@@ -270,6 +270,28 @@ export function useDeleteRateCard() {
   });
 }
 
+export interface SeedDemoResult {
+  set: string;
+  groups: number;
+  cards: number;
+}
+
+/** Creates a ready-made "Demo" set of rate cards for quickly populating the UI. */
+export function useSeedDemoRateCards() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId }: { companyId: string }) =>
+      apiClient<SeedDemoResult>(`/companies/${companyId}/rate-cards/seed-demo`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, { companyId }) => {
+      queryClient.invalidateQueries({ queryKey: setsKey(companyId) });
+      queryClient.invalidateQueries({ queryKey: groupsKey(companyId) });
+      queryClient.invalidateQueries({ queryKey: cardsKey(companyId) });
+    },
+  });
+}
+
 export function useApplyRateCards() {
   const queryClient = useQueryClient();
   return useMutation({

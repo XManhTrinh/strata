@@ -10,6 +10,7 @@ import { RateCardsModule } from './rate-cards/rate-cards.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { OrgChartModule } from './org-chart/org-chart.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AssistantModule } from './assistant/assistant.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CalendarModule,
     OrgChartModule,
     NotificationsModule,
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [],

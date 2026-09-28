@@ -38,6 +38,7 @@ import {
   useCreateRateCardSet,
   useUpdateRateCardSet,
   useDeleteRateCardSet,
+  useSeedDemoRateCards,
   type RateCard,
   type RateCardGroup,
   type RateCardSet,
@@ -245,6 +246,7 @@ export default function RateCardsPage() {
   const createSet = useCreateRateCardSet();
   const updateSet = useUpdateRateCardSet();
   const deleteSet = useDeleteRateCardSet();
+  const seedDemo = useSeedDemoRateCards();
 
   const orderedCards = useMemo(
     () => [...cards].sort((a, b) => a.priority - b.priority),
@@ -484,6 +486,19 @@ export default function RateCardsPage() {
     );
   };
 
+  const handleSeedDemo = () => {
+    seedDemo.mutate(
+      { companyId },
+      {
+        onSuccess: (res) => {
+          toast.success(`Added ${res.cards} demo rate cards`);
+          setActiveTab("");
+        },
+        onError: (err) => toast.error(err.message || "Failed to add demo cards"),
+      },
+    );
+  };
+
   // Continuous index across all cards for the numbered badge (priority order).
   const indexOf = (card: RateCard) => orderedCards.findIndex((c) => c.id === card.id);
 
@@ -605,6 +620,10 @@ export default function RateCardsPage() {
           </Typography>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
+            <Icon name="bolt" size={18} />
+            {seedDemo.isPending ? "Adding…" : "Quick demo cards"}
+          </Button>
           <Button variant="tonal" onClick={openCreateSet}>
             <Icon name="add" size={18} />
             New tab
@@ -688,6 +707,12 @@ export default function RateCardsPage() {
                     />
                   )}
                   <Typography variant="title-medium">{t.name}</Typography>
+                  {t.name.includes("(Demo)") && (
+                    <Chip variant="assist">
+                      <Icon name="bolt" size={14} />
+                      Demo
+                    </Chip>
+                  )}
                   {t.set?.description && (
                     <Typography variant="body-small" color="surface-variant-foreground">
                       {t.set.description}

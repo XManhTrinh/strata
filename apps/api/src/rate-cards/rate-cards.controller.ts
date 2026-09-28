@@ -117,6 +117,14 @@ export class RateCardsController {
     return this.service.deleteSet(companyId, id);
   }
 
+  // ─── Demo data ────────────────────────────────────────────────────────────
+
+  @Post('seed-demo')
+  @HttpCode(HttpStatus.OK)
+  async seedDemo(@Param('companyId') companyId: string) {
+    return this.service.seedDemo(companyId);
+  }
+
   // ─── Groups ─────────────────────────────────────────────────────────────
 
   @Get('groups')

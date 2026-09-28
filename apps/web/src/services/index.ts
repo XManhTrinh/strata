@@ -8,3 +8,4 @@ export * from "./rate-cards.service";
 export * from "./company.service";
 
 export * from "./notifications.service";
+export * from "./assistant.service";

@@ -5,6 +5,7 @@ import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { SkipToContent } from "./skip-to-content";
 import { RouteAnnouncer } from "@/components/accessibility/route-announcer";
+import { AssistantPanel } from "@/components/assistant/assistant-panel";
 
 interface AppShellProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export function AppShell({ children }: AppShellProps) {
             {children}
           </main>
         </div>
+        <AssistantPanel />
       </div>
     </>
   );

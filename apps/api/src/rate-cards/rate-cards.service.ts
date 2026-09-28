@@ -189,6 +189,106 @@ export class RateCardsService {
     return this.prisma.rateCardSet.delete({ where: { id } });
   }
 
+  // ─── Demo data ──────────────────────────────────────────────────────────────
+
+  /**
+   * Create a ready-made "Demo" set of rate cards for the company so the UI can
+   * be populated quickly (mirrors the seed: a Digital-style set → Opex/Capex
+   * groups → UK/Offshore × band cards). Idempotent: re-running clears and
+   * recreates the demo set's cards. Everything is tagged "(Demo)" by name so
+   * it's obvious this is quick sample data, not real rates.
+   */
+  async seedDemo(companyId: string) {
+    const SET_NAME = 'Digital (Demo)';
+    const GROUP_NAMES = { opex: 'Opex (Demo)', capex: 'Capex (Demo)' };
+    const DEMO_DESCRIPTION = 'Quick demo data — sample rate cards for previewing the UI.';
+
+    // Upsert the demo set (tab).
+    const set = await this.prisma.rateCardSet.upsert({
+      where: { companyId_name: { companyId, name: SET_NAME } },
+      update: { description: DEMO_DESCRIPTION, color: '#6750A4', displayOrder: 0 },
+      create: {
+        companyId,
+        name: SET_NAME,
+        description: DEMO_DESCRIPTION,
+        color: '#6750A4',
+        displayOrder: 0,
+      },
+    });
+
+    const groupSpecs = [
+      { name: GROUP_NAMES.opex, color: '#F59E0B', capexOpex: 'Opex', multiplier: 1.0 },
+      { name: GROUP_NAMES.capex, color: '#10B981', capexOpex: 'Capex', multiplier: 1.12 },
+    ];
+
+    const groupIdByName = new Map<string, string>();
+    for (const g of groupSpecs) {
+      const row = await this.prisma.rateCardGroup.upsert({
+        where: { companyId_name: { companyId, name: g.name } },
+        update: { description: DEMO_DESCRIPTION, color: g.color, setId: set.id },
+        create: {
+          companyId,
+          name: g.name,
+          description: DEMO_DESCRIPTION,
+          color: g.color,
+          setId: set.id,
+        },
+      });
+      groupIdByName.set(g.name, row.id);
+    }
+
+    // Clear existing demo cards so re-runs stay clean.
+    const groupIds = [...groupIdByName.values()];
+    await this.prisma.rateCard.deleteMany({
+      where: { companyId, groupId: { in: groupIds } },
+    });
+
+    const locations = [
+      { label: 'UK', geography: 'UK', premium: 1.0 },
+      { label: 'Offshore', geography: 'AMEA', premium: 0.55 },
+    ];
+    const bands = [
+      { label: 'B', base: 780 },
+      { label: 'C', base: 620 },
+      { label: 'D', base: 470 },
+      { label: 'E', base: 340 },
+    ];
+    const quarterDays = { q1: 63, q2: 61, q3: 64, q4: 60 };
+    const round5 = (n: number) => Math.round(n / 5) * 5;
+
+    let priority = 0;
+    let created = 0;
+    for (const g of groupSpecs) {
+      const groupId = groupIdByName.get(g.name)!;
+      for (const loc of locations) {
+        for (const band of bands) {
+          const dayRate = round5(band.base * loc.premium * g.multiplier);
+          await this.prisma.rateCard.create({
+            data: {
+              companyId,
+              groupId,
+              name: `${g.capexOpex} · ${loc.label} Band ${band.label} (Demo)`,
+              priority: priority++,
+              isDefault: false,
+              conditions: [
+                { column: 'Opex /Capex', operator: 'EQUALS', value: g.capexOpex },
+                { column: 'Work Geography', operator: 'EQUALS', value: loc.geography },
+                { column: 'Grade', operator: 'EQUALS', value: band.label },
+              ] as unknown as Prisma.InputJsonValue,
+              q1DayRate: toDecimal(dayRate), q1WorkingDays: toDecimal(quarterDays.q1),
+              q2DayRate: toDecimal(dayRate), q2WorkingDays: toDecimal(quarterDays.q2),
+              q3DayRate: toDecimal(dayRate), q3WorkingDays: toDecimal(quarterDays.q3),
+              q4DayRate: toDecimal(dayRate), q4WorkingDays: toDecimal(quarterDays.q4),
+            },
+          });
+          created += 1;
+        }
+      }
+    }
+
+    return { set: SET_NAME, groups: groupSpecs.length, cards: created };
+  }
+
   private cardData(companyId: string, dto: UpsertRateCardDto) {
     return {
       companyId,

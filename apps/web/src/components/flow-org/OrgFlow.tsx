@@ -248,7 +248,7 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
             {info.groupPersons!.slice(0, 10).map((p) => (
               <div
                 key={p.id}
-                className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-2 ring-white ring-outline overflow-hidden"
+                className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-2 ring-outline overflow-hidden"
               >
                 {p.avatarUrl ? (
                   <img

@@ -642,32 +642,59 @@ async function seedRoles(companyId: string) {
     log(`Role: ${role.name}`);
   }
 
-  // Assign permissions to roles — covering all 6 PermissionScopeV2 values
-  const scopeAssignments: Array<{ roleId: string; featurePermissionId: string; scope: "OWN" | "DIRECT_REPORTS" | "ORGANIZATION_UNIT" | "BRANCH" | "COMPANY" | "GLOBAL" }> = [
-    // Admin gets GLOBAL + COMPANY scope on all permissions
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.peopleRead, scope: "GLOBAL" },
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.peopleWrite, scope: "COMPANY" },
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.calendarRead, scope: "GLOBAL" },
-    { roleId: IDS.roles.admin, featurePermissionId: IDS.featurePermissions.calendarWrite, scope: "COMPANY" },
-    // Manager gets DIRECT_REPORTS + ORGANIZATION_UNIT + BRANCH
-    { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.peopleRead, scope: "BRANCH" },
-    { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.peopleWrite, scope: "DIRECT_REPORTS" },
-    { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.calendarRead, scope: "ORGANIZATION_UNIT" },
-    { roleId: IDS.roles.manager, featurePermissionId: IDS.featurePermissions.calendarWrite, scope: "DIRECT_REPORTS" },
-    // Employee gets OWN scope
-    { roleId: IDS.roles.employee, featurePermissionId: IDS.featurePermissions.peopleRead, scope: "OWN" },
-    { roleId: IDS.roles.employee, featurePermissionId: IDS.featurePermissions.calendarRead, scope: "OWN" },
-    { roleId: IDS.roles.employee, featurePermissionId: IDS.featurePermissions.calendarWrite, scope: "OWN" },
+  // Feature permissions are created by the API's FeatureRegistryBootstrap at
+  // startup (with generated ids), so resolve them by feature+permission KEY
+  // rather than hardcoded ids. Skips any that aren't registered yet.
+  const featurePermissions = await prisma.featurePermission.findMany({
+    include: { feature: { select: { key: true } } },
+  });
+  const fpId = (featureKey: string, permKey: string): string | undefined =>
+    featurePermissions.find(
+      (fp) => fp.feature.key === featureKey && fp.key === permKey,
+    )?.id;
+
+  // Assign permissions to roles — covering all 6 PermissionScope values.
+  const scopeAssignments: Array<{
+    roleId: string;
+    feature: string;
+    permission: string;
+    scope: 'OWN' | 'DIRECT_REPORTS' | 'ORGANIZATION_UNIT' | 'BRANCH' | 'COMPANY' | 'GLOBAL';
+  }> = [
+    // Admin — broad scope
+    { roleId: IDS.roles.admin, feature: 'people', permission: 'view', scope: 'GLOBAL' },
+    { roleId: IDS.roles.admin, feature: 'people', permission: 'update', scope: 'COMPANY' },
+    { roleId: IDS.roles.admin, feature: 'calendar', permission: 'view', scope: 'GLOBAL' },
+    { roleId: IDS.roles.admin, feature: 'calendar', permission: 'manage', scope: 'COMPANY' },
+    { roleId: IDS.roles.admin, feature: 'capacity', permission: 'view', scope: 'COMPANY' },
+    // Manager — mid scope
+    { roleId: IDS.roles.manager, feature: 'people', permission: 'view', scope: 'BRANCH' },
+    { roleId: IDS.roles.manager, feature: 'people', permission: 'update', scope: 'DIRECT_REPORTS' },
+    { roleId: IDS.roles.manager, feature: 'calendar', permission: 'view', scope: 'ORGANIZATION_UNIT' },
+    { roleId: IDS.roles.manager, feature: 'calendar', permission: 'manage', scope: 'DIRECT_REPORTS' },
+    // Employee — own scope
+    { roleId: IDS.roles.employee, feature: 'people', permission: 'view', scope: 'OWN' },
+    { roleId: IDS.roles.employee, feature: 'calendar', permission: 'view', scope: 'OWN' },
+    { roleId: IDS.roles.employee, feature: 'calendar', permission: 'manage', scope: 'OWN' },
   ];
 
+  let assigned = 0;
   for (const sa of scopeAssignments) {
+    const featurePermissionId = fpId(sa.feature, sa.permission);
+    if (!featurePermissionId) continue; // permission not registered yet — skip
     await prisma.rolePermission.upsert({
-      where: { roleId_featurePermissionId_scope: { roleId: sa.roleId, featurePermissionId: sa.featurePermissionId, scope: sa.scope } },
+      where: {
+        roleId_featurePermissionId_scope: {
+          roleId: sa.roleId,
+          featurePermissionId,
+          scope: sa.scope,
+        },
+      },
       update: {},
-      create: { roleId: sa.roleId, featurePermissionId: sa.featurePermissionId, scope: sa.scope },
+      create: { roleId: sa.roleId, featurePermissionId, scope: sa.scope },
     });
+    assigned += 1;
   }
-  log(`Assigned ${scopeAssignments.length} role-permission combinations covering all 6 PermissionScopeV2 values`);
+  log(`Assigned ${assigned} role-permission combinations`);
 
   return results;
 }
