@@ -8,8 +8,27 @@ import type {
 } from '../assistant.types';
 
 const DEFAULT_MODEL = 'gemini-3.8-flash';
+// No default fallback: on this API the sibling flash models are unreliable
+// (intermittent 404s). Retrying the primary handles transient 429/503. Set
+// GEMINI_FALLBACK_MODEL explicitly to enable a fallback if one is dependable.
+const DEFAULT_FALLBACK_MODEL = '';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+// Statuses worth retrying: rate limit, overload/unavailable, and 404 — on this
+// API the flash models intermittently 404 under load rather than returning 503.
+const RETRYABLE_STATUS = new Set([404, 429, 500, 503]);
+const MAX_ATTEMPTS_PER_MODEL = 3;
+const RETRY_BASE_DELAY_MS = 700;
+
+/** A Gemini call failure that carries whether a retry is worthwhile. */
+class GeminiCallError extends Error {
+  constructor(message: string, readonly retryable: boolean) {
+    super(message);
+    this.name = 'GeminiCallError';
+  }
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Shapes for the subset of the Gemini generateContent API we use. */
 interface GeminiPart {
@@ -42,6 +61,11 @@ export class GeminiProvider implements LlmProvider {
   private get model(): string {
     return process.env.GEMINI_MODEL || DEFAULT_MODEL;
   }
+  private get fallbackModel(): string | null {
+    const fb = process.env.GEMINI_FALLBACK_MODEL ?? DEFAULT_FALLBACK_MODEL;
+    // A fallback only helps if it differs from the primary model.
+    return fb && fb !== this.model ? fb : null;
+  }
   private get timeoutMs(): number {
     const raw = Number(process.env.ASSISTANT_REQUEST_TIMEOUT_MS);
     return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_TIMEOUT_MS;
@@ -57,6 +81,39 @@ export class GeminiProvider implements LlmProvider {
       throw new Error('LLM provider is not configured');
     }
 
+    // Try the primary model (with retries on transient errors), then the
+    // fallback model. Gemini's shared models occasionally return 429/503 under
+    // load; a couple of retries + a fallback keeps that invisible to the user.
+    const models = [this.model, this.fallbackModel].filter(
+      (m): m is string => !!m,
+    );
+
+    let lastError: Error = new Error('LLM request failed');
+    for (const model of models) {
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_MODEL; attempt++) {
+        try {
+          return await this.callModel(model, input);
+        } catch (err) {
+          lastError = err as Error;
+          const retryable = err instanceof GeminiCallError && err.retryable;
+          const moreAttempts = attempt < MAX_ATTEMPTS_PER_MODEL;
+          if (retryable && moreAttempts) {
+            await sleep(RETRY_BASE_DELAY_MS * attempt);
+            continue;
+          }
+          // Non-retryable, or out of attempts for this model → move to fallback.
+          break;
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  /** A single generateContent call against one model. */
+  private async callModel(
+    model: string,
+    input: LlmGenerateInput,
+  ): Promise<LlmGenerateResult> {
     const body = {
       systemInstruction: { parts: [{ text: input.systemInstruction }] },
       contents: this.toContents(input.messages),
@@ -82,7 +139,7 @@ export class GeminiProvider implements LlmProvider {
         : undefined,
     };
 
-    const url = `${GEMINI_BASE}/${this.model}:generateContent?key=${this.apiKey}`;
+    const url = `${GEMINI_BASE}/${model}:generateContent?key=${this.apiKey}`;
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -102,9 +159,13 @@ export class GeminiProvider implements LlmProvider {
       const cause =
         e?.cause instanceof Error ? `${e.cause.name}: ${e.cause.message}` : String(e?.cause ?? '');
       this.logger.warn(
-        `Gemini request failed${aborted ? ' (timeout)' : ''} — ${e?.name}: ${e?.message}${cause ? ` | cause: ${cause}` : ''}`,
+        `Gemini request failed${aborted ? ' (timeout)' : ''} [${model}] — ${e?.name}: ${e?.message}${cause ? ` | cause: ${cause}` : ''}`,
       );
-      throw new Error(aborted ? 'LLM request timed out' : 'LLM request failed');
+      // Network errors and timeouts are worth a retry.
+      throw new GeminiCallError(
+        aborted ? 'LLM request timed out' : 'LLM request failed',
+        true,
+      );
     } finally {
       clearTimeout(timer);
     }
@@ -118,8 +179,8 @@ export class GeminiProvider implements LlmProvider {
       } catch {
         // ignore parse failure
       }
-      this.logger.warn(`Gemini returned HTTP ${res.status}${detail}`);
-      throw new Error('LLM request failed');
+      this.logger.warn(`Gemini returned HTTP ${res.status} [${model}]${detail}`);
+      throw new GeminiCallError('LLM request failed', RETRYABLE_STATUS.has(res.status));
     }
 
     const data = (await res.json()) as GeminiResponse;
