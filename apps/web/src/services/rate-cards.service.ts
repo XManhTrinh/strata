@@ -7,6 +7,7 @@ export type RateCardRuleOperator =
   | "EQUALS"
   | "NOT_EQUALS"
   | "STARTS_WITH"
+  | "STARTS_WITH_ANY"
   | "ENDS_WITH"
   | "CONTAINS"
   | "IN";
@@ -282,6 +283,22 @@ export function useSeedDemoRateCards() {
   return useMutation({
     mutationFn: ({ companyId }: { companyId: string }) =>
       apiClient<SeedDemoResult>(`/companies/${companyId}/rate-cards/seed-demo`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, { companyId }) => {
+      queryClient.invalidateQueries({ queryKey: setsKey(companyId) });
+      queryClient.invalidateQueries({ queryKey: groupsKey(companyId) });
+      queryClient.invalidateQueries({ queryKey: cardsKey(companyId) });
+    },
+  });
+}
+
+/** Creates a ready-made "Consumer (Demo)" set grouped by Function. */
+export function useSeedDemoConsumer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ companyId }: { companyId: string }) =>
+      apiClient<SeedDemoResult>(`/companies/${companyId}/rate-cards/seed-demo-consumer`, {
         method: "POST",
       }),
     onSuccess: (_data, { companyId }) => {

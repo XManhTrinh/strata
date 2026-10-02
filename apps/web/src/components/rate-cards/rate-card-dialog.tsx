@@ -32,6 +32,7 @@ const OPERATOR_OPTIONS: { value: RateCardRuleOperator; label: string }[] = [
   { value: "EQUALS", label: "equals" },
   { value: "NOT_EQUALS", label: "does not equal" },
   { value: "STARTS_WITH", label: "starts with" },
+  { value: "STARTS_WITH_ANY", label: "starts with any of (comma-separated)" },
   { value: "ENDS_WITH", label: "ends with" },
   { value: "CONTAINS", label: "contains" },
   { value: "IN", label: "is one of (comma-separated)" },
@@ -103,6 +104,7 @@ export function RateCardDialog({
   const [conditions, setConditions] = useState<RuleCondition[]>([]);
   const [quarters, setQuarters] = useState<QuarterDraft>(emptyQuarters());
   const [error, setError] = useState<string | null>(null);
+  const [showConditionsHelp, setShowConditionsHelp] = useState(false);
 
   const groupOptions = useMemo(
     () => [
@@ -250,7 +252,48 @@ export function RateCardDialog({
           {!isDefault && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Typography variant="title-small">Conditions (all must match)</Typography>
+                <div className="flex items-center gap-1.5">
+                  <Typography variant="title-small">Conditions (all must match)</Typography>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowConditionsHelp((v) => !v)}
+                      aria-label="How conditions work"
+                      aria-expanded={showConditionsHelp}
+                      className="flex items-center text-surface-variant-foreground hover:text-primary transition-colors"
+                    >
+                      <Icon name="info" size={18} />
+                    </button>
+                    {showConditionsHelp && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowConditionsHelp(false)}
+                        />
+                        <div className="absolute left-0 top-full mt-2 z-50 w-80 rounded-xl bg-surface-container-high border border-outline-variant shadow-lg p-4 space-y-2">
+                          <Typography variant="label-large" className="font-medium">
+                            How conditions work
+                          </Typography>
+                          <Typography variant="body-small" color="surface-variant-foreground">
+                            A rate card matches a member only when <span className="font-medium text-surface-foreground">all</span> of its conditions are true (AND). Pick a column, an operator, and a value.
+                          </Typography>
+                          <ul className="space-y-1.5 text-[12px] text-surface-variant-foreground">
+                            <li><span className="font-medium text-surface-foreground">equals</span> — exact match (e.g. Grade = D).</li>
+                            <li><span className="font-medium text-surface-foreground">does not equal</span> — anything except the value.</li>
+                            <li><span className="font-medium text-surface-foreground">starts with</span> — value is a prefix (e.g. OUC starts with Q). One prefix only.</li>
+                            <li><span className="font-medium text-surface-foreground">starts with any of</span> — comma-separated prefixes; matches if the value starts with any one (e.g. OUC starts with any of XB, XE). Acts like OR.</li>
+                            <li><span className="font-medium text-surface-foreground">ends with</span> — value is a suffix.</li>
+                            <li><span className="font-medium text-surface-foreground">contains</span> — value appears anywhere.</li>
+                            <li><span className="font-medium text-surface-foreground">is one of</span> — matches any <span className="font-medium text-surface-foreground">exact</span> value in a comma-separated list (e.g. UK, AMEA). Acts like OR, but exact values, not prefixes.</li>
+                          </ul>
+                          <Typography variant="body-small" color="surface-variant-foreground">
+                            For &ldquo;starts with X <span className="font-medium text-surface-foreground">or</span> Y&rdquo;, use <span className="font-medium text-surface-foreground">starts with any of</span>. For exact &ldquo;X or Y&rdquo;, use <span className="font-medium text-surface-foreground">is one of</span>.
+                          </Typography>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <Button variant="text" onClick={addCondition}>
                   <Icon name="add" size={18} />
                   Add condition

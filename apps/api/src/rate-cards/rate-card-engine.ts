@@ -77,6 +77,13 @@ function matchesCondition(
       return actual !== expected;
     case 'STARTS_WITH':
       return actual.startsWith(expected);
+    case 'STARTS_WITH_ANY':
+      // value is a comma-separated list of prefixes; match if any is a prefix.
+      return cond.value
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+        .some((prefix) => actual.startsWith(prefix));
     case 'ENDS_WITH':
       return actual.endsWith(expected);
     case 'CONTAINS':

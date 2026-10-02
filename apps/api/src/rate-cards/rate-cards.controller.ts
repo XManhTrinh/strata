@@ -19,6 +19,7 @@ const RuleOperatorSchema = z.enum([
   'EQUALS',
   'NOT_EQUALS',
   'STARTS_WITH',
+  'STARTS_WITH_ANY',
   'ENDS_WITH',
   'CONTAINS',
   'IN',
@@ -123,6 +124,12 @@ export class RateCardsController {
   @HttpCode(HttpStatus.OK)
   async seedDemo(@Param('companyId') companyId: string) {
     return this.service.seedDemo(companyId);
+  }
+
+  @Post('seed-demo-consumer')
+  @HttpCode(HttpStatus.OK)
+  async seedDemoConsumer(@Param('companyId') companyId: string) {
+    return this.service.seedDemoConsumer(companyId);
   }
 
   // ─── Groups ─────────────────────────────────────────────────────────────

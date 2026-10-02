@@ -304,6 +304,151 @@ export class RateCardsService {
     return { set: SET_NAME, groups: groupSpecs.length, cards: created };
   }
 
+  /**
+   * "Quick Demo Consumer" — creates a Consumer (Demo) tab following the Consumer
+   * Rate Card principles. Groups are by Function, each selected by an OUC rule:
+   *   Consumer Product  — OUC starts with any of XB, XE
+   *   Consumer Delivery — OUC = XP41
+   *   Business Design   — OUC is one of XP1, XP42
+   *   Networks          — OUC starts with T
+   * Within each group: a card per location (UK/AMEA) × band (A–F) with mock day
+   * rates. UK = 18 working days, AMEA = 19 (same across quarters). Idempotent.
+   */
+  async seedDemoConsumer(companyId: string) {
+    const SET_NAME = 'Consumer (Demo)';
+    const DEMO_DESCRIPTION =
+      'Quick demo data — Consumer rate cards grouped by Function.';
+
+    const set = await this.prisma.rateCardSet.upsert({
+      where: { companyId_name: { companyId, name: SET_NAME } },
+      update: { description: DEMO_DESCRIPTION, color: '#0EA5E9', displayOrder: 1 },
+      create: {
+        companyId,
+        name: SET_NAME,
+        description: DEMO_DESCRIPTION,
+        color: '#0EA5E9',
+        displayOrder: 1,
+      },
+    });
+
+    // Each Function is a group, selected by its own OUC rule, with an explicit
+    // day-rate table per location × band (A–F). Whole pounds, no pence. A rate
+    // of 0 means "no card for this combination" and is skipped.
+    type BandRates = Record<string, number>; // A..F
+    const functionGroups: {
+      name: string;
+      color: string;
+      oucCondition: { column: string; operator: string; value: string };
+      rates: { UK: BandRates; AMEA: BandRates };
+      /** If set, overrides the per-location working days for all this group's cards. */
+      workingDaysOverride?: number;
+    }[] = [
+      {
+        name: 'Consumer Product (Demo)',
+        color: '#8B5CF6',
+        oucCondition: { column: 'OUC', operator: 'STARTS_WITH_ANY', value: 'XB, XE' },
+        rates: {
+          UK: { A: 2445, B: 1372, C: 778, D: 398, E: 261, F: 206 },
+          AMEA: { A: 0, B: 1019, C: 632, D: 285, E: 117, F: 117 },
+        },
+      },
+      {
+        name: 'Consumer Delivery (Demo)',
+        color: '#F59E0B',
+        oucCondition: { column: 'OUC', operator: 'EQUALS', value: 'XP41' },
+        rates: {
+          UK: { A: 2445, B: 1372, C: 276, D: 212, E: 132, F: 132 },
+          AMEA: { A: 0, B: 1019, C: 632, D: 285, E: 117, F: 117 },
+        },
+      },
+      {
+        name: 'Business Design (Demo)',
+        color: '#EC4899',
+        oucCondition: { column: 'OUC', operator: 'IN', value: 'XP1, XP42' },
+        rates: {
+          UK: { A: 2445, B: 1372, C: 276, D: 212, E: 132, F: 132 },
+          AMEA: { A: 0, B: 1019, C: 632, D: 285, E: 117, F: 117 },
+        },
+      },
+      {
+        name: 'Networks (Demo)',
+        color: '#10B981',
+        oucCondition: { column: 'OUC', operator: 'STARTS_WITH', value: 'T' },
+        rates: {
+          UK: { A: 0, B: 1190, C: 609, D: 407, E: 302, F: 302 },
+          AMEA: { A: 0, B: 0, C: 138, D: 138, E: 138, F: 138 },
+        },
+        // Networks uses 18.5 working days for both UK and Offshore.
+        workingDaysOverride: 18.5,
+      },
+    ];
+
+    const groupIdByName = new Map<string, string>();
+    for (const g of functionGroups) {
+      const row = await this.prisma.rateCardGroup.upsert({
+        where: { companyId_name: { companyId, name: g.name } },
+        update: { description: DEMO_DESCRIPTION, color: g.color, setId: set.id },
+        create: {
+          companyId,
+          name: g.name,
+          description: DEMO_DESCRIPTION,
+          color: g.color,
+          setId: set.id,
+        },
+      });
+      groupIdByName.set(g.name, row.id);
+    }
+
+    // Clear existing cards in these groups so re-runs stay clean.
+    const groupIds = [...groupIdByName.values()];
+    await this.prisma.rateCard.deleteMany({
+      where: { companyId, groupId: { in: groupIds } },
+    });
+
+    const locations = [
+      { label: 'UK', geography: 'UK' as const, workingDays: 18 },
+      { label: 'Offshore', geography: 'AMEA' as const, workingDays: 19 },
+    ];
+    const bandOrder = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+
+    let priority = 0;
+    let created = 0;
+    for (const g of functionGroups) {
+      const groupId = groupIdByName.get(g.name)!;
+      // Short label without the "(Demo)" suffix for card names.
+      const fnLabel = g.name.replace(/ \(Demo\)$/, '');
+      for (const loc of locations) {
+        for (const band of bandOrder) {
+          const dayRate = g.rates[loc.geography]?.[band] ?? 0;
+          if (dayRate <= 0) continue; // no card for zero-rate combinations
+          const days = g.workingDaysOverride ?? loc.workingDays;
+          await this.prisma.rateCard.create({
+            data: {
+              companyId,
+              groupId,
+              name: `${fnLabel} · ${loc.label} Band ${band} (Demo)`,
+              priority: priority++,
+              isDefault: false,
+              conditions: [
+                g.oucCondition,
+                { column: 'Employment Type', operator: 'EQUALS', value: 'Perm' },
+                { column: 'Work Geography', operator: 'EQUALS', value: loc.geography },
+                { column: 'Grade', operator: 'EQUALS', value: band },
+              ] as unknown as Prisma.InputJsonValue,
+              q1DayRate: toDecimal(dayRate), q1WorkingDays: toDecimal(days),
+              q2DayRate: toDecimal(dayRate), q2WorkingDays: toDecimal(days),
+              q3DayRate: toDecimal(dayRate), q3WorkingDays: toDecimal(days),
+              q4DayRate: toDecimal(dayRate), q4WorkingDays: toDecimal(days),
+            },
+          });
+          created += 1;
+        }
+      }
+    }
+
+    return { set: SET_NAME, groups: functionGroups.length, cards: created };
+  }
+
   private cardData(companyId: string, dto: UpsertRateCardDto) {
     return {
       companyId,

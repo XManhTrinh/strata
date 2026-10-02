@@ -622,6 +622,7 @@ enum RateCardRuleOperator {
   EQUALS
   NOT_EQUALS
   STARTS_WITH
+  STARTS_WITH_ANY // value is a comma-separated list of prefixes; matches if the column starts with any
   ENDS_WITH
   CONTAINS
   IN

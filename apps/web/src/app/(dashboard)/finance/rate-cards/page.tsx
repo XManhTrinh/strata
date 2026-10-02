@@ -39,6 +39,7 @@ import {
   useUpdateRateCardSet,
   useDeleteRateCardSet,
   useSeedDemoRateCards,
+  useSeedDemoConsumer,
   type RateCard,
   type RateCardGroup,
   type RateCardSet,
@@ -55,6 +56,7 @@ const OPERATOR_LABEL: Record<RateCardRuleOperator, string> = {
   EQUALS: "=",
   NOT_EQUALS: "≠",
   STARTS_WITH: "starts with",
+  STARTS_WITH_ANY: "starts with any of",
   ENDS_WITH: "ends with",
   CONTAINS: "contains",
   IN: "in",
@@ -247,6 +249,7 @@ export default function RateCardsPage() {
   const updateSet = useUpdateRateCardSet();
   const deleteSet = useDeleteRateCardSet();
   const seedDemo = useSeedDemoRateCards();
+  const seedDemoConsumer = useSeedDemoConsumer();
 
   const orderedCards = useMemo(
     () => [...cards].sort((a, b) => a.priority - b.priority),
@@ -499,6 +502,19 @@ export default function RateCardsPage() {
     );
   };
 
+  const handleSeedDemoConsumer = () => {
+    seedDemoConsumer.mutate(
+      { companyId },
+      {
+        onSuccess: (res) => {
+          toast.success(`Added ${res.cards} Consumer demo cards`);
+          setActiveTab("");
+        },
+        onError: (err) => toast.error(err.message || "Failed to add Consumer demo cards"),
+      },
+    );
+  };
+
   // Continuous index across all cards for the numbered badge (priority order).
   const indexOf = (card: RateCard) => orderedCards.findIndex((c) => c.id === card.id);
 
@@ -623,6 +639,10 @@ export default function RateCardsPage() {
           <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
             <Icon name="bolt" size={18} />
             {seedDemo.isPending ? "Adding…" : "Quick Demo Digital"}
+          </Button>
+          <Button variant="text" onClick={handleSeedDemoConsumer} disabled={seedDemoConsumer.isPending}>
+            <Icon name="bolt" size={18} />
+            {seedDemoConsumer.isPending ? "Adding…" : "Quick Demo Consumer"}
           </Button>
           <Button variant="tonal" onClick={openCreateSet}>
             <Icon name="add" size={18} />
