@@ -47,7 +47,14 @@ export interface UpsertAllocationDto {
 
 // ─── Hooks ──────────────────────────────────────────────────────────────────────
 
-export function useCapacitySummary(companyId: string, fiscalYear: number, orgUnitId?: string) {
+export function useCapacitySummary(
+  companyId: string,
+  fiscalYear: number,
+  orgUnitId?: string,
+  /** When true, the query stays idle until an orgUnitId is provided (avoids
+   * fetching the entire company at once). */
+  requireOrgUnit = false,
+) {
   return useQuery({
     queryKey: ["capacity-summary", companyId, fiscalYear, orgUnitId],
     queryFn: () => {
@@ -57,7 +64,7 @@ export function useCapacitySummary(companyId: string, fiscalYear: number, orgUni
         `/companies/${companyId}/capacity/summary?${params}`,
       );
     },
-    enabled: !!companyId,
+    enabled: !!companyId && (!requireOrgUnit || !!orgUnitId),
   });
 }
 

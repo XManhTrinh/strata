@@ -622,7 +622,7 @@ export default function RateCardsPage() {
         <div className="flex items-center gap-2">
           <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
             <Icon name="bolt" size={18} />
-            {seedDemo.isPending ? "Adding…" : "Quick demo cards"}
+            {seedDemo.isPending ? "Adding…" : "Quick Demo Digital"}
           </Button>
           <Button variant="tonal" onClick={openCreateSet}>
             <Icon name="add" size={18} />

@@ -29,6 +29,7 @@ export interface Person {
   isSuperAdmin: boolean;
   orgUnitId: string | null;
   orgUnitName: string | null;
+  orgPath: { type: string; name: string }[];
   positionId: string | null;
   positionName: string | null;
   roles: MemberRole[];

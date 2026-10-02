@@ -96,5 +96,22 @@ export interface LlmProvider {
   generate(input: LlmGenerateInput): Promise<LlmGenerateResult>;
 }
 
+/**
+ * A provider-agnostic LLM call failure. Providers throw this so the service can
+ * react (e.g. show a clear message on quota exhaustion) without depending on a
+ * specific provider implementation.
+ */
+export class LlmError extends Error {
+  constructor(
+    message: string,
+    readonly retryable: boolean,
+    /** True when the failure is a usage/quota limit (retrying won't help). */
+    readonly quotaExceeded = false,
+  ) {
+    super(message);
+    this.name = 'LlmError';
+  }
+}
+
 /** Injection token for the active LlmProvider. */
 export const LLM_PROVIDER = Symbol('LLM_PROVIDER');

@@ -43,7 +43,7 @@ export interface MemberAllocation {
   division: string | null;
   position: string | null;
   dayRate: number | null;
-  annualCost: number | null; // computed from rate card or dayRate×228
+  annualCost: number | null; // sum of the applied rate card cost across periods
   allocations: PeriodValues;
   monthlyCost: PeriodValues; // FTE × (annualCost / 12)
 }
@@ -178,12 +178,21 @@ export class CapacityService {
     fiscalYear: number,
     orgUnitId?: string,
   ): Promise<SquadCapacitySummary[]> {
+    // When scoped to an org unit, include ALL descendant units too — members are
+    // allocated at the deepest (squad) level, so a division scope must match the
+    // division and everything beneath it. Imported units don't populate `path`,
+    // so descendants are derived by walking parentId.
+    let scopedUnitIds: string[] | undefined;
+    if (orgUnitId) {
+      scopedUnitIds = await this.getSubtreeUnitIds(companyId, orgUnitId);
+    }
+
     // Fetch allocations with membership + position + careerLevel + org unit in one query.
     const allocations = await this.prisma.capacityAllocation.findMany({
       where: {
         companyId,
         fiscalYear,
-        ...(orgUnitId ? { orgUnitId } : {}),
+        ...(scopedUnitIds ? { orgUnitId: { in: scopedUnitIds } } : {}),
       },
       include: {
         membership: {
@@ -313,43 +322,58 @@ export class CapacityService {
   }
 
   /**
+   * Returns the given org unit id plus all descendant unit ids (the full
+   * subtree), derived by walking parentId across the company's units. Used to
+   * scope the capacity summary to a division and everything beneath it.
+   */
+  private async getSubtreeUnitIds(
+    companyId: string,
+    rootUnitId: string,
+  ): Promise<string[]> {
+    const units = await this.prisma.organizationUnit.findMany({
+      where: { companyId },
+      select: { id: true, parentId: true },
+    });
+    const childrenByParent = new Map<string, string[]>();
+    for (const u of units) {
+      if (!u.parentId) continue;
+      if (!childrenByParent.has(u.parentId)) childrenByParent.set(u.parentId, []);
+      childrenByParent.get(u.parentId)!.push(u.id);
+    }
+    const result: string[] = [];
+    const queue = [rootUnitId];
+    const seen = new Set<string>();
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      result.push(id);
+      for (const child of childrenByParent.get(id) ?? []) queue.push(child);
+    }
+    return result;
+  }
+
+  /**
    * Resolve a member's monthly cost per period (at 1.0 FTE).
    *
-   * Prefers the rate-card "apply" snapshot (membership.appliedCost, a
-   * { p1..p12 } map). Falls back to the simple heuristic — SubCon = dayRate × 228,
-   * Perm = annualSalary — spread evenly across the year — when no card has been
-   * applied.
+   * Comes solely from the rate-card "apply" snapshot (membership.appliedCost, a
+   * { p1..p12 } monthly map derived from the card's Q1–Q4 figures). Members with
+   * no applied rate card contribute zero cost — there is no salary/day-rate
+   * heuristic; cost is a rate-card concept.
    */
   private resolveMemberPeriodCost(membership: {
     appliedCost: Prisma.JsonValue | null;
-    dayRate: Prisma.Decimal | null;
-    annualSalary: Prisma.Decimal | null;
-    employmentType: string | null;
   }): PeriodValues {
     const applied = membership.appliedCost as Partial<
       Record<(typeof PERIOD_KEYS)[number], number>
     > | null;
+    const periods = zeroPeriods();
     if (applied && typeof applied === 'object') {
-      const periods = zeroPeriods();
-      let hasValue = false;
       for (const pk of PERIOD_KEYS) {
         const v = Number(applied[pk] ?? 0);
-        if (v) hasValue = true;
         periods[pk] = isFinite(v) ? v : 0;
       }
-      if (hasValue) return periods;
     }
-
-    // Fallback heuristic.
-    let annual = 0;
-    if (membership.employmentType === 'SubCon' && membership.dayRate) {
-      annual = Number(membership.dayRate) * 228;
-    } else if (membership.employmentType === 'Perm' && membership.annualSalary) {
-      annual = Number(membership.annualSalary);
-    }
-    const monthly = annual / 12;
-    const periods = zeroPeriods();
-    for (const pk of PERIOD_KEYS) periods[pk] = monthly;
     return periods;
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import {
@@ -81,7 +81,6 @@ import { displayEmail, isPlaceholderEmail } from "@/lib/utils";
 const CORE_COLUMNS = [
   { key: "name", label: "Name" },
   { key: "email", label: "Email" },
-  { key: "orgUnit", label: "Org Unit" },
   { key: "position", label: "Position" },
   { key: "roles", label: "Roles" },
 ] as const;
@@ -263,11 +262,27 @@ export default function PeoplePage() {
   };
 
   // ── Column helpers ────────────────────────────────────────────────────────
+  // Org hierarchy levels present in the data (e.g. Division, Tribe, Cluster,
+  // Squad), ordered by their depth in the tree, become optional columns.
+  const orgLevelTypes = useMemo(() => {
+    const depth = new Map<string, number>(); // type -> shallowest index seen
+    for (const p of people) {
+      p.orgPath?.forEach((node, i) => {
+        const prev = depth.get(node.type);
+        if (prev === undefined || i < prev) depth.set(node.type, i);
+      });
+    }
+    return [...depth.entries()]
+      .sort((a, b) => a[1] - b[1])
+      .map(([type]) => type);
+  }, [people]);
+
   const allColumns = useMemo(() => {
     const core = CORE_COLUMNS.map((c) => ({ key: c.key, label: c.label, isCore: true }));
+    const org = orgLevelTypes.map((t) => ({ key: `org:${t}`, label: t, isCore: false }));
     const meta = metadataKeys.map((k) => ({ key: `meta:${k}`, label: k, isCore: false }));
-    return [...core, ...meta];
-  }, [metadataKeys]);
+    return [...core, ...org, ...meta];
+  }, [orgLevelTypes, metadataKeys]);
 
   // Initialize column order when metadata keys change
   useEffect(() => {
@@ -280,6 +295,19 @@ export default function PeoplePage() {
       return [...existing, ...newKeys];
     });
   }, [allColumns]);
+
+  // Show org hierarchy columns (Division, Tribe, …) by default the first time
+  // they appear, so the full structure is visible without configuring columns.
+  const orgDefaultsApplied = useRef(false);
+  useEffect(() => {
+    if (orgDefaultsApplied.current || orgLevelTypes.length === 0) return;
+    orgDefaultsApplied.current = true;
+    setVisibleMetaKeys((prev) => {
+      const next = new Set(prev);
+      for (const t of orgLevelTypes) next.add(`org:${t}`);
+      return next;
+    });
+  }, [orgLevelTypes]);
 
   const visibleColumns = useMemo(() => {
     const visible = allColumns.filter((col) => col.isCore || visibleMetaKeys.has(col.key));
@@ -354,9 +382,12 @@ export default function PeoplePage() {
       visibleColumns.map((col) => {
         if (col.key === "name") return escapeCsvField(p.fullName);
         if (col.key === "email") return escapeCsvField(isPlaceholderEmail(p.email) ? "" : p.email);
-        if (col.key === "orgUnit") return escapeCsvField(p.orgUnitName ?? "");
         if (col.key === "position") return escapeCsvField(p.positionName ?? "");
         if (col.key === "roles") return escapeCsvField((p.roles ?? []).map((r) => r.name).join(", "));
+        if (col.key.startsWith("org:")) {
+          const type = col.key.slice(4);
+          return escapeCsvField(p.orgPath?.find((n) => n.type === type)?.name ?? "");
+        }
         const metaKey = col.key.replace("meta:", "");
         return escapeCsvField(p.metadata?.[metaKey] ?? "");
       }),
@@ -429,8 +460,6 @@ export default function PeoplePage() {
         ) : (
           person.email
         );
-      case "orgUnit":
-        return person.orgUnitName ?? "—";
       case "position":
         return person.positionName ?? "—";
       case "roles":
@@ -444,6 +473,10 @@ export default function PeoplePage() {
           </div>
         );
       default: {
+        if (colKey.startsWith("org:")) {
+          const type = colKey.slice(4);
+          return person.orgPath?.find((n) => n.type === type)?.name ?? "—";
+        }
         const metaKey = colKey.replace("meta:", "");
         return person.metadata?.[metaKey] ?? "—";
       }
@@ -481,7 +514,7 @@ export default function PeoplePage() {
   // ─── Main Content ─────────────────────────────────────────────────────────
   return (
     <motion.div
-      className="space-y-6"
+      className="flex flex-col h-full min-h-0 gap-4"
       variants={pageTransitionVariants}
       initial="initial"
       animate="enter"
@@ -489,7 +522,7 @@ export default function PeoplePage() {
       transition={defaultTransition}
     >
       {/* Page Header */}
-      <PageBar className="justify-between">
+      <PageBar className="justify-between shrink-0">
         <div>
           <Typography variant="headline-medium">Members</Typography>
           <Typography variant="body-medium" color="surface-variant-foreground">{data?.total ?? 0} members · Manage workspace members and their roles.</Typography>
@@ -510,7 +543,7 @@ export default function PeoplePage() {
       </PageBar>
 
       {/* Search + Filters Row */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
         <div className="flex items-center gap-4 flex-1">
           <Search
             className="max-w-sm flex-1"
@@ -599,6 +632,8 @@ export default function PeoplePage() {
         </div>
       </div>
 
+      {/* Scrollable content region — fills remaining height so pagination stays pinned */}
+      <div className="flex-1 min-h-0 flex flex-col gap-4">
       {/* Loading State */}
       {isLoading && (
         <Card variant="elevated">
@@ -661,8 +696,8 @@ export default function PeoplePage() {
           )}
 
           {/* Desktop Table */}
-          <Card variant="elevated" className="hidden md:block">
-            <CardContent className="p-0 max-h-[calc(100vh-280px)] overflow-y-auto">
+          <Card variant="elevated" className="hidden md:flex md:flex-col md:flex-1 md:min-h-0 overflow-hidden">
+            <CardContent className="p-0 flex-1 min-h-0 overflow-y-auto">
               <Table>
                 <TableHeader className="sticky top-0 z-10 bg-surface shadow-sm">
                   <TableRow>
@@ -702,7 +737,7 @@ export default function PeoplePage() {
           </Card>
 
           {/* Mobile Card View */}
-          <div className="flex flex-col gap-4 md:hidden">
+          <div className="flex flex-col gap-4 md:hidden flex-1 min-h-0 overflow-y-auto">
             {people.map((person) => (
               <Card key={person.id} variant="elevated">
                 <CardContent className="flex items-center gap-4 p-4">
@@ -727,9 +762,9 @@ export default function PeoplePage() {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination — pinned footer, always visible without scrolling */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between shrink-0 border-t border-outline-variant pt-3">
               <Typography variant="body-medium" color="surface-variant-foreground">
                 Page {page} of {totalPages} · {data?.total ?? 0} total
               </Typography>
@@ -745,6 +780,7 @@ export default function PeoplePage() {
           )}
         </>
       )}
+      </div>
 
       {/* ─── Dialogs ──────────────────────────────────────────────────────────── */}
 

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { LlmError } from '../assistant.types';
 import type {
   LlmProvider,
   LlmGenerateInput,
@@ -7,26 +8,22 @@ import type {
   LlmToolCall,
 } from '../assistant.types';
 
-const DEFAULT_MODEL = 'gemini-3.8-flash';
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 // No default fallback: on this API the sibling flash models are unreliable
 // (intermittent 404s). Retrying the primary handles transient 429/503. Set
 // GEMINI_FALLBACK_MODEL explicitly to enable a fallback if one is dependable.
 const DEFAULT_FALLBACK_MODEL = '';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-// Statuses worth retrying: rate limit, overload/unavailable, and 404 — on this
-// API the flash models intermittently 404 under load rather than returning 503.
-const RETRYABLE_STATUS = new Set([404, 429, 500, 503]);
+// Statuses worth retrying: transient overload/unavailable. 429 is handled
+// separately (quota exhaustion is non-retryable). 404 can occur transiently
+// under load on this API, so it's included.
+const RETRYABLE_STATUS = new Set([404, 500, 503]);
 const MAX_ATTEMPTS_PER_MODEL = 3;
 const RETRY_BASE_DELAY_MS = 700;
 
-/** A Gemini call failure that carries whether a retry is worthwhile. */
-class GeminiCallError extends Error {
-  constructor(message: string, readonly retryable: boolean) {
-    super(message);
-    this.name = 'GeminiCallError';
-  }
-}
+/** A Gemini call failure (a provider-agnostic LlmError). */
+class GeminiCallError extends LlmError {}
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -171,15 +168,28 @@ export class GeminiProvider implements LlmProvider {
     }
 
     if (!res.ok) {
-      // Include Gemini's error message (not the key/URL) to aid diagnosis.
+      // Include Gemini's error message + status (not the key/URL) to aid diagnosis.
       let detail = '';
+      let apiStatus = '';
       try {
-        const errBody = (await res.json()) as { error?: { message?: string } };
+        const errBody = (await res.json()) as {
+          error?: { message?: string; status?: string };
+        };
         detail = errBody?.error?.message ? ` — ${errBody.error.message}` : '';
+        apiStatus = errBody?.error?.status ?? '';
       } catch {
         // ignore parse failure
       }
       this.logger.warn(`Gemini returned HTTP ${res.status} [${model}]${detail}`);
+
+      // Free-tier quota exhaustion (429 RESOURCE_EXHAUSTED). Retrying only burns
+      // more of the limited quota, so mark it non-retryable and flag it so the
+      // service can show a clear "usage limit" message.
+      const quotaExceeded = res.status === 429 || apiStatus === 'RESOURCE_EXHAUSTED';
+      if (quotaExceeded) {
+        throw new GeminiCallError('LLM quota exceeded', false, true);
+      }
+
       throw new GeminiCallError('LLM request failed', RETRYABLE_STATUS.has(res.status));
     }
 

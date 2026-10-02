@@ -58,15 +58,40 @@ export interface MemberResponse {
   isSuperAdmin: boolean;
   orgUnitId: string | null;
   orgUnitName: string | null;
+  /** Ancestor chain root→self, e.g. [{type:"Division",name:"Digital"}, ...]. */
+  orgPath: { type: string; name: string }[];
   positionId: string | null;
   positionName: string | null;
   roles: { id: string; name: string }[];
   employmentType: string | null;
   annualSalary: number | null;
   dayRate: number | null;
-  annualCost: number | null; // calculated: salary for Perm, dayRate × 228 for SubCon
+  annualCost: number | null; // sum of the applied rate card's Q1–Q4 cost; null if no card applied
   metadata: Record<string, string>;
   createdAt: string;
+}
+
+const APPLIED_PERIOD_KEYS = [
+  'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11', 'p12',
+] as const;
+
+/**
+ * Annual cost = sum of the applied rate-card cost snapshot (membership.appliedCost,
+ * a { p1..p12 } monthly map derived from the card's Q1–Q4 figures). Returns null
+ * when no rate card has been applied — cost is a rate-card concept, not a salary
+ * heuristic.
+ */
+function annualCostFromApplied(appliedCost: unknown): number | null {
+  if (!appliedCost || typeof appliedCost !== 'object') return null;
+  const map = appliedCost as Record<string, unknown>;
+  let total = 0;
+  let hasValue = false;
+  for (const pk of APPLIED_PERIOD_KEYS) {
+    const v = Number(map[pk] ?? 0);
+    if (Number.isFinite(v) && v !== 0) hasValue = true;
+    if (Number.isFinite(v)) total += v;
+  }
+  return hasValue ? Math.round(total) : null;
 }
 
 @Injectable()
@@ -130,6 +155,7 @@ export class CompanyPeopleService {
         employmentType: true,
         annualSalary: true,
         dayRate: true,
+        appliedCost: true,
         createdAt: true,
         orgUnit: { select: { name: true } },
         position: { select: { name: true } },
@@ -148,6 +174,7 @@ export class CompanyPeopleService {
       include: { person: true },
     });
     const userMap = new Map(users.map((u) => [u.id, u]));
+    const orgPathOf = await this.buildOrgPathResolver(companyId);
 
     const members: MemberResponse[] = memberships
       .map((m) => {
@@ -167,6 +194,7 @@ export class CompanyPeopleService {
           isSuperAdmin: m.isSuperAdmin,
           orgUnitId: m.orgUnitId,
           orgUnitName: m.orgUnit?.name ?? null,
+          orgPath: orgPathOf(m.orgUnitId),
           positionId: m.positionId,
           positionName: m.position?.name ?? null,
           roles: m.roleAssignments.map((ra) => ({
@@ -176,11 +204,8 @@ export class CompanyPeopleService {
           employmentType: m.employmentType,
           annualSalary: m.annualSalary ? Number(m.annualSalary) : null,
           dayRate: m.dayRate ? Number(m.dayRate) : null,
-          annualCost: m.annualSalary
-            ? Number(m.annualSalary)
-            : m.dayRate
-              ? Number(m.dayRate) * 228
-              : null,
+          // Cost is derived from the applied rate card (Q1–Q4), not a heuristic.
+          annualCost: annualCostFromApplied(m.appliedCost),
           metadata: (m.metadata as Record<string, string>) ?? {},
           createdAt: m.createdAt.toISOString(),
         };
@@ -217,6 +242,7 @@ export class CompanyPeopleService {
         employmentType: true,
         annualSalary: true,
         dayRate: true,
+        appliedCost: true,
         createdAt: true,
         orgUnit: { select: { name: true } },
         position: { select: { name: true } },
@@ -226,6 +252,8 @@ export class CompanyPeopleService {
       },
     });
     if (!membership) throw new NotFoundException('Member not found in this workspace');
+
+    const orgPathOf = await this.buildOrgPathResolver(companyId);
 
     return {
       id: person.id,
@@ -239,6 +267,7 @@ export class CompanyPeopleService {
       isSuperAdmin: membership.isSuperAdmin,
       orgUnitId: membership.orgUnitId,
       orgUnitName: membership.orgUnit?.name ?? null,
+      orgPath: orgPathOf(membership.orgUnitId),
       positionId: membership.positionId,
       positionName: membership.position?.name ?? null,
       roles: membership.roleAssignments.map((ra) => ({
@@ -248,11 +277,8 @@ export class CompanyPeopleService {
       employmentType: membership.employmentType,
       annualSalary: membership.annualSalary ? Number(membership.annualSalary) : null,
       dayRate: membership.dayRate ? Number(membership.dayRate) : null,
-      annualCost: membership.annualSalary
-        ? Number(membership.annualSalary)
-        : membership.dayRate
-          ? Number(membership.dayRate) * 228
-          : null,
+      // Cost is derived from the applied rate card (Q1–Q4), not a heuristic.
+      annualCost: annualCostFromApplied(membership.appliedCost),
       metadata: (membership.metadata as Record<string, string>) ?? {},
       createdAt: membership.createdAt.toISOString(),
     };
@@ -854,6 +880,46 @@ export class CompanyPeopleService {
       select: { id: true },
     });
     return created.id;
+  }
+
+  /**
+   * Builds a resolver that maps an org unit id to its ancestor chain
+   * (root → self) as [{type, name}]. Loads all company units + types once so
+   * callers can resolve many members without N+1 queries. Walks `parentId`
+   * (not `path`, which imported units don't populate).
+   */
+  private async buildOrgPathResolver(
+    companyId: string,
+  ): Promise<(orgUnitId: string | null) => { type: string; name: string }[]> {
+    const [units, types] = await Promise.all([
+      this.prisma.organizationUnit.findMany({
+        where: { companyId },
+        select: { id: true, name: true, parentId: true, typeId: true },
+      }),
+      this.prisma.organizationUnitType.findMany({
+        where: { companyId },
+        select: { id: true, name: true },
+      }),
+    ]);
+    const unitById = new Map(units.map((u) => [u.id, u]));
+    const typeName = new Map(types.map((t) => [t.id, t.name]));
+
+    return (orgUnitId: string | null) => {
+      const chain: { type: string; name: string }[] = [];
+      let currentId = orgUnitId;
+      const seen = new Set<string>(); // guard against cyclic data
+      while (currentId && !seen.has(currentId)) {
+        seen.add(currentId);
+        const unit = unitById.get(currentId);
+        if (!unit) break;
+        chain.unshift({
+          type: typeName.get(unit.typeId) ?? 'Unit',
+          name: unit.name,
+        });
+        currentId = unit.parentId;
+      }
+      return chain;
+    };
   }
 
   private async findOrCreateOrgUnit(

@@ -10,6 +10,9 @@ import {
   Chip,
   Select,
   Typography,
+  Tabs,
+  TabList,
+  Tab,
 } from "@vkieu/mui";
 import { Button } from "@vkieu/mui/buttons";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -138,8 +141,27 @@ export default function CapacityPage() {
     currentSquadId: string;
   } | null>(null);
 
-  const { data: squads, isLoading, isError, error } = useCapacitySummary(companyId, fiscalYear);
   const { data: orgUnits = [] } = useOrgUnitTree(companyId);
+
+  // Top-level org units (divisions) become tabs. Capacity loads per tab so we
+  // never fetch all members at once — key to performance at 5k+ people.
+  const divisionTabs = useMemo(
+    () => [...orgUnits].sort((a, b) => a.name.localeCompare(b.name)),
+    [orgUnits],
+  );
+  const [activeDivisionId, setActiveDivisionId] = useState<string>("");
+  useEffect(() => {
+    if (!activeDivisionId && divisionTabs.length > 0) {
+      setActiveDivisionId(divisionTabs[0].id);
+    }
+  }, [divisionTabs, activeDivisionId]);
+
+  const { data: squads, isLoading, isError, error } = useCapacitySummary(
+    companyId,
+    fiscalYear,
+    activeDivisionId || undefined,
+    true, // require a division — never fetch the whole company at once
+  );
   const { data: companySettings } = useCompanySettings(companyId);
 
   const fiscalYearStartMonth = (companySettings?.settings as Record<string, unknown>)?.fiscalYearStart as number ?? 1;
@@ -554,37 +576,8 @@ export default function CapacityPage() {
   });
 
   // ─── Loading ────────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <PageBar><div>
-          <Typography variant="headline-medium">Capacity Planning</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">Team allocation and monthly phasing.</Typography>
-        </div></PageBar>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} variant="elevated"><CardContent className="p-5 space-y-3">
-              <Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-3 w-20" /><Skeleton className="h-7 w-28" />
-            </CardContent></Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="space-y-6">
-        <PageBar><div><Typography variant="headline-medium">Capacity Planning</Typography></div></PageBar>
-        <Card variant="elevated" className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center py-12 text-center">
-            <Icon name="error" size={32} className="text-error mb-3" />
-            <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Failed to load"}</Typography>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const activeDivisionName =
+    divisionTabs.find((d) => d.id === activeDivisionId)?.name ?? "";
 
   return (
     <motion.div className="space-y-6" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
@@ -600,6 +593,44 @@ export default function CapacityPage() {
           <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
         </div>
       </PageBar>
+
+      {/* Division tabs — capacity loads per division (lazy). */}
+      {divisionTabs.length > 0 && (
+        <Tabs value={activeDivisionId} onValueChange={setActiveDivisionId} variant="primary" scrollable>
+          <TabList>
+            {divisionTabs.map((d) => (
+              <Tab key={d.id} value={d.id} label={d.name} />
+            ))}
+          </TabList>
+        </Tabs>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} variant="elevated"><CardContent className="p-5 space-y-3">
+              <Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-3 w-20" /><Skeleton className="h-7 w-28" />
+            </CardContent></Card>
+          ))}
+        </div>
+      ) : isError ? (
+        <Card variant="elevated" className="max-w-md mx-auto">
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <Icon name="error" size={32} className="text-error mb-3" />
+            <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Failed to load"}</Typography>
+          </CardContent>
+        </Card>
+      ) : (squads ?? []).length === 0 ? (
+        <Card variant="elevated" className="max-w-md mx-auto">
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <Icon name="groups" size={32} className="text-surface-variant-foreground mb-3" />
+            <Typography variant="body-medium" color="surface-variant-foreground">
+              No allocations in {activeDivisionName || "this division"} yet.
+            </Typography>
+          </CardContent>
+        </Card>
+      ) : (
+      <>
 
       {/* Filters Row */}
       <div className="flex items-center justify-between gap-3">
@@ -662,7 +693,6 @@ export default function CapacityPage() {
       </div>
 
       {/* FTE Phasing */}
-      <>
           {/* Bulk expand / collapse */}
           {groupedData.length > 0 && (
             <div className="flex justify-end">
@@ -805,6 +835,7 @@ export default function CapacityPage() {
             )}
           </AnimatePresence>
       </>
+      )}
 
       {/* Context Menu: Allocate to Squad */}
       {contextMenu && (

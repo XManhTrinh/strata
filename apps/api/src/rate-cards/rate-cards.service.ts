@@ -217,8 +217,8 @@ export class RateCardsService {
     });
 
     const groupSpecs = [
-      { name: GROUP_NAMES.opex, color: '#F59E0B', capexOpex: 'Opex', multiplier: 1.0 },
-      { name: GROUP_NAMES.capex, color: '#10B981', capexOpex: 'Capex', multiplier: 1.12 },
+      { name: GROUP_NAMES.opex, color: '#F59E0B', capexOpex: 'Opex' },
+      { name: GROUP_NAMES.capex, color: '#10B981', capexOpex: 'Capex' },
     ];
 
     const groupIdByName = new Map<string, string>();
@@ -244,41 +244,56 @@ export class RateCardsService {
     });
 
     const locations = [
-      { label: 'UK', geography: 'UK', premium: 1.0 },
-      { label: 'Offshore', geography: 'AMEA', premium: 0.55 },
+      // Working days per quarter: UK = 18, AMEA (Offshore) = 19.
+      { label: 'UK', geography: 'UK', workingDays: 18 },
+      { label: 'Offshore', geography: 'AMEA', workingDays: 19 },
     ];
-    const bands = [
-      { label: 'B', base: 780 },
-      { label: 'C', base: 620 },
-      { label: 'D', base: 470 },
-      { label: 'E', base: 340 },
-    ];
-    const quarterDays = { q1: 63, q2: 61, q3: 64, q4: 60 };
-    const round5 = (n: number) => Math.round(n / 5) * 5;
+    const bandOrder = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+
+    // Explicit day rates per group · location · band (same across all quarters).
+    // A rate of 0 means "no card for this combination" and is skipped.
+    const RATES: Record<string, Record<string, Record<string, number>>> = {
+      Opex: {
+        UK: { A: 2731, B: 996, C: 629, D: 413, E: 265, F: 204 },
+        AMEA: { A: 0, B: 962, C: 629, D: 183, E: 91, F: 0 },
+      },
+      Capex: {
+        UK: { A: 0, B: 0, C: 690, D: 438, E: 288, F: 226 },
+        AMEA: { A: 0, B: 0, C: 495, D: 198, E: 99, F: 99 },
+      },
+    };
 
     let priority = 0;
     let created = 0;
     for (const g of groupSpecs) {
       const groupId = groupIdByName.get(g.name)!;
       for (const loc of locations) {
-        for (const band of bands) {
-          const dayRate = round5(band.base * loc.premium * g.multiplier);
+        for (const band of bandOrder) {
+          const dayRate = RATES[g.capexOpex]?.[loc.geography]?.[band] ?? 0;
+          if (dayRate <= 0) continue; // no card for zero-rate combinations
+          const days = loc.workingDays;
           await this.prisma.rateCard.create({
             data: {
               companyId,
               groupId,
-              name: `${g.capexOpex} · ${loc.label} Band ${band.label} (Demo)`,
+              name: `${g.capexOpex} · ${loc.label} Band ${band} (Demo)`,
               priority: priority++,
               isDefault: false,
               conditions: [
+                // Digital Rate Card principles:
+                //   OUC starts with Q; Regular staff (Regular/Temporary mapped to
+                //   Employment Type = "Perm"); Opex/Capex split; UK/Offshore via
+                //   Work Geography; band = Grade.
+                { column: 'OUC', operator: 'STARTS_WITH', value: 'Q' },
+                { column: 'Employment Type', operator: 'EQUALS', value: 'Perm' },
                 { column: 'Opex /Capex', operator: 'EQUALS', value: g.capexOpex },
                 { column: 'Work Geography', operator: 'EQUALS', value: loc.geography },
-                { column: 'Grade', operator: 'EQUALS', value: band.label },
+                { column: 'Grade', operator: 'EQUALS', value: band },
               ] as unknown as Prisma.InputJsonValue,
-              q1DayRate: toDecimal(dayRate), q1WorkingDays: toDecimal(quarterDays.q1),
-              q2DayRate: toDecimal(dayRate), q2WorkingDays: toDecimal(quarterDays.q2),
-              q3DayRate: toDecimal(dayRate), q3WorkingDays: toDecimal(quarterDays.q3),
-              q4DayRate: toDecimal(dayRate), q4WorkingDays: toDecimal(quarterDays.q4),
+              q1DayRate: toDecimal(dayRate), q1WorkingDays: toDecimal(days),
+              q2DayRate: toDecimal(dayRate), q2WorkingDays: toDecimal(days),
+              q3DayRate: toDecimal(dayRate), q3WorkingDays: toDecimal(days),
+              q4DayRate: toDecimal(dayRate), q4WorkingDays: toDecimal(days),
             },
           });
           created += 1;

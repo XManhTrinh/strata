@@ -4,6 +4,7 @@ import { ToolRegistry } from './tools/tool-registry';
 import { authorizeTool } from './authz/authorize-tool';
 import {
   LLM_PROVIDER,
+  LlmError,
   type AssistantContext,
   type ChatInput,
   type ChatResult,
@@ -56,11 +57,25 @@ export class AssistantService {
     // hit the call cap.
     // The +2 guards against a provider that never yields text; we still stop.
     for (let turn = 0; turn <= this.maxToolCalls + 1; turn++) {
-      const result = await this.provider.generate({
-        systemInstruction: SYSTEM_INSTRUCTION,
-        messages,
-        tools,
-      });
+      let result;
+      try {
+        result = await this.provider.generate({
+          systemInstruction: SYSTEM_INSTRUCTION,
+          messages,
+          tools,
+        });
+      } catch (err) {
+        // Quota exhaustion (free-tier limit) is a normal, expected outcome —
+        // return a clear message rather than a 502 error.
+        if (err instanceof LlmError && err.quotaExceeded) {
+          return {
+            reply:
+              "I've hit the usage limit for now (the AI is on a free tier with a per-minute cap). Please wait a minute and try again.",
+            toolsUsed,
+          };
+        }
+        throw err;
+      }
 
       if (result.toolCalls && result.toolCalls.length > 0) {
         for (const call of result.toolCalls) {

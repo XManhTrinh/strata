@@ -59,8 +59,6 @@ export default function SettingsPage() {
   const [slug, setSlug] = useState("");
   const [fiscalYearStart, setFiscalYearStart] = useState("1");
   const [currency, setCurrency] = useState("GBP");
-  const [workingDaysPerYear, setWorkingDaysPerYear] = useState("228");
-  const [workingDaysPerMonth, setWorkingDaysPerMonth] = useState("19");
 
   useEffect(() => {
     if (company) {
@@ -69,8 +67,6 @@ export default function SettingsPage() {
       const s = company.settings as Record<string, unknown>;
       setFiscalYearStart(String(s.fiscalYearStart ?? "1"));
       setCurrency(String(s.currency ?? "GBP"));
-      setWorkingDaysPerYear(String(s.workingDaysPerYear ?? "228"));
-      setWorkingDaysPerMonth(String(s.workingDaysPerMonth ?? "19"));
     }
   }, [company]);
 
@@ -78,9 +74,7 @@ export default function SettingsPage() {
     name !== company.name ||
     slug !== company.slug ||
     fiscalYearStart !== String((company.settings as Record<string, unknown>).fiscalYearStart ?? "1") ||
-    currency !== String((company.settings as Record<string, unknown>).currency ?? "GBP") ||
-    workingDaysPerYear !== String((company.settings as Record<string, unknown>).workingDaysPerYear ?? "228") ||
-    workingDaysPerMonth !== String((company.settings as Record<string, unknown>).workingDaysPerMonth ?? "19")
+    currency !== String((company.settings as Record<string, unknown>).currency ?? "GBP")
   );
 
   const handleSave = () => {
@@ -95,8 +89,6 @@ export default function SettingsPage() {
           ...(company?.settings as Record<string, unknown> ?? {}),
           fiscalYearStart: parseInt(fiscalYearStart, 10) || 1,
           currency,
-          workingDaysPerYear: parseInt(workingDaysPerYear, 10) || 228,
-          workingDaysPerMonth: parseInt(workingDaysPerMonth, 10) || 19,
         },
       },
       {
@@ -113,8 +105,6 @@ export default function SettingsPage() {
       const s = company.settings as Record<string, unknown>;
       setFiscalYearStart(String(s.fiscalYearStart ?? "1"));
       setCurrency(String(s.currency ?? "GBP"));
-      setWorkingDaysPerYear(String(s.workingDaysPerYear ?? "228"));
-      setWorkingDaysPerMonth(String(s.workingDaysPerMonth ?? "19"));
     }
   };
 
@@ -347,33 +337,6 @@ export default function SettingsPage() {
                       value={fiscalYearStart}
                       onValueChange={(v) => setFiscalYearStart(v)}
                       options={monthLabels.map((label, i) => ({ value: String(i + 1), label }))}
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card variant="outlined">
-                  <CardContent className="p-6 space-y-5">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
-                        <Icon name="schedule" size={20} className="text-primary-container-foreground" />
-                      </div>
-                      <Typography variant="title-small">Working Days</Typography>
-                    </div>
-                    <TextField
-                      variant="outlined"
-                      label="Working Days per Year"
-                      type="number"
-                      value={workingDaysPerYear}
-                      onChange={(e) => setWorkingDaysPerYear(e.target.value)}
-                      supportingText="SubCon annual cost = day rate × this value."
-                    />
-                    <TextField
-                      variant="outlined"
-                      label="Working Days per Month"
-                      type="number"
-                      value={workingDaysPerMonth}
-                      onChange={(e) => setWorkingDaysPerMonth(e.target.value)}
-                      supportingText="SubCon monthly cost = day rate × this value."
                     />
                   </CardContent>
                 </Card>

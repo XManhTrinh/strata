@@ -85,67 +85,66 @@ async function seedRateCards(companyId: string) {
   //                      principles: UK → UK, AMEA → OFFSHORE.
   //   "Grade"          — the band letter (A–F).
   const locations = [
-    { label: "UK", geography: "UK", premium: 1.0 },
-    { label: "Offshore", geography: "AMEA", premium: 0.55 },
+    // Working days per quarter: UK = 18, AMEA (Offshore) = 19.
+    { label: "UK", geography: "UK", workingDays: 18 },
+    { label: "Offshore", geography: "AMEA", workingDays: 19 },
   ];
-  const bands = [
-    { label: "A", base: 940 },
-    { label: "B", base: 780 },
-    { label: "C", base: 620 },
-    { label: "D", base: 470 },
-    { label: "E", base: 340 },
-    { label: "F", base: 260 },
-  ];
-  const quarterDays = { q1: 63, q2: 61, q3: 64, q4: 60 };
-  const round5 = (n: number) => Math.round(n / 5) * 5;
+  const bandOrder = ["A", "B", "C", "D", "E", "F"] as const;
+
+  // Explicit day rates per group · location · band (same across all quarters).
+  // A rate of 0 means "no card for this combination" and is skipped.
+  const RATES: Record<string, Record<string, Record<string, number>>> = {
+    Opex: {
+      UK: { A: 2731, B: 996, C: 629, D: 413, E: 265, F: 204 },
+      AMEA: { A: 0, B: 962, C: 629, D: 183, E: 91, F: 0 },
+    },
+    Capex: {
+      UK: { A: 0, B: 0, C: 690, D: 438, E: 288, F: 226 },
+      AMEA: { A: 0, B: 0, C: 495, D: 198, E: 99, F: 99 },
+    },
+  };
 
   let priority = 0;
   let created = 0;
 
   for (const g of groups) {
     const groupId = groupIdByName.get(g.name)!;
-    const groupMultiplier = g.capexOpex === "Capex" ? 1.12 : 1.0;
+    let groupCount = 0;
 
     for (const loc of locations) {
-      for (const band of bands) {
-        const dayRate = round5(band.base * loc.premium * groupMultiplier);
-        const name = `${g.name} · ${loc.label} Band ${band.label}`;
+      for (const band of bandOrder) {
+        const dayRate = RATES[g.capexOpex]?.[loc.geography]?.[band] ?? 0;
+        if (dayRate <= 0) continue; // no card for zero-rate combinations
+        const days = loc.workingDays;
+        const name = `${g.name} · ${loc.label} Band ${band}`;
         const conditions = [
+          { column: "OUC", operator: "STARTS_WITH", value: "Q" },
+          { column: "Employment Type", operator: "EQUALS", value: "Perm" },
           { column: "Opex /Capex", operator: "EQUALS", value: g.capexOpex },
           { column: "Work Geography", operator: "EQUALS", value: loc.geography },
-          { column: "Grade", operator: "EQUALS", value: band.label },
+          { column: "Grade", operator: "EQUALS", value: band },
         ];
 
-        await prisma.rateCard.upsert({
-          where: { companyId_name: { companyId, name } },
-          update: {
-            groupId,
-            priority,
-            isDefault: false,
-            conditions,
-            q1DayRate: dayRate, q1WorkingDays: quarterDays.q1,
-            q2DayRate: dayRate, q2WorkingDays: quarterDays.q2,
-            q3DayRate: dayRate, q3WorkingDays: quarterDays.q3,
-            q4DayRate: dayRate, q4WorkingDays: quarterDays.q4,
-          },
-          create: {
+        await prisma.rateCard.create({
+          data: {
             companyId,
             groupId,
             name,
             priority,
             isDefault: false,
             conditions,
-            q1DayRate: dayRate, q1WorkingDays: quarterDays.q1,
-            q2DayRate: dayRate, q2WorkingDays: quarterDays.q2,
-            q3DayRate: dayRate, q3WorkingDays: quarterDays.q3,
-            q4DayRate: dayRate, q4WorkingDays: quarterDays.q4,
+            q1DayRate: dayRate, q1WorkingDays: days,
+            q2DayRate: dayRate, q2WorkingDays: days,
+            q3DayRate: dayRate, q3WorkingDays: days,
+            q4DayRate: dayRate, q4WorkingDays: days,
           },
         });
         priority += 1;
         created += 1;
+        groupCount += 1;
       }
     }
-    console.log(`  ${g.name}: ${locations.length * bands.length} cards`);
+    console.log(`  ${g.name}: ${groupCount} cards`);
   }
 
   console.log(`Total rate cards: ${created}`);
