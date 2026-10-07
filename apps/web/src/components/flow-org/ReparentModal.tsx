@@ -1,22 +1,26 @@
 "use client";
+import type React from "react";
 
 import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  Search,
+  DialogActions,
+  SearchBar,
   List,
   ListItem,
-  Icon,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { Person } from "@/lib/org-tree/types";
 import { Avatar } from "@/components/ui/avatar";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -62,74 +66,63 @@ export default function ReparentModal({
   // ── Person picker view ─────────────────────────────────────────────────
   if (showPicker) {
     return (
-      <Dialog open onOpenChange={(open) => !open && onCancel()}>
-        <DialogContent icon="swap_horiz">
-          <DialogHeader centered>
-            <DialogTitle>
-              Reassign {directReportCount} {directReportCount === 1 ? "report" : "reports"}
-            </DialogTitle>
-            <DialogDescription>
-              Choose who should manage {personName}&apos;s direct reports.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Search
+      <Dialog open onOpenChange={(open) => !open && onCancel()} icon={<Icon name="swap_horiz" />}>
+        <DialogTitle>
+          Reassign {directReportCount} {directReportCount === 1 ? "report" : "reports"}
+        </DialogTitle>
+        <DialogContent>
+          <p className="mb-4">Choose who should manage {personName}&apos;s direct reports.</p>
+          <SearchBar
+          aria-label="Search"
             value={search}
-            onValueChange={setSearch}
+            onChange={setSearch}
             placeholder="Search by name or title..."
             className="w-full"
           />
-
-          <div className="max-h-64 overflow-y-auto -mx-6">
+          <div className="max-h-64 overflow-y-auto mt-2">
             {filteredPersons.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center">
-                <Icon name="search_off" size={24} className="text-surface-variant-foreground/40 mb-2" />
+                <Icon name="search_off" size={24} className="text-on-surface-variant/40 mb-2" />
                 <Typography variant="body-medium" color="surface-variant-foreground">
                   No matches
                 </Typography>
               </div>
             ) : (
-              <List className="py-0">
+              <List aria-label="List" className="py-0">
                 {filteredPersons.map((p) => (
-                  <ListItem
+                  <ListItemWithClick
                     key={p.id}
-                    interactive
                     onClick={() => onReassignReports(p.id)}
                     leading={<Avatar name={p.fullName} size="s" />}
-                    lines={2}
-                    supporting={p.title}
+                    supportingText={p.title}
                   >
                     {p.fullName}
-                  </ListItem>
+                  </ListItemWithClick>
                 ))}
               </List>
             )}
           </div>
-
-          <DialogFooter>
-            <Button variant="text" onClick={() => setShowPicker(false)}>
-              Back
-            </Button>
-          </DialogFooter>
         </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setShowPicker(false)}>
+            Back
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }
 
   // ── Main choice view ───────────────────────────────────────────────────
   return (
-    <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent icon="drag_indicator">
-        <DialogHeader centered>
-          <DialogTitle>Move {personName}</DialogTitle>
-          <DialogDescription>
-            {personName} has{" "}
-            <strong>{directReportCount}</strong>{" "}
-            direct {directReportCount === 1 ? "report" : "reports"}.
-            What should happen to them?
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open onOpenChange={(open) => !open && onCancel()} icon={<Icon name="drag_indicator" />}>
+      <DialogTitle>Move {personName}</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">
+          {personName} has{" "}
+          <strong>{directReportCount}</strong>{" "}
+          direct {directReportCount === 1 ? "report" : "reports"}.
+          What should happen to them?
+        </p>
         <div className="flex flex-col gap-2">
           <Button variant="filled" onClick={onMoveWithReports} className="w-full justify-start gap-3">
             <Icon name="group" size={20} />
@@ -146,13 +139,12 @@ export default function ReparentModal({
             </Button>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={onCancel}>
-            Cancel
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={onCancel}>
+          Cancel
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

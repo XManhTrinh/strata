@@ -8,16 +8,14 @@ import { buildTree, buildDepartmentTree, getPathToRootNodes } from "@/lib/org-tr
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
   DialogTitle,
-  DialogDescription,
-  Typography,
-  Icon,
+  DialogActions,
   Card,
-  CardContent,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnitTree } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -312,18 +310,17 @@ export default function OrgChartPage() {
 
       {/* Group move dialog */}
       {pendingGroupMove && (
-        <Dialog open onOpenChange={() => setPendingGroupMove(null)}>
-          <DialogContent icon="group" alert>
-            <DialogHeader centered>
-              <DialogTitle>Move {pendingGroupMove.persons.length} people</DialogTitle>
-              <DialogDescription>
-                Move all {pendingGroupMove.persons.length} direct reports{" "}
-                {pendingGroupMove.targetId
-                  ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
-                  : "to unallocated"}?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
+        <Dialog open onOpenChange={() => setPendingGroupMove(null)} icon={<Icon name="group" />} role="alertdialog">
+          <DialogTitle>Move {pendingGroupMove.persons.length} people</DialogTitle>
+          <DialogContent>
+            <p>
+              Move all {pendingGroupMove.persons.length} direct reports{" "}
+              {pendingGroupMove.targetId
+                ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
+                : "to unallocated"}?
+            </p>
+          </DialogContent>
+          <DialogActions>
               <Button variant="text" onClick={() => setPendingGroupMove(null)}>Cancel</Button>
               <Button
                 onClick={() => {
@@ -333,8 +330,7 @@ export default function OrgChartPage() {
               >
                 Confirm
               </Button>
-            </DialogFooter>
-          </DialogContent>
+          </DialogActions>
         </Dialog>
       )}
     </div>

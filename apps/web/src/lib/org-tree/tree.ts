@@ -212,7 +212,7 @@ export function getPathToRoot(persons: Person[], targetId: string): string[] {
 
 /**
  * Like getPathToRoot, but returns { id, name } for each step so callers can
- * make the breadcrumb interactive (e.g. click a segment to focus that person).
+ * make the breadcrumb (e.g. click a segment to focus that person).
  */
 export function getPathToRootNodes(
   persons: Person[],

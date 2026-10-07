@@ -3,7 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { NavigationBar } from "@vkieu/mui/navigation";
+import { NavigationBar, NavigationBarItem } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Mobile bottom navigation using M3 Navigation Bar.
@@ -41,12 +42,42 @@ export function MobileNav() {
 
   return (
     <div className="md:hidden">
-      <NavigationBar value={activeValue} onValueChange={handleValueChange}>
-        <NavigationBar.Item value="dashboard" icon="dashboard" label="Dashboard" />
-        <NavigationBar.Item value="people" icon="person" label="People" />
-        <NavigationBar.Item value="finance" icon="account_balance" label="Finance" />
-        <NavigationBar.Item value="calendar" icon="calendar_month" label="Calendar" />
-        <NavigationBar.Item value="more" icon="more_horiz" label="More" />
+      <NavigationBar aria-label="Main navigation">
+        <NavigationBarItem
+          icon={<Icon name="dashboard" />}
+          selected={activeValue === "dashboard"}
+          onPress={() => handleValueChange("dashboard")}
+        >
+          Dashboard
+        </NavigationBarItem>
+        <NavigationBarItem
+          icon={<Icon name="person" />}
+          selected={activeValue === "people"}
+          onPress={() => handleValueChange("people")}
+        >
+          People
+        </NavigationBarItem>
+        <NavigationBarItem
+          icon={<Icon name="account_balance" />}
+          selected={activeValue === "finance"}
+          onPress={() => handleValueChange("finance")}
+        >
+          Finance
+        </NavigationBarItem>
+        <NavigationBarItem
+          icon={<Icon name="calendar_month" />}
+          selected={activeValue === "calendar"}
+          onPress={() => handleValueChange("calendar")}
+        >
+          Calendar
+        </NavigationBarItem>
+        <NavigationBarItem
+          icon={<Icon name="more_horiz" />}
+          selected={activeValue === "more"}
+          onPress={() => handleValueChange("more")}
+        >
+          More
+        </NavigationBarItem>
       </NavigationBar>
     </div>
   );

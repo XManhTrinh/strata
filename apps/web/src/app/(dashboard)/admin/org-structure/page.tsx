@@ -1,27 +1,25 @@
 "use client";
+import type React from "react";
 
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
 import {
-  Search,
-  PageBar,
-  Icon,
+  SearchBar,
+  TopAppBar,
   Card,
-  CardContent,
+  TooltipTrigger,
   Tooltip,
   TextField,
-  Select,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  Chip,
+  FilterChip,
   List,
   ListItem,
+  Dialog, DialogContent, DialogTitle, DialogActions,
+  Button,
+  IconButton,
 } from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,6 +34,11 @@ import { useOrgUnitTypes } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { OrgUnitFlow } from "@/components/flow-org/OrgUnitFlow";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Tree types ───────────────────────────────────────────────────────────────
 
@@ -113,8 +116,7 @@ function TreeNode({
   return (
     <div role="treeitem" aria-expanded={hasChildren ? expanded : undefined}>
       <div style={{ paddingInlineStart: `${depth * 24}px` }}>
-        <ListItem
-          interactive
+        <ListItemWithClick
           className="group rounded-lg"
           leading={
           hasChildren ? (
@@ -123,9 +125,8 @@ function TreeNode({
               size="xs"
               onClick={() => setExpanded(!expanded)}
               aria-label={expanded ? "Collapse" : "Expand"}
-            >
-              <Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />
-            </IconButton>
+              icon={<Icon name={expanded ? "expand_more" : "chevron_right"} size={20} />}
+            />
           ) : (
             <span className="inline-flex items-center justify-center h-8 w-8">
               <Icon name="remove" size={16} className="text-outline" />
@@ -134,21 +135,18 @@ function TreeNode({
         }
         trailing={
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-            <Tooltip content="Edit">
-              <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(unit)}>
-                <Icon name="edit" size={18} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip content="Add child">
-              <IconButton variant="standard" size="xs" aria-label="Add child" onClick={() => onAddChild(unit.id)}>
-                <Icon name="add" size={18} className="text-primary" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip content="Archive">
-              <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(unit.id)}>
-                <Icon name="archive" size={18} />
-              </IconButton>
-            </Tooltip>
+            <TooltipTrigger placement="top">
+              <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(unit)} icon={<Icon name="edit" size={18} />} />
+              <Tooltip>Edit</Tooltip>
+            </TooltipTrigger>
+            <TooltipTrigger placement="top">
+              <IconButton variant="standard" size="xs" aria-label="Add child" onClick={() => onAddChild(unit.id)} icon={<Icon name="add" size={18} className="text-primary" />} />
+              <Tooltip>Add child</Tooltip>
+            </TooltipTrigger>
+            <TooltipTrigger placement="top">
+              <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(unit.id)} icon={<Icon name="archive" size={18} />} />
+              <Tooltip>Archive</Tooltip>
+            </TooltipTrigger>
           </div>
         }
         onClick={() => hasChildren && setExpanded(!expanded)}
@@ -165,7 +163,7 @@ function TreeNode({
             {unit.typeName}
           </span>
         </span>
-      </ListItem>
+      </ListItemWithClick>
       </div>
 
       {expanded && hasChildren && (
@@ -281,25 +279,22 @@ function OrgUnitDialog({
   orgUnits,
 }: OrgUnitDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon={editing ? "edit" : "add_circle"}>
-        <DialogHeader centered>
-          <DialogTitle>
-            {editing ? "Edit Organization Unit" : "Create Organization Unit"}
-          </DialogTitle>
-          <DialogDescription>
-            {editing
-              ? "Update the details for this organization unit."
-              : "Add a new unit to your organization hierarchy."}
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name={editing ? "edit" : "add_circle"} />}>
+      <DialogTitle>
+        {editing ? "Edit Organization Unit" : "Create Organization Unit"}
+      </DialogTitle>
+      <DialogContent>
+        <p className="text-sm text-on-surface-variant mb-4">
+          {editing
+            ? "Update the details for this organization unit."
+            : "Add a new unit to your organization hierarchy."}
+        </p>
         <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Name"
             value={formData.name}
-            onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+            onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Engineering"
             onKeyDown={(e) => { if (e.key === "Enter" && formData.name.trim()) onSubmit(); }}
           />
@@ -331,20 +326,19 @@ function OrgUnitDialog({
             ]}
           />
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="text"
-            onClick={onSubmit}
-            disabled={!formData.name.trim() || !formData.typeId || isPending}
-          >
-            {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button
+          variant="text"
+          onClick={onSubmit}
+          disabled={!formData.name.trim() || !formData.typeId || isPending}
+        >
+          {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -464,14 +458,10 @@ export default function OrgStructurePage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <PageBar className="justify-between">
-          <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              Build and manage your organization&apos;s hierarchical structure.
-            </p>
-          </div>
-        </PageBar>
+        <TopAppBar
+          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Hierarchy</h1>}
+          subtitle="Build and manage your organization's hierarchical structure."
+        />
         <ErrorState onRetry={() => refetch()} />
       </div>
     );
@@ -488,57 +478,57 @@ export default function OrgStructurePage() {
       transition={defaultTransition}
     >
       {/* ── Page header ────────────────────────────────────────────────── */}
-      <PageBar className="justify-between shrink-0">
-        <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Hierarchy</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            Build and manage your organization&apos;s hierarchical structure.
-          </p>
-        </div>
-        <Button onClick={() => openCreate()}>
-          <Icon name="add" size={18} />
-          Create Unit
-        </Button>
-      </PageBar>
+      <TopAppBar
+        className="justify-between shrink-0"
+        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Hierarchy</h1>}
+        subtitle="Build and manage your organization's hierarchical structure."
+        actions={
+          <Button onClick={() => openCreate()}>
+            <Icon name="add" size={18} />
+            Create Unit
+          </Button>
+        }
+      />
 
       {/* ── Toolbar: search + stats + view toggle ──────────────────────── */}
       <div className="flex items-center gap-4 shrink-0">
-        <Search
+        <SearchBar
+          aria-label="Search"
           className="max-w-sm"
           value={search}
-          onValueChange={setSearch}
+          onChange={setSearch}
           placeholder="Search units..."
         />
 
         {!isLoading && unitCount > 0 && (
-          <Chip variant="filter" selected className="shrink-0">
+          <FilterChip defaultSelected className="shrink-0">
             {unitCount} {unitCount === 1 ? "unit" : "units"}
-          </Chip>
+          </FilterChip>
         )}
 
         <div className="ml-auto flex items-center gap-1 rounded-full bg-surface-container-highest/50 p-1">
-          <Tooltip content="List view">
+          <TooltipTrigger placement="top">
             <IconButton
-              variant={viewMode === "list" ? "filled-tonal" : "standard"}
+              variant={viewMode === "list" ? "tonal" : "standard"}
               size="xs"
               onClick={() => setViewMode("list")}
               aria-label="List view"
               aria-pressed={viewMode === "list"}
-            >
-              <Icon name="list" size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content="Flow view">
+              icon={<Icon name="list" size={18} />}
+            />
+            <Tooltip>List view</Tooltip>
+          </TooltipTrigger>
+          <TooltipTrigger placement="top">
             <IconButton
-              variant={viewMode === "flow" ? "filled-tonal" : "standard"}
+              variant={viewMode === "flow" ? "tonal" : "standard"}
               size="xs"
               onClick={() => setViewMode("flow")}
               aria-label="Flow view"
               aria-pressed={viewMode === "flow"}
-            >
-              <Icon name="account_tree" size={18} />
-            </IconButton>
-          </Tooltip>
+              icon={<Icon name="account_tree" size={18} />}
+            />
+            <Tooltip>Flow view</Tooltip>
+          </TooltipTrigger>
         </div>
       </div>
 
@@ -551,7 +541,7 @@ export default function OrgStructurePage() {
             ) : filteredTree.length === 0 ? (
               <EmptyState onCreateClick={() => openCreate()} />
             ) : (
-              <List className="py-1">
+              <List aria-label="List" className="py-1">
                 {filteredTree.map((unit) => (
                   <TreeNode
                     key={unit.id}

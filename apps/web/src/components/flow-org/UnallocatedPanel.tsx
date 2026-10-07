@@ -1,6 +1,7 @@
 "use client";
 
-import { Icon, Typography } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { Person } from "@/lib/org-tree/types";
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────

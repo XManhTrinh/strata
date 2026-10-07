@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { Person } from "@/lib/org-tree/types";
 
 export interface PersonNodeData {

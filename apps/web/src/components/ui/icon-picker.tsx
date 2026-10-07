@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { TextField } from "@vkieu/mui";
 import { cn } from "@/lib/utils";
 
@@ -232,10 +232,9 @@ export function IconPicker({
           variant="outlined"
           label={label}
           value={focused ? search : (value || "")}
-          onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
+          onChange={(value) => { setSearch(value); setOpen(true); }}
           onFocus={() => { setFocused(true); setSearch(""); setOpen(true); }}
           onBlur={() => setFocused(false)}
-          onClick={() => setOpen(true)}
           placeholder={placeholder}
           leadingIcon={
             color

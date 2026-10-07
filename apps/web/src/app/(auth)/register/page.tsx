@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@vkieu/mui/buttons";
-import { TextField, Divider, Icon, Card, CardContent, Typography } from "@vkieu/mui";
+import { Button, TextField, Divider, Card } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -169,10 +171,10 @@ export default function RegisterPage() {
               <TextField
                 id="fullName" type="text" variant="outlined" label="Full name"
                 value={fullName}
-                onChange={(e) => { setFullName(e.target.value); if (nameError) validateName(e.target.value); }}
+                onChange={(value) => { setFullName(value); if (nameError) validateName(value); }}
                 onBlur={() => validateName(fullName)}
                 placeholder="Jane Smith"
-                error={!!nameError} errorText={nameError}
+                invalid={!!nameError} errorMessage={nameError}
                 autoComplete="name"
                 leadingIcon={<Icon name="person" size={20} />}
                 aria-invalid={!!nameError}
@@ -181,10 +183,10 @@ export default function RegisterPage() {
               <TextField
                 id="companyName" type="text" variant="outlined" label="Workspace name"
                 value={companyName}
-                onChange={(e) => { setCompanyName(e.target.value); if (companyError) validateCompany(e.target.value); }}
+                onChange={(value) => { setCompanyName(value); if (companyError) validateCompany(value); }}
                 onBlur={() => validateCompany(companyName)}
                 placeholder="My team or Acme Inc."
-                error={!!companyError} errorText={companyError}
+                invalid={!!companyError} errorMessage={companyError}
                 autoComplete="organization"
                 leadingIcon={<Icon name="apartment" size={20} />}
                 aria-invalid={!!companyError}
@@ -193,10 +195,10 @@ export default function RegisterPage() {
               <TextField
                 id="email" type="email" variant="outlined" label="Email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); if (emailError) validateEmail(e.target.value); }}
+                onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
                 onBlur={() => validateEmail(email)}
                 placeholder="you@company.com"
-                error={!!emailError} errorText={emailError}
+                invalid={!!emailError} errorMessage={emailError}
                 autoComplete="email"
                 leadingIcon={<Icon name="mail" size={20} />}
                 aria-invalid={!!emailError}
@@ -205,10 +207,10 @@ export default function RegisterPage() {
               <TextField
                 id="password" type={showPassword ? "text" : "password"} variant="outlined" label="Password"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); if (passwordError) validatePassword(e.target.value); }}
+                onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
                 onBlur={() => validatePassword(password)}
                 placeholder="Min. 8 characters"
-                error={!!passwordError} errorText={passwordError}
+                invalid={!!passwordError} errorMessage={passwordError}
                 autoComplete="new-password"
                 leadingIcon={<Icon name="lock" size={20} />}
                 trailingIcon={
@@ -222,10 +224,10 @@ export default function RegisterPage() {
               <TextField
                 id="confirmPassword" type={showConfirmPassword ? "text" : "password"} variant="outlined" label="Confirm password"
                 value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); if (confirmError) validateConfirmPassword(e.target.value); }}
+                onChange={(value) => { setConfirmPassword(value); if (confirmError) validateConfirmPassword(value); }}
                 onBlur={() => validateConfirmPassword(confirmPassword)}
                 placeholder="Re-enter your password"
-                error={!!confirmError} errorText={confirmError}
+                invalid={!!confirmError} errorMessage={confirmError}
                 autoComplete="new-password"
                 leadingIcon={<Icon name="lock" size={20} />}
                 trailingIcon={
@@ -236,7 +238,7 @@ export default function RegisterPage() {
                 aria-invalid={!!confirmError}
               />
 
-              <Button type="submit" variant="filled" disabled={isSubmitting} loading={isSubmitting} className="w-full">
+              <Button type="submit" variant="filled" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? "Creating account..." : "Create account"}
               </Button>
             </form>
@@ -247,7 +249,7 @@ export default function RegisterPage() {
               <Divider className="flex-1" />
             </div>
 
-            <Button type="button" variant="tonal" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+            <Button type="button" variant="tonal" className="w-full" leadingIcon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
               Sign up with Google
             </Button>
 

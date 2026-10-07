@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { Icon } from "@vkieu/mui";
-import { Checkbox } from "@vkieu/mui";
-import { Search } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Checkbox, SearchBar, Button } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import type { OrganizationUnit } from "@/services";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -184,10 +182,10 @@ export function OrgUnitTreeSelect({
   return (
     <div ref={containerRef} className={`relative ${className ?? ""}`}>
       {/* Search input (the trigger) — M3 Search Bar */}
-      <Search
+      <SearchBar
+        aria-label="Search"
         value={search}
-        onValueChange={(v) => { setSearch(v); if (!open) setOpen(true); }}
-        onFocus={() => setOpen(true)}
+        onChange={(v: string) => { setSearch(v); if (!open) setOpen(true); }}
         placeholder={placeholder}
         className="mx-0 min-w-0 w-full"
         trailingIcon={
@@ -244,10 +242,10 @@ export function OrgUnitTreeSelect({
                     )}
 
                     {/* Checkbox */}
-                    <Checkbox
-                      checked={state === "checked"}
+                    <Checkbox aria-label="Toggle"
+ selected={state === "checked"}
                       indeterminate={state === "indeterminate"}
-                      onCheckedChange={() => toggleSelect(node)}
+                      onSelectedChange={() => toggleSelect(node)}
                       className="shrink-0"
                     />
 

@@ -3,11 +3,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
-  PageBar, Icon, Card, CardContent, TextField, Select, Chip,
-  Divider, List, ListItem, Typography,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  TopAppBar, FilterChip,
+  Card, TextField,
+  Divider, List, ListItem,
+  Dialog, DialogContent, DialogTitle, DialogActions,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
@@ -125,12 +130,10 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full">
-        <PageBar>
-          <div>
-            <Typography variant="headline-small">Settings</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground">Workspace configuration.</Typography>
-          </div>
-        </PageBar>
+        <TopAppBar
+          title={<Typography variant="headline-small">Settings</Typography>}
+          subtitle="Workspace configuration."
+        />
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
           {Array.from({ length: 5 }).map((_, i) => (
             <Card key={i} variant="elevated"><CardContent className="p-4"><Skeleton className="h-14 w-full" /></CardContent></Card>
@@ -152,7 +155,7 @@ export default function SettingsPage() {
   if (isError) {
     return (
       <div className="flex flex-col h-full">
-        <PageBar><div><Typography variant="headline-small">Settings</Typography></div></PageBar>
+        <TopAppBar title={<Typography variant="headline-small">Settings</Typography>} />
         <div className="flex-1 flex items-center justify-center">
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
@@ -172,12 +175,11 @@ export default function SettingsPage() {
   return (
     <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
-      <PageBar className="justify-between shrink-0">
-        <div>
-          <Typography variant="headline-small">Settings</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">Workspace configuration and preferences.</Typography>
-        </div>
-        {isDirty && (
+      <TopAppBar
+        className="justify-between shrink-0"
+        title={<Typography variant="headline-small">Settings</Typography>}
+        subtitle="Workspace configuration and preferences."
+        actions={isDirty ? (
           <div className="flex items-center gap-2">
             <Button variant="text" onClick={handleDiscard} disabled={updateMutation.isPending}>Discard</Button>
             <Button variant="filled" onClick={handleSave} disabled={updateMutation.isPending}>
@@ -185,8 +187,8 @@ export default function SettingsPage() {
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-        )}
-      </PageBar>
+        ) : undefined}
+      />
 
       {/* Workspace Overview Strip — M3 elevated cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 shrink-0">
@@ -209,22 +211,26 @@ export default function SettingsPage() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[240px_1fr] mt-4 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
         {/* Side Navigation — M3 List */}
         <div className="border-b lg:border-b-0 lg:border-r border-outline-variant flex lg:flex-col overflow-x-auto lg:overflow-x-visible">
-          <List className="py-1 flex lg:flex-col w-full">
+          <List
+            aria-label="Settings navigation"
+            className="py-1 flex lg:flex-col w-full"
+            selectionMode="single"
+            selectedKeys={[activeSection]}
+            onSelectionChange={(keys) => { const v = [...keys][0]; if (v) setActiveSection(v as SettingsSection); }}
+            onAction={(key) => setActiveSection(key as SettingsSection)}
+          >
             {NAV_ITEMS.map((item) => {
               const isActive = activeSection === item.id;
               return (
                 <ListItem
                   key={item.id}
-                  interactive
-                  selected={isActive}
                   leading={
                     <Icon
                       name={item.icon}
                       size={20}
-                      className={isActive ? "text-primary" : "text-surface-variant-foreground"}
+                      className={isActive ? "text-primary" : "text-on-surface-variant"}
                     />
                   }
-                  onClick={() => setActiveSection(item.id)}
                 >
                   {item.label}
                 </ListItem>
@@ -258,14 +264,14 @@ export default function SettingsPage() {
                       variant="outlined"
                       label="Company Name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(value) => setName(value)}
                       placeholder="e.g. Strata Technologies"
                     />
                     <TextField
                       variant="outlined"
                       label="Workspace Slug"
                       value={slug}
-                      onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                      onChange={(value) => setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
                       placeholder="e.g. strata-tech"
                       supportingText="Used in URLs. Lowercase letters, numbers, and hyphens only."
                     />
@@ -281,22 +287,21 @@ export default function SettingsPage() {
                       </div>
                       <Typography variant="title-small">Workspace Details</Typography>
                     </div>
-                    <List className="py-0">
+                    <List aria-label="List" className="py-0">
                       <ListItem
-                        lines={1}
-                        supporting="Workspace ID"
+                        supportingText="Workspace ID"
                         trailing={
-                          <Chip variant="filter" className="font-mono text-[11px]">{company?.id}</Chip>
+                          <FilterChip className="font-mono text-[11px]">{company?.id}</FilterChip>
                         }
                       >
                         Identifier
                       </ListItem>
                       <Divider />
-                      <ListItem lines={1} supporting="When this workspace was created" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.createdAt) : "—"}</Typography>}>
+                      <ListItem supportingText="When this workspace was created" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.createdAt) : "—"}</Typography>}>
                         Created
                       </ListItem>
                       <Divider />
-                      <ListItem lines={1} supporting="Last settings update" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.updatedAt) : "—"}</Typography>}>
+                      <ListItem supportingText="Last settings update" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.updatedAt) : "—"}</Typography>}>
                         Updated
                       </ListItem>
                     </List>
@@ -327,7 +332,7 @@ export default function SettingsPage() {
                       variant="outlined"
                       label="Currency"
                       value={currency}
-                      onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+                      onChange={(value) => setCurrency(value.toUpperCase())}
                       placeholder="e.g. GBP, USD, EUR"
                       supportingText="ISO 4217 currency code."
                     />
@@ -369,11 +374,11 @@ export default function SettingsPage() {
                         preview before committing.
                       </Typography>
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <Chip variant="filter" leadingIcon="group">Members</Chip>
-                        <Chip variant="filter" leadingIcon="lan">Org Structure</Chip>
-                        <Chip variant="filter" leadingIcon="work">Positions</Chip>
-                        <Chip variant="filter" leadingIcon="leaderboard">Grades</Chip>
-                        <Chip variant="filter" leadingIcon="shield">Roles</Chip>
+                        <FilterChip leadingIcon={<Icon name="group" />}>Members</FilterChip>
+                        <FilterChip leadingIcon={<Icon name="lan" />}>Org Structure</FilterChip>
+                        <FilterChip leadingIcon={<Icon name="work" />}>Positions</FilterChip>
+                        <FilterChip leadingIcon={<Icon name="leaderboard" />}>Grades</FilterChip>
+                        <FilterChip leadingIcon={<Icon name="shield" />}>Roles</FilterChip>
                       </div>
                       <div className="mt-4">
                         <CsvImportDialog companyId={companyId} />
@@ -392,35 +397,31 @@ export default function SettingsPage() {
                     </div>
                     <Typography variant="title-small">Import Tips</Typography>
                   </div>
-                  <List className="py-0">
+                  <List aria-label="List" className="py-0">
                     <ListItem
-                      lines={2}
                       leading={<Icon name="check_circle" size={20} className="text-primary" />}
-                      supporting="Each row must have at least a name and email."
+                      supportingText="Each row must have at least a name and email."
                     >
                       Required columns: Full Name & Email
                     </ListItem>
                     <Divider />
                     <ListItem
-                      lines={2}
                       leading={<Icon name="account_tree" size={20} className="text-primary" />}
-                      supporting="Use separate columns for each level (e.g. Division, Tribe, Squad). You can reorder them in the wizard."
+                      supportingText="Use separate columns for each level (e.g. Division, Tribe, Squad). You can reorder them in the wizard."
                     >
                       Org hierarchy from multiple columns
                     </ListItem>
                     <Divider />
                     <ListItem
-                      lines={2}
                       leading={<Icon name="table_chart" size={20} className="text-primary" />}
-                      supporting="Any CSV column not mapped to a known field is stored as member metadata."
+                      supportingText="Any CSV column not mapped to a known field is stored as member metadata."
                     >
                       Extra columns become metadata
                     </ListItem>
                     <Divider />
                     <ListItem
-                      lines={2}
                       leading={<Icon name="sync" size={20} className="text-primary" />}
-                      supporting="Members matched by email are updated. New emails create new members."
+                      supportingText="Members matched by email are updated. New emails create new members."
                     >
                       Safe to re-import
                     </ListItem>
@@ -439,16 +440,15 @@ export default function SettingsPage() {
               </div>
 
               <Card variant="outlined">
-                <List className="py-0">
+                <List aria-label="List" className="py-0">
                   {/* Export */}
                   <ListItem
-                    lines={2}
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant/30">
                         <Icon name="download" size={20} className="text-surface-variant-foreground" />
                       </div>
                     }
-                    supporting="Download all workspace data as CSV files."
+                    supportingText="Download all workspace data as CSV files."
                     trailing={<Button variant="outlined" disabled>Coming Soon</Button>}
                   >
                     Export All Data
@@ -458,13 +458,12 @@ export default function SettingsPage() {
 
                   {/* Reset */}
                   <ListItem
-                    lines={2}
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
                         <Icon name="restart_alt" size={20} className="text-error-container-foreground" />
                       </div>
                     }
-                    supporting="Delete all members, org structure, roles, capacity data. Preserves super admin accounts."
+                    supportingText="Delete all members, org structure, roles, capacity data. Preserves super admin accounts."
                     trailing={
                       <Button variant="tonal" className="text-error" onClick={() => setShowResetDialog(true)}>
                         <Icon name="restart_alt" size={18} />Reset
@@ -478,13 +477,12 @@ export default function SettingsPage() {
 
                   {/* Delete */}
                   <ListItem
-                    lines={2}
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
                         <Icon name="delete_forever" size={20} className="text-error-container-foreground" />
                       </div>
                     }
-                    supporting="Permanently delete this workspace and all its data."
+                    supportingText="Permanently delete this workspace and all its data."
                     trailing={<Button variant="outlined" className="text-error border-error/30" disabled><Icon name="delete_forever" size={18} />Delete</Button>}
                   >
                     Delete Workspace
@@ -497,50 +495,49 @@ export default function SettingsPage() {
       </div>
 
       {/* Reset Confirmation Dialog — M3 Dialog */}
-      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <DialogContent icon="warning">
-          <DialogHeader centered>
-            <DialogTitle>Reset All Data</DialogTitle>
-            <DialogDescription>
-              This will permanently delete all members, org structure, positions, roles, calendar data,
-              capacity allocations, and rate cards. Only super admin accounts will be preserved.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog} icon={<Icon name="warning" />}>
+        <DialogTitle>Reset All Data</DialogTitle>
+        <DialogContent>
+          <p>
+            This will permanently delete all members, org structure, positions, roles, calendar data,
+            capacity allocations, and rate cards. Only super admin accounts will be preserved.
+          </p>
+          <div className="space-y-3 mt-4">
             <Typography variant="body-small" color="surface-variant-foreground">
               Type <strong className="text-error">RESET</strong> to confirm:
             </Typography>
             <TextField
               variant="outlined"
+              label="Confirmation"
               value={resetConfirmText}
-              onChange={(e) => setResetConfirmText(e.target.value)}
+              onChange={(value) => setResetConfirmText(value)}
               placeholder="Type RESET"
             />
           </div>
-          <DialogFooter>
-            <Button variant="text" onClick={() => { setShowResetDialog(false); setResetConfirmText(""); }}>Cancel</Button>
-            <Button
-              variant="text"
-              className="text-error"
-              disabled={resetConfirmText !== "RESET" || resetMutation.isPending}
-              onClick={() => {
-                resetMutation.mutate(
-                  { companyId },
-                  {
-                    onSuccess: (result) => {
-                      toast.success(`Workspace reset. ${result.preserved.superAdmins} super admin(s) preserved.`);
-                      setShowResetDialog(false);
-                      setResetConfirmText("");
-                    },
-                    onError: (err) => toast.error(err.message || "Failed to reset"),
-                  },
-                );
-              }}
-            >
-              {resetMutation.isPending ? "Resetting..." : "Reset All Data"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => { setShowResetDialog(false); setResetConfirmText(""); }}>Cancel</Button>
+          <Button
+            variant="text"
+            className="text-error"
+            disabled={resetConfirmText !== "RESET" || resetMutation.isPending}
+            onClick={() => {
+              resetMutation.mutate(
+                { companyId },
+                {
+                  onSuccess: (result) => {
+                    toast.success(`Workspace reset. ${result.preserved.superAdmins} super admin(s) preserved.`);
+                    setShowResetDialog(false);
+                    setResetConfirmText("");
+                  },
+                  onError: (err) => toast.error(err.message || "Failed to reset"),
+                },
+              );
+            }}
+          >
+            {resetMutation.isPending ? "Resetting..." : "Reset All Data"}
+          </Button>
+        </DialogActions>
       </Dialog>
     </motion.div>
   );

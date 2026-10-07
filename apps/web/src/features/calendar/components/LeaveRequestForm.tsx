@@ -4,16 +4,14 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
   TextField,
-  Select,
-  Icon,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Select } from "@/components/ui/select";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
 import { calculateWorkingDays, getAvailableBalance } from "../utils/calendar.utils";
 
@@ -145,15 +143,10 @@ export function LeaveRequestForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent icon="event_available">
-        <DialogHeader centered>
-          <DialogTitle>Request Leave</DialogTitle>
-          <DialogDescription>
-            Submit a leave request for approval.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <DialogTitle>Request Leave</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Submit a leave request for approval.</p>
+        <form onSubmit={handleSubmit} className="space-y-4" id="leave-form">
           {errors.length > 0 && (
             <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
@@ -191,14 +184,14 @@ export function LeaveRequestForm({
               label="Start Date"
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(value) => setStartDate(value)}
             />
             <TextField
               variant="outlined"
               label="End Date"
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(value) => setEndDate(value)}
             />
           </div>
 
@@ -213,21 +206,21 @@ export function LeaveRequestForm({
             variant="outlined"
             label="Notes (optional)"
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(value) => setNotes(value)}
             placeholder="Reason for leave..."
             multiline
           />
 
-          <DialogFooter>
-            <Button type="button" variant="text" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="text">
-              Submit Request
-            </Button>
-          </DialogFooter>
         </form>
       </DialogContent>
+      <DialogActions>
+        <Button type="button" variant="text" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button type="submit" form="leave-form" variant="text">
+          Submit Request
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

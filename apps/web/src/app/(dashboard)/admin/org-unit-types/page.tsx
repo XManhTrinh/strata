@@ -1,27 +1,25 @@
 "use client";
+import type React from "react";
 
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
 import {
-  Search,
-  PageBar,
-  Icon,
+  SearchBar,
+  TopAppBar,
   Card,
-  CardContent,
-  Chip,
+  FilterChip,
+  TooltipTrigger,
   Tooltip,
   TextField,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  Dialog, DialogContent, DialogTitle, DialogActions,
   List,
   ListItem,
   Divider,
+  Button,
+  IconButton,
 } from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
 import {
   Table,
   TableHeader,
@@ -44,6 +42,11 @@ import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { ColorPicker } from "@/components/ui/color-picker";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -189,27 +192,26 @@ function TypeRow({
         </div>
       </TableCell>
       <TableCell>
-        <Chip variant="filter" selected={!row.archived}>
+        <FilterChip defaultSelected={!row.archived}>
           {row.archived ? "Archived" : "Active"}
-        </Chip>
+        </FilterChip>
       </TableCell>
       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-1">
-          <Tooltip content="Edit">
-            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(row)}>
-              <Icon name="edit" size={18} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content={row.archived ? "Restore" : "Archive"}>
+          <TooltipTrigger placement="top">
+            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(row)} icon={<Icon name="edit" size={18} />} />
+            <Tooltip>Edit</Tooltip>
+          </TooltipTrigger>
+          <TooltipTrigger placement="top">
             <IconButton
               variant="standard"
               size="xs"
               aria-label={row.archived ? "Restore" : "Archive"}
               onClick={() => (row.archived ? onRestore(row.id) : onArchive(row.id))}
-            >
-              <Icon name={row.archived ? "unarchive" : "archive"} size={18} />
-            </IconButton>
-          </Tooltip>
+              icon={<Icon name={row.archived ? "unarchive" : "archive"} size={18} />}
+            />
+            <Tooltip>{row.archived ? "Restore" : "Archive"}</Tooltip>
+          </TooltipTrigger>
         </div>
       </TableCell>
     </TableRow>
@@ -235,8 +237,7 @@ function TypeCard({
   return (
     <Card variant="elevated">
       <CardContent className="p-0">
-        <ListItem
-          interactive
+        <ListItemWithClick
           onClick={() => onEdit(row)}
           leading={
             <div
@@ -250,10 +251,10 @@ function TypeCard({
           }
           trailing={
             <div className="flex items-center gap-2">
-              <Chip variant="filter" selected={!row.archived}>
+              <FilterChip defaultSelected={!row.archived}>
                 {row.archived ? "Archived" : "Active"}
-              </Chip>
-              <Tooltip content={row.archived ? "Restore" : "Archive"}>
+              </FilterChip>
+              <TooltipTrigger placement="top">
                 <IconButton
                   variant="standard"
                   size="xs"
@@ -262,17 +263,16 @@ function TypeCard({
                     e.stopPropagation();
                     row.archived ? onRestore(row.id) : onArchive(row.id);
                   }}
-                >
-                  <Icon name={row.archived ? "unarchive" : "archive"} size={18} />
-                </IconButton>
-              </Tooltip>
+                  icon={<Icon name={row.archived ? "unarchive" : "archive"} size={18} />}
+                />
+                <Tooltip>{row.archived ? "Restore" : "Archive"}</Tooltip>
+              </TooltipTrigger>
             </div>
           }
-          lines={2}
-          supporting={row.description || "No description"}
+          supportingText={row.description || "No description"}
         >
           {row.name}
-        </ListItem>
+        </ListItemWithClick>
       </CardContent>
     </Card>
   );
@@ -300,23 +300,20 @@ function TypeDialog({
   isPending,
 }: TypeDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon={editing ? "edit" : "label"}>
-        <DialogHeader centered>
-          <DialogTitle>{editing ? "Edit Type" : "Create Type"}</DialogTitle>
-          <DialogDescription>
-            {editing
-              ? "Update the organization unit type details."
-              : "Define a new type for your organization structure."}
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name={editing ? "edit" : "label"} />}>
+      <DialogTitle>{editing ? "Edit Type" : "Create Type"}</DialogTitle>
+      <DialogContent>
+        <p className="text-sm text-on-surface-variant mb-4">
+          {editing
+            ? "Update the organization unit type details."
+            : "Define a new type for your organization structure."}
+        </p>
         <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Name"
             value={formData.name}
-            onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+            onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Department"
             onKeyDown={(e) => {
               if (e.key === "Enter" && formData.name.trim()) onSubmit();
@@ -326,7 +323,7 @@ function TypeDialog({
             variant="outlined"
             label="Description"
             value={formData.description}
-            onChange={(e) => onFormChange({ ...formData, description: e.target.value })}
+            onChange={(value) => onFormChange({ ...formData, description: value })}
             placeholder="Brief description of this type"
           />
           <div className="grid grid-cols-2 gap-4">
@@ -352,29 +349,28 @@ function TypeDialog({
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-[14px] font-medium text-surface-foreground truncate">
+              <p className="text-[14px] font-medium text-on-surface truncate">
                 {formData.name || "Type name"}
               </p>
-              <p className="text-[12px] text-surface-variant-foreground truncate">
+              <p className="text-[12px] text-on-surface-variant truncate">
                 {formData.description || "Description"}
               </p>
             </div>
           </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="text"
-            onClick={onSubmit}
-            disabled={!formData.name.trim() || isPending}
-          >
-            {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button
+          variant="text"
+          onClick={onSubmit}
+          disabled={!formData.name.trim() || isPending}
+        >
+          {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -491,16 +487,10 @@ export default function OrgUnitTypesPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <PageBar className="justify-between">
-          <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
-              Organization Unit Types
-            </h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              Define the types of organizational units used in your company structure.
-            </p>
-          </div>
-        </PageBar>
+        <TopAppBar
+          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Organization Unit Types</h1>}
+          subtitle="Define the types of organizational units used in your company structure."
+        />
         <ErrorState onRetry={() => refetch()} />
       </div>
     );
@@ -517,33 +507,31 @@ export default function OrgUnitTypesPage() {
       transition={defaultTransition}
     >
       {/* ── Page header ────────────────────────────────────────────────── */}
-      <PageBar className="justify-between">
-        <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">
-            Organization Unit Types
-          </h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            Define the types of organizational units used in your company structure.
-          </p>
-        </div>
-        <Button onClick={openCreate} className="shrink-0">
-          <Icon name="add" size={18} />
-          Create Type
-        </Button>
-      </PageBar>
+      <TopAppBar
+        className="justify-between"
+        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Organization Unit Types</h1>}
+        subtitle="Define the types of organizational units used in your company structure."
+        actions={
+          <Button onClick={openCreate} className="shrink-0">
+            <Icon name="add" size={18} />
+            Create Type
+          </Button>
+        }
+      />
 
       {/* ── Toolbar: search + count ────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        <Search
+        <SearchBar
+          aria-label="Search"
           className="max-w-sm"
           value={search}
-          onValueChange={setSearch}
+          onChange={setSearch}
           placeholder="Search types..."
         />
         {!isLoading && activeCount > 0 && (
-          <Chip variant="filter" selected className="shrink-0">
+          <FilterChip defaultSelected className="shrink-0">
             {activeCount} active
-          </Chip>
+          </FilterChip>
         )}
       </div>
 

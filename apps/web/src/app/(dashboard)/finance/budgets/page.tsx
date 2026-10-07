@@ -3,13 +3,13 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
 import {
-  PageBar,
-  Icon,
+  TopAppBar,
   Card,
-  CardContent,
-  Chip,
-  Typography,
+  FilterChip,
 } from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -177,16 +177,7 @@ export default function BudgetsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <PageBar>
-          <div>
-            <Typography variant="headline-medium">
-              Budget & Cost
-            </Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground">
-              Headcount costs across divisions and squads.
-            </Typography>
-          </div>
-        </PageBar>
+        <TopAppBar title={<Typography variant="headline-medium">Budget &amp; Cost</Typography>} subtitle="Headcount costs across divisions and squads." />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} variant="elevated">
@@ -205,13 +196,7 @@ export default function BudgetsPage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageBar>
-          <div>
-            <Typography variant="headline-medium">
-              Budget & Cost
-            </Typography>
-          </div>
-        </PageBar>
+        <TopAppBar title={<Typography variant="headline-medium">Budget &amp; Cost</Typography>} />
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
@@ -233,16 +218,7 @@ export default function BudgetsPage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <PageBar>
-        <div>
-          <Typography variant="headline-medium">
-            Budget & Cost
-          </Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            Headcount costs across divisions and squads · {fmtNum(members.length)} members
-          </Typography>
-        </div>
-      </PageBar>
+      <TopAppBar title={<Typography variant="headline-medium">Budget &amp; Cost</Typography>} subtitle={`Headcount costs across divisions and squads · ${fmtNum(members.length)} members`} />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -294,7 +270,7 @@ export default function BudgetsPage() {
                       <Typography variant="body-medium" as="span">
                         {stat.name}
                       </Typography>
-                      <Chip variant="filter">{stat.headcount} people</Chip>
+                      <FilterChip>{stat.headcount} people</FilterChip>
                     </div>
                     <Typography variant="body-medium" as="span">
                       {fmtGBP(stat.totalAnnualCost)}

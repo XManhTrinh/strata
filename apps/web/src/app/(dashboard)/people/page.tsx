@@ -25,26 +25,25 @@ import {
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
 import {
-  Search,
-  Icon,
+  SearchBar,
+  TopAppBar,
   Card,
-  CardContent,
   TextField,
-  Chip,
-  Select,
+  FilterChip,
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
   DialogTitle,
-  DialogDescription,
+  DialogActions,
+  TooltipTrigger,
   Tooltip,
   Checkbox,
   Divider,
-  PageBar,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
+import { Select } from "@/components/ui/select";
 import {
   usePeople,
   useCreatePerson,
@@ -91,13 +90,13 @@ function SortableColumnItem({
   id,
   label,
   isCore,
-  checked,
+  selected,
   onToggle,
 }: {
   id: string;
   label: string;
   isCore: boolean;
-  checked: boolean;
+  selected: boolean;
   onToggle: () => void;
 }) {
   const {
@@ -136,9 +135,10 @@ function SortableColumnItem({
       </button>
       <label className={`flex items-center gap-1.5 flex-1 min-w-0 ${isCore ? "" : "cursor-pointer hover:bg-surface-foreground/4"} rounded px-0.5`}>
         <Checkbox
-          checked={checked}
+          selected={selected}
           disabled={isCore}
-          onCheckedChange={isCore ? undefined : onToggle}
+          onSelectedChange={isCore ? undefined : () => onToggle()}
+          aria-label={`Toggle ${label} column`}
           className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
         />
         <span className="text-[12px] text-surface-foreground truncate">{label}</span>
@@ -465,8 +465,8 @@ export default function PeoplePage() {
       case "roles":
         return (
           <div className="flex items-center gap-1 flex-wrap">
-            {person.isSuperAdmin && <Chip variant="filter" selected>Admin</Chip>}
-            {(person.roles ?? []).map((r) => <Chip key={r.id} variant="filter">{r.name}</Chip>)}
+            {person.isSuperAdmin && <FilterChip defaultSelected>Admin</FilterChip>}
+            {(person.roles ?? []).map((r) => <FilterChip key={r.id}>{r.name}</FilterChip>)}
             {!person.isSuperAdmin && (person.roles ?? []).length === 0 && (
               <span className="text-[12px] text-surface-variant-foreground">No role</span>
             )}
@@ -487,12 +487,7 @@ export default function PeoplePage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <PageBar className="justify-between">
-          <div>
-            <Typography variant="headline-medium">Members</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground">Manage workspace members and their roles.</Typography>
-          </div>
-        </PageBar>
+        <TopAppBar title={<Typography variant="headline-medium">Members</Typography>} subtitle="Manage workspace members and their roles." />
         <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
@@ -522,33 +517,36 @@ export default function PeoplePage() {
       transition={defaultTransition}
     >
       {/* Page Header */}
-      <PageBar className="justify-between shrink-0">
-        <div>
-          <Typography variant="headline-medium">Members</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">{data?.total ?? 0} members · Manage workspace members and their roles.</Typography>
-        </div>
-        <div className="flex items-center gap-2">
-          <Tooltip content="Export visible columns to CSV">
-            <Button variant="tonal" onClick={handleExport}>
-              <Icon name="download" size={18} />Export
+      <TopAppBar
+        className="justify-between shrink-0"
+        title={<Typography variant="headline-medium">Members</Typography>}
+        subtitle={`${data?.total ?? 0} members · Manage workspace members and their roles.`}
+        actions={
+          <div className="flex items-center gap-2">
+            <TooltipTrigger placement="bottom">
+              <Button variant="tonal" onClick={handleExport}>
+                <Icon name="download" size={18} />Export
+              </Button>
+              <Tooltip>Export visible columns to CSV</Tooltip>
+            </TooltipTrigger>
+            <Button variant="tonal" className="text-error" onClick={() => setShowDeleteAllDialog(true)}>
+              <Icon name="delete_sweep" size={18} />Delete All
             </Button>
-          </Tooltip>
-          <Button variant="tonal" className="text-error" onClick={() => setShowDeleteAllDialog(true)}>
-            <Icon name="delete_sweep" size={18} />Delete All
-          </Button>
-          <Button onClick={openAdd}>
-            <Icon name="person_add" size={18} />Add Member
-          </Button>
-        </div>
-      </PageBar>
+            <Button onClick={openAdd}>
+              <Icon name="person_add" size={18} />Add Member
+            </Button>
+          </div>
+        }
+      />
 
       {/* Search + Filters Row */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
         <div className="flex items-center gap-4 flex-1">
-          <Search
+          <SearchBar
+          aria-label="Search"
             className="max-w-sm flex-1"
             value={search}
-            onValueChange={(val) => setSearch(val)}
+            onChange={(val) => setSearch(val)}
             placeholder="Search by name or email..."
           />
         </div>
@@ -568,26 +566,29 @@ export default function PeoplePage() {
           />
 
           {selectedViewId && (
-            <Tooltip content="Delete this view">
+            <TooltipTrigger placement="top">
               <Button variant="text" size="xs" className="rounded-full text-error" onClick={() => handleDeleteView(selectedViewId)}>
                 <Icon name="delete" size={18} />
               </Button>
-            </Tooltip>
+              <Tooltip>Delete this view</Tooltip>
+            </TooltipTrigger>
           )}
 
-          <Tooltip content="Save current column selection as a view">
+          <TooltipTrigger placement="top">
             <Button variant="tonal" size="xs" onClick={() => setShowSaveViewDialog(true)}>
               <Icon name="save" size={18} />Save View
             </Button>
-          </Tooltip>
+            <Tooltip>Save current column selection as a view</Tooltip>
+          </TooltipTrigger>
 
           {/* Column Visibility */}
           <div className="relative">
-            <Tooltip content="Toggle columns">
+            <TooltipTrigger placement="top">
               <Button variant="tonal" size="xs" onClick={() => setShowColumnToggle((v) => !v)}>
                 <Icon name="view_column" size={18} />Columns
               </Button>
-            </Tooltip>
+              <Tooltip>Toggle columns</Tooltip>
+            </TooltipTrigger>
 
             {showColumnToggle && (
               <>
@@ -618,7 +619,7 @@ export default function PeoplePage() {
                             id={key}
                             label={col.label}
                             isCore={col.isCore}
-                            checked={col.isCore || visibleMetaKeys.has(key)}
+                            selected={col.isCore || visibleMetaKeys.has(key)}
                             onToggle={() => toggleMetaColumn(key)}
                           />
                         );
@@ -686,7 +687,7 @@ export default function PeoplePage() {
           {selectedIds.size > 0 && (
             <Card variant="elevated" className="hidden md:block">
               <CardContent className="flex items-center gap-4 p-3">
-                <Chip variant="filter" selected>{selectedIds.size} selected</Chip>
+                <FilterChip defaultSelected>{selectedIds.size} selected</FilterChip>
                 <Button variant="tonal" onClick={() => setShowBatchRoleDialog(true)}>
                   <Icon name="shield" size={18} />Assign Role
                 </Button>
@@ -703,10 +704,11 @@ export default function PeoplePage() {
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
-                        checked={people.length > 0 && selectedIds.size === people.length}
-                        indeterminate={selectedIds.size > 0 && selectedIds.size < people.length}
-                        onCheckedChange={toggleSelectAll}
-                      />
+                      selected={people.length > 0 && selectedIds.size === people.length}
+                      indeterminate={selectedIds.size > 0 && selectedIds.size < people.length}
+                      onSelectedChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
                     </TableHead>
                     {visibleColumns.map((col) => <TableHead key={col.key}>{col.label}</TableHead>)}
                     <TableHead className="text-right">Actions</TableHead>
@@ -716,7 +718,7 @@ export default function PeoplePage() {
                   {people.map((person) => (
                     <TableRow key={person.id} className={selectedIds.has(person.id) ? "bg-primary/5" : ""}>
                       <TableCell className="w-10">
-                        <Checkbox checked={selectedIds.has(person.id)} onCheckedChange={() => toggleSelect(person.id)} />
+                        <Checkbox selected={selectedIds.has(person.id)} onSelectedChange={() => toggleSelect(person.id)} aria-label="Select row" />
                       </TableCell>
                       {visibleColumns.map((col) => <TableCell key={col.key}>{renderCell(person, col.key)}</TableCell>)}
                       <TableCell className="text-right">
@@ -786,14 +788,12 @@ export default function PeoplePage() {
 
       {/* Add Member */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent fullScreen>
-          <DialogHeader>
-            <DialogTitle>Add Member</DialogTitle>
-            <DialogDescription>Add a new member to your workspace.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
-            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+        <DialogTitle>Add Member</DialogTitle>
+        <DialogContent>
+          <p className="mb-4">Add a new member to your workspace.</p>
+          <form onSubmit={handleAdd} className="space-y-4" id="add-member-form">
+            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
+            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
             <Select
               variant="outlined"
               label="Role"
@@ -801,119 +801,106 @@ export default function PeoplePage() {
               onValueChange={(value) => setFormData({ ...formData, roleId: value || undefined })}
               options={[{ value: "", label: "No role (basic access)" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
             />
-            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} />
-            <DialogFooter>
-              <Button type="button" variant="text" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-              <Button variant="text" type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Saving..." : "Save"}
-              </Button>
-            </DialogFooter>
+            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
+            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
+            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
           </form>
         </DialogContent>
+        <DialogActions>
+          <Button type="button" variant="text" onClick={() => setShowAddDialog(false)}>Cancel</Button>
+          <Button variant="text" type="submit" form="add-member-form" disabled={createMutation.isPending}>
+            {createMutation.isPending ? "Saving..." : "Save"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Edit Member */}
       <Dialog open={!!editPerson} onOpenChange={(open) => !open && setEditPerson(null)}>
-        <DialogContent fullScreen>
-          <DialogHeader>
-            <DialogTitle>Edit Member</DialogTitle>
-            <DialogDescription>Update the member&apos;s information.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEdit} className="space-y-4">
-            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
-            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} />
+        <DialogTitle>Edit Member</DialogTitle>
+        <DialogContent>
+          <p className="mb-4">Update the member&apos;s information.</p>
+          <form onSubmit={handleEdit} className="space-y-4" id="edit-member-form">
+            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
+            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
+            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
+            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
+            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
 
             {editPerson && metadataKeys.length > 0 && (
               <>
                 <Divider />
                 <Typography variant="label-medium" color="surface-variant-foreground" as="span" className="uppercase tracking-wide">Additional Fields</Typography>
                 {metadataKeys.map((key) => (
-                  <TextField key={key} variant="outlined" label={key} value={formMetadata[key] ?? ""} onChange={(e) => setFormMetadata({ ...formMetadata, [key]: e.target.value })} />
+                  <TextField key={key} variant="outlined" label={key} value={formMetadata[key] ?? ""} onChange={(value) => setFormMetadata({ ...formMetadata, [key]: value })} />
                 ))}
               </>
             )}
-
-            <DialogFooter>
-              <Button type="button" variant="text" onClick={() => setEditPerson(null)}>Cancel</Button>
-              <Button variant="text" type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "Saving..." : "Save"}
-              </Button>
-            </DialogFooter>
           </form>
         </DialogContent>
+        <DialogActions>
+          <Button type="button" variant="text" onClick={() => setEditPerson(null)}>Cancel</Button>
+          <Button variant="text" type="submit" form="edit-member-form" disabled={updateMutation.isPending}>
+            {updateMutation.isPending ? "Saving..." : "Save"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Delete Single Member */}
-      <Dialog open={!!deleteId} onOpenChange={() => {}}>
-        <DialogContent alert icon="delete">
-          <DialogHeader centered>
-            <DialogTitle>Confirm Delete</DialogTitle>
-            <DialogDescription>Are you sure you want to remove this member? This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="button" variant="text" onClick={() => setDeleteId(null)}>Cancel</Button>
-            <Button variant="text" className="text-error" onClick={handleDelete} disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
+      <Dialog open={!!deleteId} onOpenChange={() => {}} icon={<Icon name="delete" />} role="alertdialog">
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to remove this member? This action cannot be undone.</p>
         </DialogContent>
+        <DialogActions>
+          <Button type="button" variant="text" onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button variant="text" className="text-error" onClick={handleDelete} disabled={deleteMutation.isPending}>
+            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Delete All Members */}
-      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
-        <DialogContent alert icon="delete_sweep">
-          <DialogHeader centered>
-            <DialogTitle>Delete All Members</DialogTitle>
-            <DialogDescription>Are you sure you want to remove all members? This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="button" variant="text" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
-            <Button variant="text" className="text-error" onClick={handleDeleteAll} disabled={deleteAllMutation.isPending}>
-              {deleteAllMutation.isPending ? "Deleting..." : "Delete All Members"}
-            </Button>
-          </DialogFooter>
+      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog} icon={<Icon name="delete_sweep" />} role="alertdialog">
+        <DialogTitle>Delete All Members</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to remove all members? This action cannot be undone.</p>
         </DialogContent>
+        <DialogActions>
+          <Button type="button" variant="text" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+          <Button variant="text" className="text-error" onClick={handleDeleteAll} disabled={deleteAllMutation.isPending}>
+            {deleteAllMutation.isPending ? "Deleting..." : "Delete All Members"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Save View */}
       <Dialog open={showSaveViewDialog} onOpenChange={setShowSaveViewDialog}>
+        <DialogTitle>Save Table View</DialogTitle>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save Table View</DialogTitle>
-            <DialogDescription>Save the current column selection as a named view.</DialogDescription>
-          </DialogHeader>
-          <div className="px-6 py-2">
-            <TextField variant="outlined" label="View Name" required value={newViewName} onChange={(e) => setNewViewName(e.target.value)} placeholder="e.g. Engineering View" />
-            <div className="mt-3">
+          <p className="mb-4">Save the current column selection as a named view.</p>
+          <div className="space-y-3">
+            <TextField variant="outlined" label="View Name" required value={newViewName} onChange={(value) => setNewViewName(value)} placeholder="e.g. Engineering View" />
+            <div>
               <Typography variant="body-small" color="surface-variant-foreground" className="mb-1">Visible columns:</Typography>
               <div className="flex flex-wrap gap-1">
-                {visibleColumns.map((col) => <Chip key={col.key} variant="filter">{col.label}</Chip>)}
+                {visibleColumns.map((col) => <FilterChip key={col.key}>{col.label}</FilterChip>)}
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="text" onClick={() => { setShowSaveViewDialog(false); setNewViewName(""); }}>Cancel</Button>
-            <Button variant="text" onClick={handleSaveView} disabled={createViewMutation.isPending}>
-              {createViewMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
+        <DialogActions>
+          <Button type="button" variant="text" onClick={() => { setShowSaveViewDialog(false); setNewViewName(""); }}>Cancel</Button>
+          <Button variant="text" onClick={handleSaveView} disabled={createViewMutation.isPending}>
+            {createViewMutation.isPending ? "Saving..." : "Save"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Batch Role Assignment */}
-      <Dialog open={showBatchRoleDialog} onOpenChange={setShowBatchRoleDialog}>
-        <DialogContent icon="shield">
-          <DialogHeader centered>
-            <DialogTitle>Assign Role</DialogTitle>
-            <DialogDescription>
-              Assign a role to {selectedIds.size} selected member{selectedIds.size !== 1 ? "s" : ""}.
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={showBatchRoleDialog} onOpenChange={setShowBatchRoleDialog} icon={<Icon name="shield" />}>
+        <DialogTitle>Assign Role</DialogTitle>
+        <DialogContent>
+          <p className="mb-4">Assign a role to {selectedIds.size} selected member{selectedIds.size !== 1 ? "s" : ""}.</p>
           <Select
             variant="outlined"
             label="Role"
@@ -921,13 +908,13 @@ export default function PeoplePage() {
             onValueChange={setBatchRoleId}
             options={roles.map((r) => ({ value: r.id, label: r.name }))}
           />
-          <DialogFooter>
-            <Button variant="text" onClick={() => setShowBatchRoleDialog(false)}>Cancel</Button>
-            <Button variant="text" onClick={handleBatchAssignRole} disabled={!batchRoleId || assignRoleMutation.isPending}>
-              {assignRoleMutation.isPending ? "Assigning..." : "Assign"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
+        <DialogActions>
+          <Button variant="text" onClick={() => setShowBatchRoleDialog(false)}>Cancel</Button>
+          <Button variant="text" onClick={handleBatchAssignRole} disabled={!batchRoleId || assignRoleMutation.isPending}>
+            {assignRoleMutation.isPending ? "Assigning..." : "Assign"}
+          </Button>
+        </DialogActions>
       </Dialog>
     </motion.div>
   );

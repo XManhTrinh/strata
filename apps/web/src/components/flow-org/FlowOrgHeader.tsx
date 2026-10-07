@@ -2,8 +2,9 @@
 
 import { useMemo } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import { PageBar, Icon, Chip, Search, Typography } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { TopAppBar, FilterChip, SearchBar, Button } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import type { OrganizationUnit } from "@/services";
 import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 
@@ -106,58 +107,58 @@ export default function FlowOrgHeader({
   return (
     <div className="shrink-0 z-10">
       {/* ── Main toolbar ───────────────────────────────────────────────── */}
-      <PageBar className="justify-between gap-4">
-        {/* Left: title + view toggle */}
-        <div className="flex items-center gap-4 shrink-0">
-          <Typography variant="title-large">Org Chart</Typography>
-
-          {/* Segmented toggle */}
-          <div className="flex items-center bg-surface-container-highest/50 rounded-full p-1">
-            <Button
-              variant={viewMode === "reporting" ? "tonal" : "text"}
-              size="xs"
-              onClick={() => onViewModeChange("reporting")}
-              className="rounded-full"
-            >
-              Reporting
-            </Button>
-            <Button
-              variant={viewMode === "department" ? "tonal" : "text"}
-              size="xs"
-              onClick={() => onViewModeChange("department")}
-              className="rounded-full"
-            >
-              Departments
-            </Button>
+      <TopAppBar
+        className="justify-between gap-4"
+        title={
+          <div className="flex items-center gap-4 shrink-0">
+            <Typography variant="title-large">Org Chart</Typography>
+            {/* Segmented toggle */}
+            <div className="flex items-center bg-surface-container-highest/50 rounded-full p-1">
+              <Button
+                variant={viewMode === "reporting" ? "tonal" : "text"}
+                size="xs"
+                onClick={() => onViewModeChange("reporting")}
+                className="rounded-full"
+              >
+                Reporting
+              </Button>
+              <Button
+                variant={viewMode === "department" ? "tonal" : "text"}
+                size="xs"
+                onClick={() => onViewModeChange("department")}
+                className="rounded-full"
+              >
+                Departments
+              </Button>
+            </div>
           </div>
-        </div>
-
-        {/* Center: search */}
-        <Search
-          className="flex-1 max-w-xs"
-          value={search}
-          onValueChange={onSearchChange}
-          placeholder="Search name, title, dept..."
-        />
-
-        {/* Right: filter + count */}
-        <div className="flex items-center gap-3 shrink-0">
-          {search.trim() && searchResultCount !== undefined && (
-            <Chip variant="filter" selected>
-              {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
-            </Chip>
-          )}
-
-          {/* Hierarchy-aware org unit filter (Division → Cluster → Squad …) */}
-          <OrgUnitTreeSelect
-            tree={orgUnitTree}
-            selectedIds={selectedUnitIds}
-            onSelectionChange={onSelectionChange}
-            placeholder={isAllView ? `Filter teams (${totalCount})…` : "Filter teams…"}
-            className="w-64"
-          />
-        </div>
-      </PageBar>
+        }
+        actions={
+          <div className="flex items-center gap-3 shrink-0 flex-1">
+            {/* Center: search */}
+            <SearchBar
+          aria-label="Search"
+              className="flex-1 max-w-xs"
+              value={search}
+              onChange={onSearchChange}
+              placeholder="Search name, title, dept..."
+            />
+            {search.trim() && searchResultCount !== undefined && (
+              <FilterChip defaultSelected className="shrink-0">
+                {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
+              </FilterChip>
+            )}
+            {/* Hierarchy-aware org unit filter */}
+            <OrgUnitTreeSelect
+              tree={orgUnitTree}
+              selectedIds={selectedUnitIds}
+              onSelectionChange={onSelectionChange}
+              placeholder={isAllView ? `Filter teams (${totalCount})…` : "Filter teams…"}
+              className="w-64"
+            />
+          </div>
+        }
+      />
 
       {/* ── Filter chips + status + path ───────────────────────────────── */}
       {(!isAllView || statusText || (pathToRoot && pathToRoot.length > 0)) && (
@@ -166,15 +167,14 @@ export default function FlowOrgHeader({
           {!isAllView && (
             <>
               {chipIds.map((id) => (
-                <Chip
+                <FilterChip
                   key={id}
-                  variant="filter"
-                  selected
-                  trailingIcon="close"
-                  onClick={() => deselectBranch(id)}
+                  defaultSelected
+                  trailingIcon={<Icon name="close" size={18} />}
+                  onPress={() => deselectBranch(id)}
                 >
                   {nameById.get(id) ?? id}
-                </Chip>
+                </FilterChip>
               ))}
               <Button variant="text" size="xs" onClick={onClearSquads}>
                 Clear

@@ -166,13 +166,12 @@ export function ColorPicker({
           variant="outlined"
           label={label}
           value={hexInput}
-          onChange={(e) => {
-            const v = e.target.value;
+          onChange={(value) => {
+            const v = value;
             setHexInput(v);
             const hex = v.startsWith("#") ? v : `#${v}`;
             if (/^#[0-9A-Fa-f]{6}$/.test(hex)) onChange(hex);
           }}
-          onClick={() => setOpen(true)}
           onFocus={() => setOpen(true)}
           placeholder="#000000"
           leadingIcon={

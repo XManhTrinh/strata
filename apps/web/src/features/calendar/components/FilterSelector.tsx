@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Checkbox, Icon, Typography } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Checkbox, Button } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import type { OrgUnit } from "../types/calendar.types";
 
 interface FilterSelectorProps {
@@ -96,9 +97,9 @@ export function FilterSelector({
             {orgUnits.map((orgUnit) => (
               <div key={orgUnit.id} className="mb-2">
                 <div className="flex items-center gap-2 rounded px-2 py-1 hover:bg-surface-variant cursor-pointer" onClick={() => toggleOrgUnit(orgUnit.id)}>
-                  <Checkbox
-                    checked={selectedOrgUnitIds.includes(orgUnit.id)}
-                    onCheckedChange={() => toggleOrgUnit(orgUnit.id)}
+                  <Checkbox aria-label="Toggle"
+ selected={selectedOrgUnitIds.includes(orgUnit.id)}
+                    onSelectedChange={() => toggleOrgUnit(orgUnit.id)}
                   />
                   <Typography variant="label-large" as="span">{orgUnit.name}</Typography>
                   <Typography variant="body-small" as="span" color="surface-variant-foreground">({orgUnit.members.length})</Typography>
@@ -106,9 +107,9 @@ export function FilterSelector({
                 <div className="ml-6 space-y-0.5">
                   {orgUnit.members.map((member) => (
                     <div key={member.id} className="flex items-center gap-2 rounded px-2 py-0.5 hover:bg-surface-variant cursor-pointer" onClick={() => toggleMember(member.id)}>
-                      <Checkbox
-                        checked={selectedUserIds.includes(member.id)}
-                        onCheckedChange={() => toggleMember(member.id)}
+                      <Checkbox aria-label="Toggle"
+ selected={selectedUserIds.includes(member.id)}
+                        onSelectedChange={() => toggleMember(member.id)}
                       />
                       <Typography variant="body-small" as="span">{member.name}</Typography>
                     </div>

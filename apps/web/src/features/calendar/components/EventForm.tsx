@@ -4,16 +4,14 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
   TextField,
-  Select,
   Checkbox,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Select } from "@/components/ui/select";
+import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
 interface EventFormProps {
@@ -111,15 +109,10 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent icon="event">
-        <DialogHeader centered>
-          <DialogTitle>Create Event</DialogTitle>
-          <DialogDescription>
-            Add a new event to the calendar.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <DialogTitle>Create Event</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Add a new event to the calendar.</p>
+        <form onSubmit={handleSubmit} className="space-y-4" id="event-form">
           {errors.length > 0 && (
             <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
@@ -134,7 +127,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
             variant="outlined"
             label="Title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(value) => setTitle(value)}
             placeholder="Event title"
           />
 
@@ -150,10 +143,10 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
           />
 
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
-            <Checkbox
-              id="all-day"
-              checked={allDay}
-              onCheckedChange={(checked) => setAllDay(checked === true)}
+            <Checkbox aria-label="Toggle"
+  id="all-day"
+              selected={allDay}
+              onSelectedChange={(checked) => setAllDay(checked === true)}
             />
             <label htmlFor="all-day" className="text-sm text-surface-foreground cursor-pointer select-none">
               All Day
@@ -166,14 +159,14 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
               label="Start Date"
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(value) => setStartDate(value)}
             />
             <TextField
               variant="outlined"
               label="End Date"
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(value) => setEndDate(value)}
             />
           </div>
 
@@ -184,14 +177,14 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
                 label="Start Time"
                 type="time"
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(value) => setStartTime(value)}
               />
               <TextField
                 variant="outlined"
                 label="End Time"
                 type="time"
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={(value) => setEndTime(value)}
               />
             </div>
           )}
@@ -215,16 +208,16 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
             }))}
           />
 
-          <DialogFooter>
-            <Button type="button" variant="text" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="text">
-              Create Event
-            </Button>
-          </DialogFooter>
         </form>
       </DialogContent>
+      <DialogActions>
+        <Button type="button" variant="text" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button type="submit" form="event-form" variant="text">
+          Create Event
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

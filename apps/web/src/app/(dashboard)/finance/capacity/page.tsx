@@ -2,19 +2,14 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  PageBar,
-  Icon,
-  Card,
-  CardContent,
-  Chip,
-  Select,
-  Typography,
+import {TopAppBar,Card,InputChip,
   Tabs,
-  TabList,
   Tab,
-} from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+  Button} from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
@@ -582,26 +577,23 @@ export default function CapacityPage() {
   return (
     <motion.div className="space-y-6" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
-      <PageBar className="justify-between">
-        <div>
-          <Typography variant="headline-medium">Capacity Planning</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            FTE allocation {groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing
-          </Typography>
-        </div>
-        <div className="flex items-center gap-3">
-          <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
-        </div>
-      </PageBar>
+      <TopAppBar
+        className="justify-between"
+        title={<Typography variant="headline-medium">Capacity Planning</Typography>}
+        subtitle={`FTE allocation ${groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing`}
+        actions={
+          <div className="flex items-center gap-3">
+            <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
+          </div>
+        }
+      />
 
       {/* Division tabs — capacity loads per division (lazy). */}
       {divisionTabs.length > 0 && (
-        <Tabs value={activeDivisionId} onValueChange={setActiveDivisionId} variant="primary" scrollable>
-          <TabList>
-            {divisionTabs.map((d) => (
-              <Tab key={d.id} value={d.id} label={d.name} />
+        <Tabs selectedKey={activeDivisionId} onSelectionChange={(k) => setActiveDivisionId(k as string)} variant="primary" scrollable>
+          {divisionTabs.map((d) => (
+              <Tab key={d.id} title={d.name} />
             ))}
-          </TabList>
         </Tabs>
       )}
 
@@ -673,13 +665,13 @@ export default function CapacityPage() {
           {(squads ?? [])
             .filter((s) => selectedSquadIds.has(s.orgUnitId))
             .map((s) => (
-              <Chip key={s.orgUnitId} variant="input" onDismiss={() => {
+              <InputChip key={s.orgUnitId} onRemove={() => {
                 const next = new Set(selectedSquadIds);
                 next.delete(s.orgUnitId);
                 setSelectedSquadIds(next);
               }}>
                 {s.orgUnitName}
-              </Chip>
+              </InputChip>
             ))}
         </div>
       )}

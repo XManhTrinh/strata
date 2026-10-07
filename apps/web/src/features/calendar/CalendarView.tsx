@@ -4,18 +4,17 @@ import { useState, useMemo } from "react";
 import type { CalendarEvent, CalendarFilter, OrgUnit } from "./types/calendar.types";
 import { formatMonthYear } from "./utils/calendar.utils";
 import {
-  PageBar,
-  Icon,
-  Chip,
-  Typography,
+  TopAppBar,
+  FilterChip,
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
+  Button,
+  IconButton,
 } from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import { useLeaveBalances } from "./hooks/useLeaveBalances";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -81,12 +80,9 @@ function EventDetailDialog({
 
   return (
     <Dialog open={!!event} onOpenChange={(open) => !open && onClose()}>
+      <DialogTitle>{event.title}</DialogTitle>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{event.title}</DialogTitle>
-          <DialogDescription>{event.ownerName}</DialogDescription>
-        </DialogHeader>
-
+        <p className="text-sm text-on-surface-variant mb-4">{event.ownerName}</p>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Typography variant="label-large" as="span">Type:</Typography>
@@ -102,16 +98,15 @@ function EventDetailDialog({
             <>
               <div className="flex items-center gap-2">
                 <Typography variant="label-large" as="span">Status:</Typography>
-                <Chip
-                  variant="filter"
-                  selected={event.leaveRequest.status === "APPROVED"}
+                <FilterChip
+                  defaultSelected={event.leaveRequest.status === "APPROVED"}
                   className={
                     event.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
                     event.leaveRequest.status === "REJECTED" ? "text-error" : ""
                   }
                 >
                   {event.leaveRequest.status}
-                </Chip>
+                </FilterChip>
               </div>
               <div className="flex items-center gap-2">
                 <Typography variant="label-large" as="span">Working Days:</Typography>
@@ -126,27 +121,26 @@ function EventDetailDialog({
             </div>
           )}
         </div>
-
-        {isPending && (canApprove || canReject || canCancel) && (
-          <DialogFooter>
-            {canCancel && (
-              <Button variant="text" className="text-error" onClick={() => onCancel(event.id)}>
-                Cancel
-              </Button>
-            )}
-            {canReject && (
-              <Button variant="text" className="text-error" onClick={() => onReject(event.id)}>
-                Reject
-              </Button>
-            )}
-            {canApprove && (
-              <Button variant="text" onClick={() => onApprove(event.id)}>
-                Approve
-              </Button>
-            )}
-          </DialogFooter>
-        )}
       </DialogContent>
+      {isPending && (canApprove || canReject || canCancel) && (
+        <DialogActions>
+          {canCancel && (
+            <Button variant="text" className="text-error" onClick={() => onCancel(event.id)}>
+              Cancel
+            </Button>
+          )}
+          {canReject && (
+            <Button variant="text" className="text-error" onClick={() => onReject(event.id)}>
+              Reject
+            </Button>
+          )}
+          {canApprove && (
+            <Button variant="text" onClick={() => onApprove(event.id)}>
+              Approve
+            </Button>
+          )}
+        </DialogActions>
+      )}
     </Dialog>
   );
 }
@@ -207,55 +201,48 @@ export function CalendarView() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <PageBar className="justify-between gap-3 flex-wrap sm:flex-nowrap">
-        <div className="flex items-center gap-4">
-          <Typography variant="title-large">Calendar</Typography>
-          <div className="flex items-center gap-1">
-            <IconButton variant="standard" size="xs" onClick={goToPreviousMonth} aria-label="Previous month">
-              <Icon name="chevron_left" size={20} />
-            </IconButton>
-            <Typography variant="label-large" as="span" className="min-w-40 text-center">
-              {formatMonthYear(currentDate)}
-            </Typography>
-            <IconButton variant="standard" size="xs" onClick={goToNextMonth} aria-label="Next month">
-              <Icon name="chevron_right" size={20} />
-            </IconButton>
-            <Button variant="outlined" size="xs" onClick={goToToday} className="ml-2">
-              Today
-            </Button>
-            <Button
-              variant={showWeekends ? "tonal" : "outlined"}
-              size="xs"
-              onClick={() => setShowWeekends(!showWeekends)}
-              className="ml-2"
-            >
-              {showWeekends ? "Hide weekends" : "Show weekends"}
-            </Button>
+      <TopAppBar
+        className="justify-between gap-3 flex-wrap sm:flex-nowrap"
+        title={
+          <div className="flex items-center gap-4">
+            <Typography variant="title-large">Calendar</Typography>
+            <div className="flex items-center gap-1">
+              <IconButton variant="standard" size="xs" onClick={goToPreviousMonth} aria-label="Previous month" icon={<Icon name="chevron_left" size={20} />} />
+              <Typography variant="label-large" as="span" className="min-w-40 text-center">
+                {formatMonthYear(currentDate)}
+              </Typography>
+              <IconButton variant="standard" size="xs" onClick={goToNextMonth} aria-label="Next month" icon={<Icon name="chevron_right" size={20} />} />
+              <Button variant="outlined" size="xs" onClick={goToToday} className="ml-2">Today</Button>
+              <Button variant={showWeekends ? "tonal" : "outlined"} size="xs" onClick={() => setShowWeekends(!showWeekends)} className="ml-2">
+                {showWeekends ? "Hide weekends" : "Show weekends"}
+              </Button>
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <FilterSelector
-            orgUnits={MOCK_ORG_UNITS}
-            selectedOrgUnitIds={selectedOrgUnitIds}
-            selectedUserIds={selectedUserIds}
-            onOrgUnitsChange={setSelectedOrgUnitIds}
-            onUserIdsChange={setSelectedUserIds}
-          />
-          {canCreate && (
-            <>
-              <Button variant="outlined" onClick={() => setShowEventForm(true)}>
-                <Icon name="event" size={18} />
-                New Event
-              </Button>
-              <Button onClick={() => setShowLeaveForm(true)}>
-                <Icon name="event_available" size={18} />
-                Request Leave
-              </Button>
-            </>
-          )}
-        </div>
-      </PageBar>
+        }
+        actions={
+          <div className="flex items-center gap-3">
+            <FilterSelector
+              orgUnits={MOCK_ORG_UNITS}
+              selectedOrgUnitIds={selectedOrgUnitIds}
+              selectedUserIds={selectedUserIds}
+              onOrgUnitsChange={setSelectedOrgUnitIds}
+              onUserIdsChange={setSelectedUserIds}
+            />
+            {canCreate && (
+              <>
+                <Button variant="outlined" onClick={() => setShowEventForm(true)}>
+                  <Icon name="event" size={18} />
+                  New Event
+                </Button>
+                <Button onClick={() => setShowLeaveForm(true)}>
+                  <Icon name="event_available" size={18} />
+                  Request Leave
+                </Button>
+              </>
+            )}
+          </div>
+        }
+      />
 
       {/* Main content */}
       <div className="flex flex-1 justify-between gap-3 min-h-0 overflow-hidden">

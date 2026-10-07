@@ -4,15 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
   TextField,
-  Select,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Select } from "@/components/ui/select";
+import { Typography } from "@/components/ui/typography";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardGroup, RateCardSet, UpsertRateCardGroupInput } from "@/services";
 
@@ -79,27 +77,22 @@ export function RateCardGroupDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="folder">
-        <DialogHeader centered>
-          <DialogTitle>{group ? "Rename group" : "New group"}</DialogTitle>
-          <DialogDescription>
-            Groups organize rate cards (e.g. &ldquo;Division A&rdquo;). They don&apos;t affect matching.
-          </DialogDescription>
-        </DialogHeader>
-
+      <DialogTitle>{group ? "Rename group" : "New group"}</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Groups organize rate cards (e.g. &ldquo;Division A&rdquo;). They don&apos;t affect matching.</p>
         <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Group name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(value) => setName(value)}
             placeholder="e.g. Division A, Special Employees"
           />
           <TextField
             variant="outlined"
             label="Description (optional)"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(value) => setDescription(value)}
           />
           <Select
             variant="outlined"
@@ -116,16 +109,15 @@ export function RateCardGroupDialog({
             </Typography>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : group ? "Save" : "Create group"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Saving…" : group ? "Save" : "Create group"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

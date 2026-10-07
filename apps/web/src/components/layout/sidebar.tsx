@@ -3,8 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useTheme } from "@vkieu/mui";
-import { Icon, Tooltip } from "@vkieu/mui";
+import { useTheme, TooltipTrigger, Tooltip } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { cn } from "@/lib/utils";
 
@@ -166,14 +166,15 @@ export function Sidebar() {
         onMouseLeave={scheduleClose}
       >
         {/* Logo */}
-        <Tooltip content="Strata" side="right">
+        <TooltipTrigger placement="right">
           <div
             className="flex items-center justify-center w-12 h-12 mb-6"
             onMouseEnter={scheduleClose}
           >
             <StrataLogo />
           </div>
-        </Tooltip>
+          <Tooltip>Strata</Tooltip>
+        </TooltipTrigger>
 
         {/* Category items */}
         <div className="flex flex-col items-center gap-1 flex-1 overflow-y-auto w-full">
@@ -240,7 +241,7 @@ export function Sidebar() {
 
         {/* Theme toggle */}
         <div className="flex flex-col items-center pt-2" onMouseEnter={scheduleClose}>
-          <Tooltip content={`Switch to ${mode === "dark" ? "light" : "dark"} mode`} side="right">
+          <TooltipTrigger placement="right">
             <button
               type="button"
               onClick={toggleTheme}
@@ -250,10 +251,11 @@ export function Sidebar() {
               <Icon
                 name={mode === "dark" ? "light_mode" : "dark_mode"}
                 size={24}
-                className="text-surface-variant-foreground"
+                className="text-on-surface-variant"
               />
             </button>
-          </Tooltip>
+            <Tooltip>{`Switch to ${mode === "dark" ? "light" : "dark"} mode`}</Tooltip>
+          </TooltipTrigger>
         </div>
       </nav>
 

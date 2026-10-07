@@ -3,22 +3,17 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Search,
-  PageBar,
-  Icon,
+  SearchBar,
+  TopAppBar,
   Card,
-  CardContent,
-  Chip,
+  FilterChip,
   Switch,
-  Typography,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  Dialog, DialogContent, DialogTitle, DialogActions,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
@@ -162,8 +157,8 @@ function FeatureCard({
           </div>
           <div onClick={(e) => e.stopPropagation()}>
             <Switch
-              checked={feature.enabled}
-              onCheckedChange={onToggle}
+              selected={feature.enabled}
+              onSelectedChange={onToggle}
               disabled={isToggling}
               aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
             />
@@ -183,9 +178,9 @@ function FeatureCard({
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
-          <Chip variant="filter" selected={feature.enabled}>
+          <FilterChip defaultSelected={feature.enabled}>
             {feature.permissionsCount} permission{feature.permissionsCount !== 1 ? "s" : ""}
-          </Chip>
+          </FilterChip>
           <Button
             variant="text"
             onClick={onExpand}
@@ -282,23 +277,10 @@ export default function FeaturesPage() {
 
   // ── Page header (shared across states) ─────────────────────────────────
   const header = (
-    <PageBar>
-      <div>
-        <Typography variant="headline-medium">Features</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
-          Control which features are enabled for your workspace.
-          {!isLoading && features.length > 0 && (
-            <>
-              {" "}
-              <Typography variant="label-large" as="span">
-                {enabledCount} of {features.length}
-              </Typography>{" "}
-              active.
-            </>
-          )}
-        </Typography>
-      </div>
-    </PageBar>
+    <TopAppBar
+      title={<Typography variant="headline-medium">Features</Typography>}
+      subtitle={!isLoading && features.length > 0 ? `Control which features are enabled for your workspace. ${enabledCount} of ${features.length} active.` : "Control which features are enabled for your workspace."}
+    />
   );
 
   // ── Loading ────────────────────────────────────────────────────────────
@@ -335,11 +317,11 @@ export default function FeaturesPage() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-4">
-        <Search className="max-w-sm" value={search} onValueChange={setSearch} placeholder="Search features..." />
+        <SearchBar aria-label="Search" className="max-w-sm" value={search} onChange={setSearch} placeholder="Search features..." />
         {enabledCount > 0 && (
-          <Chip variant="filter" selected className="shrink-0">
+          <FilterChip defaultSelected className="shrink-0">
             {enabledCount} enabled
-          </Chip>
+          </FilterChip>
         )}
       </div>
 

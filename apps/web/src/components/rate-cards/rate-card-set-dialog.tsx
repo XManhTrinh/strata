@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
   TextField,
-  Typography,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Typography } from "@/components/ui/typography";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardSet, UpsertRateCardSetInput } from "@/services";
 
@@ -60,28 +58,22 @@ export function RateCardSetDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="tab">
-        <DialogHeader centered>
-          <DialogTitle>{set ? "Rename tab" : "New tab"}</DialogTitle>
-          <DialogDescription>
-            Tabs are the top level (e.g. &ldquo;Digital&rdquo;). Each tab holds groups, and
-            groups hold rate cards. Tabs don&apos;t affect matching.
-          </DialogDescription>
-        </DialogHeader>
-
+      <DialogTitle>{set ? "Rename tab" : "New tab"}</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Tabs are the top level (e.g. &ldquo;Digital&rdquo;). Each tab holds groups, and groups hold rate cards. Tabs don&apos;t affect matching.</p>
         <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Tab name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(value) => setName(value)}
             placeholder="e.g. Digital, Infrastructure"
           />
           <TextField
             variant="outlined"
             label="Description (optional)"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(value) => setDescription(value)}
           />
           <ColorPicker value={color} onChange={setColor} label="Color" />
           {error && (
@@ -90,16 +82,15 @@ export function RateCardSetDialog({
             </Typography>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : set ? "Save" : "Create tab"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Saving…" : set ? "Save" : "Create tab"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import {
-  PageBar,
+  TopAppBar,
   Card,
-  CardContent,
   List,
   ListItem,
-  Icon,
-  Typography,
 } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -91,30 +91,21 @@ export default function SettingsPage() {
       transition={defaultTransition}
     >
       {/* Header */}
-      <PageBar>
-        <div>
-          <Typography variant="headline-medium">Settings</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            Platform configuration and preferences.
-          </Typography>
-        </div>
-      </PageBar>
+      <TopAppBar title={<Typography variant="headline-medium">Settings</Typography>} subtitle="Platform configuration and preferences." />
 
       {/* Settings List */}
       <Card variant="elevated">
         <CardContent className="p-0">
-          <List>
+          <List aria-label="Settings menu">
             {visibleCards.map((card) => (
               <Link key={card.href} href={card.href}>
                 <ListItem
-                  lines={2}
-                  interactive
                   leading={
                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
                       <Icon name={card.icon} size={24} className="text-primary" />
                     </div>
                   }
-                  supporting={card.description}
+                  supportingText={card.description}
                   trailing={<Icon name="chevron_right" size={24} className="text-surface-variant-foreground" />}
                 >
                   {card.title}

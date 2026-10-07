@@ -1,6 +1,6 @@
 "use client";
 
-import { Typography } from "@vkieu/mui";
+import { Typography } from "@/components/ui/typography";
 
 interface TeamAvailabilityBarProps {
   available: number;

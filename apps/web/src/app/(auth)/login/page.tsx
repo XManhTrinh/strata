@@ -4,8 +4,10 @@ import { useState, useEffect, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { Button } from "@vkieu/mui/buttons";
-import { TextField, Divider, Icon, Card, CardContent, Typography } from "@vkieu/mui";
+import { Button, TextField, Divider, Card } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
@@ -118,11 +120,11 @@ export default function LoginPage() {
                   variant="outlined"
                   label="Email"
                   value={email}
-                  onChange={(e) => { setEmail(e.target.value); if (emailError) validateEmail(e.target.value); }}
+                  onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
                   onBlur={() => validateEmail(email)}
                   placeholder="you@company.com"
-                  error={!!emailError}
-                  errorText={emailError}
+                  invalid={!!emailError}
+                  errorMessage={emailError}
                   autoComplete="email"
                   leadingIcon={<Icon name="mail" size={20} />}
                   aria-invalid={!!emailError}
@@ -134,11 +136,11 @@ export default function LoginPage() {
                   variant="outlined"
                   label="Password"
                   value={password}
-                  onChange={(e) => { setPassword(e.target.value); if (passwordError) validatePassword(e.target.value); }}
+                  onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
                   onBlur={() => validatePassword(password)}
                   placeholder="••••••••"
-                  error={!!passwordError}
-                  errorText={passwordError}
+                  invalid={!!passwordError}
+                  errorMessage={passwordError}
                   autoComplete="current-password"
                   leadingIcon={<Icon name="lock" size={20} />}
                   trailingIcon={
@@ -149,7 +151,7 @@ export default function LoginPage() {
                   aria-invalid={!!passwordError}
                 />
 
-                <Button type="submit" variant="filled" disabled={isLoading} loading={isLoading} className="w-full">
+                <Button type="submit" variant="filled" disabled={isLoading} className="w-full">
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
@@ -160,7 +162,7 @@ export default function LoginPage() {
                 <Divider className="flex-1" />
               </div>
 
-              <Button type="button" variant="tonal" className="w-full" icon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+              <Button type="button" variant="tonal" className="w-full" leadingIcon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
                 Sign in with Google
               </Button>
 

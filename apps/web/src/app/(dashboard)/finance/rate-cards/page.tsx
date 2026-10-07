@@ -2,20 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import {
-  PageBar,
-  Icon,
-  Card,
-  CardContent,
-  Checkbox,
-  Chip,
-  Typography,
+import {TopAppBar,Card,Checkbox,
+  AssistChip,
+  FilterChip,
   Tabs,
-  TabList,
   Tab,
-  TabContent,
-} from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+  Button} from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
@@ -111,14 +106,14 @@ function annualCost(card: RateCard): number {
 function CardTableRow({
   card,
   index,
-  checked,
+  selected: checked,
   onToggle,
   onEdit,
   onDelete,
 }: {
   card: RateCard;
   index: number;
-  checked: boolean;
+  selected: boolean;
   onToggle: (id: string) => void;
   onEdit: (card: RateCard) => void;
   onDelete: (card: RateCard) => void;
@@ -128,8 +123,8 @@ function CardTableRow({
     <TableRow>
       <TableCell className="w-10">
         <Checkbox
-          checked={checked}
-          onCheckedChange={() => onToggle(card.id)}
+          selected={checked}
+          onSelectedChange={() => onToggle(card.id)}
           aria-label={`Select ${card.name}`}
         />
       </TableCell>
@@ -141,7 +136,7 @@ function CardTableRow({
             {index + 1}
           </span>
           <span className="font-medium text-surface-foreground truncate">{card.name}</span>
-          {card.isDefault && <Chip variant="filter" selected>Default</Chip>}
+          {card.isDefault && <FilterChip defaultSelected>Default</FilterChip>}
         </div>
         {!card.isDefault && card.conditions.length > 0 && (
           <div className="flex flex-wrap items-center gap-1 mt-1">
@@ -532,9 +527,9 @@ export default function RateCardsPage() {
       >
         <div className="flex items-center gap-2">
           <Checkbox
-            checked={allOn}
+ selected={allOn}
             indeterminate={someOn}
-            onCheckedChange={() => toggleGroup(groupCards)}
+            onSelectedChange={() => toggleGroup(groupCards)}
             aria-label={`Select all in ${title}`}
           />
           <span style={color ? { color } : undefined} className={color ? undefined : "text-surface-variant-foreground"}>
@@ -602,7 +597,7 @@ export default function RateCardsPage() {
                     key={card.id}
                     card={card}
                     index={indexOf(card)}
-                    checked={selected.has(card.id)}
+                    selected={selected.has(card.id)}
                     onToggle={toggleOne}
                     onEdit={openEdit}
                     onDelete={handleDelete}
@@ -627,42 +622,40 @@ export default function RateCardsPage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <PageBar className="justify-between">
-        <div>
-          <Typography variant="headline-medium">Rate Cards</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            Organize rate cards into tabs and groups, define condition-based rates, then
-            apply to matching members.
-          </Typography>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
-            <Icon name="bolt" size={18} />
-            {seedDemo.isPending ? "Adding…" : "Quick Demo Digital"}
-          </Button>
-          <Button variant="text" onClick={handleSeedDemoConsumer} disabled={seedDemoConsumer.isPending}>
-            <Icon name="bolt" size={18} />
-            {seedDemoConsumer.isPending ? "Adding…" : "Quick Demo Consumer"}
-          </Button>
-          <Button variant="tonal" onClick={openCreateSet}>
-            <Icon name="add" size={18} />
-            New tab
-          </Button>
-          <Button onClick={() => openCreate(null)}>
-            <Icon name="add" size={18} />
-            New rate card
-          </Button>
-        </div>
-      </PageBar>
+      <TopAppBar
+        className="justify-between"
+        title={<Typography variant="headline-medium">Rate Cards</Typography>}
+        subtitle="Organize rate cards into tabs and groups, define condition-based rates, then apply to matching members."
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
+              <Icon name="bolt" size={18} />
+              {seedDemo.isPending ? "Adding…" : "Quick Demo Digital"}
+            </Button>
+            <Button variant="text" onClick={handleSeedDemoConsumer} disabled={seedDemoConsumer.isPending}>
+              <Icon name="bolt" size={18} />
+              {seedDemoConsumer.isPending ? "Adding…" : "Quick Demo Consumer"}
+            </Button>
+            <Button variant="tonal" onClick={openCreateSet}>
+              <Icon name="add" size={18} />
+              New tab
+            </Button>
+            <Button onClick={() => openCreate(null)}>
+              <Icon name="add" size={18} />
+              New rate card
+            </Button>
+          </div>
+        }
+      />
 
       {/* Toolbar: global select-all + apply */}
       {orderedCards.length > 0 && (
         <div className="flex items-center justify-between gap-3">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <Checkbox
-              checked={allSelected}
+          selected={allSelected}
               indeterminate={someSelected}
-              onCheckedChange={toggleAll}
+              onSelectedChange={toggleAll}
               aria-label="Select all rate cards"
             />
             <Typography variant="body-medium" color="surface-variant-foreground">
@@ -707,15 +700,10 @@ export default function RateCardsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Tabs value={activeTabModel?.id ?? ""} onValueChange={setActiveTab} variant="primary" scrollable>
-          <TabList>
-            {tabs.map((t) => (
-              <Tab key={t.id} value={t.id} label={t.name} />
-            ))}
-          </TabList>
-
+        <Tabs selectedKey={activeTabModel?.id ?? ""} onSelectionChange={(k) => setActiveTab(k as string)} variant="primary" scrollable>
           {tabs.map((t) => (
-            <TabContent key={t.id} value={t.id} className="space-y-6">
+            <Tab key={t.id} title={t.name}>
+              <div className="space-y-6">
               {/* Tab header actions */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -728,10 +716,9 @@ export default function RateCardsPage() {
                   )}
                   <Typography variant="title-medium">{t.name}</Typography>
                   {t.name.includes("(Demo)") && (
-                    <Chip variant="assist">
-                      <Icon name="bolt" size={14} />
+                    <AssistChip leadingIcon={<Icon name="bolt" size={14} />}>
                       Demo
-                    </Chip>
+                    </AssistChip>
                   )}
                   {t.set?.description && (
                     <Typography variant="body-small" color="surface-variant-foreground">
@@ -774,7 +761,8 @@ export default function RateCardsPage() {
               ) : (
                 t.buckets.map((b) => renderBucket(b))
               )}
-            </TabContent>
+              </div>
+            </Tab>
           ))}
         </Tabs>
       )}

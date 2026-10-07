@@ -97,7 +97,7 @@ function CellEditor({
       autoFocus
       value={draft}
       onFocus={(e) => e.target.select()}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => {
         if (e.key === "Enter") {

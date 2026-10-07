@@ -1,8 +1,8 @@
 "use client";
 
 import { ProgressBar } from "@strata/ui";
-import { Typography, Chip } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { FilterChip, Button } from "@vkieu/mui";
+import { Typography } from "@/components/ui/typography";
 import type { LeaveBalance } from "../types/calendar.types";
 import { getAvailableBalance } from "../utils/calendar.utils";
 
@@ -37,14 +37,14 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
-                    <Chip variant="filter" className="h-5 text-[10px] px-1.5 text-amber-800 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300">
+                    <FilterChip className="h-5 text-[10px] px-1.5 text-amber-800 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300">
                       Low
-                    </Chip>
+                    </FilterChip>
                   )}
                   {isDepleted && (
-                    <Chip variant="filter" className="h-5 text-[10px] px-1.5 text-error bg-error-container dark:bg-error-container/30">
+                    <FilterChip className="h-5 text-[10px] px-1.5 text-error bg-error-container dark:bg-error-container/30">
                       Depleted
-                    </Chip>
+                    </FilterChip>
                   )}
                   <Typography variant="label-large" as="span">
                     {balance.used}/{total}

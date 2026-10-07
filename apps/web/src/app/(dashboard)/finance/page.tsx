@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { PageBar, Card, CardContent, Icon, Typography } from "@vkieu/mui";
+import { TopAppBar, Card } from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 // ─── Finance hub sections ─────────────────────────────────────────────────────
@@ -55,14 +58,7 @@ export default function FinancePage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <PageBar>
-        <div>
-          <Typography variant="headline-medium">Finance</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            Budgets, capacity planning, and rate cards.
-          </Typography>
-        </div>
-      </PageBar>
+      <TopAppBar title={<Typography variant="headline-medium">Finance</Typography>} subtitle="Budgets, capacity planning, and rate cards." />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {FINANCE_LINKS.map((link) => (

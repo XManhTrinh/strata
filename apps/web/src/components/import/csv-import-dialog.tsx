@@ -17,26 +17,23 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  Icon,
   Card,
-  CardContent,
-  Chip,
-  Select,
+  FilterChip,
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
   DialogTitle,
-  DialogDescription,
+  DialogActions,
   Divider,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
-import { useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Select } from "@/components/ui/select";
 import { parseCsvLine, autoDetectMapping, detectUnitTypeName, detectUnitTypeIcon, detectUnitTypeColor } from "@/lib/csv";
-import { useBulkImport, useRoles } from "@/services";
+import { useRoles } from "@/services";
 import type { ImportMemberRow } from "@/services";
 import { useToast } from "@/hooks/use-toast";
+import { useImportProgress } from "@/components/import/import-progress-provider";
 
 import type { ColumnMapping, MappingTarget, ImportStep } from "./types";
 import { MAPPING_OPTIONS } from "./types";
@@ -76,9 +73,9 @@ export interface CsvImportDialogProps {
  * `CsvImportDialog.Trigger` (render-prop pattern) or can be controlled
  * via the returned ref.
  */
-export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialogProps) {
+export function CsvImportDialog({ companyId }: CsvImportDialogProps) {
   const toast = useToast();
-  const queryClient = useQueryClient();
+  const { startImport } = useImportProgress();
 
   // ── DnD sensors ─────────────────────────────────────────────────────────
   const dndSensors = useSensors(
@@ -88,7 +85,6 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
 
   // ── Data ────────────────────────────────────────────────────────────────
   const { data: roles = [] } = useRoles(companyId);
-  const bulkImportMutation = useBulkImport(companyId);
 
   // ── State ───────────────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -342,23 +338,15 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
     const rows = importPreview.rows;
     reset();
 
-    toast.success(`Processing ${rows.length} members...`);
+    toast.success(`Importing ${rows.length} members…`);
 
-    // Use plain apiClient so the request survives component unmount
-    apiClient<{ total: number; created: number; updated: number; errors: unknown[] }>(
-      `/companies/${companyId}/members/import`,
-      { method: "POST", body: { rows } },
-    )
-      .then(() => {
-        // Notification is created by the backend — Realtime will show it
-        queryClient.invalidateQueries({ queryKey: ["members", companyId] });
-        queryClient.invalidateQueries({ queryKey: ["company-settings", companyId] });
-        onImportComplete?.();
-      })
-      .catch((err) => {
-        toast.error(err.message || "Import failed");
-      });
-  }, [importPreview, companyId, queryClient, onImportComplete, reset]);
+    // Start a background job and register it with the global progress provider,
+    // so the progress ring on the avatar persists across navigation and the
+    // dialog unmounting. onImportComplete fires via the provider's polling.
+    startImport(rows).catch((err: Error) => {
+      toast.error(err.message || "Failed to start import");
+    });
+  }, [importPreview, reset, startImport, toast]);
 
   // ─── Render ─────────────────────────────────────────────────────────────
   return (
@@ -379,20 +367,18 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
       </Button>
 
       {/* Dialog */}
-      <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); }}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {importStep === "mapping" && "Map CSV Columns"}
-              {importStep === "preview" && "Import Summary"}
-            </DialogTitle>
-            <DialogDescription>
-              {importStep === "mapping" &&
-                "Match each CSV column to a member field. Unmapped columns are stored as metadata."}
-              {importStep === "preview" &&
-                "Review what will be imported into your workspace."}
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); }} className="max-w-2xl">
+        <DialogTitle>
+          {importStep === "mapping" && "Map CSV Columns"}
+          {importStep === "preview" && "Import Summary"}
+        </DialogTitle>
+        <DialogContent>
+          <p className="mb-4">
+            {importStep === "mapping" &&
+              "Match each CSV column to a member field. Unmapped columns are stored as metadata."}
+            {importStep === "preview" &&
+              "Review what will be imported into your workspace."}
+          </p>
 
           {/* ── Step 1: Column Mapping ──────────────────────────────────── */}
           {importStep === "mapping" && (
@@ -441,46 +427,37 @@ export function CsvImportDialog({ companyId, onImportComplete }: CsvImportDialog
               importPreview={importPreview}
               columnMappings={columnMappings}
               orgLevelOrder={orgLevelOrder}
-              isPending={bulkImportMutation.isPending}
+              isPending={false}
             />
           )}
 
-          {/* ── Footer ─────────────────────────────────────────────────── */}
-          <DialogFooter>
-            {importStep === "mapping" && (
-              <>
-                <Button variant="text" onClick={reset}>Cancel</Button>
-                <Button variant="filled" onClick={handleMappingNext} disabled={mappingErrors.length > 0}>
-                  <Icon name="arrow_forward" size={18} />Review Import
-                </Button>
-              </>
-            )}
-            {importStep === "preview" && (
-              <>
-                <Button variant="text" onClick={() => setImportStep("mapping")}>
-                  <Icon name="arrow_back" size={18} />Back
-                </Button>
-                <Button
-                  variant="filled"
-                  onClick={handleImportConfirm}
-                  disabled={!importPreview?.rows.length || bulkImportMutation.isPending}
-                >
-                  {bulkImportMutation.isPending ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
-                      Importing...
-                    </span>
-                  ) : (
-                    <>
-                      <Icon name="upload" size={18} />
-                      Import {importPreview?.rows.length ?? 0} Records
-                    </>
-                  )}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
         </DialogContent>
+        {/* ── Footer ─────────────────────────────────────────────────── */}
+        <DialogActions>
+          {importStep === "mapping" && (
+            <>
+              <Button variant="text" onClick={reset}>Cancel</Button>
+              <Button variant="filled" onClick={handleMappingNext} disabled={mappingErrors.length > 0}>
+                <Icon name="arrow_forward" size={18} />Review Import
+              </Button>
+            </>
+          )}
+          {importStep === "preview" && (
+            <>
+              <Button variant="text" onClick={() => setImportStep("mapping")}>
+                <Icon name="arrow_back" size={18} />Back
+              </Button>
+              <Button
+                variant="filled"
+                onClick={handleImportConfirm}
+                disabled={!importPreview?.rows.length}
+              >
+                <Icon name="upload" size={18} />
+                Import {importPreview?.rows.length ?? 0} Records
+              </Button>
+            </>
+          )}
+        </DialogActions>
       </Dialog>
     </>
   );
@@ -533,9 +510,9 @@ function MappingStep({
     <>
       {/* Step indicator — outside scroll */}
       <div className="px-6 pb-3 flex items-center gap-2">
-        <Chip variant="filter" selected leadingIcon="looks_one">Step 1 of 2</Chip>
-        <Chip variant="filter" leadingIcon="table_chart">{csvHeaders.length} columns</Chip>
-        <Chip variant="filter" leadingIcon="dataset">{csvRows.length} rows</Chip>
+        <FilterChip defaultSelected leadingIcon={<Icon name="looks_one" />}>Step 1 of 2</FilterChip>
+        <FilterChip leadingIcon={<Icon name="table_chart" />}>{csvHeaders.length} columns</FilterChip>
+        <FilterChip leadingIcon={<Icon name="dataset" />}>{csvRows.length} rows</FilterChip>
       </div>
 
       {/* Scrollable content */}
@@ -742,16 +719,87 @@ interface PreviewStepProps {
 
 function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }: PreviewStepProps) {
   const rows = importPreview.rows;
-  const uniqueEmails = new Set(rows.map((r) => (r.email ?? "").toLowerCase()).filter(Boolean));
-  const duplicateRows = rows.length - uniqueEmails.size;
-  const positions = new Set(rows.map((r) => r.position).filter(Boolean));
-  const grades = new Set(rows.map((r) => r.grade).filter(Boolean));
-  const permCount = rows.filter((r) => r.employmentType === "Perm").length;
-  const subConCount = rows.filter((r) => r.employmentType === "SubCon").length;
-  const withManagers = rows.filter((r) => r.lineManagerIdentifier).length;
-  const uniqueManagers = new Set(rows.map((r) => r.lineManagerIdentifier).filter(Boolean)).size;
-  const withSalary = rows.filter((r) => r.annualSalary).length;
-  const withDayRate = rows.filter((r) => r.dayRate).length;
+
+  const stats = useMemo(() => {
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Mirror the backend's identity rule: a row with a valid email is keyed by
+    // that email (so the same person across multiple squad rows collapses to
+    // one member); a row without a valid email becomes its own member (the
+    // backend assigns it a unique placeholder address).
+    const memberKey = (r: (typeof rows)[number], i: number): string => {
+      const email = (r.email ?? "").trim().toLowerCase();
+      return email && EMAIL_RE.test(email) ? `e:${email}` : `r:${i}`;
+    };
+
+    // First row seen per member — breakdown stats are per person, not per row.
+    const firstRowByMember = new Map<string, (typeof rows)[number]>();
+    rows.forEach((r, i) => {
+      const key = memberKey(r, i);
+      if (!firstRowByMember.has(key)) firstRowByMember.set(key, r);
+    });
+    const members = [...firstRowByMember.values()];
+
+    // Sets of member keys that exist in the import — used to tell whether a
+    // referenced line manager actually resolves to an imported member.
+    const emailMembers = new Set<string>();
+    const nameMembers = new Set<string>();
+    for (const m of members) {
+      const email = (m.email ?? "").trim().toLowerCase();
+      if (email && EMAIL_RE.test(email)) emailMembers.add(email);
+      const name = (m.fullName ?? "").trim().toLowerCase();
+      if (name) nameMembers.add(name);
+    }
+
+    // Members who have a manager (distinct people, not rows).
+    const reportMembers = members.filter((m) => (m.lineManagerIdentifier ?? "").trim());
+
+    // Distinct manager identifiers, and how many of them resolve to an
+    // imported member via the row's match field (email / fullName).
+    const managerIds = new Set<string>();
+    const resolvedSeen = new Set<string>();
+    for (const m of reportMembers) {
+      const id = (m.lineManagerIdentifier ?? "").trim();
+      if (!id) continue;
+      const idLower = id.toLowerCase();
+      managerIds.add(idLower);
+      const field = m.lineManagerMatchField || "email";
+      const resolves =
+        field === "fullName" ? nameMembers.has(idLower) : emailMembers.has(idLower);
+      if (resolves) resolvedSeen.add(idLower);
+    }
+
+    return {
+      memberCount: members.length,
+      duplicateRows: rows.length - members.length,
+      positions: new Set(rows.map((r) => r.position).filter(Boolean)).size,
+      grades: new Set(rows.map((r) => r.grade).filter(Boolean)).size,
+      permCount: members.filter((m) => m.employmentType === "Perm").length,
+      subConCount: members.filter((m) => m.employmentType === "SubCon").length,
+      otherEmpCount: members.filter(
+        (m) => m.employmentType && m.employmentType !== "Perm" && m.employmentType !== "SubCon",
+      ).length,
+      reportCount: reportMembers.length,
+      uniqueManagers: managerIds.size,
+      resolvedManagers: resolvedSeen.size,
+      withSalary: members.filter((m) => m.annualSalary).length,
+      withDayRate: members.filter((m) => m.dayRate).length,
+    };
+  }, [rows]);
+
+  const {
+    memberCount,
+    duplicateRows,
+    positions,
+    grades,
+    permCount,
+    subConCount,
+    otherEmpCount,
+    reportCount,
+    uniqueManagers,
+    resolvedManagers,
+    withSalary,
+    withDayRate,
+  } = stats;
 
   return (
     <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto relative">
@@ -768,18 +816,18 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
 
       {/* Step indicator */}
       <div className="flex items-center gap-2">
-        <Chip variant="filter" selected leadingIcon="looks_two">Step 2 of 2</Chip>
+        <FilterChip defaultSelected leadingIcon={<Icon name="looks_two" />}>Step 2 of 2</FilterChip>
         {importPreview.errors.length === 0 && (
-          <Chip variant="filter" selected leadingIcon="check_circle" className="text-primary">Ready to import</Chip>
+          <FilterChip defaultSelected leadingIcon={<Icon name="check_circle" />} className="text-primary">Ready to import</FilterChip>
         )}
       </div>
 
       {/* KPI Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { value: uniqueEmails.size, label: "Members", icon: "group", color: "bg-primary-container" },
-          { value: positions.size, label: "Positions", icon: "work", color: "bg-secondary-container" },
-          { value: grades.size, label: "Grades", icon: "leaderboard", color: "bg-tertiary-container" },
+          { value: memberCount, label: "Members", icon: "group", color: "bg-primary-container" },
+          { value: positions, label: "Positions", icon: "work", color: "bg-secondary-container" },
+          { value: grades, label: "Grades", icon: "leaderboard", color: "bg-tertiary-container" },
           { value: importPreview.errors.length, label: "Errors", icon: importPreview.errors.length > 0 ? "error" : "check_circle", color: importPreview.errors.length > 0 ? "bg-error-container" : "bg-primary-container" },
         ].map((stat) => (
           <Card key={stat.label} variant="elevated">
@@ -818,11 +866,21 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
         <CardContent className="p-3 space-y-3">
           <p className="text-label-medium text-surface-foreground">Data Breakdown</p>
           <div className="flex flex-wrap gap-2">
-            {permCount > 0 && <Chip variant="filter" selected leadingIcon="badge">{permCount} Perm</Chip>}
-            {subConCount > 0 && <Chip variant="filter" selected leadingIcon="engineering">{subConCount} SubCon</Chip>}
-            {withManagers > 0 && <Chip variant="filter" leadingIcon="supervisor_account">{uniqueManagers} managers ({withManagers} reports)</Chip>}
-            {withSalary > 0 && <Chip variant="filter" leadingIcon="payments">{withSalary} salaries</Chip>}
-            {withDayRate > 0 && <Chip variant="filter" leadingIcon="schedule">{withDayRate} day rates</Chip>}
+            {permCount > 0 && <FilterChip defaultSelected leadingIcon={<Icon name="badge" />}>{permCount} Perm</FilterChip>}
+            {subConCount > 0 && <FilterChip defaultSelected leadingIcon={<Icon name="engineering" />}>{subConCount} SubCon</FilterChip>}
+            {otherEmpCount > 0 && <FilterChip leadingIcon={<Icon name="help" />}>{otherEmpCount} other type{otherEmpCount !== 1 ? "s" : ""}</FilterChip>}
+            {reportCount > 0 && (
+              <FilterChip leadingIcon={<Icon name="supervisor_account" />}>
+                {uniqueManagers} manager{uniqueManagers !== 1 ? "s" : ""} ({reportCount} report{reportCount !== 1 ? "s" : ""})
+              </FilterChip>
+            )}
+            {uniqueManagers > resolvedManagers && (
+              <FilterChip leadingIcon={<Icon name="link_off" />} className="text-error">
+                {uniqueManagers - resolvedManagers} manager{uniqueManagers - resolvedManagers !== 1 ? "s" : ""} not in import
+              </FilterChip>
+            )}
+            {withSalary > 0 && <FilterChip leadingIcon={<Icon name="payments" />}>{withSalary} salaries</FilterChip>}
+            {withDayRate > 0 && <FilterChip leadingIcon={<Icon name="schedule" />}>{withDayRate} day rates</FilterChip>}
           </div>
 
           {/* Org structure counts per level */}
@@ -837,9 +895,9 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
                     rows.map((r) => r.orgStructure?.split(" | ")?.[levelIdx]).filter(Boolean),
                   );
                   return (
-                    <Chip key={colIdx} variant="filter" leadingIcon="lan">
+                    <FilterChip key={colIdx} leadingIcon={<Icon name="lan" />}>
                       {uniqueValues.size} {typeName}{uniqueValues.size !== 1 ? "s" : ""}
-                    </Chip>
+                    </FilterChip>
                   );
                 })}
               </div>

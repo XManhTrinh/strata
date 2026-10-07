@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import type { OrganizationUnit } from "@/services";
 
 // ─── Data shape ─────────────────────────────────────────────────────────────────

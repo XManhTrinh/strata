@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 import { ICON_OPTIONS } from "./icon-picker";

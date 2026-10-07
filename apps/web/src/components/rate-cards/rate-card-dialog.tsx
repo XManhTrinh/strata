@@ -4,18 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  DialogActions,
   TextField,
-  Select,
   Switch,
-  Icon,
-  Typography,
   Divider,
+  Button,
 } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { Select } from "@/components/ui/select";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { ComboBox } from "@/components/ui/combo-box";
 import type {
   RateCard,
@@ -210,22 +208,16 @@ export function RateCardDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="request_quote" className="max-w-2xl">
-        <DialogHeader centered>
-          <DialogTitle>{card ? "Edit rate card" : "New rate card"}</DialogTitle>
-          <DialogDescription>
-            Match members by their imported columns, then set the day rate and working
-            days per quarter.
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open={open} onOpenChange={onOpenChange} className="max-w-2xl">
+      <DialogTitle>{card ? "Edit rate card" : "New rate card"}</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Match members by their imported columns, then set the day rate and working days per quarter.</p>
         <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
           <TextField
             variant="outlined"
             label="Rate card name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(value) => setName(value)}
             placeholder="e.g. UK Opex Contractor"
           />
 
@@ -245,7 +237,7 @@ export function RateCardDialog({
                 Matches any member not caught by a higher-priority card. Conditions ignored.
               </Typography>
             </div>
-            <Switch checked={isDefault} onCheckedChange={setIsDefault} />
+            <Switch selected={isDefault} onSelectedChange={setIsDefault} aria-label="Default fallback" />
           </div>
 
           {/* Conditions */}
@@ -362,14 +354,14 @@ export function RateCardDialog({
                     type="number"
                     label="Day rate (£)"
                     value={quarters[q].dayRate}
-                    onChange={(e) => updateQuarter(q, "dayRate", e.target.value)}
+                    onChange={(value) => updateQuarter(q, "dayRate", value)}
                   />
                   <TextField
                     variant="outlined"
                     type="number"
                     label="Working days"
                     value={quarters[q].workingDays}
-                    onChange={(e) => updateQuarter(q, "workingDays", e.target.value)}
+                    onChange={(value) => updateQuarter(q, "workingDays", value)}
                   />
                   <div className="text-right">
                     <Typography variant="body-small" color="surface-variant-foreground">Monthly</Typography>
@@ -393,16 +385,15 @@ export function RateCardDialog({
             </Typography>
           )}
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Saving…" : card ? "Save changes" : "Create rate card"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Saving…" : card ? "Save changes" : "Create rate card"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

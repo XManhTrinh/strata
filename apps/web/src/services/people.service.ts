@@ -209,6 +209,53 @@ export function useBulkImport(companyId: string) {
   });
 }
 
+// ─── Background import + progress ──────────────────────────────────────────────
+
+/** Returned when an import job is started. */
+export interface ImportJobStart {
+  jobId: string;
+  total: number;
+}
+
+/** Live progress for a running/finished import job. */
+export interface ImportJobProgress {
+  jobId: string;
+  companyId: string;
+  total: number;
+  processed: number;
+  status: "running" | "completed" | "failed" | "unknown";
+  created: number;
+  updated: number;
+  errorCount: number;
+  startedAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Start a background import. Returns a jobId immediately; the server processes
+ * rows in the background and reports progress via fetchImportProgress. Uses the
+ * plain apiClient (not a hook) so it survives the dialog unmounting.
+ */
+export function startMemberImport(
+  companyId: string,
+  rows: ImportMemberRow[],
+): Promise<ImportJobStart> {
+  return apiClient<ImportJobStart>(`/companies/${companyId}/members/import`, {
+    method: "POST",
+    body: { rows },
+  });
+}
+
+/** Poll a single import job's progress. */
+export function fetchImportProgress(
+  companyId: string,
+  jobId: string,
+): Promise<ImportJobProgress> {
+  return apiClient<ImportJobProgress>(
+    `/companies/${companyId}/members/import/${jobId}/progress`,
+  );
+}
+
 export function useAssignRole(companyId: string) {
   const queryClient = useQueryClient();
   return useMutation({

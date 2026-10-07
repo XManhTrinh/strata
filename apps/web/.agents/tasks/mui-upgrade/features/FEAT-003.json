@@ -1,0 +1,50 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Consumer file migration: update all 55 files that import from @vkieu/mui, @vkieu/mui/buttons, @vkieu/mui/navigation, or @/lib/theme. Depends on FEAT-001 and FEAT-002 being complete. This is the largest FEAT — work through it systematically by transform type.",
+  "status": "completed",
+  "steps": [
+    "STEP A — Import path consolidation (all 33 files with /buttons or /navigation subpaths): merge `import { Button, IconButton } from '@vkieu/mui/buttons'` and `import { NavigationBar } from '@vkieu/mui/navigation'` into a single `import { ..., Button, IconButton, NavigationBar } from '@vkieu/mui'` statement. Files: src/app/(auth)/register/page.tsx, src/app/(auth)/login/page.tsx, src/app/(dashboard)/calendar/page.tsx, src/app/(dashboard)/admin/settings/page.tsx, src/app/(dashboard)/admin/org-structure/page.tsx, src/app/(dashboard)/admin/features/page.tsx, src/app/(dashboard)/admin/roles/page.tsx, src/app/(dashboard)/admin/org-unit-types/page.tsx, src/app/(dashboard)/admin/positions/page.tsx, src/app/(dashboard)/dashboard/page.tsx, src/app/(dashboard)/org-chart/page.tsx, src/app/(dashboard)/people/page.tsx, src/app/(dashboard)/finance/capacity/page.tsx, src/app/(dashboard)/finance/rate-cards/page.tsx, src/features/calendar/CalendarView.tsx, src/features/calendar/components/EventForm.tsx, src/features/calendar/components/LeaveBalancePanel.tsx, src/features/calendar/components/FilterSelector.tsx, src/features/calendar/components/ApprovalActions.tsx, src/features/calendar/components/LeaveRequestForm.tsx, src/components/assistant/assistant-panel.tsx, src/components/ui/org-unit-tree-select.tsx, src/components/flow-org/ExportButton.tsx, src/components/flow-org/ReparentModal.tsx, src/components/flow-org/FlowOrgHeader.tsx, src/components/layout/header.tsx, src/components/navigation/mobile-nav.tsx, src/components/rate-cards/rate-card-set-dialog.tsx, src/components/rate-cards/rate-card-group-dialog.tsx, src/components/rate-cards/rate-card-dialog.tsx, src/components/import/csv-import-dialog.tsx, src/components/notifications/notification-dropdown.tsx.",
+
+    "STEP B — Replace removed imports with local polyfill imports across ALL consumer files. For every file importing Icon, Typography, Select, CardContent, CardHeader, CardTitle, CardFooter, or CardDescription from @vkieu/mui: remove them from the @vkieu/mui import block and add `import { Icon } from '@/components/ui/icon'`, `import { Typography } from '@/components/ui/typography'`, `import { Select } from '@/components/ui/select'`, `import { CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card-content'` as appropriate. Completed.",
+
+    "STEP C — Migrate IconButton from children to icon prop. Completed across all files.",
+
+    "STEP D — Migrate Chip component to AssistChip / FilterChip / InputChip. Completed.",
+
+    "STEP E — Migrate Tooltip to TooltipTrigger+Tooltip. Completed.",
+
+    "STEP F — Migrate Menu/MenuItem/MenuDivider to MenuTrigger+Menu+MenuItem+MenuGroup. Completed.",
+
+    "STEP G — Migrate Dialog/DialogContent/DialogHeader/DialogFooter/DialogDescription. Completed.",
+
+    "STEP H — Migrate Tabs/TabList/Tab/TabContent. Completed.",
+
+    "STEP I — Migrate PageBar/AppBar → TopAppBar. Completed.",
+
+    "STEP J — Migrate Search → SearchBar. Completed (note: onValueChange → onChange was also required).",
+
+    "STEP K — Migrate NavigationBar in mobile-nav.tsx. Completed.",
+
+    "STEP L — Migrate useTheme in sidebar.tsx. Already complete from FEAT-002.",
+
+    "STEP M — Verify Select polyfill usage (API compatible). Verified.",
+
+    "STEP N — Final pass: tsc --noEmit exits 0, pnpm build exits 0."
+  ],
+  "acceptance_criteria": [
+    "tsc --noEmit -p apps/web/tsconfig.json exits with zero errors",
+    "pnpm --filter @strata/web build exits 0",
+    "No file imports from @vkieu/mui/buttons or @vkieu/mui/navigation",
+    "No file imports Icon, Typography, Select, CardContent/CardHeader/CardTitle/CardFooter/CardDescription from @vkieu/mui",
+    "No file imports useTheme from @/lib/theme",
+    "No file uses Chip, PageBar, AppBar, DialogHeader, DialogFooter, DialogDescription, TabList, TabContent, MenuDivider, Search as imported names"
+  ],
+  "verification": [
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && tsc --noEmit -p apps/web/tsconfig.json",
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && pnpm --filter @strata/web build",
+    "grep -r '@vkieu/mui/buttons\\|@vkieu/mui/navigation' /Users/xuan-manh.trinh/workplace/web/strata/apps/web/src --include='*.tsx' --include='*.ts' | wc -l  # should be 0"
+  ],
+  "blocked_reason": null,
+  "findings": "1. SearchBar.onChange vs old Search.onValueChange: The new SearchBar uses onChange (value: string) not onValueChange — callers updated accordingly. 2. TextField API changes: onChange passes (value: string) not React.ChangeEvent; error/errorText renamed to invalid/errorMessage. 3. Switch/Checkbox API: checked→selected, onCheckedChange→onSelectedChange. 4. Button: no loading/icon props; size 's' renamed to 'sm'; icon moved to leadingIcon. 5. List: now requires aria-label/aria-labelledby; ListItem: interactive/lines/supporting/selected props removed; interactive behavior via List.onAction. 6. Badge: completely new API (Badge + BadgedBox); old variant/count/visible props gone. 7. IconButton: filled-tonal variant removed, use tonal instead. 8. Dialog.icon accepts ReactNode not string. 9. Typography polyfill updated to accept legacy color names (surface-variant-foreground → on-surface-variant etc.) as aliases. 10. A LegacyListItemProps type cast was used in files needing onClick on ListItem for TypeScript compatibility while preserving runtime behavior."
+}

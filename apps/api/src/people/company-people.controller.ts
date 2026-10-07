@@ -19,6 +19,7 @@ import {
   ImportMemberDto,
 } from './company-people.service';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 
 const CreateMemberSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -128,7 +129,32 @@ export class CompanyPeopleController {
       });
     }
     const supabaseUserId = req?.user?.sub;
-    return this.service.bulkImport(companyId, parsed.data.rows, supabaseUserId);
+    const jobId = randomUUID();
+
+    // Run the import in the background and return a jobId immediately so the
+    // client can poll progress and keep showing it across navigation. Progress
+    // (and the completion notification) are written as it runs.
+    void this.service
+      .bulkImport(companyId, parsed.data.rows, supabaseUserId, jobId)
+      .catch(() => {
+        // Errors are reflected in the per-row results + progress; swallow here
+        // so an unhandled rejection doesn't crash the process.
+      });
+
+    return { jobId, total: parsed.data.rows.length };
+  }
+
+  @Get('import/:jobId/progress')
+  async importProgress(
+    @Param('companyId') companyId: string,
+    @Param('jobId') jobId: string,
+  ) {
+    const progress = await this.service.getImportProgress(companyId, jobId);
+    if (!progress) {
+      // Unknown/expired job — report as not found so the client stops polling.
+      return { jobId, status: 'unknown' as const };
+    }
+    return progress;
   }
 
   @Put(':id')

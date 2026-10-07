@@ -1,12 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { IconButton } from "@vkieu/mui/buttons";
-import { Button } from "@vkieu/mui/buttons";
-import { Icon } from "@vkieu/mui";
-import { Badge } from "@vkieu/mui";
-import { Tooltip } from "@vkieu/mui";
-import { Divider } from "@vkieu/mui";
+import { IconButton, Button, Badge, BadgedBox, TooltipTrigger, Tooltip, Divider } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { useCompanyId } from "@/hooks/use-company";
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import {
@@ -73,19 +69,19 @@ export function NotificationDropdown() {
 
   return (
     <div className="relative">
-      <Tooltip content={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`} side="bottom">
-        <Badge variant="count" count={unreadCount} visible={unreadCount > 0}>
+      <TooltipTrigger placement="bottom">
+        <BadgedBox badge={unreadCount > 0 ? <Badge>{unreadCount > 99 ? '99+' : unreadCount}</Badge> : <span />}>
           <IconButton
             variant="standard"
-            size="s"
+            size="sm"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
             aria-expanded={isOpen}
-          >
-            <Icon name="notifications" size={24} />
-          </IconButton>
-        </Badge>
-      </Tooltip>
+            icon={<Icon name="notifications" size={24} />}
+          />
+        </BadgedBox>
+        <Tooltip>{`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}</Tooltip>
+      </TooltipTrigger>
 
       {isOpen && (
         <>
@@ -104,7 +100,7 @@ export function NotificationDropdown() {
               {unreadCount > 0 && (
                 <Button
                   variant="text"
-                  size="s"
+                  size="sm"
                   onClick={handleMarkAllAsRead}
                   disabled={markAllAsReadMutation.isPending}
                   className="text-[12px] text-primary"
@@ -155,17 +151,16 @@ export function NotificationDropdown() {
 
                       {/* Mark as read */}
                       {!notification.read && (
-                        <Tooltip content="Mark as read" side="left">
+                        <TooltipTrigger placement="left">
                           <IconButton
                             variant="standard"
                             size="xs"
-                            compact
                             onClick={() => handleMarkAsRead(notification.id)}
                             aria-label="Mark as read"
-                          >
-                            <Icon name="done" size={18} className="text-primary" />
-                          </IconButton>
-                        </Tooltip>
+                            icon={<Icon name="done" size={18} className="text-primary" />}
+                          />
+                          <Tooltip>Mark as read</Tooltip>
+                        </TooltipTrigger>
                       )}
                     </div>
                   );

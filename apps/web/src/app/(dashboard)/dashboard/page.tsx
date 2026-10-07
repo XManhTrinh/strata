@@ -2,20 +2,18 @@
 
 import { motion } from "motion/react";
 import {
-  PageBar,
+  TopAppBar,
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Icon,
   List,
   ListItem,
   Divider,
-  Chip,
-  Typography,
+  AssistChip,
+  Button,
 } from "@vkieu/mui";
 import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
-import { Button } from "@vkieu/mui/buttons";
+import { Icon } from "@/components/ui/icon";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
@@ -163,13 +161,7 @@ export default function DashboardPage() {
   if (hasError) {
     return (
       <div className="flex flex-col gap-6">
-        <PageBar>
-          <div>
-            <Typography variant="headline-medium">
-              Dashboard
-            </Typography>
-          </div>
-        </PageBar>
+        <TopAppBar title={<Typography variant="headline-medium">Dashboard</Typography>} />
         <Card variant="filled" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
@@ -213,16 +205,7 @@ export default function DashboardPage() {
       transition={defaultTransition}
     >
       {/* ─── Page Header ─────────────────────────────────────────────────── */}
-      <PageBar>
-        <div className="flex flex-col gap-1">
-          <Typography variant="headline-medium">
-            Dashboard
-          </Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
-            Overview of your organization&apos;s key metrics
-          </Typography>
-        </div>
-      </PageBar>
+      <TopAppBar title={<Typography variant="headline-medium">Dashboard</Typography>} subtitle="Overview of your organization's key metrics" />
 
       {/* ─── KPI Stats Grid ──────────────────────────────────────────────── */}
       <section aria-label="Key metrics">
@@ -248,9 +231,9 @@ export default function DashboardPage() {
               <CardTitle className="text-[16px] leading-6 font-medium text-surface-foreground">
                 Upcoming Events
               </CardTitle>
-              <Chip variant="assist" leadingIcon="calendar_month">
+              <AssistChip leadingIcon={<Icon name="calendar_month" />}>
                 Next 30 days
-              </Chip>
+              </AssistChip>
             </CardHeader>
             <CardContent className="px-0 pt-0 pb-2">
               {isLoading ? (
@@ -272,11 +255,10 @@ export default function DashboardPage() {
                   </Typography>
                 </div>
               ) : (
-                <List>
+                <List aria-label="List">
                   {(eventsData ?? []).slice(0, 5).map((event) => (
                     <ListItem
                       key={event.id}
-                      lines={2}
                       leading={
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
                           <Icon
@@ -286,7 +268,7 @@ export default function DashboardPage() {
                           />
                         </div>
                       }
-                      supporting={new Date(
+                      supportingText={new Date(
                         event.startDate
                       ).toLocaleDateString(undefined, {
                         weekday: "short",
@@ -294,12 +276,11 @@ export default function DashboardPage() {
                         day: "numeric",
                       })}
                       trailing={
-                        <Chip
-                          variant="assist"
-                          leadingIcon={event.allDay ? "sunny" : "schedule"}
+                        <AssistChip
+                          leadingIcon={<Icon name={event.allDay ? "sunny" : "schedule"} />}
                         >
                           {event.allDay ? "All day" : "Timed"}
-                        </Chip>
+                        </AssistChip>
                       }
                     >
                       {event.title}

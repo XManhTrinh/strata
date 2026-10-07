@@ -2,8 +2,10 @@
 
 import { motion } from "motion/react";
 import { CalendarView } from "@/features/calendar/CalendarView";
-import { Button } from "@vkieu/mui/buttons";
-import { Icon, Card, CardContent, Typography } from "@vkieu/mui";
+import { Button, Card } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
+import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCalendarEvents,

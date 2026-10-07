@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-004",
+  "type": "docs",
+  "description": "Update the Strata development conventions steering file to reflect the new @vkieu/mui API: new CSS import, new theme system, new component names, local polyfill locations, updated dark mode mechanism. Independent of FEATs 001-003 but should run last for accuracy.",
+  "status": "pending",
+  "steps": [
+    "1. Open /Users/xuan-manh.trinh/workplace/web/strata/.kiro/steering/development.md and update the following sections:",
+
+    "2. In '## Theming' section: replace the entire section content. New content: CSS tokens come from `@vkieu/mui/styles.css`. Theming is managed by `ThemeProvider` from `@vkieu/mui` in providers.tsx. The facebook brand theme is registered via `createTheme({ name: 'facebook', seed: '#1877F2' })`. Dark mode is via `data-mode='dark'` attribute set by `ThemeProvider` — the `dark:` Tailwind prefix responds to `[data-mode='dark']` (configured in @vkieu/mui/styles.css utilities). Use `useTheme()` from `@vkieu/mui` (not @/lib/theme) to read/set theme/mode. The hook returns `{ theme, mode, resolvedMode, setTheme, setMode, setContrast, ... }`. Remove references to `ThemeContext` and `@/lib/theme`. Remove `darkMode: 'class'` mention.",
+
+    "3. In '## Component Hierarchy — What to Use' section, item 1 for @vkieu/mui: update the list of available components to reflect current API. Replace AppBar/PageBar with TopAppBar. Replace SnackbarProvider with SnackbarHost. Replace Search with SearchBar. Replace Chip with AssistChip/FilterChip/InputChip/SuggestionChip. Replace CircularProgress/LinearProgress with CircularProgressIndicator/LinearProgressIndicator. Remove Icon, Typography, Select, CardContent/CardHeader/CardTitle/CardFooter/CardDescription from the @vkieu/mui list. Add them to a new 'Local polyfills' section. Remove @vkieu/mui/buttons and @vkieu/mui/navigation subpath references — everything imports from @vkieu/mui directly.",
+
+    "4. Add a new '## Local UI Polyfills' section listing the 4 local polyfill components that replaced removed @vkieu/mui exports: `Icon` → import from `@/components/ui/icon`; `Typography` → import from `@/components/ui/typography`; `Select` → import from `@/components/ui/select`; `CardContent, CardHeader, CardTitle, CardFooter, CardDescription` → import from `@/components/ui/card-content`. Note that these use the M3 token class names matching the new @vkieu/mui CSS variables.",
+
+    "5. Add a new '## Snackbar' section: the snackbar state is managed via `useSnackbar()` from `@/lib/snackbar` (not from @vkieu/mui). Calling `snackbar.showSnackbar({ message, duration: 'short' | 'long' | 'indefinite', withDismissAction: boolean })` shows a snackbar. `SnackbarHost` is rendered once in providers.tsx. The convenience wrapper is `useToast()` from `@/hooks/use-toast`.",
+
+    "6. Update the 'What NOT to Do' section: remove mention of `ThemeContext` from @/lib/theme. Update any mentions of old component names."
+  ],
+  "acceptance_criteria": [
+    "development.md no longer references @vkieu/mui/buttons or @vkieu/mui/navigation subpaths",
+    "development.md no longer references ThemeContext from @/lib/theme",
+    "development.md no longer references SnackbarProvider, useSnackbar from @vkieu/mui",
+    "development.md correctly lists TopAppBar, SearchBar, AssistChip/FilterChip/InputChip as replacements",
+    "development.md has a Local UI Polyfills section describing the 4 new component files",
+    "development.md describes the new snackbar pattern with useSnackbar from @/lib/snackbar"
+  ],
+  "verification": [
+    "Read the file and confirm the above criteria manually — no automated test needed for docs."
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

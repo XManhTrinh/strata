@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@vkieu/mui/buttons";
+import { Button } from "@vkieu/mui";
 
 interface ApprovalActionsProps {
   eventId: string;

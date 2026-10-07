@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { IconColorPicker } from "@/components/ui/icon-color-picker";
 
 // ─── Props ──────────────────────────────────────────────────────────────────────

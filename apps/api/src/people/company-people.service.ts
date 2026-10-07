@@ -6,7 +6,27 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaClient } from '@strata/database';
+import Redis from 'ioredis';
+import { randomUUID } from 'crypto';
 import { CapacityService } from '../capacity/capacity.service';
+
+/** Shape of an import job's progress record stored in Redis. */
+export interface ImportProgress {
+  jobId: string;
+  companyId: string;
+  total: number;
+  processed: number;
+  status: 'running' | 'completed' | 'failed';
+  created: number;
+  updated: number;
+  errorCount: number;
+  startedAt: number;
+  updatedAt: number;
+}
+
+const IMPORT_JOB_TTL_SECONDS = 60 * 30; // keep progress 30 min after last update
+const importJobKey = (companyId: string, jobId: string) =>
+  `import-progress:${companyId}:${jobId}`;
 
 export interface CreateMemberDto {
   fullName: string;
@@ -99,7 +119,35 @@ export class CompanyPeopleService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly capacityService: CapacityService,
+    private readonly redis: Redis,
   ) {}
+
+  // ─── Import progress (Redis-backed, survives navigation/refresh) ────────────
+
+  private async writeProgress(p: ImportProgress): Promise<void> {
+    try {
+      await this.redis.set(
+        importJobKey(p.companyId, p.jobId),
+        JSON.stringify(p),
+        'EX',
+        IMPORT_JOB_TTL_SECONDS,
+      );
+    } catch {
+      // Progress is best-effort — never fail the import because Redis is down.
+    }
+  }
+
+  async getImportProgress(
+    companyId: string,
+    jobId: string,
+  ): Promise<ImportProgress | null> {
+    try {
+      const raw = await this.redis.get(importJobKey(companyId, jobId));
+      return raw ? (JSON.parse(raw) as ImportProgress) : null;
+    } catch {
+      return null;
+    }
+  }
 
   /**
    * List all members with metadata.
@@ -503,34 +551,76 @@ export class CompanyPeopleService {
   /**
    * Bulk import from CSV with column mapping.
    */
-  async bulkImport(companyId: string, rows: ImportMemberDto[], supabaseUserId?: string) {
+  async bulkImport(
+    companyId: string,
+    rows: ImportMemberDto[],
+    supabaseUserId?: string,
+    jobId?: string,
+  ) {
     const results: { status: string; email: string; error?: string }[] = [];
+
+    // Progress accounts for two phases (create + line-manager resolution), so
+    // total work = rows.length * 2. Phase 1 fills the first half.
+    const totalWork = rows.length * 2;
+    const progress: ImportProgress = {
+      jobId: jobId ?? '',
+      companyId,
+      total: rows.length,
+      processed: 0,
+      status: 'running',
+      created: 0,
+      updated: 0,
+      errorCount: 0,
+      startedAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    // Write progress to Redis at most ~every 1% (or every row for small sets).
+    const flushEvery = Math.max(1, Math.floor(totalWork / 100));
+    let workDone = 0;
+    const bump = async (force = false) => {
+      workDone += 1;
+      progress.processed = Math.min(progress.total, Math.round(workDone / 2));
+      progress.updatedAt = Date.now();
+      if (jobId && (force || workDone % flushEvery === 0)) {
+        await this.writeProgress(progress);
+      }
+    };
+
+    if (jobId) await this.writeProgress(progress);
 
     // Phase 1: Create all members (without line manager)
     for (const row of rows) {
       try {
         const result = await this.importMember(companyId, row);
         results.push({ ...result, email: result.email ?? '' });
+        if (result.status === 'created') progress.created += 1;
+        else if (result.status === 'updated') progress.updated += 1;
       } catch (err: any) {
         results.push({
           status: 'error',
           email: row.email ?? '',
           error: err.message || 'Unknown error',
         });
+        progress.errorCount += 1;
       }
+      await bump();
     }
 
     // Phase 2: Resolve line manager relationships (all members exist now)
     for (const row of rows) {
       // Support both legacy lineManagerEmail and the new flexible identifier
       const identifier = row.lineManagerIdentifier || row.lineManagerEmail;
-      if (!identifier) continue;
+      if (!identifier) {
+        await bump();
+        continue;
+      }
       const matchField = row.lineManagerMatchField || 'email';
       try {
         await this.resolveLineManager(companyId, row.email ?? '', identifier, matchField);
       } catch {
         // Silently skip — manager might not exist
       }
+      await bump();
     }
 
     const importResult = {
@@ -539,6 +629,14 @@ export class CompanyPeopleService {
       updated: results.filter((r) => r.status === 'updated').length,
       errors: results.filter((r) => r.status === 'error'),
     };
+
+    // Final progress snapshot — mark complete (processed = total).
+    if (jobId) {
+      progress.processed = progress.total;
+      progress.status = 'completed';
+      progress.updatedAt = Date.now();
+      await this.writeProgress(progress);
+    }
 
     // Create notification for the importing user
     if (supabaseUserId) {

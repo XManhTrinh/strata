@@ -1,28 +1,22 @@
 "use client";
+import type React from "react";
 
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
-import {
-  Search,
-  PageBar,
-  Icon,
-  Card,
-  CardContent,
-  Chip,
+import {SearchBar,
+  TopAppBar,Card,FilterChip,
   Checkbox,
   TextField,
-  Select,
+  TooltipTrigger,
   Tooltip,
   List,
   ListItem,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+  Dialog, DialogContent, DialogTitle, DialogActions,
+  Button,
+  IconButton} from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Select } from "@/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -46,6 +40,11 @@ import {
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -234,35 +233,33 @@ function PositionRow({
         </span>
       </TableCell>
       <TableCell>
-        <Chip variant="filter" selected={!row.archived}>
+        <FilterChip defaultSelected={!row.archived}>
           {row.archived ? "Archived" : "Active"}
-        </Chip>
+        </FilterChip>
       </TableCell>
       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-1">
-          <Tooltip content="Edit">
-            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(row)}>
-              <Icon name="edit" size={18} />
-            </IconButton>
-          </Tooltip>
+          <TooltipTrigger placement="top">
+            <IconButton variant="standard" size="xs" aria-label="Edit" onClick={() => onEdit(row)} icon={<Icon name="edit" size={18} />} />
+            <Tooltip>Edit</Tooltip>
+          </TooltipTrigger>
           {row.archived ? (
-            <Tooltip content="Delete permanently">
+            <TooltipTrigger placement="top">
               <IconButton
                 variant="standard"
                 size="xs"
                 aria-label="Delete permanently"
                 className="text-error"
                 onClick={() => onDelete(row.id)}
-              >
-                <Icon name="delete_forever" size={18} />
-              </IconButton>
-            </Tooltip>
+                icon={<Icon name="delete_forever" size={18} />}
+              />
+              <Tooltip>Delete permanently</Tooltip>
+            </TooltipTrigger>
           ) : (
-            <Tooltip content="Archive">
-              <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(row.id)}>
-                <Icon name="archive" size={18} />
-              </IconButton>
-            </Tooltip>
+            <TooltipTrigger placement="top">
+              <IconButton variant="standard" size="xs" aria-label="Archive" onClick={() => onArchive(row.id)} icon={<Icon name="archive" size={18} />} />
+              <Tooltip>Archive</Tooltip>
+            </TooltipTrigger>
           )}
         </div>
       </TableCell>
@@ -291,8 +288,7 @@ function PositionCard({
   return (
     <Card variant="elevated">
       <CardContent className="p-0">
-        <ListItem
-          interactive
+        <ListItemWithClick
           onClick={() => onEdit(row)}
           leading={
             <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/8 shrink-0">
@@ -301,10 +297,10 @@ function PositionCard({
           }
           trailing={
             <div className="flex items-center gap-2">
-              <Chip variant="filter" selected={!row.archived}>
+              <FilterChip defaultSelected={!row.archived}>
                 {row.archived ? "Archived" : "Active"}
-              </Chip>
-              <Tooltip content={row.archived ? "Delete" : "Archive"}>
+              </FilterChip>
+              <TooltipTrigger placement="top">
                 <IconButton
                   variant="standard"
                   size="xs"
@@ -314,17 +310,16 @@ function PositionCard({
                     e.stopPropagation();
                     row.archived ? onDelete(row.id) : onArchive(row.id);
                   }}
-                >
-                  <Icon name={row.archived ? "delete_forever" : "archive"} size={18} />
-                </IconButton>
-              </Tooltip>
+                  icon={<Icon name={row.archived ? "delete_forever" : "archive"} size={18} />}
+                />
+                <Tooltip>{row.archived ? "Delete" : "Archive"}</Tooltip>
+              </TooltipTrigger>
             </div>
           }
-          lines={2}
-          supporting={subtitle}
+          supportingText={subtitle}
         >
           {row.name}
-        </ListItem>
+        </ListItemWithClick>
       </CardContent>
     </Card>
   );
@@ -363,23 +358,20 @@ function PositionDialog({
   }, [sortedLevels, levels, formData.minLevelId]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon={editing ? "edit" : "work"}>
-        <DialogHeader centered>
-          <DialogTitle>{editing ? "Edit Position" : "Create Position"}</DialogTitle>
-          <DialogDescription>
-            {editing
-              ? "Update position details, career level range, and reporting capabilities."
-              : "Define a new position with career levels and reporting settings."}
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name={editing ? "edit" : "work"} />}>
+      <DialogTitle>{editing ? "Edit Position" : "Create Position"}</DialogTitle>
+      <DialogContent>
+        <p className="text-sm text-on-surface-variant mb-4">
+          {editing
+            ? "Update position details, career level range, and reporting capabilities."
+            : "Define a new position with career levels and reporting settings."}
+        </p>
         <div className="space-y-4">
           <TextField
             variant="outlined"
             label="Name"
             value={formData.name}
-            onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+            onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Senior Engineer"
             onKeyDown={(e) => {
               if (e.key === "Enter" && formData.name.trim()) onSubmit();
@@ -389,7 +381,7 @@ function PositionDialog({
             variant="outlined"
             label="Description"
             value={formData.description}
-            onChange={(e) => onFormChange({ ...formData, description: e.target.value })}
+            onChange={(value) => onFormChange({ ...formData, description: value })}
             placeholder="Brief role description"
           />
           <div className="grid grid-cols-2 gap-3">
@@ -427,10 +419,10 @@ function PositionDialog({
             />
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
-            <Checkbox
-              id="pos-reports"
-              checked={formData.canHaveDirectReports}
-              onCheckedChange={(checked) =>
+            <Checkbox aria-label="Toggle"
+  id="pos-reports"
+              selected={formData.canHaveDirectReports}
+              onSelectedChange={(checked) =>
                 onFormChange({ ...formData, canHaveDirectReports: checked === true })
               }
             />
@@ -439,20 +431,19 @@ function PositionDialog({
             </label>
           </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="text"
-            onClick={onSubmit}
-            disabled={!formData.name.trim() || isPending}
-          >
-            {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button
+          variant="text"
+          onClick={onSubmit}
+          disabled={!formData.name.trim() || isPending}
+        >
+          {isPending ? "Saving..." : editing ? "Save Changes" : "Create"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -475,22 +466,19 @@ function CareerLevelDialog({
   isPending: boolean;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="trending_up">
-        <DialogHeader centered>
-          <DialogTitle>Add Career Level</DialogTitle>
-          <DialogDescription>
-            Define a new career level in your company's leveling scheme.
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name="trending_up" />}>
+      <DialogTitle>Add Career Level</DialogTitle>
+      <DialogContent>
+        <p className="text-sm text-on-surface-variant mb-4">
+          Define a new career level in your company&apos;s leveling scheme.
+        </p>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <TextField
               variant="outlined"
               label="Label"
               value={formData.label}
-              onChange={(e) => onFormChange({ ...formData, label: e.target.value })}
+              onChange={(value) => onFormChange({ ...formData, label: value })}
               placeholder="e.g., L3, M2"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && formData.label.trim()) onSubmit();
@@ -500,7 +488,7 @@ function CareerLevelDialog({
               variant="outlined"
               label="Display Name"
               value={formData.displayName}
-              onChange={(e) => onFormChange({ ...formData, displayName: e.target.value })}
+              onChange={(value) => onFormChange({ ...formData, displayName: value })}
               placeholder="e.g., Senior"
             />
           </div>
@@ -510,7 +498,7 @@ function CareerLevelDialog({
               label="Rank"
               type="number"
               value={String(formData.rank)}
-              onChange={(e) => onFormChange({ ...formData, rank: Number(e.target.value) })}
+              onChange={(value) => onFormChange({ ...formData, rank: Number(value) })}
               placeholder="Sort order"
             />
             <Select
@@ -526,20 +514,19 @@ function CareerLevelDialog({
             />
           </div>
         </div>
-
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="text"
-            onClick={onSubmit}
-            disabled={!formData.label.trim() || isPending}
-          >
-            {isPending ? "Creating..." : "Create"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button
+          variant="text"
+          onClick={onSubmit}
+          disabled={!formData.label.trim() || isPending}
+        >
+          {isPending ? "Creating..." : "Create"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -687,14 +674,10 @@ export default function PositionsPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <PageBar className="justify-between">
-          <div>
-            <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Positions</h1>
-            <p className="text-[14px] leading-5 text-surface-variant-foreground">
-              Configure positions with career levels and reporting capabilities.
-            </p>
-          </div>
-        </PageBar>
+        <TopAppBar
+          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Positions</h1>}
+          subtitle="Configure positions with career levels and reporting capabilities."
+        />
         <ErrorState onRetry={() => refetch()} />
       </div>
     );
@@ -711,37 +694,37 @@ export default function PositionsPage() {
       transition={defaultTransition}
     >
       {/* ── Page header ────────────────────────────────────────────────── */}
-      <PageBar className="justify-between">
-        <div>
-          <h1 className="text-[28px] leading-9 font-normal text-surface-foreground">Positions</h1>
-          <p className="text-[14px] leading-5 text-surface-variant-foreground">
-            Configure positions with career levels and reporting capabilities.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="tonal" onClick={openAddLevel}>
-            <Icon name="trending_up" size={18} />
-            Add Level
-          </Button>
-          <Button onClick={openCreate}>
-            <Icon name="add" size={18} />
-            Create Position
-          </Button>
-        </div>
-      </PageBar>
+      <TopAppBar
+        className="justify-between"
+        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Positions</h1>}
+        subtitle="Configure positions with career levels and reporting capabilities."
+        actions={
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="tonal" onClick={openAddLevel}>
+              <Icon name="trending_up" size={18} />
+              Add Level
+            </Button>
+            <Button onClick={openCreate}>
+              <Icon name="add" size={18} />
+              Create Position
+            </Button>
+          </div>
+        }
+      />
 
       {/* ── Toolbar: search + count ────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        <Search
+        <SearchBar
+          aria-label="Search"
           className="max-w-sm"
           value={search}
-          onValueChange={setSearch}
+          onChange={setSearch}
           placeholder="Search positions..."
         />
         {!isLoading && activeCount > 0 && (
-          <Chip variant="filter" selected className="shrink-0">
+          <FilterChip defaultSelected className="shrink-0">
             {activeCount} active
-          </Chip>
+          </FilterChip>
         )}
       </div>
 

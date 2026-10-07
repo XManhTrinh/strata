@@ -63,6 +63,13 @@ const typographyVariants = cva("", {
       "on-primary-container": "text-on-primary-container",
       "on-secondary-container": "text-on-secondary-container",
       "on-tertiary-container": "text-on-tertiary-container",
+      // Legacy aliases (old token names)
+      "surface-foreground": "text-on-surface",
+      "surface-variant-foreground": "text-on-surface-variant",
+      "primary-container-foreground": "text-on-primary-container",
+      "secondary-container-foreground": "text-on-secondary-container",
+      "tertiary-container-foreground": "text-on-tertiary-container",
+      "secondary-foreground": "text-secondary",
     },
   },
   defaultVariants: {

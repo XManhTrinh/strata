@@ -152,8 +152,8 @@ export function ComboBox({
           label={label}
           value={value}
           placeholder={placeholder}
-          onChange={(e) => {
-            onChange(e.target.value);
+          onChange={(value) => {
+            onChange(value);
             if (!open) setOpen(true);
           }}
           onFocus={() => setOpen(true)}

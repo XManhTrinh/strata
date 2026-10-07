@@ -1,30 +1,24 @@
 "use client";
+import type React from "react";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Search,
-  PageBar,
-  Icon,
-  Card,
-  CardContent,
-  Chip,
+import {SearchBar,
+  TopAppBar,Card,FilterChip,
   Checkbox,
   TextField,
+  TooltipTrigger,
   Tooltip,
   Divider,
   List,
   ListItem,
-  Select,
-  Typography,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@vkieu/mui";
-import { Button, IconButton } from "@vkieu/mui/buttons";
+  Dialog, DialogContent, DialogTitle, DialogActions,
+  Button,
+  IconButton} from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
+import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -42,6 +36,11 @@ import {
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Types & constants ────────────────────────────────────────────────────────
 
@@ -106,26 +105,25 @@ function PageHeader({
   showAddAdmin: boolean;
 }) {
   return (
-    <PageBar className="justify-between shrink-0">
-      <div>
-        <Typography variant="headline-small">Roles & Permissions</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
-          Define roles and manage feature-level access with granular scope control.
-        </Typography>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {showAddAdmin && (
-          <Button variant="tonal" onClick={onAddAdmin} disabled={isAddingAdmin}>
-            <Icon name="shield_person" size={18} />
-            {isAddingAdmin ? "Adding…" : "Add Admin"}
+    <TopAppBar
+      className="justify-between shrink-0"
+      title={<Typography variant="headline-small">Roles & Permissions</Typography>}
+      subtitle="Define roles and manage feature-level access with granular scope control."
+      actions={
+        <div className="flex items-center gap-2 shrink-0">
+          {showAddAdmin && (
+            <Button variant="tonal" onClick={onAddAdmin} disabled={isAddingAdmin}>
+              <Icon name="shield_person" size={18} />
+              {isAddingAdmin ? "Adding…" : "Add Admin"}
+            </Button>
+          )}
+          <Button onClick={onCreateClick}>
+            <Icon name="add" size={18} />
+            Create Role
           </Button>
-        )}
-        <Button onClick={onCreateClick}>
-          <Icon name="add" size={18} />
-          Create Role
-        </Button>
-      </div>
-    </PageBar>
+        </div>
+      }
+    />
   );
 }
 
@@ -208,21 +206,19 @@ function CreateRoleDialog({
   onSubmit: () => void; isPending: boolean;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="shield">
-        <DialogHeader centered>
-          <DialogTitle>Create Role</DialogTitle>
-          <DialogDescription>Create a new role to assign feature permissions and scope access.</DialogDescription>
-        </DialogHeader>
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name="shield" />}>
+      <DialogTitle>Create Role</DialogTitle>
+      <DialogContent>
+        <p className="text-sm text-on-surface-variant mb-4">Create a new role to assign feature permissions and scope access.</p>
         <div className="space-y-4">
-          <TextField variant="outlined" label="Role Name" value={name} onChange={(e) => onNameChange(e.target.value)} placeholder="e.g., Finance Administrator" onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onSubmit(); }} />
-          <TextField variant="outlined" label="Description" value={description} onChange={(e) => onDescriptionChange(e.target.value)} placeholder="Brief description of responsibilities" />
+          <TextField variant="outlined" label="Role Name" value={name} onChange={(value) => onNameChange(value)} placeholder="e.g., Finance Administrator" onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onSubmit(); }} />
+          <TextField variant="outlined" label="Description" value={description} onChange={(value) => onDescriptionChange(value)} placeholder="Brief description of responsibilities" />
         </div>
-        <DialogFooter>
-          <Button variant="text" onClick={() => { onOpenChange(false); onNameChange(""); onDescriptionChange(""); }}>Cancel</Button>
-          <Button variant="text" onClick={onSubmit} disabled={!name.trim() || isPending}>{isPending ? "Creating..." : "Create"}</Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => { onOpenChange(false); onNameChange(""); onDescriptionChange(""); }}>Cancel</Button>
+        <Button variant="text" onClick={onSubmit} disabled={!name.trim() || isPending}>{isPending ? "Creating..." : "Create"}</Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -237,23 +233,21 @@ function DeleteRoleDialog({
   onConfirm: () => void; isPending: boolean;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="delete">
-        <DialogHeader centered>
-          <DialogTitle>Delete “{roleName}”?</DialogTitle>
-          <DialogDescription>
-            {affectedUsers > 0
-              ? `${affectedUsers} member${affectedUsers !== 1 ? "s" : ""} will lose this role and its permissions. This can't be undone.`
-              : "This role isn't assigned to anyone. This can't be undone."}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button variant="text" onClick={onConfirm} disabled={isPending} className="text-error">
-            {isPending ? "Deleting..." : "Delete role"}
-          </Button>
-        </DialogFooter>
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name="delete" />}>
+      <DialogTitle>Delete &ldquo;{roleName}&rdquo;?</DialogTitle>
+      <DialogContent>
+        <p>
+          {affectedUsers > 0
+            ? `${affectedUsers} member${affectedUsers !== 1 ? "s" : ""} will lose this role and its permissions. This can't be undone.`
+            : "This role isn't assigned to anyone. This can't be undone."}
+        </p>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>Cancel</Button>
+        <Button variant="text" onClick={onConfirm} disabled={isPending} className="text-error">
+          {isPending ? "Deleting..." : "Delete role"}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -268,20 +262,16 @@ function UnsavedChangesDialog({
   onStay: () => void; onSaveAndSwitch: () => void; onDiscard: () => void;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="warning">
-        <DialogHeader centered>
-          <DialogTitle>Unsaved Changes</DialogTitle>
-          <DialogDescription>
-            You have {changeCount} unsaved permission change{changeCount !== 1 ? "s" : ""} for {roleName}. Switching roles will discard them.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="text" onClick={onStay}>Stay</Button>
-          <Button variant="text" onClick={onSaveAndSwitch}>Save & Switch</Button>
-          <Button variant="text" className="text-error" onClick={onDiscard}>Discard</Button>
-        </DialogFooter>
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name="warning" />}>
+      <DialogTitle>Unsaved Changes</DialogTitle>
+      <DialogContent>
+        <p>You have {changeCount} unsaved permission change{changeCount !== 1 ? "s" : ""} for {roleName}. Switching roles will discard them.</p>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={onStay}>Stay</Button>
+        <Button variant="text" onClick={onSaveAndSwitch}>Save &amp; Switch</Button>
+        <Button variant="text" className="text-error" onClick={onDiscard}>Discard</Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -299,12 +289,10 @@ const SCOPE_GUIDE = [
 
 function ScopeGuideDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent icon="help" className="max-w-lg">
-        <DialogHeader centered>
-          <DialogTitle>Permission Scopes</DialogTitle>
-          <DialogDescription>Scopes control how far a permission reaches in your organization.</DialogDescription>
-        </DialogHeader>
+    <Dialog open={open} onOpenChange={onOpenChange} icon={<Icon name="help" />} className="max-w-lg">
+      <DialogTitle>Permission Scopes</DialogTitle>
+      <DialogContent>
+        <p className="mb-4">Scopes control how far a permission reaches in your organization.</p>
         <div className="divide-y divide-outline-variant">
           {SCOPE_GUIDE.map((item) => (
             <div key={item.scope} className="flex gap-3 py-3 first:pt-0 last:pb-0">
@@ -324,10 +312,10 @@ function ScopeGuideDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             <span className="font-medium">Tip:</span> For small teams, you only need 3 scopes: Own, Branch, and Company.
           </Typography>
         </div>
-        <DialogFooter>
-          <Button variant="text" onClick={() => onOpenChange(false)}>Got it</Button>
-        </DialogFooter>
       </DialogContent>
+      <DialogActions>
+        <Button variant="text" onClick={() => onOpenChange(false)}>Got it</Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -369,11 +357,10 @@ function PermissionMatrix({
           <Typography variant="label-medium" color="surface-variant-foreground" as="span" className="uppercase tracking-wide">
             {features.length} {features.length === 1 ? "feature" : "features"}
           </Typography>
-          <Tooltip content="What do the scopes mean?" side="right">
-            <IconButton variant="standard" size="xs" onClick={() => setShowScopeGuide(true)} aria-label="Scope guide">
-              <Icon name="help" size={16} />
-            </IconButton>
-          </Tooltip>
+          <TooltipTrigger placement="right">
+            <IconButton variant="standard" size="xs" onClick={() => setShowScopeGuide(true)} aria-label="Scope guide" icon={<Icon name="help" size={16} />} />
+            <Tooltip>What do the scopes mean?</Tooltip>
+          </TooltipTrigger>
         </div>
         <Button variant="text" onClick={allExpanded ? onCollapseAll : onExpandAll} className="text-xs h-8">
           {allExpanded ? "Collapse all" : "Expand all"}
@@ -411,9 +398,10 @@ function PermissionMatrix({
                     {!readOnly && (
                       <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low/50">
                         <Checkbox
-                          checked={assignedCount === feature.permissions.length && assignedCount > 0}
+                          selected={assignedCount === feature.permissions.length && assignedCount > 0}
                           indeterminate={assignedCount > 0 && assignedCount < feature.permissions.length}
-                          onCheckedChange={(c) => onSelectAll(feature, c === true)}
+                          onSelectedChange={(c) => onSelectAll(feature, c === true)}
+                          aria-label={`${assignedCount === feature.permissions.length ? "Deselect" : "Select"} all permissions for ${feature.displayName}`}
                         />
                         <Typography variant="body-small" color="surface-variant-foreground" as="span" className="font-medium">
                           {assignedCount === feature.permissions.length ? "Deselect all" : "Select all"}
@@ -426,7 +414,7 @@ function PermissionMatrix({
                       const scope = (localDraft.get(key) as Scope) ?? "OWN";
                       return (
                         <div key={fp.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-foreground/4 transition-colors">
-                          <Checkbox checked={isEnabled} disabled={readOnly} onCheckedChange={(c) => onToggle(feature.key, fp.key, c === true)} />
+                          <Checkbox selected={isEnabled} disabled={readOnly} onSelectedChange={(c) => onToggle(feature.key, fp.key, c === true)} aria-label={`Toggle ${fp.displayName}`} />
                           <Typography variant="body-medium" as="span" color={isEnabled ? "surface-foreground" : "surface-variant-foreground"} className="flex-1 min-w-0 truncate">
                             {fp.displayName}
                           </Typography>
@@ -643,25 +631,23 @@ export default function RolesPage() {
         {/* ── Left: role list ──────────────────────────────────────────── */}
         <div className="border-r border-outline-variant flex flex-col min-h-0">
           <div className="p-3 shrink-0 min-h-21 flex items-center border-b border-outline-variant">
-            <Search value={roleSearch} onValueChange={setRoleSearch} placeholder="Search roles..." className="min-w-0 w-full max-w-none mx-0" />
+            <SearchBar aria-label="Search" value={roleSearch} onChange={setRoleSearch} placeholder="Search roles..." className="min-w-0 w-full max-w-none mx-0" />
           </div>
           <div className="flex-1 overflow-y-auto">
-            <List className="py-0">
+            <List aria-label="List" className="py-0">
               {filteredRoles.map((role) => {
                 const isSelected = role.id === effectiveSelectedId;
                 return (
-                  <ListItem
+                  <ListItemWithClick
                     key={role.id}
-                    interactive
                     selected={isSelected}
-                    lines={2}
                     leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-surface-variant-foreground"} />}
-                    trailing={role.isSystem ? <Chip variant="filter" selected className="text-[11px] h-6 px-2">System</Chip> : undefined}
-                    supporting={role.description ?? undefined}
+                    trailing={role.isSystem ? <FilterChip defaultSelected className="text-[11px] h-6 px-2">System</FilterChip> : undefined}
+                    supportingText={role.description ?? undefined}
                     onClick={() => handleRoleSelect(role.id)}
                   >
                     {role.name}
-                  </ListItem>
+                  </ListItemWithClick>
                 );
               })}
             </List>
@@ -685,7 +671,7 @@ export default function RolesPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Typography variant="title-medium" className="truncate">{selectedRole.name}</Typography>
-                    {selectedRole.isSystem && <Chip variant="filter" selected className="shrink-0">System</Chip>}
+                    {selectedRole.isSystem && <FilterChip defaultSelected className="shrink-0">System</FilterChip>}
                   </div>
                   {selectedRole.description && (
                     <Typography variant="body-small" color="surface-variant-foreground" className="truncate">
@@ -696,7 +682,7 @@ export default function RolesPage() {
                 <div className="flex items-center gap-2 shrink-0 ml-4">
                   {isDirty ? (
                     <>
-                      <Chip variant="filter" selected className="shrink-0">{changeCount} unsaved</Chip>
+                      <FilterChip defaultSelected className="shrink-0">{changeCount} unsaved</FilterChip>
                       <Button variant="text" onClick={handleDiscard} disabled={bulkPermissionMutation.isPending}>Discard</Button>
                       <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending}>
                         <Icon name="save" size={18} />
@@ -705,18 +691,20 @@ export default function RolesPage() {
                     </>
                   ) : (
                     <>
-                      <Tooltip content="Duplicate this role" side="bottom">
+                      <TooltipTrigger placement="bottom">
                         <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
                           <Icon name="content_copy" size={18} />
                           Duplicate
                         </Button>
-                      </Tooltip>
-                      <Tooltip content="Delete this role" side="bottom">
+                        <Tooltip>Duplicate this role</Tooltip>
+                      </TooltipTrigger>
+                      <TooltipTrigger placement="bottom">
                         <Button variant="text" onClick={() => setShowDeleteDialog(true)} className="text-error">
                           <Icon name="delete" size={18} />
                           Delete
                         </Button>
-                      </Tooltip>
+                        <Tooltip>Delete this role</Tooltip>
+                      </TooltipTrigger>
                     </>
                   )}
                 </div>

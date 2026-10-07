@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { Card, CardContent, Icon, Typography } from "@vkieu/mui";
+import { Card } from "@vkieu/mui";
+import { CardContent } from "@/components/ui/card-content";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 
 export default function LandingPage() {
   return (
@@ -71,7 +74,7 @@ export default function LandingPage() {
 
             <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature) => (
-                <Card key={feature.title} variant="outlined" interactive>
+                <Card key={feature.title} variant="outlined">
                   <CardContent>
                     <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
                       <Icon name={feature.icon} size={24} className="text-primary-container-foreground" />

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon, IconButton, TextField, Typography } from "@vkieu/mui";
-import { Button } from "@vkieu/mui/buttons";
+import { IconButton, TextField, Button } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { useCompanyId } from "@/hooks/use-company";
 import { useAssistantChat, type AssistantMessage } from "@/services";
@@ -130,9 +131,8 @@ export function AssistantPanel() {
               variant="standard"
               onClick={() => setOpen(false)}
               aria-label="Close assistant"
-            >
-              <Icon name="close" size={20} />
-            </IconButton>
+              icon={<Icon name="close" size={20} />}
+            />
           </div>
 
           {/* Transcript */}
@@ -190,7 +190,7 @@ export function AssistantPanel() {
                 variant="outlined"
                 label="Message"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(value) => setInput(value)}
                 onKeyDown={onKeyDown}
                 disabled={chat.isPending}
               />

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Icon } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 // ─── Route label overrides ────────────────────────────────────────────────────

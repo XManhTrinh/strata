@@ -1,7 +1,15 @@
 "use client";
+import type React from "react";
 
 import { useEffect, useRef } from "react";
-import { Icon, Typography, Divider, List, ListItem } from "@vkieu/mui";
+import { Divider, List, ListItem } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
+import { Typography } from "@/components/ui/typography";
+
+// Legacy compatibility type for interactive ListItem
+// Legacy compatibility - TypeScript cast for interactive list items
+const ListItemWithClick = ListItem as unknown as (props: React.ComponentProps<typeof ListItem> & { onClick?: () => void; selected?: boolean; }) => React.ReactElement;
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,11 +76,10 @@ export default function ContextMenu({ x, y, target, onAction, onClose }: Context
         </Typography>
       </div>
       <Divider />
-      <List className="py-1">
+      <List aria-label="List" className="py-1">
         {actions.map((item) => (
-          <ListItem
+          <ListItemWithClick
             key={item.action}
-            interactive
             leading={<Icon name={item.icon} size={18} className="text-surface-variant-foreground" />}
             onClick={() => {
               onAction(item.action, targetId);
@@ -80,7 +87,7 @@ export default function ContextMenu({ x, y, target, onAction, onClose }: Context
             }}
           >
             {item.label}
-          </ListItem>
+          </ListItemWithClick>
         ))}
       </List>
     </div>
