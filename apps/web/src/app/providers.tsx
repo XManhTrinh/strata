@@ -47,7 +47,7 @@ export function Providers({ children }: { children: ReactNode }) {
         storage="cookie"
       >
         <SnackbarContext.Provider value={snackbarState}>
-          <SnackbarHost state={snackbarState} />
+          <SnackbarHost state={snackbarState} className="fixed inset-x-0 bottom-0 z-50" />
           {children}
         </SnackbarContext.Provider>
       </ThemeProvider>
