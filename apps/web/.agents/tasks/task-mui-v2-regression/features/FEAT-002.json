@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Bug 2: Move <Icon> out of Button children into leadingIcon/trailingIcon props, or convert icon-only Buttons to IconButton. 13 files affected. The new Button API puts icon-slot sizing and gap CSS on the leadingIcon/trailingIcon props, not on children. Independent from FEAT-001 and FEAT-003.",
+  "status": "completed",
+  "steps": [
+    "Read context.json at /Users/xuan-manh.trinh/workplace/web/strata/apps/web/.agents/tasks/task-mui-v2-regression/context.json and this FEAT file before touching any source. FEAT-001 must already be committed.",
+    "Rules: (a) Icon before label text → leadingIcon={<Icon name='...' />}. (b) Icon after label text → trailingIcon={<Icon name='...' />}. (c) Icon-only button (no text child at all) → <IconButton icon={<Icon name='...' />} .../>. (d) Drop size={N} from Icon when it goes into leadingIcon or trailingIcon — the button slot controls icon sizing. (e) Children must be text-only after the change.",
+    "app/(dashboard)/admin/settings/page.tsx L486: <Button ...disabled><Icon name='delete_forever' size={18} />Delete</Button> → add leadingIcon={<Icon name='delete_forever' />}, children='Delete', remove inline <Icon>.",
+    "app/(dashboard)/dashboard/page.tsx: (1) L179-183 Retry: add leadingIcon={<Icon name='refresh' />}, children='Retry', remove inline Icon. (2) L304 Add Member quick action: add leadingIcon={<Icon name='person_add' />}, children='Add Member', remove inline Icon, remove gap-3 from className. (3) L308 View Org Chart: leadingIcon account_tree, same. (4) L312 Submit Leave: leadingIcon event_available, same. (5) L316 Generate Report: leadingIcon description, same. (6) L323 New Request (filled): leadingIcon add, same.",
+    "app/(dashboard)/admin/org-structure/page.tsx: (1) L224 EmptyState Create Unit: leadingIcon={<Icon name='add' />}, children='Create Unit'. (2) L486 Header Create Unit: same fix.",
+    "app/(dashboard)/admin/org-unit-types/page.tsx: (1) L118 EmptyState Create Type: leadingIcon={<Icon name='add' />}, children='Create Type'. (2) L515 Header Create Type: same fix, keep className='shrink-0'.",
+    "app/(dashboard)/admin/positions/page.tsx: (1) L151 EmptyState Create Position: leadingIcon={<Icon name='add' />}, children='Create Position'. (2) L703 Add Level: leadingIcon={<Icon name='trending_up' />}, children='Add Level'. (3) L707 Create Position: leadingIcon={<Icon name='add' />}, children='Create Position'.",
+    "app/(dashboard)/admin/roles/page.tsx: (1) L115 Add Admin: leadingIcon={<Icon name='shield_person' />}, children={isAddingAdmin ? 'Adding…' : 'Add Admin'}. (2) L120 Create Role: leadingIcon={<Icon name='add' />}, children='Create Role'. (3) L189 EmptyState Create first role: leadingIcon={<Icon name='add' />}, children='Create your first role'. (4) L687 Save: leadingIcon={<Icon name='save' />}, children={bulkPermissionMutation.isPending ? 'Saving...' : 'Save'}. (5) L695 Duplicate: leadingIcon={<Icon name='content_copy' />}, children='Duplicate'. (6) L702 Delete: leadingIcon={<Icon name='delete' />}, children='Delete'.",
+    "app/(dashboard)/admin/features/page.tsx L184: Icon is AFTER label text ('Details'/'Hide') so it is trailingIcon. Change to trailingIcon={<Icon name={isExpanded ? 'expand_less' : 'expand_more'} />}, children={isExpanded ? 'Hide' : 'Details'}, remove gap-1 from className.",
+    "app/(dashboard)/people/page.tsx: (1) L527 Export: leadingIcon download. (2) L532 Delete All: leadingIcon delete_sweep. (3) L535 Add Member: leadingIcon person_add. (4) L570-572 Delete View (icon-only, inside TooltipTrigger): convert to <IconButton variant='standard' size='xs' className='text-error' icon={<Icon name='delete' />} onClick={() => handleDeleteView(selectedViewId)} aria-label='Delete view' />. (5) L578 Save View: leadingIcon save. (6) L587 Columns: leadingIcon view_column. (7) L671 Import in Settings (inside Link): leadingIcon upload. (8) L675 Add Member (empty): leadingIcon person_add. (9) L691 Assign Role batch: leadingIcon shield. (10) L726 table row edit (icon-only): convert to IconButton with icon=edit, keep aria-label, keep onClick. (11) L729 table row delete (icon-only): IconButton with icon=delete, className='text-error hover:text-error'. (12) L755 mobile edit (icon-only): same as L726. (13) L758 mobile delete (icon-only): same as L729. (14) L774 Previous (icon before text): leadingIcon chevron_left, children='Previous'. (15) L777 Next (icon after text): trailingIcon chevron_right, children='Next'. Add IconButton to the @vkieu/mui import if not already present.",
+    "app/(dashboard)/finance/rate-cards/page.tsx: (1) L545 Card: leadingIcon add size=16→drop size. (2) L568 Apply: leadingIcon playlist_add_check. (3) L631 Quick Demo Digital: leadingIcon bolt. (4) L635 Quick Demo Consumer: leadingIcon bolt. (5) L639 New tab header: leadingIcon add. (6) L643 New rate card header: leadingIcon add. (7) L665 Apply to matching members toolbar: leadingIcon playlist_add_check. (8) L691 New tab empty: leadingIcon add. (9) L695 New rate card empty: leadingIcon add. (10) L730 Group: leadingIcon create_new_folder.",
+    "features/calendar/CalendarView.tsx: (1) L233 New Event: leadingIcon={<Icon name='event' />}, children='New Event'. (2) L237 Request Leave: leadingIcon={<Icon name='event_available' />}, children='Request Leave'.",
+    "components/import/csv-import-dialog.tsx: (1) L364 trigger Import CSV: leadingIcon={<Icon name='upload' />}, children='Import CSV'. (2) L440 Review Import: leadingIcon={<Icon name='arrow_forward' />}, children='Review Import'. (3) L447 Back: leadingIcon={<Icon name='arrow_back' />}, children='Back'. (4) L450 Import N Records: leadingIcon={<Icon name='upload' />}, children={`Import ${importPreview?.rows.length ?? 0} Records`}.",
+    "components/assistant/assistant-panel.tsx L198-203: send button is icon-only → <IconButton icon={<Icon name='send' />} type='button' onClick={send} disabled={chat.isPending || !input.trim()} aria-label='Send message' />. Remove Button from the @vkieu/mui import (IconButton is already imported).",
+    "Run tsc --noEmit -p apps/web/tsconfig.json from workspace root. Fix any type errors. Then run pnpm --filter @strata/web build.",
+    "Update this FEAT's status to 'completed' in FEAT-002.json and record findings. Commit locally with message 'fix(ui): move Button icons to leadingIcon/trailingIcon, icon-only to IconButton (FEAT-002)'."
+  ],
+  "acceptance_criteria": [
+    "No <Button> component has a <Icon> as a direct child anywhere in the codebase.",
+    "Every icon-only Button (single <Icon> child, no text) has been converted to <IconButton>.",
+    "Every Button with icon + text uses leadingIcon or trailingIcon prop with no size prop on the Icon.",
+    "tsc --noEmit exits 0.",
+    "pnpm --filter @strata/web build exits 0."
+  ],
+  "verification": [
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && tsc --noEmit -p apps/web/tsconfig.json — must exit 0",
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && pnpm --filter @strata/web build — must exit 0"
+  ],
+  "blocked_reason": null,
+  "findings": "All 13 files updated. Icon children moved out of Button into leadingIcon/trailingIcon props; icon-only Buttons in people/page.tsx and assistant-panel.tsx converted to IconButton. IconButton added to @vkieu/mui import in people/page.tsx; Button removed from assistant-panel.tsx import. tsc --noEmit and pnpm build both exit 0."
+}
