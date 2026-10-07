@@ -1,0 +1,24 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Local polyfills: create 4 new component files to replace removed @vkieu/mui exports: icon.tsx, typography.tsx, select.tsx, card-content.tsx. Independent of FEAT-003 but FEAT-003 depends on these existing.",
+  "status": "completed",
+  "steps": [
+    "1. Create /Users/xuan-manh.trinh/workplace/web/strata/apps/web/src/components/ui/icon.tsx: port verbatim from /Users/xuan-manh.trinh/workplace/web/strata/apps/web/.agents/tasks/mui-upgrade/old-sources/icon.tsx. Change only the cn() import from './lib/utils' → '@/lib/utils'. Keep all props: name, size, filled, weight, grade, opticalSize, className. Keep aria-hidden='true' and material-symbols-rounded span.",
+    "2. Create /Users/xuan-manh.trinh/workplace/web/strata/apps/web/src/components/ui/typography.tsx: port from /Users/xuan-manh.trinh/workplace/web/strata/apps/web/.agents/tasks/mui-upgrade/old-sources/typography.tsx. Change cn() import to '@/lib/utils'. Keep cva from class-variance-authority (dep still present). Keep Slot from @radix-ui/react-slot (dep still present). Update the color variant class names to use new token names: 'text-surface-foreground' → 'text-on-surface', 'text-surface-variant-foreground' → 'text-on-surface-variant', 'text-primary-container-foreground' → 'text-on-primary-container', 'text-secondary-container-foreground' → 'text-on-secondary-container', 'text-tertiary-container-foreground' → 'text-on-tertiary-container'. Update defaultVariants color key from 'surface-foreground' → 'on-surface' (rename the key to match the new token). Export Typography, typographyVariants, ELEMENT_MAP, and all types.",
+    "3. Create /Users/xuan-manh.trinh/workplace/web/strata/apps/web/src/components/ui/select.tsx: port from /Users/xuan-manh.trinh/workplace/web/strata/apps/web/.agents/tasks/mui-upgrade/old-sources/select.tsx. Change imports: './lib/utils' → '@/lib/utils', './icon' → '@/components/ui/icon'. Replace all inline hsl(var(--xxx)) CSS variable references with their new equivalents: 'hsl(var(--on-surface)/N)' → use Tailwind class 'bg-on-surface/[N*100]' pattern or 'hsl(var(--md-sys-color-on-surface)/N)'. Specifically: 'hsl(var(--on-surface)/0.08)' → move to Tailwind class 'hover:bg-on-surface/8 focus:bg-on-surface/8'; 'hsl(var(--primary))' → class 'text-primary'; 'hsl(var(--error))' → class 'text-error'; 'hsl(var(--on-surface-variant))' → class 'text-on-surface-variant' or 'var(--md-sys-color-on-surface-variant)' in inline style; 'hsl(var(--outline))' → class 'border-outline'; shadow with var(--elevation-2) → class 'shadow-elevation-2' or 'shadow-md'. Surface bg classes (bg-surface-container-highest, bg-surface-container-high, bg-surface-container) are UNCHANGED. Export Select, SelectOption, SelectProps.",
+    "4. Create /Users/xuan-manh.trinh/workplace/web/strata/apps/web/src/components/ui/card-content.tsx: port the sub-components only (NOT Card or cardVariants) from /Users/xuan-manh.trinh/workplace/web/strata/apps/web/.agents/tasks/mui-upgrade/old-sources/card.tsx. Include: CardHeader, CardTitle, CardDescription, CardContent, CardFooter. Change cn() import to '@/lib/utils'. Update class names: 'text-surface-foreground' → 'text-on-surface', 'text-surface-variant-foreground' → 'text-on-surface-variant'. Keep all forwardRef patterns. Export all 5 components."
+  ],
+  "acceptance_criteria": [
+    "All 4 files exist at the specified paths",
+    "Each file exports the expected named exports (Icon, Typography, Select/SelectOption, CardHeader/CardTitle/CardDescription/CardContent/CardFooter)",
+    "tsc --noEmit passes (no type errors in the new files)",
+    "pnpm --filter @strata/web build exits 0"
+  ],
+  "verification": [
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && tsc --noEmit -p apps/web/tsconfig.json",
+    "cd /Users/xuan-manh.trinh/workplace/web/strata && pnpm --filter @strata/web build"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
