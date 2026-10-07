@@ -1,0 +1,4 @@
+{
+  "verdict": "PENDING_REVIEW",
+  "fixer_notes": "Integration pass (iteration 1). Verified: `npx tsc --noEmit -p apps/web/tsconfig.json` → exit 0, no type errors. `pnpm --filter @strata/web build` → exit 0, all 22 routes generated successfully (Next.js 16.3.0 Turbopack). Spot-checks: (1) No files import from `@/lib/theme` ThemeContext, `@mui/material`, or banned `@vkieu/mui` subpaths. (2) `ThemeProvider`, `useTheme`, `SnackbarHost` are correctly sourced from `@vkieu/mui` in providers.tsx. (3) `useSnackbar` is provided by `@/lib/snackbar` (not from @vkieu/mui). (4) Local polyfills (Icon, Typography, Select, CardContent family) exist in `components/ui/`. (5) All 4 FEAT commits (foundation, polyfills, 55-file component migration, steering docs) are present on main. No seam issues found between FEATs."
+}
