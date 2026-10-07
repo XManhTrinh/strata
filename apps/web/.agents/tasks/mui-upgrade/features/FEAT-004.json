@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "docs",
   "description": "Update the Strata development conventions steering file to reflect the new @vkieu/mui API: new CSS import, new theme system, new component names, local polyfill locations, updated dark mode mechanism. Independent of FEATs 001-003 but should run last for accuracy.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "1. Open /Users/xuan-manh.trinh/workplace/web/strata/.kiro/steering/development.md and update the following sections:",
 

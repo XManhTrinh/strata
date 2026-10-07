@@ -31,22 +31,43 @@ You are a world-class engineer. Write **production-ready, clean, component-based
 
 ## Component Hierarchy — What to Use
 
-1. **`@vkieu/mui`** — first choice for all standard UI: `Button`, `IconButton`, `Icon`, `Typography`, `Card`, `CardContent`, `CardHeader`, `CardTitle`, `Dialog`, `Select`, `TextField`, `Checkbox`, `Chip`, `Search`, `Divider`, `List`, `ListItem`, `Menu`, `MenuItem`, `Tooltip`, `Badge`, `NavigationRail`, `NavigationBar`, `Table`, `AppBar`, `PageBar`, `SideSheet`, `SnackbarProvider`, `LinearProgress`, etc. Import from `@vkieu/mui`, `@vkieu/mui/buttons`, or `@vkieu/mui/navigation`.
+1. **`@vkieu/mui`** — first choice for all standard UI: `Button`, `IconButton`, `Card`, `Dialog`, `TextField`, `Checkbox`, `AssistChip`, `FilterChip`, `InputChip`, `SuggestionChip`, `SearchBar`, `Divider`, `List`, `ListItem`, `Menu`, `MenuItem`, `Tooltip`, `Badge`, `NavigationRail`, `NavigationBar`, `Table`, `TopAppBar`, `SideSheet`, `SnackbarHost`, `LinearProgressIndicator`, `CircularProgressIndicator`, etc. Import everything from `@vkieu/mui` — subpath imports (`@vkieu/mui/buttons`, `@vkieu/mui/navigation`) no longer exist.
 2. **`@strata/ui`** — shared components that extend beyond MUI: `DataTable`, `SearchInput`, `StatCard`, `Badge`, `Avatar`, `ProgressBar`, `Toast`, `Skeleton`, `EmptyState`, `Drawer`, `ConfirmDialog`.
 3. **Radix UI** — headless primitives when `@vkieu/mui` doesn't cover the pattern (e.g., `Popover`, `DropdownMenu`, `Tabs`).
-4. **Local `components/ui/`** — app-specific UI components that don't belong in the shared package.
+4. **Local `components/ui/`** — app-specific UI components that don't belong in the shared package. See **Local UI Polyfills** below.
 
 **Never install `@mui/material` or any `@mui/*` package.** The project uses `@vkieu/mui` exclusively.
 
 ## Theming
 
-- Theme tokens come from CSS custom properties defined in `@vkieu/mui/theme.css` and the active theme file (e.g., `theme-facebook.css`).
-- **Do NOT introduce shadcn/ui theming, CSS-in-JS, or a separate ThemeProvider.** The MUI fork handles theming via CSS variables consumed by Tailwind.
-- Use semantic Tailwind token classes: `bg-card`, `text-foreground`, `text-muted-foreground`, `bg-surface-variant`, `text-on-surface-variant`, `border-border`, `bg-secondary`, `ring-background`, `ring-ring`, `p-card`.
-- Dark mode is handled via `darkMode: "class"` — use `dark:` prefix when token classes don't auto-adapt.
-- Light/dark/system toggling is managed by `ThemeContext` in `@/lib/theme.ts`. Use `useTheme()` hook.
+- CSS tokens come from `@vkieu/mui/styles.css` — import it once in `globals.css`.
+- Theming is managed by `ThemeProvider` from `@vkieu/mui` in `providers.tsx`. The facebook brand theme is registered via `createTheme({ name: 'facebook', seed: '#1877F2' })`.
+- Dark mode is driven by the `data-mode="dark"` attribute set by `ThemeProvider`. The `dark:` Tailwind prefix responds to `[data-mode='dark']` as configured in `@vkieu/mui/styles.css` utilities — **not** via `darkMode: "class"`.
+- Use `useTheme()` from `@vkieu/mui` (not `@/lib/theme`) to read/set theme and mode. The hook returns `{ theme, mode, resolvedMode, setTheme, setMode, setContrast, ... }`.
+- Use semantic Tailwind token classes: `bg-card`, `text-foreground`, `bg-surface-variant`, `text-on-surface`, `text-on-surface-variant`, `text-on-primary-container`, `border-border`, `bg-secondary`, `ring-background`, `ring-ring`, `p-card`.
+- **Do NOT use `ThemeContext` from `@/lib/theme`.** **Do NOT use `darkMode: "class"` in Tailwind config.** **Do NOT introduce shadcn/ui theming or CSS-in-JS.**
 
-## Component Authoring Rules
+## Local UI Polyfills
+
+These components were removed from `@vkieu/mui` and are provided as local polyfills that match M3 token class names:
+
+| Component(s) | Import from |
+|---|---|
+| `Icon` | `@/components/ui/icon` |
+| `Typography` | `@/components/ui/typography` |
+| `Select` | `@/components/ui/select` |
+| `CardContent`, `CardHeader`, `CardTitle`, `CardFooter`, `CardDescription` | `@/components/ui/card-content` |
+
+All polyfills use the same M3 CSS variable token names as the new `@vkieu/mui` CSS variables.
+
+## Snackbar
+
+- Snackbar state is managed via `useSnackbar()` from `@/lib/snackbar` — **not** from `@vkieu/mui`.
+- Show a snackbar by calling `snackbar.showSnackbar({ message, duration: 'short' | 'long' | 'indefinite', withDismissAction: boolean })`.
+- `SnackbarHost` (from `@vkieu/mui`) is rendered once in `providers.tsx`.
+- For simple toast-style notifications use the convenience wrapper `useToast()` from `@/hooks/use-toast`.
+
+
 
 ### Structure
 - Add `"use client"` directive at the top for any component with state, effects, event handlers, or browser APIs.
@@ -136,3 +157,6 @@ App-wide custom hooks shared across features.
 - Do NOT hardcode colors — use semantic token classes.
 - Do NOT skip `"use client"` on interactive components.
 - Do NOT use `!important` in Tailwind (the `!` suffix) unless overriding third-party styles.
+- Do NOT import from `@vkieu/mui/buttons` or `@vkieu/mui/navigation` — these subpaths no longer exist; import everything from `@vkieu/mui`.
+- Do NOT use `ThemeContext` from `@/lib/theme` — use `useTheme()` from `@vkieu/mui` instead.
+- Do NOT use `SnackbarProvider` or `useSnackbar` from `@vkieu/mui` — use `SnackbarHost` + `useSnackbar()` from `@/lib/snackbar`.
