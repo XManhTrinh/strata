@@ -39,6 +39,7 @@ import {
   Checkbox,
   Divider,
   Button,
+  IconButton,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
@@ -524,17 +525,11 @@ export default function PeoplePage() {
         actions={
           <div className="flex items-center gap-2">
             <TooltipTrigger placement="bottom">
-              <Button variant="tonal" onClick={handleExport}>
-                <Icon name="download" size={18} />Export
-              </Button>
+              <Button variant="tonal" onClick={handleExport} leadingIcon={<Icon name="download" />}>Export</Button>
               <Tooltip>Export visible columns to CSV</Tooltip>
             </TooltipTrigger>
-            <Button variant="tonal" className="text-error" onClick={() => setShowDeleteAllDialog(true)}>
-              <Icon name="delete_sweep" size={18} />Delete All
-            </Button>
-            <Button onClick={openAdd}>
-              <Icon name="person_add" size={18} />Add Member
-            </Button>
+            <Button variant="tonal" className="text-error" onClick={() => setShowDeleteAllDialog(true)} leadingIcon={<Icon name="delete_sweep" />}>Delete All</Button>
+            <Button onClick={openAdd} leadingIcon={<Icon name="person_add" />}>Add Member</Button>
           </div>
         }
       />
@@ -567,26 +562,20 @@ export default function PeoplePage() {
 
           {selectedViewId && (
             <TooltipTrigger placement="top">
-              <Button variant="text" size="xs" className="rounded-full text-error" onClick={() => handleDeleteView(selectedViewId)}>
-                <Icon name="delete" size={18} />
-              </Button>
+              <IconButton variant="standard" size="xs" className="text-error" icon={<Icon name="delete" />} onClick={() => handleDeleteView(selectedViewId)} aria-label="Delete view" />
               <Tooltip>Delete this view</Tooltip>
             </TooltipTrigger>
           )}
 
           <TooltipTrigger placement="top">
-            <Button variant="tonal" size="xs" onClick={() => setShowSaveViewDialog(true)}>
-              <Icon name="save" size={18} />Save View
-            </Button>
+            <Button variant="tonal" size="xs" onClick={() => setShowSaveViewDialog(true)} leadingIcon={<Icon name="save" />}>Save View</Button>
             <Tooltip>Save current column selection as a view</Tooltip>
           </TooltipTrigger>
 
           {/* Column Visibility */}
           <div className="relative">
             <TooltipTrigger placement="top">
-              <Button variant="tonal" size="xs" onClick={() => setShowColumnToggle((v) => !v)}>
-                <Icon name="view_column" size={18} />Columns
-              </Button>
+              <Button variant="tonal" size="xs" onClick={() => setShowColumnToggle((v) => !v)} leadingIcon={<Icon name="view_column" />}>Columns</Button>
               <Tooltip>Toggle columns</Tooltip>
             </TooltipTrigger>
 
@@ -668,13 +657,9 @@ export default function PeoplePage() {
             </Typography>
             <div className="flex gap-3">
               <Link href="/admin/settings">
-                <Button variant="tonal">
-                  <Icon name="upload" size={18} />Import in Settings
-                </Button>
+                <Button variant="tonal" leadingIcon={<Icon name="upload" />}>Import in Settings</Button>
               </Link>
-              <Button onClick={openAdd}>
-                <Icon name="person_add" size={18} />Add Member
-              </Button>
+              <Button onClick={openAdd} leadingIcon={<Icon name="person_add" />}>Add Member</Button>
             </div>
           </CardContent>
         </Card>
@@ -688,9 +673,7 @@ export default function PeoplePage() {
             <Card variant="elevated" className="hidden md:block">
               <CardContent className="flex items-center gap-4 p-3">
                 <FilterChip defaultSelected>{selectedIds.size} selected</FilterChip>
-                <Button variant="tonal" onClick={() => setShowBatchRoleDialog(true)}>
-                  <Icon name="shield" size={18} />Assign Role
-                </Button>
+                <Button variant="tonal" onClick={() => setShowBatchRoleDialog(true)} leadingIcon={<Icon name="shield" />}>Assign Role</Button>
                 <Button variant="text" onClick={() => setSelectedIds(new Set())}>Clear selection</Button>
               </CardContent>
             </Card>
@@ -723,12 +706,8 @@ export default function PeoplePage() {
                       {visibleColumns.map((col) => <TableCell key={col.key}>{renderCell(person, col.key)}</TableCell>)}
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="text" size="xs" className="rounded-full" onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`}>
-                            <Icon name="edit" size={18} />
-                          </Button>
-                          <Button variant="text" size="xs" className="rounded-full text-error hover:text-error" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
-                            <Icon name="delete" size={18} />
-                          </Button>
+                          <IconButton variant="standard" size="xs" icon={<Icon name="edit" />} onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`} />
+                          <IconButton variant="standard" size="xs" className="text-error hover:text-error" icon={<Icon name="delete" />} onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`} />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -752,12 +731,8 @@ export default function PeoplePage() {
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="text" size="xs" className="rounded-full" onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`}>
-                      <Icon name="edit" size={18} />
-                    </Button>
-                    <Button variant="text" size="xs" className="rounded-full text-error hover:text-error" onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`}>
-                      <Icon name="delete" size={18} />
-                    </Button>
+                    <IconButton variant="standard" size="xs" icon={<Icon name="edit" />} onClick={() => openEdit(person)} aria-label={`Edit ${person.fullName}`} />
+                    <IconButton variant="standard" size="xs" className="text-error hover:text-error" icon={<Icon name="delete" />} onClick={() => setDeleteId(person.id)} aria-label={`Delete ${person.fullName}`} />
                   </div>
                 </CardContent>
               </Card>
@@ -771,12 +746,8 @@ export default function PeoplePage() {
                 Page {page} of {totalPages} · {data?.total ?? 0} total
               </Typography>
               <div className="flex gap-2">
-                <Button variant="outlined" size="xs" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                  <Icon name="chevron_left" size={18} />Previous
-                </Button>
-                <Button variant="outlined" size="xs" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
-                  Next<Icon name="chevron_right" size={18} />
-                </Button>
+                <Button variant="outlined" size="xs" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} leadingIcon={<Icon name="chevron_left" />}>Previous</Button>
+                <Button variant="outlined" size="xs" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} trailingIcon={<Icon name="chevron_right" />}>Next</Button>
               </div>
             </div>
           )}

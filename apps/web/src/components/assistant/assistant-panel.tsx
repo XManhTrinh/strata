@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { IconButton, TextField, Button } from "@vkieu/mui";
+import { IconButton, TextField } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
@@ -196,14 +196,13 @@ export function AssistantPanel() {
                 disabled={chat.isPending}
               />
             </div>
-            <Button
+            <IconButton
+              icon={<Icon name="send" />}
               type="button"
               onClick={send}
               disabled={chat.isPending || !input.trim()}
               aria-label="Send message"
-            >
-              <Icon name="send" size={18} />
-            </Button>
+            />
           </div>
         </div>
       )}

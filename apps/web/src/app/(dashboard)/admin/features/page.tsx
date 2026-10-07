@@ -184,10 +184,10 @@ function FeatureCard({
           <Button
             variant="text"
             onClick={onExpand}
-            className="text-xs h-8 gap-1"
+            className="text-xs h-8"
+            trailingIcon={<Icon name={isExpanded ? "expand_less" : "expand_more"} />}
           >
             {isExpanded ? "Hide" : "Details"}
-            <Icon name={isExpanded ? "expand_less" : "expand_more"} size={16} />
           </Button>
         </div>
 

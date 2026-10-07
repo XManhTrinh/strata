@@ -486,7 +486,7 @@ export default function SettingsPage() {
                       </div>
                     }
                     supportingText="Permanently delete this workspace and all its data."
-                    trailing={<Button variant="outlined" className="text-error border-error/30" disabled><Icon name="delete_forever" size={18} />Delete</Button>}
+                    trailing={<Button variant="outlined" className="text-error border-error/30" disabled leadingIcon={<Icon name="delete_forever" />}>Delete</Button>}
                   >
                     Delete Workspace
                   </ListItem>

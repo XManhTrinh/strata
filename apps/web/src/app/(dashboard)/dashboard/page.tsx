@@ -178,13 +178,13 @@ export default function DashboardPage() {
             </Typography>
             <Button
               variant="filled"
+              leadingIcon={<Icon name="refresh" />}
               onClick={() => {
                 refetchEmployees();
                 refetchLeave();
                 refetchEvents();
               }}
             >
-              <Icon name="refresh" size={18} />
               Retry
             </Button>
           </CardContent>
@@ -301,27 +301,22 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-0">
-              <Button variant="tonal" className="w-full justify-start gap-3">
-                <Icon name="person_add" size={20} />
+              <Button variant="tonal" className="w-full justify-start" leadingIcon={<Icon name="person_add" />}>
                 Add Member
               </Button>
-              <Button variant="tonal" className="w-full justify-start gap-3">
-                <Icon name="account_tree" size={20} />
+              <Button variant="tonal" className="w-full justify-start" leadingIcon={<Icon name="account_tree" />}>
                 View Org Chart
               </Button>
-              <Button variant="tonal" className="w-full justify-start gap-3">
-                <Icon name="event_available" size={20} />
+              <Button variant="tonal" className="w-full justify-start" leadingIcon={<Icon name="event_available" />}>
                 Submit Leave
               </Button>
-              <Button variant="tonal" className="w-full justify-start gap-3">
-                <Icon name="description" size={20} />
+              <Button variant="tonal" className="w-full justify-start" leadingIcon={<Icon name="description" />}>
                 Generate Report
               </Button>
 
               <Divider className="my-2" />
 
-              <Button variant="filled" className="w-full justify-start gap-3">
-                <Icon name="add" size={20} />
+              <Button variant="filled" className="w-full justify-start" leadingIcon={<Icon name="add" />}>
                 New Request
               </Button>
             </CardContent>

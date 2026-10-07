@@ -542,8 +542,7 @@ export default function RateCardsPage() {
           <div className="flex-1" />
           {group && (
             <>
-              <Button variant="text" size="xs" onClick={() => openCreate(group.id)}>
-                <Icon name="add" size={16} />
+              <Button variant="text" size="xs" onClick={() => openCreate(group.id)} leadingIcon={<Icon name="add" />}>
                 Card
               </Button>
               <button
@@ -565,8 +564,7 @@ export default function RateCardsPage() {
             </>
           )}
           {ids.length > 0 && (
-            <Button variant="text" size="xs" onClick={() => handleApply(ids)} disabled={applyCards.isPending}>
-              <Icon name="playlist_add_check" size={16} />
+            <Button variant="text" size="xs" onClick={() => handleApply(ids)} disabled={applyCards.isPending} leadingIcon={<Icon name="playlist_add_check" />}>
               Apply
             </Button>
           )}
@@ -628,20 +626,16 @@ export default function RateCardsPage() {
         subtitle="Organize rate cards into tabs and groups, define condition-based rates, then apply to matching members."
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending}>
-              <Icon name="bolt" size={18} />
+            <Button variant="text" onClick={handleSeedDemo} disabled={seedDemo.isPending} leadingIcon={<Icon name="bolt" />}>
               {seedDemo.isPending ? "Adding…" : "Quick Demo Digital"}
             </Button>
-            <Button variant="text" onClick={handleSeedDemoConsumer} disabled={seedDemoConsumer.isPending}>
-              <Icon name="bolt" size={18} />
+            <Button variant="text" onClick={handleSeedDemoConsumer} disabled={seedDemoConsumer.isPending} leadingIcon={<Icon name="bolt" />}>
               {seedDemoConsumer.isPending ? "Adding…" : "Quick Demo Consumer"}
             </Button>
-            <Button variant="tonal" onClick={openCreateSet}>
-              <Icon name="add" size={18} />
+            <Button variant="tonal" onClick={openCreateSet} leadingIcon={<Icon name="add" />}>
               New tab
             </Button>
-            <Button onClick={() => openCreate(null)}>
-              <Icon name="add" size={18} />
+            <Button onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
               New rate card
             </Button>
           </div>
@@ -666,8 +660,8 @@ export default function RateCardsPage() {
             variant="tonal"
             onClick={() => handleApply(Array.from(selected))}
             disabled={selected.size === 0 || applyCards.isPending}
+            leadingIcon={<Icon name="playlist_add_check" />}
           >
-            <Icon name="playlist_add_check" size={18} />
             {applyCards.isPending ? "Applying…" : "Apply to matching members"}
           </Button>
         </div>
@@ -688,12 +682,10 @@ export default function RateCardsPage() {
               Create a tab (e.g. &ldquo;Digital&rdquo;), add groups inside it, then create rate cards.
             </Typography>
             <div className="flex items-center gap-2">
-              <Button variant="tonal" onClick={openCreateSet}>
-                <Icon name="add" size={18} />
+              <Button variant="tonal" onClick={openCreateSet} leadingIcon={<Icon name="add" />}>
                 New tab
               </Button>
-              <Button onClick={() => openCreate(null)}>
-                <Icon name="add" size={18} />
+              <Button onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
                 New rate card
               </Button>
             </div>
@@ -727,8 +719,7 @@ export default function RateCardsPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="text" size="xs" onClick={() => openCreateGroup(t.set?.id ?? null)}>
-                    <Icon name="create_new_folder" size={16} />
+                  <Button variant="text" size="xs" onClick={() => openCreateGroup(t.set?.id ?? null)} leadingIcon={<Icon name="create_new_folder" />}>
                     Group
                   </Button>
                   {t.set && (

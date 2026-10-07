@@ -115,8 +115,7 @@ function EmptyState({
           : "Create your first organization unit type to start building your hierarchy."}
       </p>
       {!hasSearch && (
-        <Button onClick={onCreateClick}>
-          <Icon name="add" size={18} />
+        <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
           Create Type
         </Button>
       )}
@@ -514,8 +513,7 @@ export default function OrgUnitTypesPage() {
         title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Organization Unit Types</h1>}
         subtitle="Define the types of organizational units used in your company structure."
         actions={
-          <Button onClick={openCreate} className="shrink-0">
-            <Icon name="add" size={18} />
+          <Button onClick={openCreate} className="shrink-0" leadingIcon={<Icon name="add" />}>
             Create Type
           </Button>
         }

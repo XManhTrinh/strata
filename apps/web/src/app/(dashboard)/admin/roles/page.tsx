@@ -112,13 +112,11 @@ function PageHeader({
       actions={
         <div className="flex items-center gap-2 shrink-0">
           {showAddAdmin && (
-            <Button variant="tonal" onClick={onAddAdmin} disabled={isAddingAdmin}>
-              <Icon name="shield_person" size={18} />
+            <Button variant="tonal" onClick={onAddAdmin} disabled={isAddingAdmin} leadingIcon={<Icon name="shield_person" />}>
               {isAddingAdmin ? "Adding…" : "Add Admin"}
             </Button>
           )}
-          <Button onClick={onCreateClick}>
-            <Icon name="add" size={18} />
+          <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
             Create Role
           </Button>
         </div>
@@ -186,8 +184,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
           Create your first role to start managing permissions.
         </Typography>
-        <Button onClick={onCreateClick}>
-          <Icon name="add" size={18} />
+        <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
           Create your first role
         </Button>
       </div>
@@ -684,23 +681,20 @@ export default function RolesPage() {
                     <>
                       <FilterChip defaultSelected className="shrink-0">{changeCount} unsaved</FilterChip>
                       <Button variant="text" onClick={handleDiscard} disabled={bulkPermissionMutation.isPending}>Discard</Button>
-                      <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending}>
-                        <Icon name="save" size={18} />
+                      <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending} leadingIcon={<Icon name="save" />}>
                         {bulkPermissionMutation.isPending ? "Saving..." : "Save"}
                       </Button>
                     </>
                   ) : (
                     <>
                       <TooltipTrigger placement="bottom">
-                        <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending}>
-                          <Icon name="content_copy" size={18} />
+                        <Button variant="tonal" onClick={handleDuplicateRole} disabled={createRoleMutation.isPending} leadingIcon={<Icon name="content_copy" />}>
                           Duplicate
                         </Button>
                         <Tooltip>Duplicate this role</Tooltip>
                       </TooltipTrigger>
                       <TooltipTrigger placement="bottom">
-                        <Button variant="text" onClick={() => setShowDeleteDialog(true)} className="text-error">
-                          <Icon name="delete" size={18} />
+                        <Button variant="text" onClick={() => setShowDeleteDialog(true)} className="text-error" leadingIcon={<Icon name="delete" />}>
                           Delete
                         </Button>
                         <Tooltip>Delete this role</Tooltip>

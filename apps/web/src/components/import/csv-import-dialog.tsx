@@ -361,8 +361,7 @@ export function CsvImportDialog({ companyId }: CsvImportDialogProps) {
       />
 
       {/* Trigger button */}
-      <Button variant="filled" onClick={() => fileInputRef.current?.click()}>
-        <Icon name="upload" size={18} />
+      <Button variant="filled" onClick={() => fileInputRef.current?.click()} leadingIcon={<Icon name="upload" />}>
         Import CSV
       </Button>
 
@@ -437,22 +436,18 @@ export function CsvImportDialog({ companyId }: CsvImportDialogProps) {
           {importStep === "mapping" && (
             <>
               <Button variant="text" onClick={reset}>Cancel</Button>
-              <Button variant="filled" onClick={handleMappingNext} disabled={mappingErrors.length > 0}>
-                <Icon name="arrow_forward" size={18} />Review Import
-              </Button>
+              <Button variant="filled" onClick={handleMappingNext} disabled={mappingErrors.length > 0} leadingIcon={<Icon name="arrow_forward" />}>Review Import</Button>
             </>
           )}
           {importStep === "preview" && (
             <>
-              <Button variant="text" onClick={() => setImportStep("mapping")}>
-                <Icon name="arrow_back" size={18} />Back
-              </Button>
+              <Button variant="text" onClick={() => setImportStep("mapping")} leadingIcon={<Icon name="arrow_back" />}>Back</Button>
               <Button
                 variant="filled"
                 onClick={handleImportConfirm}
                 disabled={!importPreview?.rows.length}
+                leadingIcon={<Icon name="upload" />}
               >
-                <Icon name="upload" size={18} />
                 Import {importPreview?.rows.length ?? 0} Records
               </Button>
             </>

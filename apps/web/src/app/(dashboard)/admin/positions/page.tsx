@@ -148,8 +148,7 @@ function EmptyState({
           : "Create your first position to define roles in your organization."}
       </p>
       {!hasSearch && (
-        <Button onClick={onCreateClick}>
-          <Icon name="add" size={18} />
+        <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
           Create Position
         </Button>
       )}
@@ -705,12 +704,10 @@ export default function PositionsPage() {
         subtitle="Configure positions with career levels and reporting capabilities."
         actions={
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="tonal" onClick={openAddLevel}>
-              <Icon name="trending_up" size={18} />
+            <Button variant="tonal" onClick={openAddLevel} leadingIcon={<Icon name="trending_up" />}>
               Add Level
             </Button>
-            <Button onClick={openCreate}>
-              <Icon name="add" size={18} />
+            <Button onClick={openCreate} leadingIcon={<Icon name="add" />}>
               Create Position
             </Button>
           </div>

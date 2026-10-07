@@ -221,8 +221,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
       <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6 max-w-xs">
         Create your first organization unit to start building your hierarchy.
       </p>
-      <Button onClick={onCreateClick}>
-        <Icon name="add" size={18} />
+      <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
         Create Unit
       </Button>
     </div>
@@ -484,8 +483,7 @@ export default function OrgStructurePage() {
         title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Hierarchy</h1>}
         subtitle="Build and manage your organization's hierarchical structure."
         actions={
-          <Button onClick={() => openCreate()}>
-            <Icon name="add" size={18} />
+          <Button onClick={() => openCreate()} leadingIcon={<Icon name="add" />}>
             Create Unit
           </Button>
         }

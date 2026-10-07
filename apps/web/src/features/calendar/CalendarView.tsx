@@ -230,12 +230,10 @@ export function CalendarView() {
             />
             {canCreate && (
               <>
-                <Button variant="outlined" onClick={() => setShowEventForm(true)}>
-                  <Icon name="event" size={18} />
+                <Button variant="outlined" onClick={() => setShowEventForm(true)} leadingIcon={<Icon name="event" />}>
                   New Event
                 </Button>
-                <Button onClick={() => setShowLeaveForm(true)}>
-                  <Icon name="event_available" size={18} />
+                <Button onClick={() => setShowLeaveForm(true)} leadingIcon={<Icon name="event_available" />}>
                   Request Leave
                 </Button>
               </>
