@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useSnackbar } from "@vkieu/mui";
+import { useSnackbar } from "@/lib/snackbar";
 
 /**
  * Drop-in replacement for the `toast` object from `sonner`.
  *
- * Backed by `@vkieu/mui` SnackbarProvider — must be rendered above
+ * Backed by `@vkieu/mui` SnackbarHost — must be rendered above
  * any component that calls `useToast()`.
  *
  * @example
@@ -21,14 +21,14 @@ export function useToast() {
 
   const success = useCallback(
     (message: string) => {
-      snackbar.show({ message, duration: 4000 });
+      snackbar.showSnackbar({ message, duration: "short" });
     },
     [snackbar],
   );
 
   const error = useCallback(
     (message: string) => {
-      snackbar.show({ message, duration: 6000, priority: "urgent", showClose: true });
+      snackbar.showSnackbar({ message, duration: "long", withDismissAction: true });
     },
     [snackbar],
   );

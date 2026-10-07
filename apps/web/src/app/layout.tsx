@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
+import { cookies } from "next/headers";
+import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@vkieu/mui/next";
 import { Providers } from "./providers";
 import "material-symbols/rounded.css";
 import "./globals.css";
@@ -16,15 +18,22 @@ export const metadata: Metadata = {
     "Enterprise workforce management platform for organizational hierarchies, capacity planning, and team operations.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const theme = getThemeFromCookies(await cookies(), {
+    themes: ["baseline", "facebook"],
+    defaults: { theme: "facebook", mode: "system" },
+  });
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning {...themeAttributes(theme)}>
       <body className={roboto.className}>
-        <Providers>{children}</Providers>
+        <NextRouterProvider>
+          <Providers>{children}</Providers>
+        </NextRouterProvider>
       </body>
     </html>
   );

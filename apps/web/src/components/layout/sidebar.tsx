@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useTheme } from "@/lib/theme";
+import { useTheme } from "@vkieu/mui";
 import { Icon, Tooltip } from "@vkieu/mui";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,7 @@ function StrataLogo() {
 export function Sidebar() {
   const pathname = usePathname();
   const { isSuperAdmin, hasFeatureAccess } = useUserPermissions();
-  const { theme, setTheme } = useTheme();
+  const { mode, setMode } = useTheme();
 
   // Resolve the visible categories + (for parents) their accessible children.
   const categories = useMemo<NavCategory[]>(() => {
@@ -153,7 +153,7 @@ export function Sidebar() {
   const drawerCat = categories.find((c) => c.value === openValue && c.children?.length);
   const isDrawerVisible = !!drawerCat;
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+  const toggleTheme = () => setMode(mode === "dark" ? "light" : "dark");
 
   if (categories.length === 0) return null;
 
@@ -240,15 +240,15 @@ export function Sidebar() {
 
         {/* Theme toggle */}
         <div className="flex flex-col items-center pt-2" onMouseEnter={scheduleClose}>
-          <Tooltip content={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} side="right">
+          <Tooltip content={`Switch to ${mode === "dark" ? "light" : "dark"} mode`} side="right">
             <button
               type="button"
               onClick={toggleTheme}
               className="flex items-center justify-center w-12 h-12 rounded-full hover:bg-surface-foreground/8 active:bg-surface-foreground/12 transition-colors"
-              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              aria-label={`Switch to ${mode === "dark" ? "light" : "dark"} theme`}
             >
               <Icon
-                name={theme === "dark" ? "light_mode" : "dark_mode"}
+                name={mode === "dark" ? "light_mode" : "dark_mode"}
                 size={24}
                 className="text-surface-variant-foreground"
               />
