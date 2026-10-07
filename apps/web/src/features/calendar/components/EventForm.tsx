@@ -126,6 +126,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
           <TextField
             variant="outlined"
             label="Title"
+            className="w-full"
             value={title}
             onChange={(value) => setTitle(value)}
             placeholder="Event title"
@@ -157,6 +158,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
             <TextField
               variant="outlined"
               label="Start Date"
+              className="w-full"
               type="date"
               value={startDate}
               onChange={(value) => setStartDate(value)}
@@ -164,6 +166,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
             <TextField
               variant="outlined"
               label="End Date"
+              className="w-full"
               type="date"
               value={endDate}
               onChange={(value) => setEndDate(value)}
@@ -175,6 +178,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
               <TextField
                 variant="outlined"
                 label="Start Time"
+                className="w-full"
                 type="time"
                 value={startTime}
                 onChange={(value) => setStartTime(value)}
@@ -182,6 +186,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
               <TextField
                 variant="outlined"
                 label="End Time"
+                className="w-full"
                 type="time"
                 value={endTime}
                 onChange={(value) => setEndTime(value)}

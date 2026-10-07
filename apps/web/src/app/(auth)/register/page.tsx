@@ -170,6 +170,7 @@ export default function RegisterPage() {
 
               <TextField
                 id="fullName" type="text" variant="outlined" label="Full name"
+                className="w-full"
                 value={fullName}
                 onChange={(value) => { setFullName(value); if (nameError) validateName(value); }}
                 onBlur={() => validateName(fullName)}
@@ -182,6 +183,7 @@ export default function RegisterPage() {
 
               <TextField
                 id="companyName" type="text" variant="outlined" label="Workspace name"
+                className="w-full"
                 value={companyName}
                 onChange={(value) => { setCompanyName(value); if (companyError) validateCompany(value); }}
                 onBlur={() => validateCompany(companyName)}
@@ -194,6 +196,7 @@ export default function RegisterPage() {
 
               <TextField
                 id="email" type="email" variant="outlined" label="Email"
+                className="w-full"
                 value={email}
                 onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
                 onBlur={() => validateEmail(email)}
@@ -206,6 +209,7 @@ export default function RegisterPage() {
 
               <TextField
                 id="password" type={showPassword ? "text" : "password"} variant="outlined" label="Password"
+                className="w-full"
                 value={password}
                 onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
                 onBlur={() => validatePassword(password)}
@@ -223,6 +227,7 @@ export default function RegisterPage() {
 
               <TextField
                 id="confirmPassword" type={showConfirmPassword ? "text" : "password"} variant="outlined" label="Confirm password"
+                className="w-full"
                 value={confirmPassword}
                 onChange={(value) => { setConfirmPassword(value); if (confirmError) validateConfirmPassword(value); }}
                 onBlur={() => validateConfirmPassword(confirmPassword)}

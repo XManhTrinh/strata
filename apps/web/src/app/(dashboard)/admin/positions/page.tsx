@@ -370,6 +370,7 @@ function PositionDialog({
           <TextField
             variant="outlined"
             label="Name"
+            className="w-full"
             value={formData.name}
             onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Senior Engineer"
@@ -380,6 +381,7 @@ function PositionDialog({
           <TextField
             variant="outlined"
             label="Description"
+            className="w-full"
             value={formData.description}
             onChange={(value) => onFormChange({ ...formData, description: value })}
             placeholder="Brief role description"
@@ -477,6 +479,7 @@ function CareerLevelDialog({
             <TextField
               variant="outlined"
               label="Label"
+              className="w-full"
               value={formData.label}
               onChange={(value) => onFormChange({ ...formData, label: value })}
               placeholder="e.g., L3, M2"
@@ -487,6 +490,7 @@ function CareerLevelDialog({
             <TextField
               variant="outlined"
               label="Display Name"
+              className="w-full"
               value={formData.displayName}
               onChange={(value) => onFormChange({ ...formData, displayName: value })}
               placeholder="e.g., Senior"
@@ -496,6 +500,7 @@ function CareerLevelDialog({
             <TextField
               variant="outlined"
               label="Rank"
+              className="w-full"
               type="number"
               value={String(formData.rank)}
               onChange={(value) => onFormChange({ ...formData, rank: Number(value) })}

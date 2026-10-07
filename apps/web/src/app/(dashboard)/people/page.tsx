@@ -792,8 +792,8 @@ export default function PeoplePage() {
         <DialogContent>
           <p className="mb-4">Add a new member to your workspace.</p>
           <form onSubmit={handleAdd} className="space-y-4" id="add-member-form">
-            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
-            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
+            <TextField variant="outlined" label="Full Name" required className="w-full" value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
+            <TextField variant="outlined" label="Email" type="email" required className="w-full" value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
             <Select
               variant="outlined"
               label="Role"
@@ -801,9 +801,9 @@ export default function PeoplePage() {
               onValueChange={(value) => setFormData({ ...formData, roleId: value || undefined })}
               options={[{ value: "", label: "No role (basic access)" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
             />
-            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
-            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
-            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
+            <TextField variant="outlined" label="Phone" type="tel" className="w-full" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
+            <TextField variant="outlined" label="Address" className="w-full" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
+            <TextField variant="outlined" label="Date of Birth" type="date" className="w-full" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
           </form>
         </DialogContent>
         <DialogActions>
@@ -820,18 +820,18 @@ export default function PeoplePage() {
         <DialogContent>
           <p className="mb-4">Update the member&apos;s information.</p>
           <form onSubmit={handleEdit} className="space-y-4" id="edit-member-form">
-            <TextField variant="outlined" label="Full Name" required value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
-            <TextField variant="outlined" label="Email" type="email" required value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
-            <TextField variant="outlined" label="Phone" type="tel" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
-            <TextField variant="outlined" label="Address" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
-            <TextField variant="outlined" label="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
+            <TextField variant="outlined" label="Full Name" required className="w-full" value={formData.fullName} onChange={(value) => setFormData({ ...formData, fullName: value })} />
+            <TextField variant="outlined" label="Email" type="email" required className="w-full" value={formData.email} onChange={(value) => setFormData({ ...formData, email: value })} />
+            <TextField variant="outlined" label="Phone" type="tel" className="w-full" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
+            <TextField variant="outlined" label="Address" className="w-full" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
+            <TextField variant="outlined" label="Date of Birth" type="date" className="w-full" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
 
             {editPerson && metadataKeys.length > 0 && (
               <>
                 <Divider />
                 <Typography variant="label-medium" color="surface-variant-foreground" as="span" className="uppercase tracking-wide">Additional Fields</Typography>
                 {metadataKeys.map((key) => (
-                  <TextField key={key} variant="outlined" label={key} value={formMetadata[key] ?? ""} onChange={(value) => setFormMetadata({ ...formMetadata, [key]: value })} />
+                  <TextField key={key} variant="outlined" label={key} className="w-full" value={formMetadata[key] ?? ""} onChange={(value) => setFormMetadata({ ...formMetadata, [key]: value })} />
                 ))}
               </>
             )}
@@ -879,7 +879,7 @@ export default function PeoplePage() {
         <DialogContent>
           <p className="mb-4">Save the current column selection as a named view.</p>
           <div className="space-y-3">
-            <TextField variant="outlined" label="View Name" required value={newViewName} onChange={(value) => setNewViewName(value)} placeholder="e.g. Engineering View" />
+            <TextField variant="outlined" label="View Name" required className="w-full" value={newViewName} onChange={(value) => setNewViewName(value)} placeholder="e.g. Engineering View" />
             <div>
               <Typography variant="body-small" color="surface-variant-foreground" className="mb-1">Visible columns:</Typography>
               <div className="flex flex-wrap gap-1">

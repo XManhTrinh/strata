@@ -293,6 +293,7 @@ function OrgUnitDialog({
           <TextField
             variant="outlined"
             label="Name"
+            className="w-full"
             value={formData.name}
             onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Engineering"

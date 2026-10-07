@@ -119,6 +119,7 @@ export default function LoginPage() {
                   type="email"
                   variant="outlined"
                   label="Email"
+                  className="w-full"
                   value={email}
                   onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
                   onBlur={() => validateEmail(email)}
@@ -135,6 +136,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   variant="outlined"
                   label="Password"
+                  className="w-full"
                   value={password}
                   onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
                   onBlur={() => validatePassword(password)}

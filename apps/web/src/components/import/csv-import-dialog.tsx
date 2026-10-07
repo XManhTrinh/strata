@@ -516,7 +516,7 @@ function MappingStep({
       </div>
 
       {/* Scrollable content */}
-      <div data-mapping-scroll className="px-6 space-y-4 max-h-[55vh] overflow-y-auto">
+      <div data-mapping-scroll className="px-6 space-y-4">
         {/* Sticky error banner */}
         {mappingErrors.length > 0 && (
           <div className="sticky -top-px z-10 bg-surface-container-high">
@@ -802,7 +802,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
   } = stats;
 
   return (
-    <div className="px-6 space-y-4 max-h-[60vh] overflow-y-auto relative">
+    <div className="px-6 space-y-4 relative">
       {/* Loading overlay */}
       {isPending && (
         <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 rounded-xl">

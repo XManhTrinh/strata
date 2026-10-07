@@ -65,6 +65,7 @@ export function RateCardSetDialog({
           <TextField
             variant="outlined"
             label="Tab name"
+            className="w-full"
             value={name}
             onChange={(value) => setName(value)}
             placeholder="e.g. Digital, Infrastructure"
@@ -72,6 +73,7 @@ export function RateCardSetDialog({
           <TextField
             variant="outlined"
             label="Description (optional)"
+            className="w-full"
             value={description}
             onChange={(value) => setDescription(value)}
           />

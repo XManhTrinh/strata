@@ -189,6 +189,7 @@ export function AssistantPanel() {
                 ref={inputRef}
                 variant="outlined"
                 label="Message"
+                className="w-full"
                 value={input}
                 onChange={(value) => setInput(value)}
                 onKeyDown={onKeyDown}

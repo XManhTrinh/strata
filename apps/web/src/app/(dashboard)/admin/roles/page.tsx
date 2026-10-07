@@ -211,8 +211,8 @@ function CreateRoleDialog({
       <DialogContent>
         <p className="text-sm text-on-surface-variant mb-4">Create a new role to assign feature permissions and scope access.</p>
         <div className="space-y-4">
-          <TextField variant="outlined" label="Role Name" value={name} onChange={(value) => onNameChange(value)} placeholder="e.g., Finance Administrator" onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onSubmit(); }} />
-          <TextField variant="outlined" label="Description" value={description} onChange={(value) => onDescriptionChange(value)} placeholder="Brief description of responsibilities" />
+          <TextField variant="outlined" label="Role Name" className="w-full" value={name} onChange={(value) => onNameChange(value)} placeholder="e.g., Finance Administrator" onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) onSubmit(); }} />
+          <TextField variant="outlined" label="Description" className="w-full" value={description} onChange={(value) => onDescriptionChange(value)} placeholder="Brief description of responsibilities" />
         </div>
       </DialogContent>
       <DialogActions>

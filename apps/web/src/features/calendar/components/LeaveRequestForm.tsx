@@ -182,6 +182,7 @@ export function LeaveRequestForm({
             <TextField
               variant="outlined"
               label="Start Date"
+              className="w-full"
               type="date"
               value={startDate}
               onChange={(value) => setStartDate(value)}
@@ -189,6 +190,7 @@ export function LeaveRequestForm({
             <TextField
               variant="outlined"
               label="End Date"
+              className="w-full"
               type="date"
               value={endDate}
               onChange={(value) => setEndDate(value)}
@@ -205,6 +207,7 @@ export function LeaveRequestForm({
           <TextField
             variant="outlined"
             label="Notes (optional)"
+            className="w-full"
             value={notes}
             onChange={(value) => setNotes(value)}
             placeholder="Reason for leave..."

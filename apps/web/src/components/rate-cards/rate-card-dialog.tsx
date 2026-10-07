@@ -212,10 +212,11 @@ export function RateCardDialog({
       <DialogTitle>{card ? "Edit rate card" : "New rate card"}</DialogTitle>
       <DialogContent>
         <p className="mb-4">Match members by their imported columns, then set the day rate and working days per quarter.</p>
-        <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-5 pr-1">
           <TextField
             variant="outlined"
             label="Rate card name"
+            className="w-full"
             value={name}
             onChange={(value) => setName(value)}
             placeholder="e.g. UK Opex Contractor"
@@ -353,6 +354,7 @@ export function RateCardDialog({
                     variant="outlined"
                     type="number"
                     label="Day rate (£)"
+                    className="w-full"
                     value={quarters[q].dayRate}
                     onChange={(value) => updateQuarter(q, "dayRate", value)}
                   />
@@ -360,6 +362,7 @@ export function RateCardDialog({
                     variant="outlined"
                     type="number"
                     label="Working days"
+                    className="w-full"
                     value={quarters[q].workingDays}
                     onChange={(value) => updateQuarter(q, "workingDays", value)}
                   />

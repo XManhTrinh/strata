@@ -150,6 +150,7 @@ export function ComboBox({
         <TextField
           variant="outlined"
           label={label}
+          className="w-full"
           value={value}
           placeholder={placeholder}
           onChange={(value) => {

@@ -231,6 +231,7 @@ export function IconPicker({
         <TextField
           variant="outlined"
           label={label}
+          className="w-full"
           value={focused ? search : (value || "")}
           onChange={(value) => { setSearch(value); setOpen(true); }}
           onFocus={() => { setFocused(true); setSearch(""); setOpen(true); }}

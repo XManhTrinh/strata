@@ -84,6 +84,7 @@ export function RateCardGroupDialog({
           <TextField
             variant="outlined"
             label="Group name"
+            className="w-full"
             value={name}
             onChange={(value) => setName(value)}
             placeholder="e.g. Division A, Special Employees"
@@ -91,6 +92,7 @@ export function RateCardGroupDialog({
           <TextField
             variant="outlined"
             label="Description (optional)"
+            className="w-full"
             value={description}
             onChange={(value) => setDescription(value)}
           />

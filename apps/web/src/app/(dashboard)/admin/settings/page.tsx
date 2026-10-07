@@ -263,6 +263,7 @@ export default function SettingsPage() {
                     <TextField
                       variant="outlined"
                       label="Company Name"
+                      className="w-full"
                       value={name}
                       onChange={(value) => setName(value)}
                       placeholder="e.g. Strata Technologies"
@@ -270,6 +271,7 @@ export default function SettingsPage() {
                     <TextField
                       variant="outlined"
                       label="Workspace Slug"
+                      className="w-full"
                       value={slug}
                       onChange={(value) => setSlug(value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
                       placeholder="e.g. strata-tech"
@@ -331,6 +333,7 @@ export default function SettingsPage() {
                     <TextField
                       variant="outlined"
                       label="Currency"
+                      className="w-full"
                       value={currency}
                       onChange={(value) => setCurrency(value.toUpperCase())}
                       placeholder="e.g. GBP, USD, EUR"
@@ -509,6 +512,7 @@ export default function SettingsPage() {
             <TextField
               variant="outlined"
               label="Confirmation"
+              className="w-full"
               value={resetConfirmText}
               onChange={(value) => setResetConfirmText(value)}
               placeholder="Type RESET"

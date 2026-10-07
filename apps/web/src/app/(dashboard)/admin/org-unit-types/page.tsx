@@ -312,6 +312,7 @@ function TypeDialog({
           <TextField
             variant="outlined"
             label="Name"
+            className="w-full"
             value={formData.name}
             onChange={(value) => onFormChange({ ...formData, name: value })}
             placeholder="e.g., Department"
@@ -322,6 +323,7 @@ function TypeDialog({
           <TextField
             variant="outlined"
             label="Description"
+            className="w-full"
             value={formData.description}
             onChange={(value) => onFormChange({ ...formData, description: value })}
             placeholder="Brief description of this type"

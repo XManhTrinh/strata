@@ -165,6 +165,7 @@ export function ColorPicker({
         <TextField
           variant="outlined"
           label={label}
+          className="w-full"
           value={hexInput}
           onChange={(value) => {
             const v = value;
