@@ -4,7 +4,7 @@ import type React from "react";
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {SearchBar,
-  TopAppBar,Card,FilterChip,
+  TopAppBar,Card,AssistChip,
   Checkbox,
   TextField,
   TooltipTrigger,
@@ -639,7 +639,7 @@ export default function RolesPage() {
                     key={role.id}
                     selected={isSelected}
                     leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-surface-variant-foreground"} />}
-                    trailing={role.isSystem ? <FilterChip defaultSelected className="text-[11px] h-6 px-2">System</FilterChip> : undefined}
+                    trailing={role.isSystem ? <AssistChip className="text-[11px] h-6 px-2">System</AssistChip> : undefined}
                     supportingText={role.description ?? undefined}
                     onClick={() => handleRoleSelect(role.id)}
                   >
@@ -668,7 +668,7 @@ export default function RolesPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Typography variant="title-medium" className="truncate">{selectedRole.name}</Typography>
-                    {selectedRole.isSystem && <FilterChip defaultSelected className="shrink-0">System</FilterChip>}
+                    {selectedRole.isSystem && <AssistChip className="shrink-0">System</AssistChip>}
                   </div>
                   {selectedRole.description && (
                     <Typography variant="body-small" color="surface-variant-foreground" className="truncate">
@@ -679,7 +679,7 @@ export default function RolesPage() {
                 <div className="flex items-center gap-2 shrink-0 ml-4">
                   {isDirty ? (
                     <>
-                      <FilterChip defaultSelected className="shrink-0">{changeCount} unsaved</FilterChip>
+                      <AssistChip className="shrink-0">{changeCount} unsaved</AssistChip>
                       <Button variant="text" onClick={handleDiscard} disabled={bulkPermissionMutation.isPending}>Discard</Button>
                       <Button onClick={handleSave} disabled={bulkPermissionMutation.isPending} leadingIcon={<Icon name="save" />}>
                         {bulkPermissionMutation.isPending ? "Saving..." : "Save"}

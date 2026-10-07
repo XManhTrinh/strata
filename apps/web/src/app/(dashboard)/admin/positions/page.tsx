@@ -4,7 +4,7 @@ import type React from "react";
 import { useState, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
 import {SearchBar,
-  TopAppBar,Card,FilterChip,
+  TopAppBar,Card,AssistChip,
   Checkbox,
   TextField,
   TooltipTrigger,
@@ -232,9 +232,9 @@ function PositionRow({
         </span>
       </TableCell>
       <TableCell>
-        <FilterChip defaultSelected={!row.archived}>
+        <AssistChip>
           {row.archived ? "Archived" : "Active"}
-        </FilterChip>
+        </AssistChip>
       </TableCell>
       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-1">
@@ -296,9 +296,9 @@ function PositionCard({
           }
           trailing={
             <div className="flex items-center gap-2">
-              <FilterChip defaultSelected={!row.archived}>
+              <AssistChip>
                 {row.archived ? "Archived" : "Active"}
-              </FilterChip>
+              </AssistChip>
               <TooltipTrigger placement="top">
                 <IconButton
                   variant="standard"
@@ -724,9 +724,9 @@ export default function PositionsPage() {
           placeholder="Search positions..."
         />
         {!isLoading && activeCount > 0 && (
-          <FilterChip defaultSelected className="shrink-0">
+          <AssistChip className="shrink-0">
             {activeCount} active
-          </FilterChip>
+          </AssistChip>
         )}
       </div>
 

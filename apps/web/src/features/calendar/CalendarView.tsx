@@ -5,7 +5,7 @@ import type { CalendarEvent, CalendarFilter, OrgUnit } from "./types/calendar.ty
 import { formatMonthYear } from "./utils/calendar.utils";
 import {
   TopAppBar,
-  FilterChip,
+  AssistChip,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -98,15 +98,14 @@ function EventDetailDialog({
             <>
               <div className="flex items-center gap-2">
                 <Typography variant="label-large" as="span">Status:</Typography>
-                <FilterChip
-                  defaultSelected={event.leaveRequest.status === "APPROVED"}
+                <AssistChip
                   className={
                     event.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
                     event.leaveRequest.status === "REJECTED" ? "text-error" : ""
                   }
                 >
                   {event.leaveRequest.status}
-                </FilterChip>
+                </AssistChip>
               </div>
               <div className="flex items-center gap-2">
                 <Typography variant="label-large" as="span">Working Days:</Typography>

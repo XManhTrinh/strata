@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {TopAppBar,Card,Checkbox,
   AssistChip,
-  FilterChip,
   Tabs,
   Tab,
   Button} from "@vkieu/mui";
@@ -136,7 +135,7 @@ function CardTableRow({
             {index + 1}
           </span>
           <span className="font-medium text-surface-foreground truncate">{card.name}</span>
-          {card.isDefault && <FilterChip defaultSelected>Default</FilterChip>}
+          {card.isDefault && <AssistChip>Default</AssistChip>}
         </div>
         {!card.isDefault && card.conditions.length > 0 && (
           <div className="flex flex-wrap items-center gap-1 mt-1">
@@ -708,7 +707,7 @@ export default function RateCardsPage() {
                   )}
                   <Typography variant="title-medium">{t.name}</Typography>
                   {t.name.includes("(Demo)") && (
-                    <AssistChip leadingIcon={<Icon name="bolt" size={14} />}>
+                    <AssistChip leadingIcon={<Icon name="bolt" />}>
                       Demo
                     </AssistChip>
                   )}

@@ -29,7 +29,7 @@ import {
   TopAppBar,
   Card,
   TextField,
-  FilterChip,
+  AssistChip,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -466,8 +466,8 @@ export default function PeoplePage() {
       case "roles":
         return (
           <div className="flex items-center gap-1 flex-wrap">
-            {person.isSuperAdmin && <FilterChip defaultSelected>Admin</FilterChip>}
-            {(person.roles ?? []).map((r) => <FilterChip key={r.id}>{r.name}</FilterChip>)}
+            {person.isSuperAdmin && <AssistChip>Admin</AssistChip>}
+            {(person.roles ?? []).map((r) => <AssistChip key={r.id}>{r.name}</AssistChip>)}
             {!person.isSuperAdmin && (person.roles ?? []).length === 0 && (
               <span className="text-[12px] text-surface-variant-foreground">No role</span>
             )}
@@ -672,7 +672,7 @@ export default function PeoplePage() {
           {selectedIds.size > 0 && (
             <Card variant="elevated" className="hidden md:block">
               <CardContent className="flex items-center gap-4 p-3">
-                <FilterChip defaultSelected>{selectedIds.size} selected</FilterChip>
+                <AssistChip>{selectedIds.size} selected</AssistChip>
                 <Button variant="tonal" onClick={() => setShowBatchRoleDialog(true)} leadingIcon={<Icon name="shield" />}>Assign Role</Button>
                 <Button variant="text" onClick={() => setSelectedIds(new Set())}>Clear selection</Button>
               </CardContent>
@@ -854,7 +854,7 @@ export default function PeoplePage() {
             <div>
               <Typography variant="body-small" color="surface-variant-foreground" className="mb-1">Visible columns:</Typography>
               <div className="flex flex-wrap gap-1">
-                {visibleColumns.map((col) => <FilterChip key={col.key}>{col.label}</FilterChip>)}
+                {visibleColumns.map((col) => <AssistChip key={col.key}>{col.label}</AssistChip>)}
               </div>
             </div>
           </div>

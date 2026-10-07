@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
   Tooltip,
   TextField,
-  FilterChip,
+  AssistChip,
   List,
   ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
@@ -500,9 +500,9 @@ export default function OrgStructurePage() {
         />
 
         {!isLoading && unitCount > 0 && (
-          <FilterChip defaultSelected className="shrink-0">
+          <AssistChip className="shrink-0">
             {unitCount} {unitCount === 1 ? "unit" : "units"}
-          </FilterChip>
+          </AssistChip>
         )}
 
         <div className="ml-auto flex items-center gap-1 rounded-full bg-surface-container-highest/50 p-1">

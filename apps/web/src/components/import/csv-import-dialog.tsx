@@ -18,7 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import {
   Card,
-  FilterChip,
+  AssistChip,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -505,9 +505,9 @@ function MappingStep({
     <>
       {/* Step indicator — outside scroll */}
       <div className="px-6 pb-3 flex items-center gap-2">
-        <FilterChip defaultSelected leadingIcon={<Icon name="looks_one" />}>Step 1 of 2</FilterChip>
-        <FilterChip leadingIcon={<Icon name="table_chart" />}>{csvHeaders.length} columns</FilterChip>
-        <FilterChip leadingIcon={<Icon name="dataset" />}>{csvRows.length} rows</FilterChip>
+        <AssistChip leadingIcon={<Icon name="looks_one" />}>Step 1 of 2</AssistChip>
+        <AssistChip leadingIcon={<Icon name="table_chart" />}>{csvHeaders.length} columns</AssistChip>
+        <AssistChip leadingIcon={<Icon name="dataset" />}>{csvRows.length} rows</AssistChip>
       </div>
 
       {/* Scrollable content */}
@@ -811,9 +811,9 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
 
       {/* Step indicator */}
       <div className="flex items-center gap-2">
-        <FilterChip defaultSelected leadingIcon={<Icon name="looks_two" />}>Step 2 of 2</FilterChip>
+        <AssistChip leadingIcon={<Icon name="looks_two" />}>Step 2 of 2</AssistChip>
         {importPreview.errors.length === 0 && (
-          <FilterChip defaultSelected leadingIcon={<Icon name="check_circle" />} className="text-primary">Ready to import</FilterChip>
+          <AssistChip leadingIcon={<Icon name="check_circle" />} className="text-primary">Ready to import</AssistChip>
         )}
       </div>
 
@@ -861,21 +861,21 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
         <CardContent className="p-3 space-y-3">
           <p className="text-label-medium text-surface-foreground">Data Breakdown</p>
           <div className="flex flex-wrap gap-2">
-            {permCount > 0 && <FilterChip defaultSelected leadingIcon={<Icon name="badge" />}>{permCount} Perm</FilterChip>}
-            {subConCount > 0 && <FilterChip defaultSelected leadingIcon={<Icon name="engineering" />}>{subConCount} SubCon</FilterChip>}
-            {otherEmpCount > 0 && <FilterChip leadingIcon={<Icon name="help" />}>{otherEmpCount} other type{otherEmpCount !== 1 ? "s" : ""}</FilterChip>}
+            {permCount > 0 && <AssistChip leadingIcon={<Icon name="badge" />}>{permCount} Perm</AssistChip>}
+            {subConCount > 0 && <AssistChip leadingIcon={<Icon name="engineering" />}>{subConCount} SubCon</AssistChip>}
+            {otherEmpCount > 0 && <AssistChip leadingIcon={<Icon name="help" />}>{otherEmpCount} other type{otherEmpCount !== 1 ? "s" : ""}</AssistChip>}
             {reportCount > 0 && (
-              <FilterChip leadingIcon={<Icon name="supervisor_account" />}>
+              <AssistChip leadingIcon={<Icon name="supervisor_account" />}>
                 {uniqueManagers} manager{uniqueManagers !== 1 ? "s" : ""} ({reportCount} report{reportCount !== 1 ? "s" : ""})
-              </FilterChip>
+              </AssistChip>
             )}
             {uniqueManagers > resolvedManagers && (
-              <FilterChip leadingIcon={<Icon name="link_off" />} className="text-error">
+              <AssistChip leadingIcon={<Icon name="link_off" />} className="text-error">
                 {uniqueManagers - resolvedManagers} manager{uniqueManagers - resolvedManagers !== 1 ? "s" : ""} not in import
-              </FilterChip>
+              </AssistChip>
             )}
-            {withSalary > 0 && <FilterChip leadingIcon={<Icon name="payments" />}>{withSalary} salaries</FilterChip>}
-            {withDayRate > 0 && <FilterChip leadingIcon={<Icon name="schedule" />}>{withDayRate} day rates</FilterChip>}
+            {withSalary > 0 && <AssistChip leadingIcon={<Icon name="payments" />}>{withSalary} salaries</AssistChip>}
+            {withDayRate > 0 && <AssistChip leadingIcon={<Icon name="schedule" />}>{withDayRate} day rates</AssistChip>}
           </div>
 
           {/* Org structure counts per level */}
@@ -890,9 +890,9 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
                     rows.map((r) => r.orgStructure?.split(" | ")?.[levelIdx]).filter(Boolean),
                   );
                   return (
-                    <FilterChip key={colIdx} leadingIcon={<Icon name="lan" />}>
+                    <AssistChip key={colIdx} leadingIcon={<Icon name="lan" />}>
                       {uniqueValues.size} {typeName}{uniqueValues.size !== 1 ? "s" : ""}
-                    </FilterChip>
+                    </AssistChip>
                   );
                 })}
               </div>

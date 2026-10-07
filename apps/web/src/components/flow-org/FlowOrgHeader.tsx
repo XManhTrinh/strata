@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import { TopAppBar, FilterChip, SearchBar, Button } from "@vkieu/mui";
+import { TopAppBar, FilterChip, AssistChip, SearchBar, Button } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
 import type { OrganizationUnit } from "@/services";
@@ -144,9 +144,9 @@ export default function FlowOrgHeader({
               placeholder="Search name, title, dept..."
             />
             {search.trim() && searchResultCount !== undefined && (
-              <FilterChip defaultSelected className="shrink-0">
+              <AssistChip className="shrink-0">
                 {searchResultCount} {searchResultCount === 1 ? "result" : "results"}
-              </FilterChip>
+              </AssistChip>
             )}
             {/* Hierarchy-aware org unit filter */}
             <OrgUnitTreeSelect
@@ -169,9 +169,9 @@ export default function FlowOrgHeader({
               {chipIds.map((id) => (
                 <FilterChip
                   key={id}
-                  defaultSelected
-                  trailingIcon={<Icon name="close" size={18} />}
-                  onPress={() => deselectBranch(id)}
+                  selected={true}
+                  trailingIcon={<Icon name="close" />}
+                  onSelectedChange={() => deselectBranch(id)}
                 >
                   {nameById.get(id) ?? id}
                 </FilterChip>

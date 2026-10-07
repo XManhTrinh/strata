@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
-  TopAppBar, FilterChip,
+  TopAppBar, AssistChip,
   Card, TextField,
   Divider, List, ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                       <ListItem
                         supportingText="Workspace ID"
                         trailing={
-                          <FilterChip className="font-mono text-[11px]">{company?.id}</FilterChip>
+                          <AssistChip className="font-mono text-[11px]">{company?.id}</AssistChip>
                         }
                       >
                         Identifier
@@ -377,11 +377,11 @@ export default function SettingsPage() {
                         preview before committing.
                       </Typography>
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <FilterChip leadingIcon={<Icon name="group" />}>Members</FilterChip>
-                        <FilterChip leadingIcon={<Icon name="lan" />}>Org Structure</FilterChip>
-                        <FilterChip leadingIcon={<Icon name="work" />}>Positions</FilterChip>
-                        <FilterChip leadingIcon={<Icon name="leaderboard" />}>Grades</FilterChip>
-                        <FilterChip leadingIcon={<Icon name="shield" />}>Roles</FilterChip>
+                        <AssistChip leadingIcon={<Icon name="group" />}>Members</AssistChip>
+                        <AssistChip leadingIcon={<Icon name="lan" />}>Org Structure</AssistChip>
+                        <AssistChip leadingIcon={<Icon name="work" />}>Positions</AssistChip>
+                        <AssistChip leadingIcon={<Icon name="leaderboard" />}>Grades</AssistChip>
+                        <AssistChip leadingIcon={<Icon name="shield" />}>Roles</AssistChip>
                       </div>
                       <div className="mt-4">
                         <CsvImportDialog companyId={companyId} />

@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import {
   TopAppBar,
   Card,
-  FilterChip,
+  AssistChip,
 } from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
@@ -270,7 +270,7 @@ export default function BudgetsPage() {
                       <Typography variant="body-medium" as="span">
                         {stat.name}
                       </Typography>
-                      <FilterChip>{stat.headcount} people</FilterChip>
+                      <AssistChip>{stat.headcount} people</AssistChip>
                     </div>
                     <Typography variant="body-medium" as="span">
                       {fmtGBP(stat.totalAnnualCost)}

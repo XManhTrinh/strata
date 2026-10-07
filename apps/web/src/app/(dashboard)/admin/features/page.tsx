@@ -6,7 +6,7 @@ import {
   SearchBar,
   TopAppBar,
   Card,
-  FilterChip,
+  AssistChip,
   Switch,
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
@@ -178,9 +178,9 @@ function FeatureCard({
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
-          <FilterChip defaultSelected={feature.enabled}>
+          <AssistChip>
             {feature.permissionsCount} permission{feature.permissionsCount !== 1 ? "s" : ""}
-          </FilterChip>
+          </AssistChip>
           <Button
             variant="text"
             onClick={onExpand}
@@ -319,9 +319,9 @@ export default function FeaturesPage() {
       <div className="flex items-center gap-4">
         <SearchBar aria-label="Search" className="max-w-sm" value={search} onChange={setSearch} placeholder="Search features..." />
         {enabledCount > 0 && (
-          <FilterChip defaultSelected className="shrink-0">
+          <AssistChip className="shrink-0">
             {enabledCount} enabled
-          </FilterChip>
+          </AssistChip>
         )}
       </div>
 
