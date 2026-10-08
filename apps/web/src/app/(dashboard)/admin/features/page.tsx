@@ -72,17 +72,17 @@ function GridSkeleton() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
         <Card key={i} variant="outlined">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-start justify-between">
-              <Skeleton className="h-12 w-12" corner="extra-large" />
-              <Skeleton className="h-7 w-12" corner="full" />
-            </div>
-            <SkeletonGroup label="Loading features">
+          <SkeletonGroup label="Loading features">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-start justify-between">
+                <Skeleton className="h-12 w-12" corner="extra-large" />
+                <Skeleton className="h-7 w-12" corner="full" />
+              </div>
               <Skeleton className="h-5 w-32" corner="extra-small" />
               <Skeleton className="h-4 w-full" corner="extra-small" />
               <Skeleton className="h-4 w-2/3" corner="extra-small" />
-            </SkeletonGroup>
-          </CardContent>
+            </CardContent>
+          </SkeletonGroup>
         </Card>
       ))}
     </div>

@@ -141,13 +141,15 @@ function LoadingSkeleton() {
         </SkeletonGroup>
       </div>
       <div className="p-6 space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-7 w-48" corner="extra-small" />
-          <Skeleton className="h-4 w-72" corner="extra-small" />
-        </div>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-48 w-full" corner="extra-large" />
-        ))}
+        <SkeletonGroup label="Loading role details">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48" corner="extra-small" />
+            <Skeleton className="h-4 w-72" corner="extra-small" />
+          </div>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-48 w-full" corner="extra-large" />
+          ))}
+        </SkeletonGroup>
       </div>
     </div>
   );
