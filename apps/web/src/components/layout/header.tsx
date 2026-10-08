@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { RefObject } from "react";
 import { Breadcrumbs } from "./breadcrumbs";
-import { TopAppBar, TooltipTrigger, Tooltip, MenuTrigger, Menu, MenuItem, MenuGroup, IconButton, Button as _Btn } from "@vkieu/mui";
+import {
+  TopAppBar,
+  TooltipTrigger,
+  Tooltip,
+  MenuTrigger,
+  Menu,
+  MenuItem,
+  MenuGroup,
+  IconButton,
+  type TopAppBarScrollBehavior,
+} from "@vkieu/mui";
 import { useAuth } from "@/lib/auth";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Icon } from "@/components/ui/icon";
@@ -14,28 +24,22 @@ import { useRoles } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
 import { useUserRole } from "@/hooks/use-user-role";
 
-export function Header() {
+export interface HeaderProps {
+  /** Forwarded to the internal `TopAppBar`, carrying sticky/visibility classes. */
+  className?: string;
+  /** Forwarded to the internal `TopAppBar`; `"pinned"` supplies the opaque surface fill. */
+  scrollBehavior?: TopAppBarScrollBehavior;
+  /** The scroll container the pinned fill responds to (Strata scrolls inside `<main>`). */
+  scrollRef?: RefObject<HTMLElement | null>;
+}
+
+export function Header({ className, scrollBehavior, scrollRef }: HeaderProps) {
   const { logout } = useAuth();
   const companyId = useCompanyId();
   const { data: roles = [] } = useRoles(companyId);
   const { role, setRole } = useUserRole();
   const { percent, isActive, progress } = useImportProgress();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _showRing = percent !== null && (isActive || progress?.status === "completed");
-  // DEBUG: force the ring on and loop it 0→100% on load to preview the
-  // animation. Revert to `_showRing` / `percent` before committing.
-  const showRing = true;
-  const [debugPercent, setDebugPercent] = useState(0);
-  useEffect(() => {
-    const stops = [0, 100];
-    let i = 0;
-    setDebugPercent(0);
-    const id = setInterval(() => {
-      i = (i + 1) % stops.length;
-      setDebugPercent(stops[i]);
-    }, 1500);
-    return () => clearInterval(id);
-  }, []);
+  const showRing = percent !== null && (isActive || progress?.status === "completed");
 
   const roleOptions = [
     { value: "super_admin", label: "👑 Super Admin" },
@@ -44,7 +48,9 @@ export function Header() {
 
   return (
     <TopAppBar
-      className="bg-transparent"
+      className={className}
+      scrollBehavior={scrollBehavior}
+      scrollRef={scrollRef}
       title={<Breadcrumbs />}
       actions={
         <>
@@ -92,7 +98,7 @@ export function Header() {
                 size="sm"
                 aria-label={
                   showRing
-                    ? `User menu — importing, ${debugPercent}% complete`
+                    ? `User menu — importing, ${percent}% complete`
                     : "User menu"
                 }
                 icon={<Avatar size="sm" name="User" decorative />}
@@ -110,7 +116,7 @@ export function Header() {
                 </MenuGroup>
               </Menu>
             </MenuTrigger>
-            {showRing && <AvatarProgressRing percent={debugPercent} size={32} />}
+            {showRing && percent !== null && <AvatarProgressRing percent={percent} size={32} />}
           </div>
         </>
       }

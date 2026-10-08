@@ -109,8 +109,8 @@ Components used across multiple features or apps belong here. Export from `packa
 ```
 components/
 ├── ui/           # Primitives (avatar, skeleton, color-picker)
-├── layout/       # App shell, sidebar, header, breadcrumbs
-├── navigation/   # Mobile nav, navigation rail
+├── layout/       # Dashboard shell, header, breadcrumbs
+├── navigation/   # Nav rail + flyout, drawer nav, compact top bar, bottom bar, nav model
 ├── auth/         # Auth-related components
 └── <domain>/     # Domain-specific shared components
 ```

@@ -15,3 +15,9 @@ button,
 [data-mode='dark'] ::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+/* Rail flyout content fade on group switch (used via motion-safe:animate-[drawer-fade-in_...]) */
+@keyframes drawer-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
