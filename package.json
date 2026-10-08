@@ -23,5 +23,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@vkieu/mui": "XManhTrinh/mui#d8af0976&path:packages/ui"
+    }
   }
 }
