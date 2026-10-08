@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@vkieu/mui': XManhTrinh/mui#d8af0976&path:packages/ui
+  '@vkieu/mui': XManhTrinh/mui#path:packages/ui
 
 importers:
 
@@ -182,8 +182,8 @@ importers:
         specifier: ^3.13.0
         version: 3.14.13(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@vkieu/mui':
-        specifier: XManhTrinh/mui#d8af0976&path:packages/ui
-        version: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+        specifier: XManhTrinh/mui#path:packages/ui
+        version: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       '@xyflow/react':
         specifier: ^12.4.0
         version: 12.11.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -311,8 +311,8 @@ importers:
   packages/ui:
     dependencies:
       '@vkieu/mui':
-        specifier: XManhTrinh/mui#d8af0976&path:packages/ui
-        version: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+        specifier: XManhTrinh/mui#path:packages/ui
+        version: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
     devDependencies:
       '@types/react':
         specifier: ^19.1.0
@@ -2205,8 +2205,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976#path:packages/ui':
-    resolution: {path: packages/ui, tarball: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976}
+  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965#path:packages/ui':
+    resolution: {path: packages/ui, tarball: https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965}
     version: 0.0.0
     hasBin: true
     peerDependencies:
@@ -7429,7 +7429,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
       '@internationalized/date': 3.12.4
       clsx: 2.1.1
@@ -7444,7 +7444,7 @@ snapshots:
       next: 16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       tailwindcss: 4.3.3
 
-  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af0976#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@vkieu/mui@https://codeload.github.com/XManhTrinh/mui/tar.gz/d8af09760f5e50f5793df29813683931be64c965#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
       '@internationalized/date': 3.12.4
       clsx: 2.1.1

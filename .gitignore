@@ -11,3 +11,6 @@ coverage
 
 # macOS
 .DS_Store
+
+# Workflow task artifacts
+.agents

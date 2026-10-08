@@ -26,7 +26,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@vkieu/mui": "XManhTrinh/mui#d8af0976&path:packages/ui"
+      "@vkieu/mui": "XManhTrinh/mui#path:packages/ui"
     }
   }
 }
