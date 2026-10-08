@@ -20,7 +20,7 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
   useOrgUnits,
@@ -189,20 +189,22 @@ function TreeNode({
 function TreeSkeleton() {
   return (
     <div className="space-y-1 p-2">
-      {Array.from({ length: 8 }).map((_, i) => {
-        const indent = [0, 1, 2, 2, 1, 2, 0, 1][i];
-        return (
-          <div
-            key={i}
-            className="flex items-center gap-3 px-3 py-2.5"
-            style={{ paddingInlineStart: `${indent * 24 + 12}px` }}
-          >
-            <Skeleton className="h-5 w-5 rounded" />
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-5 w-14 rounded-full" />
-          </div>
-        );
-      })}
+      <SkeletonGroup label="Loading org structure">
+        {Array.from({ length: 8 }).map((_, i) => {
+          const indent = [0, 1, 2, 2, 1, 2, 0, 1][i];
+          return (
+            <div
+              key={i}
+              className="flex items-center gap-3 px-3 py-2.5"
+              style={{ paddingInlineStart: `${indent * 24 + 12}px` }}
+            >
+              <Skeleton className="h-5 w-5" corner="extra-small" />
+              <Skeleton className="h-4 w-32" corner="extra-small" />
+              <Skeleton className="h-5 w-14" corner="full" />
+            </div>
+          );
+        })}
+      </SkeletonGroup>
     </div>
   );
 }

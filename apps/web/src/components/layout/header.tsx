@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Icon } from "@/components/ui/icon";
 import { Select } from "@/components/ui/select";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar } from "@vkieu/mui/vk";
 import { AvatarProgressRing } from "@/components/import/avatar-progress-ring";
 import { useImportProgress } from "@/components/import/import-progress-provider";
 import { useRoles } from "@/services";
@@ -95,7 +95,7 @@ export function Header() {
                     ? `User menu — importing, ${debugPercent}% complete`
                     : "User menu"
                 }
-                icon={<Avatar size="s" name="User" />}
+                icon={<Avatar size="sm" name="User" decorative />}
               />
               <Menu
                 placement="bottom end"

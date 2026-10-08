@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { type NodeProps, Handle, Position } from "@xyflow/react";
+import { Avatar } from "@vkieu/mui/vk";
 import { Icon } from "@/components/ui/icon";
 import { Person } from "@/lib/org-tree/types";
 
@@ -14,27 +15,6 @@ export interface GroupNodeData {
   childCounts: Record<string, number>;
   collapsedIds: Set<string>;
   onToggleCollapse: (id: string) => void;
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2);
-}
-
-function Avatar({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
-  const initials = getInitials(name);
-  return (
-    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0 overflow-hidden">
-      {avatarUrl ? (
-        <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-      ) : (
-        initials
-      )}
-    </div>
-  );
 }
 
 function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
@@ -79,7 +59,7 @@ function GroupNode({ data }: NodeProps & { data: GroupNodeData }) {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Avatar name={person.fullName} avatarUrl={person.avatarUrl} />
+                  <Avatar name={person.fullName} src={person.avatarUrl} size="sm" decorative />
                   <div className="min-w-0 text-left">
                     <p className="font-semibold text-surface-foreground text-sm">
                       {person.fullName}

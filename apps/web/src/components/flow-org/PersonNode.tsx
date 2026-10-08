@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Avatar } from "@vkieu/mui/vk";
 import { Icon } from "@/components/ui/icon";
 import { Person } from "@/lib/org-tree/types";
 
@@ -29,27 +30,11 @@ function getCardStyle(matched: boolean, dimmed: boolean) {
   return "border-outline-variant hover:border-outline-variant dark:hover:border-outline";
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2);
-}
-
-function getStatusColor(status: Person["status"]): string {
-  switch (status) {
-    case "ACTIVE":
-      return "bg-tertiary";
-    case "ON_LEAVE":
-      return "bg-yellow-400";
-    case "SUSPENDED":
-      return "bg-orange-500";
-    case "TERMINATED":
-      return "bg-surface-container-highest";
-    default:
-      return "bg-tertiary";
-  }
+function toPresence(status: Person["status"]): "online" | "away" | "offline" | undefined {
+  if (status === "ACTIVE") return "online";
+  if (status === "ON_LEAVE") return "away";
+  if (status === "SUSPENDED") return "offline";
+  return undefined; // TERMINATED: card is already opacity-50, no presence dot
 }
 
 function getCapacityColor(capacity: number): string {
@@ -96,24 +81,6 @@ function CapacityRing({ capacity }: { capacity: number }) {
   );
 }
 
-function Avatar({ name, avatarUrl, status }: { name: string; avatarUrl?: string; status: Person["status"] }) {
-  const initials = getInitials(name);
-  return (
-    <div className="relative shrink-0">
-      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 overflow-hidden">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-        ) : (
-          initials
-        )}
-      </div>
-      <span
-        className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${getStatusColor(status)}`}
-      />
-    </div>
-  );
-}
-
 function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
   const {
     person,
@@ -147,7 +114,7 @@ function PersonNode({ data }: NodeProps & { data: PersonNodeData }) {
 
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Avatar name={person.fullName} avatarUrl={person.avatarUrl} status={person.status} />
+          <Avatar name={person.fullName} src={person.avatarUrl} size="sm" decorative presence={toPresence(person.status)} />
           <div className="min-w-0">
             <p className="font-semibold text-surface-foreground text-sm">
               {person.fullName}

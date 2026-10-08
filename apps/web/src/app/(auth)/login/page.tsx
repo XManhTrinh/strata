@@ -8,7 +8,7 @@ import { Button, TextField, Divider, Card } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -79,14 +79,16 @@ export default function LoginPage() {
       {showSkeleton ? (
         <Card variant="elevated" className="w-full max-w-100">
           <CardContent className="flex flex-col items-center gap-6 py-10">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64" />
-            <div className="w-full space-y-4 pt-4">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-12 w-full rounded-full" />
-            </div>
+            <SkeletonGroup label="Loading sign-in form">
+              <Skeleton className="h-12 w-12" corner="full" />
+              <Skeleton className="h-6 w-48" corner="extra-small" />
+              <Skeleton className="h-4 w-64" corner="extra-small" />
+              <div className="w-full space-y-4 pt-4">
+                <Skeleton className="h-14 w-full" corner="extra-small" />
+                <Skeleton className="h-14 w-full" corner="extra-small" />
+                <Skeleton className="h-12 w-full" corner="full" />
+              </div>
+            </SkeletonGroup>
           </CardContent>
         </Card>
       ) : (

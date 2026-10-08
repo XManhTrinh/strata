@@ -14,7 +14,7 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -74,12 +74,14 @@ function GridSkeleton() {
         <Card key={i} variant="outlined">
           <CardContent className="p-5 space-y-3">
             <div className="flex items-start justify-between">
-              <Skeleton className="h-12 w-12 rounded-xl" />
-              <Skeleton className="h-7 w-12 rounded-full" />
+              <Skeleton className="h-12 w-12" corner="extra-large" />
+              <Skeleton className="h-7 w-12" corner="full" />
             </div>
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
+            <SkeletonGroup label="Loading features">
+              <Skeleton className="h-5 w-32" corner="extra-small" />
+              <Skeleton className="h-4 w-full" corner="extra-small" />
+              <Skeleton className="h-4 w-2/3" corner="extra-small" />
+            </SkeletonGroup>
           </CardContent>
         </Card>
       ))}

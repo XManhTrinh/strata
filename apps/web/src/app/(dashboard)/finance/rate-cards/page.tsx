@@ -10,7 +10,7 @@ import {TopAppBar,Card,Checkbox,
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@vkieu/mui/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
@@ -669,7 +669,7 @@ export default function RateCardsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            <Skeleton key={i} className="h-20 w-full" corner="extra-large" />
           ))}
         </div>
       ) : tabs.length === 0 ? (

@@ -14,7 +14,7 @@ import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
 import { Icon } from "@/components/ui/icon";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useCompanyId } from "@/hooks/use-company";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -33,11 +33,13 @@ function StatCardSkeleton() {
   return (
     <Card variant="elevated">
       <CardContent className="flex flex-col gap-3 p-6">
-        <Skeleton className="h-10 w-10 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-4 w-28" />
-        </div>
+        <SkeletonGroup label="Loading stats">
+          <Skeleton className="h-10 w-10" corner="full" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-20" corner="extra-small" />
+            <Skeleton className="h-4 w-28" corner="extra-small" />
+          </div>
+        </SkeletonGroup>
       </CardContent>
     </Card>
   );
@@ -47,14 +49,16 @@ function ActivitySkeleton() {
   return (
     <div className="px-4 space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 py-3">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="flex-1 space-y-1.5">
-            <Skeleton className="h-4 w-44" />
-            <Skeleton className="h-3.5 w-28" />
+        <SkeletonGroup key={i} label="Loading activity">
+          <div className="flex items-center gap-4 py-3">
+            <Skeleton className="h-10 w-10" corner="full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-4 w-44" corner="extra-small" />
+              <Skeleton className="h-3.5 w-28" corner="extra-small" />
+            </div>
+            <Skeleton className="h-6 w-16" corner="full" />
           </div>
-          <Skeleton className="h-6 w-16 rounded-full" />
-        </div>
+        </SkeletonGroup>
       ))}
     </div>
   );

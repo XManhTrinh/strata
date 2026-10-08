@@ -15,7 +15,7 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
 import { Person } from "@/lib/org-tree/types";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar } from "@vkieu/mui/vk";
 
 // Legacy compatibility type for interactive ListItem
 // Legacy compatibility - TypeScript cast for interactive list items
@@ -93,7 +93,7 @@ export default function ReparentModal({
                   <ListItemWithClick
                     key={p.id}
                     onClick={() => onReassignReports(p.id)}
-                    leading={<Avatar name={p.fullName} size="s" />}
+                    leading={<Avatar name={p.fullName} size="sm" decorative />}
                     supportingText={p.title}
                   >
                     {p.fullName}

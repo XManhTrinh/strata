@@ -6,7 +6,7 @@ import { Button, Card } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   useCalendarEvents,
 } from "@/services";
@@ -40,19 +40,21 @@ export default function CalendarPage() {
   if (isLoading) {
     return (
       <div className="h-[calc(100vh-64px-24px)] flex flex-col gap-6 p-4">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <Card variant="elevated" className="flex-1">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-7 gap-2 h-full">
-              {Array.from({ length: 35 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-xl" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <SkeletonGroup label="Loading calendar">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-9 w-64" corner="extra-small" />
+            <Skeleton className="h-10 w-32" corner="extra-small" />
+          </div>
+          <Card variant="elevated" className="flex-1">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-7 gap-2 h-full">
+                {Array.from({ length: 35 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24" corner="extra-large" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </SkeletonGroup>
       </div>
     );
   }

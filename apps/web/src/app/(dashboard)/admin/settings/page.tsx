@@ -13,7 +13,7 @@ import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -136,15 +136,17 @@ export default function SettingsPage() {
         />
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} variant="elevated"><CardContent className="p-4"><Skeleton className="h-14 w-full" /></CardContent></Card>
+            <Card key={i} variant="elevated"><CardContent className="p-4"><Skeleton className="h-14 w-full" corner="extra-small" /></CardContent></Card>
           ))}
         </div>
         <div className="flex-1 grid grid-cols-[240px_1fr] mt-4 gap-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
           <div className="border-r border-outline-variant p-2">
-            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl mb-1" />)}
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full mb-1" corner="extra-large" />)}
           </div>
           <div className="p-8 space-y-6">
-            <Skeleton className="h-8 w-48" /><Skeleton className="h-14 w-full" /><Skeleton className="h-14 w-full" />
+            <SkeletonGroup label="Loading settings">
+              <Skeleton className="h-8 w-48" corner="extra-small" /><Skeleton className="h-14 w-full" corner="extra-small" /><Skeleton className="h-14 w-full" corner="extra-small" />
+            </SkeletonGroup>
           </div>
         </div>
       </div>

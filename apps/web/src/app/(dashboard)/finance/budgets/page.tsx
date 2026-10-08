@@ -10,7 +10,7 @@ import {
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   Table,
   TableHeader,
@@ -182,9 +182,11 @@ export default function BudgetsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <Card key={i} variant="elevated">
               <CardContent className="p-5 space-y-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-7 w-28" />
+                <SkeletonGroup label="Loading budgets">
+                  <Skeleton className="h-10 w-10" corner="full" />
+                  <Skeleton className="h-3 w-20" corner="extra-small" />
+                  <Skeleton className="h-7 w-28" corner="extra-small" />
+                </SkeletonGroup>
               </CardContent>
             </Card>
           ))}

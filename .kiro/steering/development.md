@@ -31,8 +31,8 @@ You are a world-class engineer. Write **production-ready, clean, component-based
 
 ## Component Hierarchy — What to Use
 
-1. **`@vkieu/mui`** — first choice for all standard UI: `Button`, `IconButton`, `Card`, `Dialog`, `TextField`, `Checkbox`, `AssistChip`, `FilterChip`, `InputChip`, `SuggestionChip`, `SearchBar`, `Divider`, `List`, `ListItem`, `Menu`, `MenuItem`, `Tooltip`, `Badge`, `NavigationRail`, `NavigationBar`, `Table`, `TopAppBar`, `SideSheet`, `SnackbarHost`, `LinearProgressIndicator`, `CircularProgressIndicator`, etc. Import everything from `@vkieu/mui` — subpath imports (`@vkieu/mui/buttons`, `@vkieu/mui/navigation`) no longer exist.
-2. **`@strata/ui`** — shared components that extend beyond MUI: `DataTable`, `SearchInput`, `StatCard`, `Badge`, `Avatar`, `ProgressBar`, `Toast`, `Skeleton`, `EmptyState`, `Drawer`, `ConfirmDialog`.
+1. **`@vkieu/mui`** — first choice for all standard UI: `Button`, `IconButton`, `Card`, `Dialog`, `TextField`, `Checkbox`, `AssistChip`, `FilterChip`, `InputChip`, `SuggestionChip`, `SearchBar`, `Divider`, `List`, `ListItem`, `Menu`, `MenuItem`, `Tooltip`, `Badge`, `NavigationRail`, `NavigationBar`, `Table`, `TopAppBar`, `SideSheet`, `SnackbarHost`, `LinearProgressIndicator`, `CircularProgressIndicator`, etc. Import everything from `@vkieu/mui` — subpath imports (`@vkieu/mui/buttons`, `@vkieu/mui/navigation`) no longer exist. `Avatar`, `AvatarGroup`, `Skeleton`, `SkeletonGroup` are available via the `/vk` subpath: import from `@vkieu/mui/vk`.
+2. **`@strata/ui`** — shared components that extend beyond MUI: `DataTable`, `SearchInput`, `StatCard`, `Badge`, `ProgressBar`, `Toast`, `EmptyState`, `Drawer`, `ConfirmDialog`.
 3. **Radix UI** — headless primitives when `@vkieu/mui` doesn't cover the pattern (e.g., `Popover`, `DropdownMenu`, `Tabs`).
 4. **Local `components/ui/`** — app-specific UI components that don't belong in the shared package. See **Local UI Polyfills** below.
 
@@ -160,3 +160,5 @@ App-wide custom hooks shared across features.
 - Do NOT import from `@vkieu/mui/buttons` or `@vkieu/mui/navigation` — these subpaths no longer exist; import everything from `@vkieu/mui`.
 - Do NOT use `ThemeContext` from `@/lib/theme` — use `useTheme()` from `@vkieu/mui` instead.
 - Do NOT use `SnackbarProvider` or `useSnackbar` from `@vkieu/mui` — use `SnackbarHost` + `useSnackbar()` from `@/lib/snackbar`.
+- Do NOT import `Avatar`, `AvatarGroup`, `Skeleton`, or `SkeletonGroup` from `@/components/ui/avatar` or `@/components/ui/skeleton` — those polyfills have been deleted; import from `@vkieu/mui/vk` instead.
+- Do NOT import `Avatar` or `Skeleton` from `@strata/ui` in the web app — go directly to `@vkieu/mui/vk`. The `@strata/ui` re-exports exist for other packages that depend on it.

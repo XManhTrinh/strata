@@ -19,7 +19,7 @@ import { Typography } from "@/components/ui/typography";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnitTree } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";
@@ -199,13 +199,15 @@ export default function OrgChartPage() {
   if (peopleLoading || loading) {
     return (
       <div className="flex flex-col h-[calc(100vh-100px)]">
-        <div className="flex items-center gap-4 px-6 h-16 border-b border-outline-variant">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-8 w-48 rounded-full" />
-          <div className="flex-1" />
-          <Skeleton className="h-10 w-64 rounded-full" />
-          <Skeleton className="h-8 w-32 rounded-full" />
-        </div>
+        <SkeletonGroup label="Loading org chart">
+          <div className="flex items-center gap-4 px-6 h-16 border-b border-outline-variant">
+            <Skeleton className="h-6 w-24" corner="extra-small" />
+            <Skeleton className="h-8 w-48" corner="full" />
+            <div className="flex-1" />
+            <Skeleton className="h-10 w-64" corner="full" />
+            <Skeleton className="h-8 w-32" corner="full" />
+          </div>
+        </SkeletonGroup>
         <div className="flex-1 flex items-center justify-center">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>

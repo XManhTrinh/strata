@@ -25,7 +25,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
   usePositions,
@@ -92,17 +92,19 @@ const EMPTY_POSITION_FORM: PositionFormData = {
 function TableSkeleton() {
   return (
     <div className="p-4 space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-20 hidden sm:block" />
-          <Skeleton className="h-4 w-16 hidden sm:block" />
-          <div className="ml-auto flex items-center gap-2">
-            <Skeleton className="h-6 w-14 rounded-full" />
-            <Skeleton className="h-8 w-8 rounded-full" />
+      <SkeletonGroup label="Loading positions">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <Skeleton className="h-4 w-32" corner="extra-small" />
+            <Skeleton className="h-4 w-20 hidden sm:block" corner="extra-small" />
+            <Skeleton className="h-4 w-16 hidden sm:block" corner="extra-small" />
+            <div className="ml-auto flex items-center gap-2">
+              <Skeleton className="h-6 w-14" corner="full" />
+              <Skeleton className="h-8 w-8" corner="full" />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </SkeletonGroup>
     </div>
   );
 }
@@ -113,11 +115,13 @@ function MobileCardSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i} variant="elevated">
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-3 w-44" />
-            </div>
-            <Skeleton className="h-6 w-14 rounded-full" />
+            <SkeletonGroup label="Loading positions">
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-28" corner="extra-small" />
+                <Skeleton className="h-3 w-44" corner="extra-small" />
+              </div>
+              <Skeleton className="h-6 w-14" corner="full" />
+            </SkeletonGroup>
           </CardContent>
         </Card>
       ))}

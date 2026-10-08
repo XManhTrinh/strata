@@ -19,7 +19,7 @@ import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
   useRoles,
@@ -131,20 +131,22 @@ function LoadingSkeleton() {
   return (
     <div className="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] mt-6 min-h-0 border border-outline-variant rounded-xl overflow-hidden bg-surface">
       <div className="border-r border-outline-variant p-4 space-y-3">
-        <Skeleton className="h-14 w-full rounded-full" />
-        <div className="space-y-2 mt-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-18 w-full rounded-lg" />
-          ))}
-        </div>
+        <SkeletonGroup label="Loading roles">
+          <Skeleton className="h-14 w-full" corner="full" />
+          <div className="space-y-2 mt-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-18 w-full" corner="large" />
+            ))}
+          </div>
+        </SkeletonGroup>
       </div>
       <div className="p-6 space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-7 w-48" corner="extra-small" />
+          <Skeleton className="h-4 w-72" corner="extra-small" />
         </div>
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-48 w-full rounded-xl" />
+          <Skeleton key={i} className="h-48 w-full" corner="extra-large" />
         ))}
       </div>
     </div>
@@ -709,10 +711,12 @@ export default function RolesPage() {
                 {(permissionsLoading || featuresLoading) ? (
                   <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="space-y-3">
-                        <Skeleton className="h-5 w-40" />
-                        <Skeleton className="h-48 w-full rounded-xl" />
-                      </div>
+                      <SkeletonGroup key={i} label="Loading permissions">
+                        <div className="space-y-3">
+                          <Skeleton className="h-5 w-40" corner="extra-small" />
+                          <Skeleton className="h-48 w-full" corner="extra-large" />
+                        </div>
+                      </SkeletonGroup>
                     ))}
                   </div>
                 ) : (

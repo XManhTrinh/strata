@@ -60,8 +60,8 @@ import {
 } from "@/services";
 import type { Person, CreatePersonRequest } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar } from "@/components/ui/avatar";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Avatar } from "@vkieu/mui/vk";
 import {
   Table,
   TableHeader,
@@ -451,7 +451,7 @@ export default function PeoplePage() {
       case "name":
         return (
           <div className="flex items-center gap-3">
-            <Avatar name={person.fullName} size="s" />
+            <Avatar name={person.fullName} size="sm" decorative />
             <span className="font-medium">{person.fullName}</span>
           </div>
         );
@@ -629,16 +629,18 @@ export default function PeoplePage() {
         <Card variant="elevated">
           <CardContent className="p-0">
             <div className="p-4 space-y-4">
+              <SkeletonGroup label="Loading people">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-10 w-10" corner="full" />
                   <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-50" />
-                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-4 w-50" corner="extra-small" />
+                    <Skeleton className="h-3 w-40" corner="extra-small" />
                   </div>
-                  <Skeleton className="h-4 w-30" />
+                  <Skeleton className="h-4 w-30" corner="extra-small" />
                 </div>
               ))}
+              </SkeletonGroup>
             </div>
           </CardContent>
         </Card>
@@ -722,7 +724,7 @@ export default function PeoplePage() {
             {people.map((person) => (
               <Card key={person.id} variant="elevated">
                 <CardContent className="flex items-center gap-4 p-4">
-                  <Avatar name={person.fullName} size="l" />
+                  <Avatar name={person.fullName} size="lg" alt={person.fullName} />
                   <div className="flex-1 min-w-0">
                     <Typography variant="title-medium" className="truncate">{person.fullName}</Typography>
                     <Typography variant="body-medium" color="surface-variant-foreground" className="truncate">{displayEmail(person.email)}</Typography>
