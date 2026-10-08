@@ -24,8 +24,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const theme = getThemeFromCookies(await cookies(), {
-    themes: ["baseline", "facebook"],
-    defaults: { theme: "facebook", mode: "system" },
+    defaults: { mode: "system" },
   });
 
   return (

@@ -41,7 +41,7 @@ You are a world-class engineer. Write **production-ready, clean, component-based
 ## Theming
 
 - CSS tokens come from `@vkieu/mui/styles.css` — import it once in `globals.css`.
-- Theming is managed by `ThemeProvider` from `@vkieu/mui` in `providers.tsx`. The facebook brand theme is registered via `createTheme({ name: 'facebook', seed: '#1877F2' })`.
+- Theming is managed by `ThemeProvider` from `@vkieu/mui` in `providers.tsx`, using the default built-in `baseline` theme (no custom `createTheme` override).
 - Dark mode is driven by the `data-mode="dark"` attribute set by `ThemeProvider`. The `dark:` Tailwind prefix responds to `[data-mode='dark']` as configured in `@vkieu/mui/styles.css` utilities — **not** via `darkMode: "class"`.
 - Use `useTheme()` from `@vkieu/mui` (not `@/lib/theme`) to read/set theme and mode. The hook returns `{ theme, mode, resolvedMode, setTheme, setMode, setContrast, ... }`.
 - Use semantic Tailwind token classes: `bg-card`, `text-foreground`, `bg-surface-variant`, `text-on-surface`, `text-on-surface-variant`, `text-on-primary-container`, `border-border`, `bg-secondary`, `ring-background`, `ring-ring`, `p-card`.

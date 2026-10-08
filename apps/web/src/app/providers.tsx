@@ -6,11 +6,8 @@ import {
   ThemeProvider,
   SnackbarHost,
   useSnackbarHostState,
-  createTheme,
 } from "@vkieu/mui";
 import { SnackbarContext } from "@/lib/snackbar";
-
-const facebookTheme = createTheme({ name: "facebook", seed: "#1877F2" });
 
 function makeQueryClient() {
   return new QueryClient({
@@ -41,11 +38,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        themes={["baseline", facebookTheme]}
-        defaultTheme="facebook"
-        storage="cookie"
-      >
+      <ThemeProvider storage="cookie">
         <SnackbarContext.Provider value={snackbarState}>
           <SnackbarHost state={snackbarState} className="fixed inset-x-0 bottom-0 z-50" />
           {children}
