@@ -132,7 +132,7 @@ const AllocationCell = React.memo(function AllocationCell({
     ? "text-error font-semibold bg-error-container/40 dark:bg-error-container/20"
     : isUnder
     ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20"
-    : "text-surface-foreground";
+    : "text-on-surface";
 
   const title = isOver
     ? `Overallocated: ${personPeriodTotal.toFixed(2)} FTE total`
@@ -159,7 +159,7 @@ const AllocationCell = React.memo(function AllocationCell({
       title={title}
       onClick={() => onStartEdit(membershipId, period)}
       className={cn(
-        "w-full h-8 text-[12px] text-center rounded border border-transparent hover:border-outline-variant hover:bg-surface-foreground/4 transition-colors cursor-text",
+        "w-full h-8 text-[12px] text-center rounded border border-transparent hover:border-outline-variant hover:bg-on-surface/4 transition-colors cursor-text",
         stateClass,
       )}
     >
@@ -197,7 +197,7 @@ const AllocationRow = React.memo(function AllocationRow({
 }: RowProps) {
   return (
     <div
-      className="grid items-center border-b border-outline-variant hover:bg-surface-foreground/4"
+      className="grid items-center border-b border-outline-variant hover:bg-on-surface/4"
       style={{ gridTemplateColumns: GRID_TEMPLATE, height: ROW_HEIGHT }}
     >
       {/* Member (sticky left) */}
@@ -205,9 +205,9 @@ const AllocationRow = React.memo(function AllocationRow({
         onContextMenu={(e) => onContextMenu(e, member, orgUnitId)}
         className="sticky left-0 z-10 bg-surface h-full flex flex-col justify-center px-3 cursor-context-menu"
       >
-        <span className="text-[13px] font-medium text-surface-foreground truncate leading-tight">{member.fullName}</span>
+        <span className="text-[13px] font-medium text-on-surface truncate leading-tight">{member.fullName}</span>
         {member.position && (
-          <span className="text-[11px] text-surface-variant-foreground truncate leading-tight">{member.position}</span>
+          <span className="text-[11px] text-on-surface-variant truncate leading-tight">{member.position}</span>
         )}
       </div>
 
@@ -219,7 +219,7 @@ const AllocationRow = React.memo(function AllocationRow({
       </div>
 
       {/* Grade */}
-      <div className="text-center text-[12px] text-surface-variant-foreground">{member.grade ?? "—"}</div>
+      <div className="text-center text-[12px] text-on-surface-variant">{member.grade ?? "—"}</div>
 
       {/* Period cells */}
       {PERIODS.map((pk) => (
@@ -239,7 +239,7 @@ const AllocationRow = React.memo(function AllocationRow({
       ))}
 
       {/* Annual cost */}
-      <div className="text-right pr-3 text-[12px] font-medium text-surface-foreground">
+      <div className="text-right pr-3 text-[12px] font-medium text-on-surface">
         {member.annualCost ? fmtGBP(Math.round(memberAnnualCost)) : "—"}
       </div>
     </div>
@@ -311,18 +311,18 @@ export function VirtualizedAllocationTable({
           className="grid items-stretch bg-surface border-b border-outline-variant sticky top-0 z-20"
           style={{ gridTemplateColumns: GRID_TEMPLATE }}
         >
-          <div className="sticky left-0 z-10 bg-surface flex items-center px-3 h-11 text-sm font-medium text-surface-variant-foreground">
+          <div className="sticky left-0 z-10 bg-surface flex items-center px-3 h-11 text-sm font-medium text-on-surface-variant">
             Member
           </div>
-          <div className="flex items-center justify-center h-11 text-sm font-medium text-surface-variant-foreground">Type</div>
-          <div className="flex items-center justify-center h-11 text-sm font-medium text-surface-variant-foreground">Grade</div>
+          <div className="flex items-center justify-center h-11 text-sm font-medium text-on-surface-variant">Type</div>
+          <div className="flex items-center justify-center h-11 text-sm font-medium text-on-surface-variant">Grade</div>
           {PERIODS.map((pk, i) => (
             <div key={pk} className="flex flex-col items-center justify-center h-11 text-[11px]">
-              <span className="font-medium text-surface-variant-foreground">{pk.toUpperCase()}</span>
-              <span className="text-surface-variant-foreground font-normal">{monthLabels[i]}</span>
+              <span className="font-medium text-on-surface-variant">{pk.toUpperCase()}</span>
+              <span className="text-on-surface-variant font-normal">{monthLabels[i]}</span>
             </div>
           ))}
-          <div className="flex items-center justify-end pr-3 h-11 text-sm font-medium text-surface-variant-foreground">
+          <div className="flex items-center justify-end pr-3 h-11 text-sm font-medium text-on-surface-variant">
             Annual Cost
           </div>
         </div>
@@ -386,10 +386,10 @@ export function VirtualizedAllocationTable({
           className="grid items-center bg-surface-container-low/30"
           style={{ gridTemplateColumns: GRID_TEMPLATE, height: ROW_HEIGHT }}
         >
-          <div className="sticky left-0 z-10 bg-surface-container-low flex items-center px-3 h-full text-[12px] text-surface-variant-foreground">Monthly Cost</div>
+          <div className="sticky left-0 z-10 bg-surface-container-low flex items-center px-3 h-full text-[12px] text-on-surface-variant">Monthly Cost</div>
           <div /><div />
           {PERIODS.map((pk) => (
-            <div key={pk} className="text-center text-[11px] text-surface-variant-foreground">{fmtGBP(squadCostTotals[pk])}</div>
+            <div key={pk} className="text-center text-[11px] text-on-surface-variant">{fmtGBP(squadCostTotals[pk])}</div>
           ))}
           <div />
         </div>

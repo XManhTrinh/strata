@@ -156,7 +156,7 @@ function TreeNode({
           <span className="shrink-0" style={{ color: unit.typeColor }}>
             <Icon name={unit.typeIcon} size={18} />
           </span>
-          <span className="text-[14px] leading-5 font-medium text-surface-foreground">{unit.name}</span>
+          <span className="text-[14px] leading-5 font-medium text-on-surface">{unit.name}</span>
           <span
             className="inline-flex items-center h-5 text-[11px] font-medium px-2 rounded-full"
             style={{ backgroundColor: unit.typeColor + "20", color: unit.typeColor }}
@@ -218,10 +218,10 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
       <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
         <Icon name="account_tree" size={40} className="text-primary" />
       </div>
-      <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+      <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
         No units found
       </h2>
-      <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6 max-w-xs">
+      <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-xs">
         Create your first organization unit to start building your hierarchy.
       </p>
       <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
@@ -240,10 +240,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+        <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
           Unable to load structure
         </h2>
-        <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+        <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
           Something went wrong loading your hierarchy. Please try again.
         </p>
         <Button variant="tonal" onClick={onRetry}>

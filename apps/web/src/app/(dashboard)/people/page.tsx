@@ -45,7 +45,6 @@ import {
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import {
   usePeople,
   useCreatePerson,
@@ -131,11 +130,11 @@ function SortableColumnItem({
         type="button"
         {...attributes}
         {...listeners}
-        className="shrink-0 touch-none cursor-grab active:cursor-grabbing text-surface-variant-foreground/40 hover:text-surface-variant-foreground"
+        className="shrink-0 touch-none cursor-grab active:cursor-grabbing text-on-surface-variant/40 hover:text-on-surface-variant"
       >
         <Icon name="drag_indicator" size={14} />
       </button>
-      <label className={`flex items-center gap-1.5 flex-1 min-w-0 ${isCore ? "" : "cursor-pointer hover:bg-surface-foreground/4"} rounded px-0.5`}>
+      <label className={`flex items-center gap-1.5 flex-1 min-w-0 ${isCore ? "" : "cursor-pointer hover:bg-on-surface/4"} rounded px-0.5`}>
         <Checkbox
           selected={selected}
           disabled={isCore}
@@ -143,7 +142,7 @@ function SortableColumnItem({
           aria-label={`Toggle ${label} column`}
           className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
         />
-        <span className="text-[12px] text-surface-foreground truncate">{label}</span>
+        <span className="text-[12px] text-on-surface truncate">{label}</span>
       </label>
     </div>
   );
@@ -458,7 +457,7 @@ export default function PeoplePage() {
         );
       case "email":
         return isPlaceholderEmail(person.email) ? (
-          <span className="text-surface-variant-foreground">No email</span>
+          <span className="text-on-surface-variant">No email</span>
         ) : (
           person.email
         );
@@ -470,7 +469,7 @@ export default function PeoplePage() {
             {person.isSuperAdmin && <AssistChip>Admin</AssistChip>}
             {(person.roles ?? []).map((r) => <AssistChip key={r.id}>{r.name}</AssistChip>)}
             {!person.isSuperAdmin && (person.roles ?? []).length === 0 && (
-              <span className="text-[12px] text-surface-variant-foreground">No role</span>
+              <span className="text-[12px] text-on-surface-variant">No role</span>
             )}
           </div>
         );
@@ -489,16 +488,16 @@ export default function PeoplePage() {
   if (isError) {
     return (
       <div className="space-y-6">
-        <TopAppBar title={<Typography variant="headline-medium">Members</Typography>} subtitle="Manage workspace members and their roles." />
+        <TopAppBar title={<h1 className="text-headline-medium">Members</h1>} subtitle="Manage workspace members and their roles." />
         <Card variant="elevated" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <Typography variant="title-medium" className="mb-2">Unable to load members</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+            <h6 className="text-title-medium mb-2">Unable to load members</h6>
+            <p className="text-body-medium text-on-surface-variant mb-6">
               {error?.message || "Something went wrong while fetching member data."}
-            </Typography>
+            </p>
             <Button variant="tonal" onClick={() => refetch()}>
               <Icon name="refresh" size={18} />Retry
             </Button>
@@ -521,7 +520,7 @@ export default function PeoplePage() {
       {/* Page Header */}
       <TopAppBar
         className="justify-between shrink-0"
-        title={<Typography variant="headline-medium">Members</Typography>}
+        title={<h1 className="text-headline-medium">Members</h1>}
         subtitle={`${data?.total ?? 0} members · Manage workspace members and their roles.`}
         actions={
           <div className="flex items-center gap-2">
@@ -655,10 +654,10 @@ export default function PeoplePage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/8 mb-6">
               <Icon name="people" size={40} className="text-primary" />
             </div>
-            <Typography variant="title-large" className="mb-2">No members yet</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6 max-w-sm">
+            <h5 className="text-title-large mb-2">No members yet</h5>
+            <p className="text-body-medium text-on-surface-variant mb-6 max-w-sm">
               Import your org data from a CSV in Settings, or add members one by one.
-            </Typography>
+            </p>
             <div className="flex gap-3">
               <Link href="/admin/settings">
                 <Button variant="tonal" leadingIcon={<Icon name="upload" />}>Import in Settings</Button>
@@ -728,10 +727,10 @@ export default function PeoplePage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <Avatar name={person.fullName} size="lg" alt={person.fullName} />
                   <div className="flex-1 min-w-0">
-                    <Typography variant="title-medium" className="truncate">{person.fullName}</Typography>
-                    <Typography variant="body-medium" color="surface-variant-foreground" className="truncate">{displayEmail(person.email)}</Typography>
+                    <h6 className="text-title-medium truncate">{person.fullName}</h6>
+                    <p className="text-body-medium text-on-surface-variant truncate">{displayEmail(person.email)}</p>
                     {person.orgUnitName && (
-                      <Typography variant="body-small" color="surface-variant-foreground" className="mt-0.5">{person.orgUnitName}</Typography>
+                      <p className="text-body-small text-on-surface-variant mt-0.5">{person.orgUnitName}</p>
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -746,9 +745,9 @@ export default function PeoplePage() {
           {/* Pagination — pinned footer, always visible without scrolling */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between shrink-0 border-t border-outline-variant pt-3">
-              <Typography variant="body-medium" color="surface-variant-foreground">
+              <p className="text-body-medium text-on-surface-variant">
                 Page {page} of {totalPages} · {data?.total ?? 0} total
-              </Typography>
+              </p>
               <div className="flex gap-2">
                 <Button variant="outlined" size="xs" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} leadingIcon={<Icon name="chevron_left" />}>Previous</Button>
                 <Button variant="outlined" size="xs" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} trailingIcon={<Icon name="chevron_right" />}>Next</Button>
@@ -808,7 +807,7 @@ export default function PeoplePage() {
             {editPerson && metadataKeys.length > 0 && (
               <>
                 <Divider />
-                <Typography variant="label-medium" color="surface-variant-foreground" as="span" className="uppercase tracking-wide">Additional Fields</Typography>
+                <span className="text-label-medium text-on-surface-variant uppercase tracking-wide">Additional Fields</span>
                 {metadataKeys.map((key) => (
                   <TextField key={key} variant="outlined" label={key} className="w-full" value={formMetadata[key] ?? ""} onChange={(value) => setFormMetadata({ ...formMetadata, [key]: value })} />
                 ))}
@@ -860,7 +859,7 @@ export default function PeoplePage() {
           <div className="space-y-3">
             <TextField variant="outlined" label="View Name" required className="w-full" value={newViewName} onChange={(value) => setNewViewName(value)} placeholder="e.g. Engineering View" />
             <div>
-              <Typography variant="body-small" color="surface-variant-foreground" className="mb-1">Visible columns:</Typography>
+              <p className="text-body-small text-on-surface-variant mb-1">Visible columns:</p>
               <div className="flex flex-wrap gap-1">
                 {visibleColumns.map((col) => <AssistChip key={col.key}>{col.label}</AssistChip>)}
               </div>

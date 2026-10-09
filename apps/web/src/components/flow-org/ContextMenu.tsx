@@ -4,7 +4,6 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import { Divider, List, ListItem } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 
 // Legacy compatibility type for interactive ListItem
 // Legacy compatibility - TypeScript cast for interactive list items
@@ -71,16 +70,16 @@ export default function ContextMenu({ x, y, target, onAction, onClose }: Context
       style={{ left: x, top: y }}
     >
       <div className="px-4 py-2">
-        <Typography variant="label-small" color="surface-variant-foreground" className="truncate">
+        <span className="text-label-small text-on-surface-variant truncate">
           {title}
-        </Typography>
+        </span>
       </div>
       <Divider />
       <List aria-label="List" className="py-1">
         {actions.map((item) => (
           <ListItemWithClick
             key={item.action}
-            leading={<Icon name={item.icon} size={18} className="text-surface-variant-foreground" />}
+            leading={<Icon name={item.icon} size={18} className="text-on-surface-variant" />}
             onClick={() => {
               onAction(item.action, targetId);
               onClose();

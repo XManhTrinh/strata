@@ -12,7 +12,6 @@ import {
   SelectItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
 import { calculateWorkingDays, getAvailableBalance } from "../utils/calendar.utils";
 
@@ -151,9 +150,9 @@ export function LeaveRequestForm({
           {errors.length > 0 && (
             <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
-                <Typography key={err} variant="body-small" color="error">
+                <p className="text-body-small text-error" key={err}>
                   {err}
-                </Typography>
+                </p>
               ))}
             </div>
           )}
@@ -171,11 +170,11 @@ export function LeaveRequestForm({
 
           {selectedBalance && (
             <div className="rounded-lg bg-surface-variant/50 p-3 flex items-center gap-2">
-              <Icon name="info" size={16} className="text-surface-variant-foreground shrink-0" />
-              <Typography variant="body-small" color="surface-variant-foreground">
+              <Icon name="info" size={16} className="text-on-surface-variant shrink-0" />
+              <p className="text-body-small text-on-surface-variant">
                 Remaining balance:{" "}
-                <Typography variant="label-large" as="span">{available} days</Typography>
-              </Typography>
+                <span className="text-label-large">{available} days</span>
+              </p>
             </div>
           )}
 
@@ -200,9 +199,9 @@ export function LeaveRequestForm({
 
           <div className="rounded-lg bg-primary-container p-3 dark:bg-primary-container/20 flex items-center gap-2">
             <Icon name="calendar_today" size={16} className="text-primary shrink-0" />
-            <Typography variant="body-small" color="primary">
-              Working days: <Typography variant="label-large" as="span" color="primary">{workingDays}</Typography>
-            </Typography>
+            <p className="text-body-small text-primary">
+              Working days: <span className="text-label-large text-primary">{workingDays}</span>
+            </p>
           </div>
 
           <TextField

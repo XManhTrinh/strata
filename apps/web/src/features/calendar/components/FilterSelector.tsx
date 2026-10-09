@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Checkbox, Button } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import type { OrgUnit } from "../types/calendar.types";
 
 interface FilterSelectorProps {
@@ -85,9 +84,9 @@ export function FilterSelector({
       {isOpen && (
         <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-lg border border-outline-variant bg-surface-container-low shadow-lg">
           <div className="flex items-center justify-between border-b border-outline-variant px-3 py-2">
-            <Typography variant="label-small" color="surface-variant-foreground" className="uppercase tracking-wide">
+            <span className="text-label-small text-on-surface-variant uppercase tracking-wide">
               Filter by Team / Person
-            </Typography>
+            </span>
             <div className="flex gap-2">
               <Button variant="text" size="xs" onClick={handleSelectAll}>Select All</Button>
               <Button variant="text" size="xs" onClick={handleClearAll}>Clear</Button>
@@ -101,8 +100,8 @@ export function FilterSelector({
  selected={selectedOrgUnitIds.includes(orgUnit.id)}
                     onSelectedChange={() => toggleOrgUnit(orgUnit.id)}
                   />
-                  <Typography variant="label-large" as="span">{orgUnit.name}</Typography>
-                  <Typography variant="body-small" as="span" color="surface-variant-foreground">({orgUnit.members.length})</Typography>
+                  <span className="text-label-large">{orgUnit.name}</span>
+                  <span className="text-body-small text-on-surface-variant">({orgUnit.members.length})</span>
                 </div>
                 <div className="ml-6 space-y-0.5">
                   {orgUnit.members.map((member) => (
@@ -111,7 +110,7 @@ export function FilterSelector({
  selected={selectedUserIds.includes(member.id)}
                         onSelectedChange={() => toggleMember(member.id)}
                       />
-                      <Typography variant="body-small" as="span">{member.name}</Typography>
+                      <span className="text-body-small">{member.name}</span>
                     </div>
                   ))}
                 </div>

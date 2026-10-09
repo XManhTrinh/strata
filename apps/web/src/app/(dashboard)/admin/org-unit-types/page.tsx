@@ -110,10 +110,10 @@ function EmptyState({
       <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
         <Icon name="label" size={40} className="text-primary" />
       </div>
-      <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+      <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
         {hasSearch ? "No types match your search" : "No unit types yet"}
       </h2>
-      <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6 max-w-xs">
+      <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-xs">
         {hasSearch
           ? "Try a different search term or clear the search."
           : "Create your first organization unit type to start building your hierarchy."}
@@ -136,10 +136,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h2 className="text-[22px] leading-7 font-normal text-surface-foreground mb-2">
+        <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
           Unable to load types
         </h2>
-        <p className="text-[14px] leading-5 text-surface-variant-foreground mb-6">
+        <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
           Something went wrong. Please try again.
         </p>
         <Button variant="tonal" onClick={onRetry}>
@@ -179,10 +179,10 @@ function TypeRow({
               <Icon name={icon} size={18} />
             </span>
           </div>
-          <span className="text-[14px] font-medium text-surface-foreground">{row.name}</span>
+          <span className="text-[14px] font-medium text-on-surface">{row.name}</span>
         </div>
       </TableCell>
-      <TableCell className="text-surface-variant-foreground">
+      <TableCell className="text-on-surface-variant">
         {row.description || "—"}
       </TableCell>
       <TableCell>
@@ -191,7 +191,7 @@ function TypeRow({
             className="inline-block h-4 w-4 rounded-full border border-outline-variant"
             style={{ backgroundColor: color }}
           />
-          <span className="text-[12px] text-surface-variant-foreground font-mono">{color}</span>
+          <span className="text-[12px] text-on-surface-variant font-mono">{color}</span>
         </div>
       </TableCell>
       <TableCell>

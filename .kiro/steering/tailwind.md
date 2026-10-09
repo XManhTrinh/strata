@@ -33,44 +33,40 @@ When a design spec gives a non-grid value, round to the nearest 4px grid point a
 - `200px` → use `w-50`
 
 ### Font sizes with Tailwind equivalents
-- `text-xs` = 12px (use `text-[12px]` only when paired with M3 leading/tracking specs)
-- `text-sm` = 14px
-- `text-base` = 16px
+- `text-xs` = 12px, `text-sm` = 14px, `text-base` = 16px — for non-type-scale UI sizing only.
+- For M3 standard type roles use `text-{role}` (see redesign-system.md §1), never a hand-rolled `text-[Npx]`.
 
 ### When arbitrary values ARE acceptable
 - Viewport-relative: `max-h-[60vh]`, `h-[calc(100vh-100px)]`
-- M3 typography with specific leading/tracking: `text-[13px]`, `text-[11px]`, `text-[10px]`
+- Non-type-scale micro sizes only (e.g. a dense control's label that is deliberately off-scale): `text-[13px]`, `text-[11px]`, `text-[10px]`. **Standard roles always use `text-{role}` per `apps/web/.agents/design/redesign-system.md` §1 — do not hand-roll M3 sizes with `text-[Npx]`.**
 - One-off design tokens with no spacing scale match
-- Color opacity modifiers: `bg-surface-foreground/4`, `text-error/80`
+- Color opacity modifiers: `bg-on-surface/4`, `text-error/80`
 
 ## M3 typography
 This project uses Material Design 3 type scale.
 
-### Use the `Typography` component from `@vkieu/mui`
-Use `<Typography>` for **all standalone text blocks** — headings, paragraphs, descriptions, captions, and labels. It provides all 15 M3 type scale roles with correct font-size, line-height, weight, and letter-spacing.
+### Typography = type-scale utility classes, no component
+Apply M3 type with `text-{role}` utilities on **semantic HTML tags** (see `apps/web/.agents/design/redesign-system.md` §1). **There is no `Typography` component — never import `@/components/ui/typography`.** The class name mirrors the role exactly (`headline-medium` → `text-headline-medium`); pick the tag for document semantics (heading level, `p`, `span`) independently of the visual size.
 
 ```tsx
-import { Typography } from "@vkieu/mui";
+// ✅ Standalone text — semantic tag + text-{role}
+<h1 className="text-headline-medium">Page Title</h1>
+<p className="text-body-medium text-on-surface-variant">Description</p>
+<span className="text-label-large">Badge text</span>
+<h5 className="text-title-large truncate">Long title…</h5>
 
-// ✅ Standalone text — always Typography
-<Typography variant="headline-medium">Page Title</Typography>
-<Typography variant="body-medium" color="surface-variant-foreground">Description</Typography>
-<Typography variant="label-large" as="span">Badge text</Typography>
-<Typography variant="title-large" className="truncate">Long title…</Typography>
-
-// ❌ Never — manual font classes on raw elements for standalone text
+// ❌ Never — hand-rolled M3 sizes on raw elements
 <h1 className="text-[28px] leading-9 font-normal">Page Title</h1>
-<p className="text-[14px] leading-5 text-surface-variant-foreground">Description</p>
 ```
 
-### When raw text is acceptable (no Typography wrapper)
+### When raw text is acceptable (no `text-{role}` wrapper)
 - **Inside MUI compounds** — `ListItem` children, `DialogTitle`, `CardTitle`, `Chip` labels already render with M3 typography. Don't double-wrap.
 - **Table cells** — `<td>` content where an extra wrapper per cell adds DOM overhead with no visual benefit.
-- **Inline fragments** — A `<span>` for inline emphasis inside an existing `<Typography>` block.
+- **Inline fragments** — A `<span>` for inline emphasis inside an existing text block.
 - **Form labels** — `<label htmlFor="...">` paired with checkboxes/inputs.
 
 ### M3 type scale quick reference
-| Variant | Size | Weight | Use case |
+| Role (class `text-{role}`) | Size | Weight | Use case |
 |---------|------|--------|----------|
 | `display-large` | 57px | 400 | Hero / splash |
 | `display-medium` | 45px | 400 | Marketing headers |

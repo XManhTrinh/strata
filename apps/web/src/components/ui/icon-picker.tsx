@@ -183,15 +183,15 @@ export function IconPicker({
               )}
               title={icon.replace(/_/g, " ")}
             >
-              <Icon name={icon} size={compact ? 18 : 22} className={isSelected ? "text-primary" : "text-surface-foreground"} />
+              <Icon name={icon} size={compact ? 18 : 22} className={isSelected ? "text-primary" : "text-on-surface"} />
             </button>
           );
         })}
       </div>
       {filtered.length === 0 && (
         <div className="flex flex-col items-center py-6 text-center">
-          <Icon name="search_off" size={20} className="text-surface-variant-foreground/40 mb-1" />
-          <p className="text-[11px] text-surface-variant-foreground">No icons found</p>
+          <Icon name="search_off" size={20} className="text-on-surface-variant/40 mb-1" />
+          <p className="text-[11px] text-on-surface-variant">No icons found</p>
         </div>
       )}
     </div>

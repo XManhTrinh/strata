@@ -122,10 +122,10 @@ export function NotificationPanel() {
               <Icon
                 name="notifications_none"
                 size={24}
-                className="text-surface-variant-foreground/40"
+                className="text-on-surface-variant/40"
               />
             </div>
-            <p className="text-body-small text-surface-variant-foreground">
+            <p className="text-body-small text-on-surface-variant">
               No notifications yet
             </p>
           </div>
@@ -148,7 +148,7 @@ export function NotificationPanel() {
                   supportingText={
                     <>
                       {notification.message}
-                      <span className="block text-surface-variant-foreground/60">
+                      <span className="block text-on-surface-variant/60">
                         {formatTimeAgo(notification.createdAt)}
                       </span>
                     </>

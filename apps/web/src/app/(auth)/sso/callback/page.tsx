@@ -16,7 +16,7 @@ export default function SSOCallbackPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-      <p className="text-sm text-surface-variant-foreground">Redirecting...</p>
+      <p className="text-sm text-on-surface-variant">Redirecting...</p>
     </main>
   );
 }

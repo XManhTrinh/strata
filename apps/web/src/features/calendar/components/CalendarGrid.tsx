@@ -182,8 +182,8 @@ export function CalendarGrid({
             key={label}
             className={`px-2 py-2 text-center text-xs font-medium uppercase tracking-wider ${
               label === "Sat" || label === "Sun"
-                ? "text-surface-variant-foreground/60 bg-surface-variant/30"
-                : "text-surface-variant-foreground"
+                ? "text-on-surface-variant/60 bg-surface-variant/30"
+                : "text-on-surface-variant"
             }`}
           >
             {label}
@@ -226,10 +226,10 @@ export function CalendarGrid({
                     <span
                       className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
                         todayHighlight
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-primary text-on-primary"
                           : isCurrentMonth
-                            ? "text-surface-foreground"
-                            : "text-surface-variant-foreground"
+                            ? "text-on-surface"
+                            : "text-on-surface-variant"
                       }`}
                     >
                       {date.getDate()}

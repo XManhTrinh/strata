@@ -2,7 +2,6 @@
 
 import { Avatar } from "@vkieu/mui/vk";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { Person } from "@/lib/org-tree/types";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -35,20 +34,20 @@ export default function UnallocatedPanel({
       {isDropTarget && (
         <div className="flex items-center gap-2 mb-4 text-primary">
           <Icon name="check_circle" size={20} />
-          <Typography variant="label-large" color="primary">Drop to unallocate</Typography>
+          <span className="text-label-large text-primary">Drop to unallocate</span>
         </div>
       )}
 
-      <Typography variant="label-small" color="surface-variant-foreground" className="uppercase tracking-wider mb-3">
+      <span className="text-label-small text-on-surface-variant uppercase tracking-wider mb-3">
         Unallocated · {persons.length}
-      </Typography>
+      </span>
 
       {persons.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-center">
-          <Icon name="person_off" size={32} className="text-surface-variant-foreground/30 mb-2" />
-          <Typography variant="body-small" color="surface-variant-foreground">
+          <Icon name="person_off" size={32} className="text-on-surface-variant/30 mb-2" />
+          <p className="text-body-small text-on-surface-variant">
             No unallocated people. Drag nodes here to remove from tree.
-          </Typography>
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -66,16 +65,16 @@ export default function UnallocatedPanel({
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} src={person.avatarUrl} size="sm" decorative />
                   <div className="min-w-0">
-                    <Typography variant="label-large" className="truncate">{person.fullName}</Typography>
-                    <Typography variant="body-small" color="surface-variant-foreground" className="truncate">
+                    <span className="text-label-large truncate">{person.fullName}</span>
+                    <p className="text-body-small text-on-surface-variant truncate">
                       {person.title}
-                    </Typography>
+                    </p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onEdit(person); }}
-                  className="shrink-0 text-surface-variant-foreground hover:text-primary transition-colors p-1 rounded"
+                  className="shrink-0 text-on-surface-variant hover:text-primary transition-colors p-1 rounded"
                   aria-label={`Edit ${person.fullName}`}
                 >
                   <Icon name="edit" size={14} />

@@ -14,7 +14,6 @@ import {
   IconButton,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import { useLeaveBalances } from "./hooks/useLeaveBalances";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -85,19 +84,19 @@ function EventDetailDialog({
         <p className="text-sm text-on-surface-variant mb-4">{event.ownerName}</p>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Typography variant="label-large" as="span">Type:</Typography>
-            <Typography variant="body-medium" as="span" color="surface-variant-foreground">{event.eventType.name}</Typography>
+            <span className="text-label-large">Type:</span>
+            <span className="text-body-medium text-on-surface-variant">{event.eventType.name}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Typography variant="label-large" as="span">Date:</Typography>
-            <Typography variant="body-medium" as="span" color="surface-variant-foreground">
+            <span className="text-label-large">Date:</span>
+            <span className="text-body-medium text-on-surface-variant">
               {new Date(event.startDate).toLocaleDateString()} – {new Date(event.endDate).toLocaleDateString()}
-            </Typography>
+            </span>
           </div>
           {event.leaveRequest && (
             <>
               <div className="flex items-center gap-2">
-                <Typography variant="label-large" as="span">Status:</Typography>
+                <span className="text-label-large">Status:</span>
                 <AssistChip
                   className={
                     event.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
@@ -108,15 +107,15 @@ function EventDetailDialog({
                 </AssistChip>
               </div>
               <div className="flex items-center gap-2">
-                <Typography variant="label-large" as="span">Working Days:</Typography>
-                <Typography variant="body-medium" as="span" color="surface-variant-foreground">{event.leaveRequest.workingDays}</Typography>
+                <span className="text-label-large">Working Days:</span>
+                <span className="text-body-medium text-on-surface-variant">{event.leaveRequest.workingDays}</span>
               </div>
             </>
           )}
           {event.notes && (
             <div>
-              <Typography variant="label-large">Notes:</Typography>
-              <Typography variant="body-medium" color="surface-variant-foreground">{event.notes}</Typography>
+              <span className="text-label-large">Notes:</span>
+              <p className="text-body-medium text-on-surface-variant">{event.notes}</p>
             </div>
           )}
         </div>
@@ -204,12 +203,12 @@ export function CalendarView() {
         className="justify-between gap-3 flex-wrap sm:flex-nowrap"
         title={
           <div className="flex items-center gap-4">
-            <Typography variant="title-large">Calendar</Typography>
+            <h5 className="text-title-large">Calendar</h5>
             <div className="flex items-center gap-1">
               <IconButton variant="standard" size="xs" onClick={goToPreviousMonth} aria-label="Previous month" icon={<Icon name="chevron_left" size={20} />} />
-              <Typography variant="label-large" as="span" className="min-w-40 text-center">
+              <span className="text-label-large min-w-40 text-center">
                 {formatMonthYear(currentDate)}
-              </Typography>
+              </span>
               <IconButton variant="standard" size="xs" onClick={goToNextMonth} aria-label="Next month" icon={<Icon name="chevron_right" size={20} />} />
               <Button variant="outlined" size="xs" onClick={goToToday} className="ml-2">Today</Button>
               <Button variant={showWeekends ? "tonal" : "outlined"} size="xs" onClick={() => setShowWeekends(!showWeekends)} className="ml-2">
@@ -265,16 +264,16 @@ export function CalendarView() {
 
           {pendingRequests.length > 0 && (
             <div className="mt-6">
-              <Typography variant="title-small" className="mb-3">
+              <h6 className="text-title-small mb-3">
                 {canApprove || canReject ? "Pending Approvals" : "Pending Requests"}
-              </Typography>
+              </h6>
               <div className="space-y-2">
                 {pendingRequests.map((event) => (
                   <div key={event.id} className="rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2.5">
-                    <Typography variant="label-large" className="truncate">{event.title}</Typography>
-                    <Typography variant="body-small" color="surface-variant-foreground" className="mt-0.5">
+                    <span className="text-label-large truncate">{event.title}</span>
+                    <p className="text-body-small text-on-surface-variant mt-0.5">
                       {event.leaveRequest?.workingDays} days
-                    </Typography>
+                    </p>
                     <div className="mt-1.5 flex items-center gap-2">
                       {canApprove && (
                         <button type="button" onClick={() => handleApprove(event.id)} className="text-[11px] font-medium text-tertiary hover:underline">

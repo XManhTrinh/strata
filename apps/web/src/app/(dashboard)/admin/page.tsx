@@ -10,7 +10,6 @@ import {
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
@@ -91,7 +90,7 @@ export default function SettingsPage() {
       transition={defaultTransition}
     >
       {/* Header */}
-      <TopAppBar title={<Typography variant="headline-medium">Settings</Typography>} subtitle="Platform configuration and preferences." />
+      <TopAppBar title={<h1 className="text-headline-medium">Settings</h1>} subtitle="Platform configuration and preferences." />
 
       {/* Settings List */}
       <Card variant="elevated">
@@ -106,7 +105,7 @@ export default function SettingsPage() {
                     </div>
                   }
                   supportingText={card.description}
-                  trailing={<Icon name="chevron_right" size={24} className="text-surface-variant-foreground" />}
+                  trailing={<Icon name="chevron_right" size={24} className="text-on-surface-variant" />}
                 >
                   {card.title}
                 </ListItem>

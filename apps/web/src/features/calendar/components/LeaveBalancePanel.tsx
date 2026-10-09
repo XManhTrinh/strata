@@ -2,7 +2,6 @@
 
 import { ProgressBar } from "@strata/ui";
 import { AssistChip, Button } from "@vkieu/mui";
-import { Typography } from "@/components/ui/typography";
 import type { LeaveBalance } from "../types/calendar.types";
 import { getAvailableBalance } from "../utils/calendar.utils";
 
@@ -14,7 +13,7 @@ interface LeaveBalancePanelProps {
 export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePanelProps) {
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-      <Typography variant="title-small">Leave Balances</Typography>
+      <h6 className="text-title-small">Leave Balances</h6>
 
       <div className="mt-4 space-y-4">
         {balances.map((balance) => {
@@ -33,7 +32,7 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                     style={{ backgroundColor: balance.leaveType.color }}
                     aria-hidden="true"
                   />
-                  <Typography variant="body-medium" as="span">{balance.leaveType.name}</Typography>
+                  <span className="text-body-medium">{balance.leaveType.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
@@ -46,15 +45,15 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                       Depleted
                     </AssistChip>
                   )}
-                  <Typography variant="label-large" as="span">
+                  <span className="text-label-large">
                     {balance.used}/{total}
-                  </Typography>
+                  </span>
                 </div>
               </div>
               <ProgressBar value={usagePercent} />
-              <Typography variant="body-small" color="surface-variant-foreground">
+              <p className="text-body-small text-on-surface-variant">
                 {available} days remaining
-              </Typography>
+              </p>
             </div>
           );
         })}

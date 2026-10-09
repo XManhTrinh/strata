@@ -97,7 +97,7 @@ export function IconColorPicker({
                 "flex-1 py-2 text-[12px] font-medium transition-colors",
                 tab === "icon"
                   ? "text-primary border-b-2 border-primary"
-                  : "text-surface-variant-foreground hover:text-surface-foreground",
+                  : "text-on-surface-variant hover:text-on-surface",
               )}
             >
               Icon
@@ -109,7 +109,7 @@ export function IconColorPicker({
                 "flex-1 py-2 text-[12px] font-medium transition-colors",
                 tab === "color"
                   ? "text-primary border-b-2 border-primary"
-                  : "text-surface-variant-foreground hover:text-surface-foreground",
+                  : "text-on-surface-variant hover:text-on-surface",
               )}
             >
               Color
@@ -125,7 +125,7 @@ export function IconColorPicker({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search icons..."
-                className="w-full h-7 px-2 text-[12px] text-surface-foreground bg-surface rounded-md border border-outline-variant/50 outline-none focus:border-primary placeholder:text-surface-variant-foreground/60"
+                className="w-full h-7 px-2 text-[12px] text-on-surface bg-surface rounded-md border border-outline-variant/50 outline-none focus:border-primary placeholder:text-on-surface-variant/60"
               />
             </div>
           )}
@@ -149,12 +149,12 @@ export function IconColorPicker({
                       )}
                       title={ic.replace(/_/g, " ")}
                     >
-                      <Icon name={ic} size={18} className={isSelected ? "text-primary" : "text-surface-foreground"} />
+                      <Icon name={ic} size={18} className={isSelected ? "text-primary" : "text-on-surface"} />
                     </button>
                   );
                 })}
                 {filteredIcons.length === 0 && (
-                  <p className="col-span-7 text-center text-[11px] text-surface-variant-foreground py-4">No icons found</p>
+                  <p className="col-span-7 text-center text-[11px] text-on-surface-variant py-4">No icons found</p>
                 )}
               </div>
             )}

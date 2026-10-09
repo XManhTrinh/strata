@@ -241,7 +241,7 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
     >
       {isGroup ? (
         <div className="bg-surface border-2 border-primary rounded-2xl px-4 py-3 shadow-2xl opacity-90">
-          <p className="text-[10px] font-semibold text-surface-variant-foreground uppercase tracking-wider mb-3">
+          <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
             Direct reports · {info.groupPersons!.length}
           </p>
           <div className="flex -space-x-2 items-center">
@@ -262,7 +262,7 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
               </div>
             ))}
             {info.groupPersons!.length > 10 && (
-              <span className="ml-2 text-xs font-semibold text-surface-variant-foreground">
+              <span className="ml-2 text-xs font-semibold text-on-surface-variant">
                 +{info.groupPersons!.length - 10}
               </span>
             )}
@@ -283,10 +283,10 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-surface-foreground text-sm">
+              <p className="font-semibold text-on-surface text-sm">
                 {info.person.fullName}
               </p>
-              <p className="text-surface-variant-foreground text-xs">
+              <p className="text-on-surface-variant text-xs">
                 {info.person.title}
               </p>
             </div>

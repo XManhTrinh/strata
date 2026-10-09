@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
 import { TopAppBar, FilterChip, AssistChip, SearchBar, Button } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import type { OrganizationUnit } from "@/services";
 import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 
@@ -111,7 +110,7 @@ export default function FlowOrgHeader({
         className="justify-between gap-4"
         title={
           <div className="flex items-center gap-4 shrink-0">
-            <Typography variant="title-large">Org Chart</Typography>
+            <h5 className="text-title-large">Org Chart</h5>
             {/* Segmented toggle */}
             <div className="flex items-center bg-surface-container-highest/50 rounded-full p-1">
               <Button
@@ -199,14 +198,11 @@ export default function FlowOrgHeader({
                       onClick={() => onFocusPerson?.(node.id)}
                       className="cursor-pointer hover:underline"
                     >
-                      <Typography
-                        variant="label-small"
-                        as="span"
-                        color={isLast ? "primary" : "surface-variant-foreground"}
-                        className={isLast ? "font-medium" : ""}
+                      <span
+                        className={`text-label-small ${isLast ? "text-primary font-medium" : "text-on-surface-variant"}`}
                       >
                         {node.name}
-                      </Typography>
+                      </span>
                     </button>
                   </span>
                 );

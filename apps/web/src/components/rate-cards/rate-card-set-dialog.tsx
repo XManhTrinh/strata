@@ -9,7 +9,6 @@ import {
   TextField,
   Button,
 } from "@vkieu/mui";
-import { Typography } from "@/components/ui/typography";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardSet, UpsertRateCardSetInput } from "@/services";
 
@@ -79,9 +78,9 @@ export function RateCardSetDialog({
           />
           <ColorPicker value={color} onChange={setColor} label="Color" />
           {error && (
-            <Typography variant="body-small" color="error">
+            <p className="text-body-small text-error">
               {error}
-            </Typography>
+            </p>
           )}
         </div>
       </DialogContent>

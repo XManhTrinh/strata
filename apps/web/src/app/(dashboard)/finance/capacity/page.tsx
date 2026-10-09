@@ -10,7 +10,6 @@ import {TopAppBar,Card,InputChip,
   SelectItem} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
@@ -101,11 +100,11 @@ function StatCard({ label, value, sub, icon, color }: {
     <Card variant="elevated">
       <CardContent className="p-5">
         <div className={`flex items-center justify-center w-10 h-10 rounded-full ${color} mb-3`}>
-          <Icon name={icon} size={24} className="text-primary-container-foreground" />
+          <Icon name={icon} size={24} className="text-on-primary-container" />
         </div>
-        <Typography variant="body-small" color="surface-variant-foreground" className="uppercase tracking-wide">{label}</Typography>
-        <Typography variant="headline-medium" className="mt-1">{value}</Typography>
-        {sub && <Typography variant="body-small" color="surface-variant-foreground" className="mt-1">{sub}</Typography>}
+        <p className="text-body-small text-on-surface-variant uppercase tracking-wide">{label}</p>
+        <h3 className="text-headline-medium mt-1">{value}</h3>
+        {sub && <p className="text-body-small text-on-surface-variant mt-1">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -580,7 +579,7 @@ export default function CapacityPage() {
       {/* Header */}
       <TopAppBar
         className="justify-between"
-        title={<Typography variant="headline-medium">Capacity Planning</Typography>}
+        title={<h1 className="text-headline-medium">Capacity Planning</h1>}
         subtitle={`FTE allocation ${groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing`}
         actions={
           <div className="flex items-center gap-3">
@@ -616,16 +615,16 @@ export default function CapacityPage() {
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Icon name="error" size={32} className="text-error mb-3" />
-            <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Failed to load"}</Typography>
+            <p className="text-body-medium text-on-surface-variant">{error?.message || "Failed to load"}</p>
           </CardContent>
         </Card>
       ) : (squads ?? []).length === 0 ? (
         <Card variant="elevated" className="max-w-md mx-auto">
           <CardContent className="flex flex-col items-center py-12 text-center">
-            <Icon name="groups" size={32} className="text-surface-variant-foreground mb-3" />
-            <Typography variant="body-medium" color="surface-variant-foreground">
+            <Icon name="groups" size={32} className="text-on-surface-variant mb-3" />
+            <p className="text-body-medium text-on-surface-variant">
               No allocations in {activeDivisionName || "this division"} yet.
-            </Typography>
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -709,9 +708,9 @@ export default function CapacityPage() {
           {groupedData.length === 0 ? (
             <Card variant="elevated">
               <CardContent className="flex flex-col items-center py-16 text-center">
-                <Icon name="stacked_bar_chart" size={40} className="text-surface-variant-foreground/30 mb-4" />
-                <Typography variant="title-medium" className="mb-1">No capacity data</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground">Import members to generate default allocations.</Typography>
+                <Icon name="stacked_bar_chart" size={40} className="text-on-surface-variant/30 mb-4" />
+                <h6 className="text-title-medium mb-1">No capacity data</h6>
+                <p className="text-body-medium text-on-surface-variant">Import members to generate default allocations.</p>
               </CardContent>
             </Card>
           ) : (
@@ -738,22 +737,22 @@ export default function CapacityPage() {
                       type="button"
                       onClick={() => toggleSquad(expandKey)}
                       aria-expanded={isExpanded}
-                      className="w-full px-5 py-4 border-b border-outline-variant flex items-center justify-between gap-3 text-left hover:bg-surface-foreground/4 transition-colors"
+                      className="w-full px-5 py-4 border-b border-outline-variant flex items-center justify-between gap-3 text-left hover:bg-on-surface/4 transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <Icon
                           name={isExpanded ? "expand_less" : "expand_more"}
                           size={22}
-                          className="text-surface-variant-foreground shrink-0"
+                          className="text-on-surface-variant shrink-0"
                         />
                         <div className="min-w-0">
-                          <Typography variant="title-medium">{squad.orgUnitName}</Typography>
-                          <Typography variant="body-small" color="surface-variant-foreground">
+                          <h6 className="text-title-medium">{squad.orgUnitName}</h6>
+                          <p className="text-body-small text-on-surface-variant">
                             {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
-                          </Typography>
+                          </p>
                         </div>
                       </div>
-                      <span className="shrink-0 inline-flex items-center h-8 rounded-lg bg-secondary-container px-3 text-sm font-medium text-secondary-container-foreground">
+                      <span className="shrink-0 inline-flex items-center h-8 rounded-lg bg-secondary-container px-3 text-sm font-medium text-on-secondary-container">
                         {fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE
                       </span>
                     </button>
@@ -801,12 +800,12 @@ export default function CapacityPage() {
                         ))}
                         <TableCell className="text-right">{fmtFTE(sumPeriods(totalFTE))}</TableCell>
                       </TableRow>
-                      <TableRow className="text-surface-variant-foreground">
+                      <TableRow className="text-on-surface-variant">
                         <TableCell>Cost</TableCell><TableCell /><TableCell />
                         {PERIODS.map((pk) => (
                           <TableCell key={pk} className="text-center text-[12px]">{fmtGBP(totalCost[pk])}</TableCell>
                         ))}
-                        <TableCell className="text-right font-semibold text-surface-foreground">{fmtGBP(annualCostTotal)}</TableCell>
+                        <TableCell className="text-right font-semibold text-on-surface">{fmtGBP(annualCostTotal)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -825,9 +824,9 @@ export default function CapacityPage() {
                 transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
                 className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-container border border-outline-variant rounded-full px-6 py-3 shadow-xl flex items-center gap-4"
               >
-                <Typography variant="body-small" color="surface-variant-foreground">
-                  <span className="font-medium text-surface-foreground">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
-                </Typography>
+                <p className="text-body-small text-on-surface-variant">
+                  <span className="font-medium text-on-surface">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
+                </p>
                 <Button variant="text" onClick={handleDiscard} disabled={saveAllocationsMutation.isPending}>Discard</Button>
                 <Button onClick={handleSave} disabled={saveAllocationsMutation.isPending}>
                   <Icon name="save" size={18} />
@@ -848,8 +847,8 @@ export default function CapacityPage() {
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
             <div className="px-3 py-2 border-b border-outline-variant">
-              <Typography variant="body-small" color="surface-variant-foreground" className="font-medium">Allocate to squad</Typography>
-              <Typography variant="body-small" className="truncate">{contextMenu.fullName}</Typography>
+              <p className="text-body-small text-on-surface-variant font-medium">Allocate to squad</p>
+              <p className="text-body-small truncate">{contextMenu.fullName}</p>
             </div>
             <div className="max-h-75 overflow-y-auto py-1">
               {(squads ?? [])
@@ -860,7 +859,7 @@ export default function CapacityPage() {
                     key={s.orgUnitId}
                     type="button"
                     onClick={() => handleAllocateToSquad(contextMenu.membershipId, s.orgUnitId)}
-                    className="w-full text-left px-3 py-2 text-[13px] hover:bg-surface-foreground/8 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-[13px] hover:bg-on-surface/8 transition-colors flex items-center gap-2"
                   >
                     <Icon name="add" size={16} className="text-primary" />
                     {s.orgUnitName}
@@ -870,7 +869,7 @@ export default function CapacityPage() {
                 .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
                 .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
                 .length === 0 && (
-                <Typography variant="body-small" color="surface-variant-foreground" className="px-3 py-2">Already in all squads</Typography>
+                <p className="text-body-small text-on-surface-variant px-3 py-2">Already in all squads</p>
               )}
             </div>
           </div>

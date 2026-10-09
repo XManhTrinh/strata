@@ -9,7 +9,6 @@ import {TopAppBar,Card,Checkbox,
   Button} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton } from "@vkieu/mui/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
@@ -131,10 +130,10 @@ function CardTableRow({
       {/* Name + conditions */}
       <TableCell>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-container text-[11px] font-medium text-surface-variant-foreground shrink-0">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-container text-[11px] font-medium text-on-surface-variant shrink-0">
             {index + 1}
           </span>
-          <span className="font-medium text-surface-foreground truncate">{card.name}</span>
+          <span className="font-medium text-on-surface truncate">{card.name}</span>
           {card.isDefault && <AssistChip>Default</AssistChip>}
         </div>
         {!card.isDefault && card.conditions.length > 0 && (
@@ -142,11 +141,11 @@ function CardTableRow({
             {card.conditions.map((c, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 text-[11px] rounded bg-surface-container px-1.5 py-0.5 text-surface-variant-foreground"
+                className="inline-flex items-center gap-1 text-[11px] rounded bg-surface-container px-1.5 py-0.5 text-on-surface-variant"
               >
-                <span className="font-medium text-surface-foreground">{c.column}</span>
+                <span className="font-medium text-on-surface">{c.column}</span>
                 {OPERATOR_LABEL[c.operator]}
-                <span className="font-medium text-surface-foreground">{c.value}</span>
+                <span className="font-medium text-on-surface">{c.value}</span>
               </span>
             ))}
           </div>
@@ -156,8 +155,8 @@ function CardTableRow({
       {/* Per-quarter: working days + quarter total */}
       {quarters.map((q, i) => (
         <TableCell key={i} className="text-right whitespace-nowrap">
-          <div className="text-[13px] text-surface-foreground">{fmtGBP(q.total)}</div>
-          <div className="text-[11px] text-surface-variant-foreground">
+          <div className="text-[13px] text-on-surface">{fmtGBP(q.total)}</div>
+          <div className="text-[11px] text-on-surface-variant">
             {q.days} day{q.days !== 1 ? "s" : ""}{q.dayRate ? ` · ${fmtGBP(q.dayRate)}/d` : ""}
           </div>
         </TableCell>
@@ -174,7 +173,7 @@ function CardTableRow({
           <button
             type="button"
             onClick={() => onEdit(card)}
-            className="text-surface-variant-foreground hover:text-primary transition-colors"
+            className="text-on-surface-variant hover:text-primary transition-colors"
             aria-label="Edit rate card"
           >
             <Icon name="edit" size={18} />
@@ -182,7 +181,7 @@ function CardTableRow({
           <button
             type="button"
             onClick={() => onDelete(card)}
-            className="text-surface-variant-foreground hover:text-error transition-colors"
+            className="text-on-surface-variant hover:text-error transition-colors"
             aria-label="Delete rate card"
           >
             <Icon name="delete" size={18} />
@@ -531,13 +530,13 @@ export default function RateCardsPage() {
             onSelectedChange={() => toggleGroup(groupCards)}
             aria-label={`Select all in ${title}`}
           />
-          <span style={color ? { color } : undefined} className={color ? undefined : "text-surface-variant-foreground"}>
+          <span style={color ? { color } : undefined} className={color ? undefined : "text-on-surface-variant"}>
             <Icon name={group ? "folder" : "folder_off"} size={18} />
           </span>
-          <Typography variant="title-small">{title}</Typography>
-          <Typography variant="body-small" color="surface-variant-foreground">
+          <h6 className="text-title-small">{title}</h6>
+          <p className="text-body-small text-on-surface-variant">
             ({groupCards.length})
-          </Typography>
+          </p>
           <div className="flex-1" />
           {group && (
             <>
@@ -547,7 +546,7 @@ export default function RateCardsPage() {
               <button
                 type="button"
                 onClick={() => openEditGroup(group)}
-                className="text-surface-variant-foreground hover:text-primary transition-colors"
+                className="text-on-surface-variant hover:text-primary transition-colors"
                 aria-label="Edit group"
               >
                 <Icon name="edit" size={16} />
@@ -555,7 +554,7 @@ export default function RateCardsPage() {
               <button
                 type="button"
                 onClick={() => handleDeleteGroup(group)}
-                className="text-surface-variant-foreground hover:text-error transition-colors"
+                className="text-on-surface-variant hover:text-error transition-colors"
                 aria-label="Delete group"
               >
                 <Icon name="delete" size={16} />
@@ -570,9 +569,9 @@ export default function RateCardsPage() {
         </div>
 
         {groupCards.length === 0 ? (
-          <Typography variant="body-small" color="surface-variant-foreground" className="pl-7">
+          <p className="text-body-small text-on-surface-variant pl-7">
             No cards in this group yet.
-          </Typography>
+          </p>
         ) : (
           <div className="overflow-x-auto border border-outline-variant rounded-lg">
             <Table>
@@ -621,7 +620,7 @@ export default function RateCardsPage() {
     >
       <TopAppBar
         className="justify-between"
-        title={<Typography variant="headline-medium">Rate Cards</Typography>}
+        title={<h1 className="text-headline-medium">Rate Cards</h1>}
         subtitle="Organize rate cards into tabs and groups, define condition-based rates, then apply to matching members."
         actions={
           <div className="flex items-center gap-2">
@@ -651,9 +650,9 @@ export default function RateCardsPage() {
               onSelectedChange={toggleAll}
               aria-label="Select all rate cards"
             />
-            <Typography variant="body-medium" color="surface-variant-foreground">
+            <p className="text-body-medium text-on-surface-variant">
               {selected.size > 0 ? `${selected.size} selected` : "Select all"}
-            </Typography>
+            </p>
           </label>
           <Button
             variant="tonal"
@@ -675,11 +674,11 @@ export default function RateCardsPage() {
       ) : tabs.length === 0 ? (
         <Card variant="elevated">
           <CardContent className="flex flex-col items-center py-16 text-center">
-            <Icon name="request_quote" size={40} className="text-surface-variant-foreground/30 mb-4" />
-            <Typography variant="title-medium" className="mb-1">No rate cards yet</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-4">
+            <Icon name="request_quote" size={40} className="text-on-surface-variant/30 mb-4" />
+            <h6 className="text-title-medium mb-1">No rate cards yet</h6>
+            <p className="text-body-medium text-on-surface-variant mb-4">
               Create a tab (e.g. &ldquo;Digital&rdquo;), add groups inside it, then create rate cards.
-            </Typography>
+            </p>
             <div className="flex items-center gap-2">
               <Button variant="tonal" onClick={openCreateSet} leadingIcon={<Icon name="add" />}>
                 New tab
@@ -705,16 +704,16 @@ export default function RateCardsPage() {
                       aria-hidden
                     />
                   )}
-                  <Typography variant="title-medium">{t.name}</Typography>
+                  <h6 className="text-title-medium">{t.name}</h6>
                   {t.name.includes("(Demo)") && (
                     <AssistChip leadingIcon={<Icon name="bolt" />}>
                       Demo
                     </AssistChip>
                   )}
                   {t.set?.description && (
-                    <Typography variant="body-small" color="surface-variant-foreground">
+                    <p className="text-body-small text-on-surface-variant">
                       {t.set.description}
-                    </Typography>
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
@@ -726,7 +725,7 @@ export default function RateCardsPage() {
                       <button
                         type="button"
                         onClick={() => openEditSet(t.set!)}
-                        className="text-surface-variant-foreground hover:text-primary transition-colors"
+                        className="text-on-surface-variant hover:text-primary transition-colors"
                         aria-label="Rename tab"
                       >
                         <Icon name="edit" size={16} />
@@ -734,7 +733,7 @@ export default function RateCardsPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteSet(t.set!)}
-                        className="text-surface-variant-foreground hover:text-error transition-colors"
+                        className="text-on-surface-variant hover:text-error transition-colors"
                         aria-label="Delete tab"
                       >
                         <Icon name="delete" size={16} />
@@ -745,9 +744,9 @@ export default function RateCardsPage() {
               </div>
 
               {t.buckets.length === 0 ? (
-                <Typography variant="body-small" color="surface-variant-foreground">
+                <p className="text-body-small text-on-surface-variant">
                   No groups in this tab yet. Add a group to start creating rate cards.
-                </Typography>
+                </p>
               ) : (
                 t.buckets.map((b) => renderBucket(b))
               )}

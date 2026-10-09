@@ -64,7 +64,7 @@ export function SortableOrgLevelItem({
         type="button"
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-surface-variant-foreground hover:text-surface-foreground shrink-0 touch-none flex items-center"
+        className="cursor-grab active:cursor-grabbing text-on-surface-variant hover:text-on-surface shrink-0 touch-none flex items-center"
         aria-label={`Reorder ${csvHeader}`}
       >
         <Icon name="drag_indicator" size={16} />
@@ -76,11 +76,11 @@ export function SortableOrgLevelItem({
       </span>
 
       {/* CSV column name */}
-      <span className="text-[12px] text-surface-variant-foreground w-20 shrink-0 truncate leading-none" title={csvHeader}>
+      <span className="text-[12px] text-on-surface-variant w-20 shrink-0 truncate leading-none" title={csvHeader}>
         {csvHeader}
       </span>
 
-      <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/50 shrink-0" />
+      <Icon name="arrow_forward" size={12} className="text-on-surface-variant/50 shrink-0" />
 
       {/* Combined icon + color picker */}
       <IconColorPicker
@@ -100,7 +100,7 @@ export function SortableOrgLevelItem({
       />
 
       {/* Level indicator */}
-      <span className="text-[9px] text-surface-variant-foreground/60 shrink-0 w-10 text-right leading-none">
+      <span className="text-[9px] text-on-surface-variant/60 shrink-0 w-10 text-right leading-none">
         {rank === 0 ? "Top" : rank === total - 1 ? "Bottom" : `Lvl ${rank + 1}`}
       </span>
     </div>

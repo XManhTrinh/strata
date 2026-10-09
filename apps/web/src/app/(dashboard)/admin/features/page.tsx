@@ -13,7 +13,6 @@ import {
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
@@ -98,10 +97,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <Typography variant="title-large" className="mb-2">Unable to load features</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+        <h5 className="text-title-large mb-2">Unable to load features</h5>
+        <p className="text-body-medium text-on-surface-variant mb-6">
           Something went wrong. Please try again.
-        </Typography>
+        </p>
         <Button variant="tonal" onClick={onRetry}>
           <Icon name="refresh" size={18} />
           Retry
@@ -120,10 +119,10 @@ function EmptyState({ hasSearch }: { hasSearch: boolean }) {
         <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
           <Icon name="extension" size={40} className="text-primary" />
         </div>
-        <Typography variant="title-large" className="mb-2">No features found</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground">
+        <h5 className="text-title-large mb-2">No features found</h5>
+        <p className="text-body-medium text-on-surface-variant">
           {hasSearch ? "Try adjusting your search query." : "No features are registered yet."}
-        </Typography>
+        </p>
       </CardContent>
     </Card>
   );
@@ -168,15 +167,15 @@ function FeatureCard({
         </div>
 
         {/* Title + key */}
-        <Typography variant="title-medium">{feature.displayName}</Typography>
-        <Typography variant="label-small" color="surface-variant-foreground" className="font-mono mt-0.5">
+        <h6 className="text-title-medium">{feature.displayName}</h6>
+        <span className="text-label-small text-on-surface-variant font-mono mt-0.5">
           {feature.key}
-        </Typography>
+        </span>
 
         {/* Description */}
-        <Typography variant="body-small" color="surface-variant-foreground" className="mt-2 line-clamp-2">
+        <p className="text-body-small text-on-surface-variant mt-2 line-clamp-2">
           {feature.description || "No description available."}
-        </Typography>
+        </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-outline-variant/50">
@@ -206,19 +205,19 @@ function FeatureCard({
               <div className="mt-4 pt-3 border-t border-outline-variant/50 space-y-2.5">
                 {feature.permissions.map((perm) => (
                   <div key={perm.key} className="flex items-start gap-2.5">
-                    <Icon name="key" size={14} className="text-surface-variant-foreground mt-0.5 shrink-0" />
+                    <Icon name="key" size={14} className="text-on-surface-variant mt-0.5 shrink-0" />
                     <div className="min-w-0">
-                      <Typography variant="label-large" as="span">{perm.displayName}</Typography>
-                      <Typography variant="label-small" color="surface-variant-foreground" className="font-mono block">
+                      <span className="text-label-large">{perm.displayName}</span>
+                      <span className="text-label-small text-on-surface-variant font-mono block">
                         {feature.key}:{perm.key}
-                      </Typography>
+                      </span>
                     </div>
                   </div>
                 ))}
                 {feature.permissions.length === 0 && (
-                  <Typography variant="body-small" color="surface-variant-foreground">
+                  <p className="text-body-small text-on-surface-variant">
                     No permissions defined for this feature.
-                  </Typography>
+                  </p>
                 )}
               </div>
             </motion.div>
@@ -280,7 +279,7 @@ export default function FeaturesPage() {
   // ── Page header (shared across states) ─────────────────────────────────
   const header = (
     <TopAppBar
-      title={<Typography variant="headline-medium">Features</Typography>}
+      title={<h1 className="text-headline-medium">Features</h1>}
       subtitle={!isLoading && features.length > 0 ? `Control which features are enabled for your workspace. ${enabledCount} of ${features.length} active.` : "Control which features are enabled for your workspace."}
     />
   );

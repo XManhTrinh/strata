@@ -54,10 +54,12 @@ These components were removed from `@vkieu/mui` and are provided as local polyfi
 | Component(s) | Import from |
 |---|---|
 | `Icon` | `@/components/ui/icon` |
-| `Typography` | `@/components/ui/typography` |
 | `CardContent`, `CardHeader`, `CardTitle`, `CardFooter`, `CardDescription` | `@/components/ui/card-content` |
+| `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption` | `@/components/ui/table` |
 
 `Select` (with `SelectItem`) and `Autocomplete` (with `AutocompleteItem`) now come from `@vkieu/mui` — the local `select` and `combo-box` polyfills were removed.
+
+**Type is utility classes, not a component.** There is no `Typography` component — the `@/components/ui/typography` polyfill was deleted. Apply M3 type with `text-{role}` utility classes on semantic HTML tags (see `apps/web/.agents/design/redesign-system.md` §1); choose the tag for document semantics and the `text-{role}` class for the visual size independently.
 
 All polyfills use the same M3 CSS variable token names as the new `@vkieu/mui` CSS variables.
 
@@ -163,3 +165,4 @@ App-wide custom hooks shared across features.
 - Do NOT use `SnackbarProvider` or `useSnackbar` from `@vkieu/mui` — use `SnackbarHost` + `useSnackbar()` from `@/lib/snackbar`.
 - Do NOT import `Avatar`, `AvatarGroup`, `Skeleton`, or `SkeletonGroup` from `@/components/ui/avatar` or `@/components/ui/skeleton` — those polyfills have been deleted; import from `@vkieu/mui/vk` instead.
 - Do NOT import `Avatar` or `Skeleton` from `@strata/ui` in the web app — go directly to `@vkieu/mui/vk`. The `@strata/ui` re-exports exist for other packages that depend on it.
+- Do NOT import or use a `Typography` component — there is none. `@/components/ui/typography` was deleted; apply M3 type with `text-{role}` utility classes on semantic tags (see `apps/web/.agents/design/redesign-system.md` §1).

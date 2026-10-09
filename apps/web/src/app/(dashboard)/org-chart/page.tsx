@@ -15,7 +15,6 @@ import {
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnitTree } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -176,18 +175,18 @@ export default function OrgChartPage() {
 
     if (!isAllView) {
       parts.push(
-        <Typography key="filter" variant="body-small" color="surface-variant-foreground" as="span">
-          Showing <strong className="text-surface-foreground">{selectedMemberCount}</strong>{" "}
+        <span className="text-body-small text-on-surface-variant" key="filter">
+          Showing <strong className="text-on-surface">{selectedMemberCount}</strong>{" "}
           {selectedMemberCount === 1 ? "person" : "people"}
-        </Typography>,
+        </span>,
       );
     }
 
     if (search.trim() && matchedIds.size > 0) {
       parts.push(
-        <Typography key="search" variant="body-small" color="surface-variant-foreground" as="span">
+        <span className="text-body-small text-on-surface-variant" key="search">
           {matchedIds.size} {matchedIds.size === 1 ? "match" : "matches"} highlighted
-        </Typography>,
+        </span>,
       );
     }
 
@@ -224,10 +223,10 @@ export default function OrgChartPage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <Typography variant="title-medium" className="mb-2">Unable to load org chart</Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground">
+            <h6 className="text-title-medium mb-2">Unable to load org chart</h6>
+            <p className="text-body-medium text-on-surface-variant">
               {error}
-            </Typography>
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -272,9 +271,9 @@ export default function OrgChartPage() {
         {focusedPerson && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-surface-container border border-outline-variant px-4 py-2 shadow-lg">
             <Icon name="center_focus_strong" size={18} className="text-primary" />
-            <Typography variant="body-small" color="surface-variant-foreground">
-              Focused on <span className="font-medium text-surface-foreground">{focusedPerson.fullName}</span>
-            </Typography>
+            <p className="text-body-small text-on-surface-variant">
+              Focused on <span className="font-medium text-on-surface">{focusedPerson.fullName}</span>
+            </p>
             <Button variant="text" size="xs" onClick={clearFocus}>
               <Icon name="close" size={16} />
               Exit focus

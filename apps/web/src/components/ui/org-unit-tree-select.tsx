@@ -193,9 +193,9 @@ export function OrgUnitTreeSelect({
             <button
               type="button"
               onClick={() => { setSearch(""); if (selectedCount > 0) clearAll(); }}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-foreground/8 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-on-surface/8 transition-colors"
             >
-              <Icon name="close" size={20} className="text-surface-variant-foreground" />
+              <Icon name="close" size={20} className="text-on-surface-variant" />
             </button>
           ) : undefined
         }
@@ -208,8 +208,8 @@ export function OrgUnitTreeSelect({
           <div className="max-h-80 overflow-y-auto py-1">
             {flatNodes.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center px-4">
-                <Icon name="search_off" size={24} className="text-surface-variant-foreground/40 mb-2" />
-                <p className="text-[13px] text-surface-variant-foreground">No org units found</p>
+                <Icon name="search_off" size={24} className="text-on-surface-variant/40 mb-2" />
+                <p className="text-[13px] text-on-surface-variant">No org units found</p>
               </div>
             ) : (
               flatNodes.map(({ node, depth, hasChildren }) => {
@@ -217,7 +217,7 @@ export function OrgUnitTreeSelect({
                 return (
                   <div
                     key={node.id}
-                    className="flex items-center gap-1 px-3 py-1.5 hover:bg-surface-foreground/4 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 hover:bg-on-surface/4 transition-colors cursor-pointer"
                     style={{ paddingLeft: `${12 + depth * 20}px` }}
                     onClick={() => toggleSelect(node)}
                   >
@@ -229,12 +229,12 @@ export function OrgUnitTreeSelect({
                           e.stopPropagation();
                           toggleExpand(node.id);
                         }}
-                        className="shrink-0 flex items-center justify-center w-5 h-5 rounded hover:bg-surface-foreground/8"
+                        className="shrink-0 flex items-center justify-center w-5 h-5 rounded hover:bg-on-surface/8"
                       >
                         <Icon
                           name={effectiveExpanded.has(node.id) ? "expand_more" : "chevron_right"}
                           size={16}
-                          className="text-surface-variant-foreground"
+                          className="text-on-surface-variant"
                         />
                       </button>
                     ) : (
@@ -250,13 +250,13 @@ export function OrgUnitTreeSelect({
                     />
 
                     {/* Label */}
-                    <span className="flex-1 text-[13px] text-surface-foreground truncate min-w-0">
+                    <span className="flex-1 text-[13px] text-on-surface truncate min-w-0">
                       {node.name}
                     </span>
 
                     {/* Type badge */}
                     {node.type?.name && (
-                      <span className="text-[10px] text-surface-variant-foreground/60 shrink-0">
+                      <span className="text-[10px] text-on-surface-variant/60 shrink-0">
                         {node.type.name}
                       </span>
                     )}
@@ -269,7 +269,7 @@ export function OrgUnitTreeSelect({
           {/* Footer */}
           {selectedCount > 0 && (
             <div className="px-3 py-2 border-t border-outline-variant flex items-center justify-between">
-              <span className="text-[12px] text-surface-variant-foreground">
+              <span className="text-[12px] text-on-surface-variant">
                 {(() => {
                   // Build summary by type name
                   const typeCounts = new Map<string, number>();

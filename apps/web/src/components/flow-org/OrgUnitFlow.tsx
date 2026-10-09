@@ -253,7 +253,7 @@ function OrgUnitFlowInner({ tree, onEdit, onAddChild, onArchive }: OrgUnitFlowIn
       <Background gap={20} size={1} className="opacity-30" />
       <Controls
         showInteractive={false}
-        className="bg-surface-container! border-outline-variant! rounded-xl! shadow-md! [&>button]:bg-surface! [&>button]:border-outline-variant! [&>button]:text-surface-foreground! [&>button:hover]:bg-surface-foreground/8!"
+        className="bg-surface-container! border-outline-variant! rounded-xl! shadow-md! [&>button]:bg-surface! [&>button]:border-outline-variant! [&>button]:text-on-surface! [&>button:hover]:bg-on-surface/8!"
       />
       <MiniMap
         className="bg-surface-container! border-outline-variant! rounded-xl!"

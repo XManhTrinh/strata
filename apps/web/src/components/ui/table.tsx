@@ -61,7 +61,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "min-h-13 border-b border-outline-variant transition-colors hover:bg-surface-foreground/8 data-[state=selected]:bg-primary-container",
+      "min-h-13 border-b border-outline-variant transition-colors hover:bg-on-surface/8 data-[state=selected]:bg-primary-container",
       className
     )}
     {...props}
@@ -76,7 +76,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle text-sm font-medium text-surface-variant-foreground has-[[role=checkbox]]:pr-0 *:[[role=checkbox]]:translate-y-0.5",
+      "h-12 px-4 text-left align-middle text-sm font-medium text-on-surface-variant has-[[role=checkbox]]:pr-0 *:[[role=checkbox]]:translate-y-0.5",
       className
     )}
     {...props}
@@ -91,7 +91,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "px-4 py-3 align-middle text-sm text-surface-foreground has-[[role=checkbox]]:pr-0 *:[[role=checkbox]]:translate-y-0.5",
+      "px-4 py-3 align-middle text-sm text-on-surface has-[[role=checkbox]]:pr-0 *:[[role=checkbox]]:translate-y-0.5",
       className
     )}
     {...props}
@@ -105,7 +105,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-xs text-surface-variant-foreground", className)}
+    className={cn("mt-4 text-xs text-on-surface-variant", className)}
     {...props}
   />
 ));

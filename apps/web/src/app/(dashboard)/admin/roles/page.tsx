@@ -19,7 +19,6 @@ import {SearchBar,
   SelectItem} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -108,7 +107,7 @@ function PageHeader({
   return (
     <TopAppBar
       className="justify-between shrink-0"
-      title={<Typography variant="headline-small">Roles & Permissions</Typography>}
+      title={<h1 className="text-headline-small">Roles & Permissions</h1>}
       subtitle="Define roles and manage feature-level access with granular scope control."
       actions={
         <div className="flex items-center gap-2 shrink-0">
@@ -166,10 +165,10 @@ function ErrorState() {
           <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
             <Icon name="error" size={24} className="text-error" />
           </div>
-          <Typography variant="title-medium" className="mb-1">Unable to load roles</Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground">
+          <h6 className="text-title-medium mb-1">Unable to load roles</h6>
+          <p className="text-body-medium text-on-surface-variant">
             Something went wrong. Please try again later.
-          </Typography>
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -185,10 +184,10 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
           <Icon name="shield" size={40} className="text-primary" />
         </div>
-        <Typography variant="title-large" className="mb-2">No roles yet</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+        <h5 className="text-title-large mb-2">No roles yet</h5>
+        <p className="text-body-medium text-on-surface-variant mb-6">
           Create your first role to start managing permissions.
-        </Typography>
+        </p>
         <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
           Create your first role
         </Button>
@@ -302,17 +301,17 @@ function ScopeGuideDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
                 <Icon name={item.icon} size={18} className="text-primary" />
               </div>
               <div className="min-w-0">
-                <Typography variant="label-large">{item.scope}</Typography>
-                <Typography variant="body-small" color="surface-variant-foreground">{item.desc}</Typography>
+                <span className="text-label-large">{item.scope}</span>
+                <p className="text-body-small text-on-surface-variant">{item.desc}</p>
               </div>
             </div>
           ))}
         </div>
         <div className="flex gap-3 rounded-xl bg-secondary-container/30 p-3 mt-4">
           <Icon name="lightbulb" size={18} className="text-secondary shrink-0 mt-0.5" />
-          <Typography variant="body-small" color="secondary">
+          <p className="text-body-small text-secondary">
             <span className="font-medium">Tip:</span> For small teams, you only need 3 scopes: Own, Branch, and Company.
-          </Typography>
+          </p>
         </div>
       </DialogContent>
       <DialogActions>
@@ -342,10 +341,10 @@ function PermissionMatrix({
     return (
       <div className="flex flex-col items-center py-16 text-center">
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/50 mb-4">
-          <Icon name="lock" size={24} className="text-surface-variant-foreground/60" />
+          <Icon name="lock" size={24} className="text-on-surface-variant/60" />
         </div>
-        <Typography variant="title-medium" className="mb-1">No features available</Typography>
-        <Typography variant="body-medium" color="surface-variant-foreground">Features will appear here once configured.</Typography>
+        <h6 className="text-title-medium mb-1">No features available</h6>
+        <p className="text-body-medium text-on-surface-variant">Features will appear here once configured.</p>
       </div>
     );
   }
@@ -356,9 +355,9 @@ function PermissionMatrix({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Typography variant="label-medium" color="surface-variant-foreground" as="span" className="uppercase tracking-wide">
+          <span className="text-label-medium text-on-surface-variant uppercase tracking-wide">
             {features.length} {features.length === 1 ? "feature" : "features"}
-          </Typography>
+          </span>
           <TooltipTrigger placement="right">
             <IconButton variant="standard" size="xs" onClick={() => setShowScopeGuide(true)} aria-label="Scope guide" icon={<Icon name="help" size={16} />} />
             <Tooltip>What do the scopes mean?</Tooltip>
@@ -375,15 +374,15 @@ function PermissionMatrix({
 
         return (
           <Card key={feature.id} variant="outlined" className="overflow-hidden">
-            <button type="button" onClick={() => onToggleFeature(feature.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-foreground/4 transition-colors text-left">
+            <button type="button" onClick={() => onToggleFeature(feature.id)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-on-surface/4 transition-colors text-left">
               <Icon name="extension" size={20} className="text-primary shrink-0" />
-              <Typography variant="label-large" as="span" className="flex-1 min-w-0">{feature.displayName}</Typography>
+              <span className="text-label-large flex-1 min-w-0">{feature.displayName}</span>
               {assignedCount > 0 && (
-                <Typography variant="label-small" as="span" className="inline-flex items-center justify-center h-6 px-2 rounded-full bg-secondary-container text-secondary-container-foreground">
+                <span className="text-label-small inline-flex items-center justify-center h-6 px-2 rounded-full bg-secondary-container text-on-secondary-container">
                   {assignedCount}/{feature.permissions.length}
-                </Typography>
+                </span>
               )}
-              <Icon name={isExpanded ? "expand_less" : "expand_more"} size={20} className="text-surface-variant-foreground shrink-0" />
+              <Icon name={isExpanded ? "expand_less" : "expand_more"} size={20} className="text-on-surface-variant shrink-0" />
             </button>
 
             <AnimatePresence initial={false}>
@@ -405,9 +404,9 @@ function PermissionMatrix({
                           onSelectedChange={(c) => onSelectAll(feature, c === true)}
                           aria-label={`${assignedCount === feature.permissions.length ? "Deselect" : "Select"} all permissions for ${feature.displayName}`}
                         />
-                        <Typography variant="body-small" color="surface-variant-foreground" as="span" className="font-medium">
+                        <span className="text-body-small text-on-surface-variant font-medium">
                           {assignedCount === feature.permissions.length ? "Deselect all" : "Select all"}
-                        </Typography>
+                        </span>
                       </div>
                     )}
                     {feature.permissions.map((fp) => {
@@ -415,11 +414,11 @@ function PermissionMatrix({
                       const isEnabled = localDraft.has(key);
                       const scope = (localDraft.get(key) as Scope) ?? "OWN";
                       return (
-                        <div key={fp.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-foreground/4 transition-colors">
+                        <div key={fp.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-on-surface/4 transition-colors">
                           <Checkbox selected={isEnabled} disabled={readOnly} onSelectedChange={(c) => onToggle(feature.key, fp.key, c === true)} aria-label={`Toggle ${fp.displayName}`} />
-                          <Typography variant="body-medium" as="span" color={isEnabled ? "surface-foreground" : "surface-variant-foreground"} className="flex-1 min-w-0 truncate">
+                          <span className={`text-body-medium ${isEnabled ? "text-on-surface" : "text-on-surface-variant"} flex-1 min-w-0 truncate`}>
                             {fp.displayName}
-                          </Typography>
+                          </span>
                           <Select
                             aria-label={`Scope for ${fp.displayName}`}
                             selectedKey={scope} disabled={readOnly || !isEnabled}
@@ -647,7 +646,7 @@ export default function RolesPage() {
                   <ListItemWithClick
                     key={role.id}
                     selected={isSelected}
-                    leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-surface-variant-foreground"} />}
+                    leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-on-surface-variant"} />}
                     trailing={role.isSystem ? <AssistChip className="text-[11px] h-6 px-2">System</AssistChip> : undefined}
                     supportingText={role.description ?? undefined}
                     onClick={() => handleRoleSelect(role.id)}
@@ -659,10 +658,10 @@ export default function RolesPage() {
             </List>
             {filteredRoles.length === 0 && roleSearch && (
               <div className="flex flex-col items-center py-8 text-center px-4">
-                <Icon name="search_off" size={24} className="text-surface-variant-foreground/40 mb-2" />
-                <Typography variant="body-medium" color="surface-variant-foreground">
+                <Icon name="search_off" size={24} className="text-on-surface-variant/40 mb-2" />
+                <p className="text-body-medium text-on-surface-variant">
                   No roles matching &ldquo;{roleSearch}&rdquo;
-                </Typography>
+                </p>
               </div>
             )}
           </div>
@@ -676,13 +675,13 @@ export default function RolesPage() {
               <div className="shrink-0 min-h-21 flex items-center px-6 border-b border-outline-variant bg-surface-container-low/50">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <Typography variant="title-medium" className="truncate">{selectedRole.name}</Typography>
+                    <h6 className="text-title-medium truncate">{selectedRole.name}</h6>
                     {selectedRole.isSystem && <AssistChip className="shrink-0">System</AssistChip>}
                   </div>
                   {selectedRole.description && (
-                    <Typography variant="body-small" color="surface-variant-foreground" className="truncate">
+                    <p className="text-body-small text-on-surface-variant truncate">
                       {selectedRole.description}
-                    </Typography>
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-4">
@@ -731,11 +730,11 @@ export default function RolesPage() {
                     {selectedRole.isSystem && (
                       <div className="flex items-start gap-2 mb-4 rounded-lg bg-secondary-container/40 px-4 py-3">
                         <Icon name="lock" size={18} className="text-secondary shrink-0 mt-0.5" />
-                        <Typography variant="body-small" color="surface-variant-foreground">
+                        <p className="text-body-small text-on-surface-variant">
                           The Admin role always has full access to every enabled feature, so its
                           permissions can&apos;t be edited. To limit what Admin can reach, disable a
                           feature on the Features page, or create a custom role instead.
-                        </Typography>
+                        </p>
                       </div>
                     )}
                     <PermissionMatrix
@@ -757,8 +756,8 @@ export default function RolesPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="flex flex-col items-center text-center px-4">
-                <Icon name="shield" size={48} className="text-surface-variant-foreground/30 mb-3" />
-                <Typography variant="body-medium" color="surface-variant-foreground">Select a role to view permissions</Typography>
+                <Icon name="shield" size={48} className="text-on-surface-variant/30 mb-3" />
+                <p className="text-body-medium text-on-surface-variant">Select a role to view permissions</p>
               </div>
             </div>
           )}

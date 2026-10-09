@@ -13,7 +13,6 @@ import {
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
@@ -41,11 +40,11 @@ const NAV_ITEMS: { id: SettingsSection; label: string; icon: string }[] = [
 ];
 
 const STAT_CONFIG = [
-  { label: "Members", icon: "group", color: "bg-primary-container", iconColor: "text-primary-container-foreground" },
-  { label: "Roles", icon: "shield", color: "bg-secondary-container", iconColor: "text-secondary-container-foreground" },
-  { label: "Positions", icon: "work", color: "bg-tertiary-container", iconColor: "text-tertiary-container-foreground" },
-  { label: "Org Units", icon: "lan", color: "bg-primary-container", iconColor: "text-primary-container-foreground" },
-  { label: "Unit Types", icon: "label", color: "bg-secondary-container", iconColor: "text-secondary-container-foreground" },
+  { label: "Members", icon: "group", color: "bg-primary-container", iconColor: "text-on-primary-container" },
+  { label: "Roles", icon: "shield", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
+  { label: "Positions", icon: "work", color: "bg-tertiary-container", iconColor: "text-on-tertiary-container" },
+  { label: "Org Units", icon: "lan", color: "bg-primary-container", iconColor: "text-on-primary-container" },
+  { label: "Unit Types", icon: "label", color: "bg-secondary-container", iconColor: "text-on-secondary-container" },
 ];
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
@@ -132,7 +131,7 @@ export default function SettingsPage() {
     return (
       <div className="flex flex-col h-full">
         <TopAppBar
-          title={<Typography variant="headline-small">Settings</Typography>}
+          title={<h1 className="text-headline-small">Settings</h1>}
           subtitle="Workspace configuration."
         />
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6">
@@ -158,15 +157,15 @@ export default function SettingsPage() {
   if (isError) {
     return (
       <div className="flex flex-col h-full">
-        <TopAppBar title={<Typography variant="headline-small">Settings</Typography>} />
+        <TopAppBar title={<h1 className="text-headline-small">Settings</h1>} />
         <div className="flex-1 flex items-center justify-center">
           <Card variant="elevated" className="max-w-md">
             <CardContent className="flex flex-col items-center py-12 text-center">
               <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error-container mb-4">
-                <Icon name="error" size={28} className="text-error-container-foreground" />
+                <Icon name="error" size={28} className="text-on-error-container" />
               </div>
-              <Typography variant="title-medium" className="mb-1">Unable to load settings</Typography>
-              <Typography variant="body-medium" color="surface-variant-foreground">{error?.message || "Something went wrong."}</Typography>
+              <h6 className="text-title-medium mb-1">Unable to load settings</h6>
+              <p className="text-body-medium text-on-surface-variant">{error?.message || "Something went wrong."}</p>
             </CardContent>
           </Card>
         </div>
@@ -180,7 +179,7 @@ export default function SettingsPage() {
       {/* Header */}
       <TopAppBar
         className="justify-between shrink-0"
-        title={<Typography variant="headline-small">Settings</Typography>}
+        title={<h1 className="text-headline-small">Settings</h1>}
         subtitle="Workspace configuration and preferences."
         actions={isDirty ? (
           <div className="flex items-center gap-2">
@@ -202,8 +201,8 @@ export default function SettingsPage() {
                 <Icon name={stat.icon} size={20} className={stat.iconColor} />
               </div>
               <div className="min-w-0">
-                <Typography variant="headline-small" className="leading-tight">{statValues[i]}</Typography>
-                <Typography variant="label-small" color="surface-variant-foreground">{stat.label}</Typography>
+                <h4 className="text-headline-small leading-tight">{statValues[i]}</h4>
+                <span className="text-label-small text-on-surface-variant">{stat.label}</span>
               </div>
             </CardContent>
           </Card>
@@ -249,8 +248,8 @@ export default function SettingsPage() {
           {activeSection === "general" && (
             <div className="space-y-6">
               <div>
-                <Typography variant="title-large">General</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Basic workspace information.</Typography>
+                <h5 className="text-title-large">General</h5>
+                <p className="text-body-medium text-on-surface-variant mt-1">Basic workspace information.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -259,9 +258,9 @@ export default function SettingsPage() {
                   <CardContent className="p-6 space-y-5">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
-                        <Icon name="edit" size={20} className="text-primary-container-foreground" />
+                        <Icon name="edit" size={20} className="text-on-primary-container" />
                       </div>
-                      <Typography variant="title-small">Company Profile</Typography>
+                      <h6 className="text-title-small">Company Profile</h6>
                     </div>
                     <TextField
                       variant="outlined"
@@ -288,9 +287,9 @@ export default function SettingsPage() {
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
-                        <Icon name="info" size={20} className="text-secondary-container-foreground" />
+                        <Icon name="info" size={20} className="text-on-secondary-container" />
                       </div>
-                      <Typography variant="title-small">Workspace Details</Typography>
+                      <h6 className="text-title-small">Workspace Details</h6>
                     </div>
                     <List aria-label="List" className="py-0">
                       <ListItem
@@ -302,11 +301,11 @@ export default function SettingsPage() {
                         Identifier
                       </ListItem>
                       <Divider />
-                      <ListItem supportingText="When this workspace was created" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.createdAt) : "—"}</Typography>}>
+                      <ListItem supportingText="When this workspace was created" trailing={<span className="text-body-small">{company ? fmtDate(company.createdAt) : "—"}</span>}>
                         Created
                       </ListItem>
                       <Divider />
-                      <ListItem supportingText="Last settings update" trailing={<Typography variant="body-small" as="span">{company ? fmtDate(company.updatedAt) : "—"}</Typography>}>
+                      <ListItem supportingText="Last settings update" trailing={<span className="text-body-small">{company ? fmtDate(company.updatedAt) : "—"}</span>}>
                         Updated
                       </ListItem>
                     </List>
@@ -320,8 +319,8 @@ export default function SettingsPage() {
           {activeSection === "financial" && (
             <div className="space-y-6">
               <div>
-                <Typography variant="title-large">Financial Settings</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Currency, fiscal year, and cost calculation parameters.</Typography>
+                <h5 className="text-title-large">Financial Settings</h5>
+                <p className="text-body-medium text-on-surface-variant mt-1">Currency, fiscal year, and cost calculation parameters.</p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -329,9 +328,9 @@ export default function SettingsPage() {
                   <CardContent className="p-6 space-y-5">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
-                        <Icon name="currency_exchange" size={20} className="text-tertiary-container-foreground" />
+                        <Icon name="currency_exchange" size={20} className="text-on-tertiary-container" />
                       </div>
-                      <Typography variant="title-small">Currency & Fiscal Year</Typography>
+                      <h6 className="text-title-small">Currency & Fiscal Year</h6>
                     </div>
                     <TextField
                       variant="outlined"
@@ -362,26 +361,26 @@ export default function SettingsPage() {
           {activeSection === "import" && (
             <div className="space-y-6">
               <div>
-                <Typography variant="title-large">Data Import</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
+                <h5 className="text-title-large">Data Import</h5>
+                <p className="text-body-medium text-on-surface-variant mt-1">
                   Import members, org structure, positions, and roles from a CSV file.
-                </Typography>
+                </p>
               </div>
 
               <Card variant="outlined">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-container shrink-0">
-                      <Icon name="upload_file" size={24} className="text-primary-container-foreground" />
+                      <Icon name="upload_file" size={24} className="text-on-primary-container" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <Typography variant="title-small">CSV Import</Typography>
-                      <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
+                      <h6 className="text-title-small">CSV Import</h6>
+                      <p className="text-body-medium text-on-surface-variant mt-1">
                         Upload a CSV file to bulk-import members and automatically create your
                         org hierarchy (divisions, tribes, squads), positions, grades, and role
                         assignments. The import wizard will guide you through column mapping and
                         preview before committing.
-                      </Typography>
+                      </p>
                       <div className="flex flex-wrap gap-2 mt-3">
                         <AssistChip leadingIcon={<Icon name="group" />}>Members</AssistChip>
                         <AssistChip leadingIcon={<Icon name="lan" />}>Org Structure</AssistChip>
@@ -402,9 +401,9 @@ export default function SettingsPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
-                      <Icon name="lightbulb" size={20} className="text-tertiary-container-foreground" />
+                      <Icon name="lightbulb" size={20} className="text-on-tertiary-container" />
                     </div>
-                    <Typography variant="title-small">Import Tips</Typography>
+                    <h6 className="text-title-small">Import Tips</h6>
                   </div>
                   <List aria-label="List" className="py-0">
                     <ListItem
@@ -444,8 +443,8 @@ export default function SettingsPage() {
           {activeSection === "danger" && (
             <div className="space-y-6">
               <div>
-                <Typography variant="title-large" color="error">Danger Zone</Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">Destructive actions that cannot be undone.</Typography>
+                <h5 className="text-title-large text-error">Danger Zone</h5>
+                <p className="text-body-medium text-on-surface-variant mt-1">Destructive actions that cannot be undone.</p>
               </div>
 
               <Card variant="outlined">
@@ -454,7 +453,7 @@ export default function SettingsPage() {
                   <ListItem
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-surface-variant/30">
-                        <Icon name="download" size={20} className="text-surface-variant-foreground" />
+                        <Icon name="download" size={20} className="text-on-surface-variant" />
                       </div>
                     }
                     supportingText="Download all workspace data as CSV files."
@@ -469,7 +468,7 @@ export default function SettingsPage() {
                   <ListItem
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
-                        <Icon name="restart_alt" size={20} className="text-error-container-foreground" />
+                        <Icon name="restart_alt" size={20} className="text-on-error-container" />
                       </div>
                     }
                     supportingText="Delete all members, org structure, roles, capacity data. Preserves super admin accounts."
@@ -488,7 +487,7 @@ export default function SettingsPage() {
                   <ListItem
                     leading={
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-error-container">
-                        <Icon name="delete_forever" size={20} className="text-error-container-foreground" />
+                        <Icon name="delete_forever" size={20} className="text-on-error-container" />
                       </div>
                     }
                     supportingText="Permanently delete this workspace and all its data."
@@ -512,9 +511,9 @@ export default function SettingsPage() {
             capacity allocations, and rate cards. Only super admin accounts will be preserved.
           </p>
           <div className="space-y-3 mt-4">
-            <Typography variant="body-small" color="surface-variant-foreground">
+            <p className="text-body-small text-on-surface-variant">
               Type <strong className="text-error">RESET</strong> to confirm:
-            </Typography>
+            </p>
             <TextField
               variant="outlined"
               label="Confirmation"

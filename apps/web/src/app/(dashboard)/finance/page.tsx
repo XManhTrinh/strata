@@ -5,7 +5,6 @@ import { motion } from "motion/react";
 import { TopAppBar, Card } from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
 
 // ─── Finance hub sections ─────────────────────────────────────────────────────
@@ -26,7 +25,7 @@ const FINANCE_LINKS: FinanceLink[] = [
     description: "Headcount and cost breakdown by division and squad.",
     icon: "payments",
     tint: "bg-primary-container",
-    iconColor: "text-primary-container-foreground",
+    iconColor: "text-on-primary-container",
   },
   {
     href: "/finance/capacity",
@@ -34,7 +33,7 @@ const FINANCE_LINKS: FinanceLink[] = [
     description: "FTE allocation and monthly phasing across squads.",
     icon: "stacked_bar_chart",
     tint: "bg-secondary-container",
-    iconColor: "text-secondary-container-foreground",
+    iconColor: "text-on-secondary-container",
   },
   {
     href: "/finance/rate-cards",
@@ -42,7 +41,7 @@ const FINANCE_LINKS: FinanceLink[] = [
     description: "Define rate card sets and the rules that match members to rates.",
     icon: "request_quote",
     tint: "bg-tertiary-container",
-    iconColor: "text-tertiary-container-foreground",
+    iconColor: "text-on-tertiary-container",
   },
 ];
 
@@ -58,7 +57,7 @@ export default function FinancePage() {
       exit="exit"
       transition={defaultTransition}
     >
-      <TopAppBar title={<Typography variant="headline-medium">Finance</Typography>} subtitle="Budgets, capacity planning, and rate cards." />
+      <TopAppBar title={<h1 className="text-headline-medium">Finance</h1>} subtitle="Budgets, capacity planning, and rate cards." />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {FINANCE_LINKS.map((link) => (
@@ -73,12 +72,12 @@ export default function FinancePage() {
                 >
                   <Icon name={link.icon} size={26} className={link.iconColor} />
                 </div>
-                <Typography variant="title-large" className="mb-1">
+                <h5 className="text-title-large mb-1">
                   {link.title}
-                </Typography>
-                <Typography variant="body-medium" color="surface-variant-foreground">
+                </h5>
+                <p className="text-body-medium text-on-surface-variant">
                   {link.description}
-                </Typography>
+                </p>
               </CardContent>
             </Card>
           </Link>

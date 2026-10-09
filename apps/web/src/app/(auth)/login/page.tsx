@@ -7,7 +7,6 @@ import { useAuth } from "@/lib/auth";
 import { Button, TextField, Divider, Card } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 
 export default function LoginPage() {
@@ -99,12 +98,12 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center space-y-1">
-              <Typography variant="headline-small">
+              <h1 className="text-headline-small">
                 Sign in to Strata
-              </Typography>
-              <Typography variant="body-large" color="surface-variant-foreground">
+              </h1>
+              <p className="text-body-large text-on-surface-variant">
                 Enter your credentials to continue
-              </Typography>
+              </p>
             </div>
 
             <div className="w-full space-y-5">
@@ -112,7 +111,7 @@ export default function LoginPage() {
                 {error && (
                   <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3">
                     <Icon name="error" size={20} className="text-error shrink-0" />
-                    <Typography variant="body-medium" color="error">{error}</Typography>
+                    <p className="text-body-medium text-error">{error}</p>
                   </div>
                 )}
 
@@ -148,7 +147,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   leadingIcon={<Icon name="lock" size={20} />}
                   trailingIcon={
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-surface-variant-foreground hover:text-surface-foreground transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-on-surface-variant hover:text-on-surface transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={20} />
                     </button>
                   }
@@ -162,7 +161,7 @@ export default function LoginPage() {
 
               <div className="relative flex items-center gap-4">
                 <Divider className="flex-1" />
-                <Typography variant="label-small" as="span" color="surface-variant-foreground" className="uppercase">Or continue with</Typography>
+                <span className="text-label-small text-on-surface-variant uppercase">Or continue with</span>
                 <Divider className="flex-1" />
               </div>
 
@@ -170,10 +169,10 @@ export default function LoginPage() {
                 Sign in with Google
               </Button>
 
-              <Typography variant="body-medium" color="surface-variant-foreground" className="text-center">
+              <p className="text-body-medium text-on-surface-variant text-center">
                 Don&apos;t have an account?{" "}
                 <Link href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">Create one</Link>
-              </Typography>
+              </p>
             </div>
           </CardContent>
         </Card>

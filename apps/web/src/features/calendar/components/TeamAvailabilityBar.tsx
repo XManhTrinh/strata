@@ -1,6 +1,5 @@
 "use client";
 
-import { Typography } from "@/components/ui/typography";
 
 interface TeamAvailabilityBarProps {
   available: number;
@@ -27,9 +26,9 @@ export function TeamAvailabilityBar({ available, total }: TeamAvailabilityBarPro
     <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2">
       <div className="flex items-center gap-2">
         <div className={`h-2.5 w-2.5 rounded-full ${colorClass}`} aria-hidden="true" />
-        <Typography variant="label-large" as="span" className={textColor}>
+        <span className={`text-label-large ${textColor}`}>
           {available}/{total} available today
-        </Typography>
+        </span>
       </div>
       <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-surface-variant">
         <div

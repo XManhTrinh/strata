@@ -44,7 +44,7 @@ export function Breadcrumbs({ className }: BreadcrumbsProps) {
         <li className="flex items-center min-w-0">
           {crumbs.length === 0 ? (
             <span
-              className="text-[14px] leading-5 font-medium tracking-[0.1px] text-surface-foreground truncate"
+              className="text-[14px] leading-5 font-medium tracking-[0.1px] text-on-surface truncate"
               aria-current="page"
             >
               Dashboard
@@ -52,7 +52,7 @@ export function Breadcrumbs({ className }: BreadcrumbsProps) {
           ) : (
             <Link
               href="/dashboard"
-              className="text-[14px] leading-5 font-medium tracking-[0.1px] text-surface-variant-foreground truncate transition-colors hover:text-surface-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-xs"
+              className="text-[14px] leading-5 font-medium tracking-[0.1px] text-on-surface-variant truncate transition-colors hover:text-on-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-xs"
             >
               Dashboard
             </Link>
@@ -72,7 +72,7 @@ export function Breadcrumbs({ className }: BreadcrumbsProps) {
               />
               {isLast ? (
                 <span
-                  className="text-[14px] leading-5 font-medium tracking-[0.1px] text-surface-foreground truncate"
+                  className="text-[14px] leading-5 font-medium tracking-[0.1px] text-on-surface truncate"
                   aria-current="page"
                 >
                   {label}
@@ -80,7 +80,7 @@ export function Breadcrumbs({ className }: BreadcrumbsProps) {
               ) : (
                 <Link
                   href={href}
-                  className="text-[14px] leading-5 font-medium tracking-[0.1px] text-surface-variant-foreground truncate transition-colors hover:text-surface-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-xs"
+                  className="text-[14px] leading-5 font-medium tracking-[0.1px] text-on-surface-variant truncate transition-colors hover:text-on-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-xs"
                 >
                   {label}
                 </Link>

@@ -13,7 +13,6 @@ import {
   Button,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { Person } from "@/lib/org-tree/types";
 import { Avatar } from "@vkieu/mui/vk";
 
@@ -83,9 +82,9 @@ export default function ReparentModal({
             {filteredPersons.length === 0 ? (
               <div className="flex flex-col items-center py-8 text-center">
                 <Icon name="search_off" size={24} className="text-on-surface-variant/40 mb-2" />
-                <Typography variant="body-medium" color="surface-variant-foreground">
+                <p className="text-body-medium text-on-surface-variant">
                   No matches
-                </Typography>
+                </p>
               </div>
             ) : (
               <List aria-label="List" className="py-0">

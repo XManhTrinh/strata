@@ -1,130 +1,171 @@
-import Link from "next/link";
-import { Card } from "@vkieu/mui";
+"use client";
+
+import { motion } from "motion/react";
+import { Button, Card } from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
+// This route sits OUTSIDE the dashboard shell, so it is not wrapped by
+// ReducedMotionProvider — read the preference from the underlying hook directly.
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
+/**
+ * Marketing homepage (standalone route, outside the dashboard shell).
+ *
+ * Routing tradeoff: the nav/CTA `Button href=` render plain `<a>` anchors, so
+ * `/login` and `/register` trigger a full-page navigation (no next/link
+ * soft-nav or prefetch). This is the accepted batch-1 intent for low-frequency
+ * marketing → app links.
+ */
 export default function LandingPage() {
+  const reduced = useReducedMotion();
+  const heroVariants = resolveAnimationVariants(pageTransitionVariants, reduced);
+
   return (
-    <div className="min-h-screen bg-surface">
-      {/* Header */}
-      <header className="border-b border-outline-variant bg-surface/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-dvh bg-surface">
+      {/* ─── Header ─────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 border-b border-outline-variant bg-surface/80 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"
+              aria-hidden="true"
+            >
+              <span className="text-label-large font-bold text-on-primary">S</span>
             </div>
-            <Typography variant="title-medium" as="span">Strata</Typography>
+            <span className="text-title-medium">Strata</span>
           </div>
-          <nav className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center rounded-full h-10 px-4 text-[14px] font-medium text-primary hover:bg-primary/8 transition-colors"
-            >
+          <nav aria-label="Primary" className="flex items-center gap-3">
+            <Button variant="text" href="/login">
               Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center rounded-full h-10 px-4 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
-            >
-              Get Started
-            </Link>
+            </Button>
+            <Button variant="filled" href="/register">
+              Get started
+            </Button>
           </nav>
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ─── Main ───────────────────────────────────────────────────────── */}
       <main>
-        <section className="max-w-6xl mx-auto px-6 py-24 lg:py-32">
+        {/* ─── Hero ─────────────────────────────────────────────────────── */}
+        <motion.section
+          className="mx-auto max-w-6xl px-6 py-24 lg:py-32"
+          variants={heroVariants}
+          initial="initial"
+          animate="enter"
+          transition={defaultTransition}
+          aria-label="Introduction"
+        >
           <div className="max-w-3xl">
-            <Typography variant="display-medium" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
-              Enterprise Workforce Management,{" "}
-              <span className="text-primary">Simplified</span>
-            </Typography>
-            <Typography variant="body-large" color="surface-variant-foreground" className="mt-6 text-lg lg:text-xl leading-relaxed max-w-2xl">
-              Strata helps organizations manage their people, teams, capacity, and budgets
-              in one unified platform. Built for enterprises with complex organizational structures.
-            </Typography>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center rounded-full h-14 px-7 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
-              >
-                Start Free Trial
-              </Link>
-              <a
-                href="#features"
-                className="inline-flex items-center justify-center rounded-full h-14 px-7 text-[14px] font-medium border border-outline text-primary hover:bg-primary/8 transition-all"
-              >
-                See Features
-              </a>
+            <h1 className="font-brand text-display-small tracking-tight sm:text-display-medium lg:text-display-large">
+              Enterprise workforce management,{" "}
+              <span className="text-primary">simplified</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-body-large text-on-surface-variant">
+              Strata helps organizations manage their people, teams, capacity,
+              and budgets in one unified platform. Built for enterprises with
+              complex organizational structures.
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <Button variant="filled" href="/register">
+                Start free trial
+              </Button>
+              <Button variant="outlined" href="#features">
+                See features
+              </Button>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        {/* Features */}
-        <section id="features" className="border-t border-outline-variant bg-surface-container-low/50 py-24">
-          <div className="max-w-6xl mx-auto px-6">
-            <Typography variant="headline-large" className="text-center">
+        {/* ─── Features ─────────────────────────────────────────────────── */}
+        <section
+          id="features"
+          className="scroll-mt-16 border-t border-outline-variant bg-surface-container-low py-24"
+          aria-label="Features"
+        >
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="text-center font-brand text-headline-large">
               Everything you need to manage your workforce
-            </Typography>
-            <Typography variant="body-large" color="surface-variant-foreground" className="mt-4 text-center max-w-xl mx-auto">
-              From org charts to capacity planning, Strata covers the full spectrum of workforce operations.
-            </Typography>
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-center text-body-large text-on-surface-variant">
+              From org charts to capacity planning, Strata covers the full
+              spectrum of workforce operations.
+            </p>
 
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {features.map((feature) => (
-                <Card key={feature.title} variant="outlined">
-                  <CardContent>
-                    <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center mb-4">
-                      <Icon name={feature.icon} size={24} className="text-primary-container-foreground" />
-                    </div>
-                    <Typography variant="title-medium">
-                      {feature.title}
-                    </Typography>
-                    <Typography variant="body-medium" color="surface-variant-foreground" className="mt-2">
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
+            <div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  variants={heroVariants}
+                  initial="initial"
+                  whileInView="enter"
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{
+                    ...defaultTransition,
+                    delay: reduced ? 0 : index * 0.05,
+                  }}
+                >
+                  <Card variant="outlined" className="h-full">
+                    <CardContent>
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-container">
+                        <Icon
+                          name={feature.icon}
+                          size={24}
+                          className="text-on-primary-container"
+                        />
+                      </div>
+                      <h3 className="text-title-medium">{feature.title}</h3>
+                      <p className="mt-2 text-body-medium text-on-surface-variant">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-24">
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <Typography variant="headline-large" className="text-center">
+        {/* ─── CTA ──────────────────────────────────────────────────────── */}
+        <section className="py-24" aria-label="Get started">
+          <div className="mx-auto max-w-6xl px-6 text-center">
+            <h2 className="font-brand text-headline-large">
               Ready to streamline your workforce management?
-            </Typography>
-            <Typography variant="body-large" color="surface-variant-foreground" className="mt-4 max-w-lg mx-auto">
-              Join organizations that trust Strata to manage their teams, budgets, and organizational structures.
-            </Typography>
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-body-large text-on-surface-variant">
+              Join organizations that trust Strata to manage their teams,
+              budgets, and organizational structures.
+            </p>
             <div className="mt-8">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center rounded-full h-14 px-7 text-[14px] font-medium bg-primary text-primary-foreground hover:shadow-sm transition-all"
-              >
-                Get Started Today
-              </Link>
+              <Button variant="filled" href="/register">
+                Get started today
+              </Button>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
+      {/* ─── Footer ─────────────────────────────────────────────────────── */}
       <footer className="border-t border-outline-variant py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">S</span>
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded bg-primary"
+              aria-hidden="true"
+            >
+              <span className="text-label-small font-bold text-on-primary">S</span>
             </div>
-            <Typography variant="title-small" as="span">Strata</Typography>
+            <span className="text-title-small">Strata</span>
           </div>
-          <Typography variant="body-small" color="surface-variant-foreground">
-            © {new Date().getFullYear()} Strata. Enterprise Workforce Management.
-          </Typography>
+          <p className="text-body-small text-on-surface-variant">
+            © {new Date().getFullYear()} Strata. Enterprise Workforce
+            Management.
+          </p>
         </div>
       </footer>
     </div>

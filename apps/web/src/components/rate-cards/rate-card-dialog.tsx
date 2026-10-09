@@ -16,7 +16,6 @@ import {
   AutocompleteItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import type {
   RateCard,
   RateCardGroup,
@@ -238,10 +237,10 @@ export function RateCardDialog({
 
           <div className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant px-4 py-3">
             <div>
-              <Typography variant="body-medium">Default fallback</Typography>
-              <Typography variant="body-small" color="surface-variant-foreground">
+              <p className="text-body-medium">Default fallback</p>
+              <p className="text-body-small text-on-surface-variant">
                 Matches any member not caught by a higher-priority card. Conditions ignored.
-              </Typography>
+              </p>
             </div>
             <Switch selected={isDefault} onSelectedChange={setIsDefault} aria-label="Default fallback" />
           </div>
@@ -251,14 +250,14 @@ export function RateCardDialog({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Typography variant="title-small">Conditions (all must match)</Typography>
+                  <h6 className="text-title-small">Conditions (all must match)</h6>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setShowConditionsHelp((v) => !v)}
                       aria-label="How conditions work"
                       aria-expanded={showConditionsHelp}
-                      className="flex items-center text-surface-variant-foreground hover:text-primary transition-colors"
+                      className="flex items-center text-on-surface-variant hover:text-primary transition-colors"
                     >
                       <Icon name="info" size={18} />
                     </button>
@@ -269,24 +268,24 @@ export function RateCardDialog({
                           onClick={() => setShowConditionsHelp(false)}
                         />
                         <div className="absolute left-0 top-full mt-2 z-50 w-80 rounded-xl bg-surface-container-high border border-outline-variant shadow-lg p-4 space-y-2">
-                          <Typography variant="label-large" className="font-medium">
+                          <span className="text-label-large font-medium">
                             How conditions work
-                          </Typography>
-                          <Typography variant="body-small" color="surface-variant-foreground">
-                            A rate card matches a member only when <span className="font-medium text-surface-foreground">all</span> of its conditions are true (AND). Pick a column, an operator, and a value.
-                          </Typography>
-                          <ul className="space-y-1.5 text-[12px] text-surface-variant-foreground">
-                            <li><span className="font-medium text-surface-foreground">equals</span> — exact match (e.g. Grade = D).</li>
-                            <li><span className="font-medium text-surface-foreground">does not equal</span> — anything except the value.</li>
-                            <li><span className="font-medium text-surface-foreground">starts with</span> — value is a prefix (e.g. OUC starts with Q). One prefix only.</li>
-                            <li><span className="font-medium text-surface-foreground">starts with any of</span> — comma-separated prefixes; matches if the value starts with any one (e.g. OUC starts with any of XB, XE). Acts like OR.</li>
-                            <li><span className="font-medium text-surface-foreground">ends with</span> — value is a suffix.</li>
-                            <li><span className="font-medium text-surface-foreground">contains</span> — value appears anywhere.</li>
-                            <li><span className="font-medium text-surface-foreground">is one of</span> — matches any <span className="font-medium text-surface-foreground">exact</span> value in a comma-separated list (e.g. UK, AMEA). Acts like OR, but exact values, not prefixes.</li>
+                          </span>
+                          <p className="text-body-small text-on-surface-variant">
+                            A rate card matches a member only when <span className="font-medium text-on-surface">all</span> of its conditions are true (AND). Pick a column, an operator, and a value.
+                          </p>
+                          <ul className="space-y-1.5 text-[12px] text-on-surface-variant">
+                            <li><span className="font-medium text-on-surface">equals</span> — exact match (e.g. Grade = D).</li>
+                            <li><span className="font-medium text-on-surface">does not equal</span> — anything except the value.</li>
+                            <li><span className="font-medium text-on-surface">starts with</span> — value is a prefix (e.g. OUC starts with Q). One prefix only.</li>
+                            <li><span className="font-medium text-on-surface">starts with any of</span> — comma-separated prefixes; matches if the value starts with any one (e.g. OUC starts with any of XB, XE). Acts like OR.</li>
+                            <li><span className="font-medium text-on-surface">ends with</span> — value is a suffix.</li>
+                            <li><span className="font-medium text-on-surface">contains</span> — value appears anywhere.</li>
+                            <li><span className="font-medium text-on-surface">is one of</span> — matches any <span className="font-medium text-on-surface">exact</span> value in a comma-separated list (e.g. UK, AMEA). Acts like OR, but exact values, not prefixes.</li>
                           </ul>
-                          <Typography variant="body-small" color="surface-variant-foreground">
-                            For &ldquo;starts with X <span className="font-medium text-surface-foreground">or</span> Y&rdquo;, use <span className="font-medium text-surface-foreground">starts with any of</span>. For exact &ldquo;X or Y&rdquo;, use <span className="font-medium text-surface-foreground">is one of</span>.
-                          </Typography>
+                          <p className="text-body-small text-on-surface-variant">
+                            For &ldquo;starts with X <span className="font-medium text-on-surface">or</span> Y&rdquo;, use <span className="font-medium text-on-surface">starts with any of</span>. For exact &ldquo;X or Y&rdquo;, use <span className="font-medium text-on-surface">is one of</span>.
+                          </p>
                         </div>
                       </>
                     )}
@@ -298,9 +297,9 @@ export function RateCardDialog({
                 </Button>
               </div>
               {conditions.length === 0 ? (
-                <Typography variant="body-small" color="surface-variant-foreground">
+                <p className="text-body-small text-on-surface-variant">
                   No conditions yet.
-                </Typography>
+                </p>
               ) : (
                 <div className="space-y-2">
                   {conditions.map((c, i) => (
@@ -346,7 +345,7 @@ export function RateCardDialog({
                       <button
                         type="button"
                         onClick={() => removeCondition(i)}
-                        className="text-surface-variant-foreground hover:text-error transition-colors shrink-0"
+                        className="text-on-surface-variant hover:text-error transition-colors shrink-0"
                         aria-label="Remove condition"
                       >
                         <Icon name="close" size={18} />
@@ -362,15 +361,15 @@ export function RateCardDialog({
 
           {/* Per-quarter rates */}
           <div className="space-y-3">
-            <Typography variant="title-small">Rates per quarter</Typography>
-            <Typography variant="body-small" color="surface-variant-foreground">
+            <h6 className="text-title-small">Rates per quarter</h6>
+            <p className="text-body-small text-on-surface-variant">
               Monthly cost = day rate × working days. Annual = each quarter&apos;s monthly cost × 3.
-            </Typography>
+            </p>
 
             <div className="space-y-2">
               {QUARTERS.map((q) => (
                 <div key={q} className="grid grid-cols-[40px_1fr_1fr_120px] gap-2 items-center">
-                  <Typography variant="body-medium" className="font-medium">Q{q}</Typography>
+                  <p className="text-body-medium font-medium">Q{q}</p>
                   <TextField
                     variant="outlined"
                     type="number"
@@ -388,25 +387,25 @@ export function RateCardDialog({
                     onChange={(value) => updateQuarter(q, "workingDays", value)}
                   />
                   <div className="text-right">
-                    <Typography variant="body-small" color="surface-variant-foreground">Monthly</Typography>
-                    <Typography variant="body-medium" className="font-medium">
+                    <p className="text-body-small text-on-surface-variant">Monthly</p>
+                    <p className="text-body-medium font-medium">
                       {fmtGBP(preview.perQuarterMonthly[q - 1])}
-                    </Typography>
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="flex items-center justify-between rounded-lg bg-surface-container-low px-4 py-3">
-              <Typography variant="title-small">Annual cost (1.0 FTE)</Typography>
-              <Typography variant="title-medium">{fmtGBP(preview.annual)}</Typography>
+              <h6 className="text-title-small">Annual cost (1.0 FTE)</h6>
+              <h6 className="text-title-medium">{fmtGBP(preview.annual)}</h6>
             </div>
           </div>
 
           {error && (
-            <Typography variant="body-small" color="error">
+            <p className="text-body-small text-error">
               {error}
-            </Typography>
+            </p>
           )}
         </div>
       </DialogContent>

@@ -38,7 +38,7 @@ function OrgUnitGroupNodeComponent({ data }: NodeProps) {
       <div className="rounded-2xl overflow-hidden bg-surface-container-low/50 border border-outline-variant/40 shadow-sm backdrop-blur-sm">
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-outline-variant/30">
-          <span className="text-[10px] font-semibold text-surface-variant-foreground uppercase tracking-wider">
+          <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
             {units.length} units
           </span>
         </div>
@@ -62,15 +62,15 @@ function OrgUnitGroupNodeComponent({ data }: NodeProps) {
                   <span className="material-symbols-rounded text-[14px]" style={{ color: typeColor }}>{typeIcon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-medium text-surface-foreground leading-tight truncate">{unit.name}</p>
-                  <p className="text-[9px] text-surface-variant-foreground/60 leading-tight">{typeName}</p>
+                  <p className="text-[11px] font-medium text-on-surface leading-tight truncate">{unit.name}</p>
+                  <p className="text-[9px] text-on-surface-variant/60 leading-tight">{typeName}</p>
                 </div>
                 <div className="flex items-center gap-0.5 opacity-0 group-hover/card:opacity-100 transition-opacity shrink-0">
-                  <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(unit); }} className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8" title="Edit">
-                    <Icon name="edit" size={11} className="text-surface-variant-foreground" />
+                  <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(unit); }} className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-on-surface/8" title="Edit">
+                    <Icon name="edit" size={11} className="text-on-surface-variant" />
                   </button>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); onArchive(unit.id); }} className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8" title="Archive">
-                    <Icon name="archive" size={11} className="text-surface-variant-foreground" />
+                  <button type="button" onClick={(e) => { e.stopPropagation(); onArchive(unit.id); }} className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-on-surface/8" title="Archive">
+                    <Icon name="archive" size={11} className="text-on-surface-variant" />
                   </button>
                 </div>
               </div>

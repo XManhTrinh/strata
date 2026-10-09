@@ -12,7 +12,6 @@ import {
   Select,
   SelectItem,
 } from "@vkieu/mui";
-import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
 interface EventFormProps {
@@ -117,9 +116,9 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
           {errors.length > 0 && (
             <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
               {errors.map((err) => (
-                <Typography key={err} variant="body-small" color="error">
+                <p className="text-body-small text-error" key={err}>
                   {err}
-                </Typography>
+                </p>
               ))}
             </div>
           )}
@@ -150,7 +149,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
               selected={allDay}
               onSelectedChange={(checked) => setAllDay(checked === true)}
             />
-            <label htmlFor="all-day" className="text-sm text-surface-foreground cursor-pointer select-none">
+            <label htmlFor="all-day" className="text-sm text-on-surface cursor-pointer select-none">
               All Day
             </label>
           </div>

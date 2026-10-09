@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { IconButton, TextField } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Typography } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { useCompanyId } from "@/hooks/use-company";
 import { useAssistantChat, type AssistantMessage } from "@/services";
@@ -124,9 +123,9 @@ export function AssistantPanel() {
           {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-outline-variant bg-surface-container">
             <Icon name="smart_toy" size={20} className="text-primary" />
-            <Typography variant="title-small" className="flex-1">
+            <h6 className="text-title-small flex-1">
               Assistant
-            </Typography>
+            </h6>
             <IconButton
               variant="standard"
               onClick={() => setOpen(false)}
@@ -145,10 +144,10 @@ export function AssistantPanel() {
           >
             {messages.length === 0 && (
               <div className="text-center py-8">
-                <Typography variant="body-medium" color="surface-variant-foreground">
+                <p className="text-body-medium text-on-surface-variant">
                   Ask about your rate cards, people, or org — for example,
                   &ldquo;how many people are in the UK?&rdquo;
-                </Typography>
+                </p>
               </div>
             )}
             {messages.map((m) => (
@@ -166,7 +165,7 @@ export function AssistantPanel() {
                       ? "bg-primary text-on-primary"
                       : m.error
                         ? "bg-error-container text-on-error-container"
-                        : "bg-surface-container-highest text-surface-foreground",
+                        : "bg-surface-container-highest text-on-surface",
                   )}
                 >
                   {m.content}
@@ -175,7 +174,7 @@ export function AssistantPanel() {
             ))}
             {chat.isPending && (
               <div className="flex justify-start">
-                <div className="rounded-2xl px-3 py-2 bg-surface-container-highest text-surface-variant-foreground text-[14px]">
+                <div className="rounded-2xl px-3 py-2 bg-surface-container-highest text-on-surface-variant text-[14px]">
                   Thinking…
                 </div>
               </div>

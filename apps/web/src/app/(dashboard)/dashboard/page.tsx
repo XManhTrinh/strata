@@ -13,10 +13,14 @@ import {
 import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
 import { Icon } from "@/components/ui/icon";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 
 interface StatCardData {
@@ -36,7 +40,7 @@ function StatCardSkeleton() {
         <SkeletonGroup label="Loading stats">
           <Skeleton className="h-10 w-10" corner="full" />
           <div className="space-y-2">
-            <Skeleton className="h-8 w-20" corner="extra-small" />
+            <Skeleton className="h-11 w-24" corner="extra-small" />
             <Skeleton className="h-4 w-28" corner="extra-small" />
           </div>
         </SkeletonGroup>
@@ -76,12 +80,8 @@ function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData
           <Icon name={icon} size={20} className={iconColor} />
         </div>
         <div>
-          <Typography variant="headline-large">
-            {value}
-          </Typography>
-          <Typography variant="body-medium" color="surface-variant-foreground" className="mt-1">
-            {label}
-          </Typography>
+          <p className="font-brand text-display-small text-on-surface">{value}</p>
+          <p className="mt-1 text-body-medium text-on-surface-variant">{label}</p>
         </div>
       </CardContent>
     </Card>
@@ -91,6 +91,7 @@ function DashboardStatCard({ icon, value, label, tint, iconColor }: StatCardData
 /* ─── Main Page ────────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
+  const reduced = useReducedMotionContext();
   const companyId = useCompanyId();
   const {
     data: employeesData,
@@ -165,21 +166,19 @@ export default function DashboardPage() {
   if (hasError) {
     return (
       <div className="flex flex-col gap-6">
-        <TopAppBar title={<Typography variant="headline-medium">Dashboard</Typography>} />
+        <TopAppBar title={<h1 className="text-headline-medium">Dashboard</h1>} />
         <Card variant="filled" className="max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <Typography variant="title-medium" className="mb-2">
-              Something went wrong
-            </Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+            <p className="text-title-medium mb-2">Something went wrong</p>
+            <p className="text-body-medium text-on-surface-variant mb-6">
               {employeesErr?.message ||
                 leaveErr?.message ||
                 eventsErr?.message ||
                 "Failed to load dashboard data. Please try again."}
-            </Typography>
+            </p>
             <Button
               variant="filled"
               leadingIcon={<Icon name="refresh" />}
@@ -202,14 +201,22 @@ export default function DashboardPage() {
   return (
     <motion.div
       className="flex flex-col gap-6"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
       transition={defaultTransition}
     >
       {/* ─── Page Header ─────────────────────────────────────────────────── */}
-      <TopAppBar title={<Typography variant="headline-medium">Dashboard</Typography>} subtitle="Overview of your organization's key metrics" />
+      <TopAppBar
+        title={<h1 className="text-headline-medium">Dashboard</h1>}
+        subtitle="Overview of your organization's key metrics"
+        actions={
+          <Button variant="filled" leadingIcon={<Icon name="add" />}>
+            New request
+          </Button>
+        }
+      />
 
       {/* ─── KPI Stats Grid ──────────────────────────────────────────────── */}
       <section aria-label="Key metrics">
@@ -218,8 +225,22 @@ export default function DashboardPage() {
             ? Array.from({ length: 4 }).map((_, i) => (
                 <StatCardSkeleton key={i} />
               ))
-            : stats.map((stat) => (
-                <DashboardStatCard key={stat.label} {...stat} />
+            : stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  variants={resolveAnimationVariants(
+                    pageTransitionVariants,
+                    reduced
+                  )}
+                  initial="initial"
+                  animate="enter"
+                  transition={{
+                    ...defaultTransition,
+                    delay: reduced ? 0 : index * 0.05,
+                  }}
+                >
+                  <DashboardStatCard {...stat} />
+                </motion.div>
               ))}
         </div>
       </section>
@@ -232,9 +253,7 @@ export default function DashboardPage() {
         <section className="lg:col-span-2" aria-label="Upcoming events">
           <Card variant="elevated">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-[16px] leading-6 font-medium text-surface-foreground">
-                Upcoming Events
-              </CardTitle>
+              <CardTitle className="text-title-medium">Upcoming Events</CardTitle>
               <AssistChip leadingIcon={<Icon name="calendar_month" />}>
                 Next 30 days
               </AssistChip>
@@ -244,19 +263,17 @@ export default function DashboardPage() {
                 <ActivitySkeleton />
               ) : (eventsData ?? []).length === 0 ? (
                 <div className="flex flex-col items-center py-12 text-center">
-                  <div className="flex items-center justify-center h-14 w-14 rounded-full bg-surface-variant mb-3">
+                  <div className="flex items-center justify-center h-14 w-14 rounded-full bg-surface-container-high mb-3">
                     <Icon
                       name="event_available"
                       size={24}
-                      className="text-surface-variant-foreground"
+                      className="text-on-surface-variant"
                     />
                   </div>
-                  <Typography variant="title-medium" className="mb-1">
-                    All clear
-                  </Typography>
-                  <Typography variant="body-medium" color="surface-variant-foreground">
+                  <p className="text-title-medium mb-1">All clear</p>
+                  <p className="text-body-medium text-on-surface-variant">
                     No upcoming events in the next 30 days
-                  </Typography>
+                  </p>
                 </div>
               ) : (
                 <List aria-label="List">
@@ -300,9 +317,7 @@ export default function DashboardPage() {
         <section aria-label="Quick actions">
           <Card variant="elevated" className="h-full">
             <CardHeader>
-              <CardTitle className="text-[16px] leading-6 font-medium text-surface-foreground">
-                Quick Actions
-              </CardTitle>
+              <CardTitle className="text-title-medium">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-0">
               <Button variant="tonal" className="w-full justify-start" leadingIcon={<Icon name="person_add" />}>

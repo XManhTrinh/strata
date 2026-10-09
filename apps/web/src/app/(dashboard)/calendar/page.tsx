@@ -5,7 +5,6 @@ import { CalendarView } from "@/features/calendar/CalendarView";
 import { Button, Card } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Typography } from "@/components/ui/typography";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   useCalendarEvents,
@@ -67,12 +66,12 @@ export default function CalendarPage() {
             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <Typography variant="title-large" className="mb-2">
+            <h5 className="text-title-large mb-2">
               Unable to load calendar
-            </Typography>
-            <Typography variant="body-medium" color="surface-variant-foreground" className="mb-6">
+            </h5>
+            <p className="text-body-medium text-on-surface-variant mb-6">
               {error?.message || "Failed to load calendar data. Please try again."}
-            </Typography>
+            </p>
             <Button variant="tonal" onClick={() => refetch()}>
               <Icon name="refresh" size={18} />
               Retry

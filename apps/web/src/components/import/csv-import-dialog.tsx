@@ -518,15 +518,15 @@ function MappingStep({
           <div className="sticky -top-px z-10 bg-surface-container-high">
             <div className="py-2.5 bg-error-container flex items-start gap-3">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-error shrink-0">
-                <Icon name="error" size={18} className="text-error-foreground" />
+                <Icon name="error" size={18} className="text-on-error" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-error-container-foreground">
+                <p className="text-[13px] font-semibold text-on-error-container">
                   {mappingErrors.length} mapping issue{mappingErrors.length !== 1 ? "s" : ""} — fix before continuing
                 </p>
                 <div className="space-y-0.5 mt-1">
                   {mappingErrors.map((err, i) => (
-                    <p key={i} className="text-[12px] text-error-container-foreground/80">{err}</p>
+                    <p key={i} className="text-[12px] text-on-error-container/80">{err}</p>
                   ))}
                 </div>
               </div>
@@ -539,25 +539,25 @@ function MappingStep({
         <div>
           {/* Header */}
           <div className="grid grid-cols-[6fr_20px_5fr_20px] gap-x-2 items-center px-3 py-2 bg-surface-container-low/50 border-b border-outline-variant/50">
-            <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">CSV Column</p>
+            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-medium">CSV Column</p>
             <div />
-            <p className="text-[10px] text-surface-variant-foreground uppercase tracking-wider font-medium">Maps To</p>
+            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-medium">Maps To</p>
             <div />
           </div>
           {/* Rows */}
           {columnMappings.map((mapping, idx) => {
             const isSkipped = mapping.target === "skip";
             return (
-            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_48px] gap-x-2 items-center px-3 py-2 hover:bg-surface-foreground/4 transition-colors ${isSkipped ? "opacity-40" : ""} ${errorIndices.has(idx) ? "bg-error/8 ring-1 ring-error/20 rounded" : ""}`}>
+            <div key={idx} className={`grid grid-cols-[6fr_20px_5fr_48px] gap-x-2 items-center px-3 py-2 hover:bg-on-surface/4 transition-colors ${isSkipped ? "opacity-40" : ""} ${errorIndices.has(idx) ? "bg-error/8 ring-1 ring-error/20 rounded" : ""}`}>
               <div className="flex items-center gap-1.5 min-w-0">
-                <Icon name="table_chart" size={12} className="text-surface-variant-foreground shrink-0" />
-                <span className={`text-[11px] font-medium truncate ${isSkipped ? "line-through text-surface-variant-foreground" : "text-surface-foreground"}`}>{mapping.csvHeader}</span>
+                <Icon name="table_chart" size={12} className="text-on-surface-variant shrink-0" />
+                <span className={`text-[11px] font-medium truncate ${isSkipped ? "line-through text-on-surface-variant" : "text-on-surface"}`}>{mapping.csvHeader}</span>
                 {!isSkipped && csvRows.length > 0 && csvRows[0][idx] && (
-                  <span className="text-[10px] text-surface-variant-foreground/60 truncate max-w-20">({csvRows[0][idx]})</span>
+                  <span className="text-[10px] text-on-surface-variant/60 truncate max-w-20">({csvRows[0][idx]})</span>
                 )}
               </div>
               <div className="flex items-center justify-center">
-                <Icon name="arrow_forward" size={12} className="text-surface-variant-foreground/40" />
+                <Icon name="arrow_forward" size={12} className="text-on-surface-variant/40" />
               </div>
               <div className="min-w-0 flex items-center">
                 <Select
@@ -576,7 +576,7 @@ function MappingStep({
                 <button
                   type="button"
                   onClick={() => onMappingChange(idx, "extra")}
-                  className={`flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors ${mapping.target === "extra" ? "text-primary" : "text-surface-variant-foreground"}`}
+                  className={`flex items-center justify-center w-5 h-5 rounded-full hover:bg-on-surface/8 transition-colors ${mapping.target === "extra" ? "text-primary" : "text-on-surface-variant"}`}
                   title="Use as extra column (stored as metadata)"
                 >
                   <Icon name="dataset" size={14} />
@@ -584,10 +584,10 @@ function MappingStep({
                 <button
                   type="button"
                   onClick={() => onMappingChange(idx, isSkipped ? "extra" : "skip")}
-                  className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-surface-foreground/8 transition-colors"
+                  className="flex items-center justify-center w-5 h-5 rounded-full hover:bg-on-surface/8 transition-colors"
                   title={isSkipped ? "Restore column" : "Skip column"}
                 >
-                  <Icon name={isSkipped ? "undo" : "close"} size={14} className="text-surface-variant-foreground" />
+                  <Icon name={isSkipped ? "undo" : "close"} size={14} className="text-on-surface-variant" />
                 </button>
               </div>
             </div>
@@ -603,9 +603,9 @@ function MappingStep({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Icon name="account_tree" size={16} className="text-primary" />
-                <p className="text-label-medium text-surface-foreground">Hierarchy Order</p>
+                <p className="text-label-medium text-on-surface">Hierarchy Order</p>
               </div>
-              <p className="text-[10px] text-surface-variant-foreground">Drag to reorder</p>
+              <p className="text-[10px] text-on-surface-variant">Drag to reorder</p>
             </div>
             <DndContext
               sensors={dndSensors}
@@ -641,7 +641,7 @@ function MappingStep({
                 </div>
               </SortableContext>
             </DndContext>
-            <p className="mt-2 text-[10px] text-surface-variant-foreground">
+            <p className="mt-2 text-[10px] text-on-surface-variant">
               {orgLevelOrder.map((idx) => columnMappings[idx]?.unitTypeName || columnMappings[idx]?.csvHeader).join(" → ")}
             </p>
           </CardContent>
@@ -654,9 +654,9 @@ function MappingStep({
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-2">
               <Icon name="supervisor_account" size={16} className="text-primary" />
-              <p className="text-label-medium text-surface-foreground">Line Manager Matching</p>
+              <p className="text-label-medium text-on-surface">Line Manager Matching</p>
             </div>
-            <p className="text-[11px] text-surface-variant-foreground mb-2">
+            <p className="text-[11px] text-on-surface-variant mb-2">
               Which column should be used to identify the manager? The line manager value
               will be matched against this field.
             </p>
@@ -686,9 +686,9 @@ function MappingStep({
         <CardContent className="p-3">
           <div className="flex items-center gap-2 mb-2">
             <Icon name="shield" size={16} className="text-primary" />
-            <p className="text-label-medium text-surface-foreground">Default Role</p>
+            <p className="text-label-medium text-on-surface">Default Role</p>
           </div>
-          <p className="text-[11px] text-surface-variant-foreground mb-2">
+          <p className="text-[11px] text-on-surface-variant mb-2">
             Assigned to all imported members. Leave empty for no role.
           </p>
           <Select
@@ -812,8 +812,8 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
       {isPending && (
         <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 rounded-xl">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-title-medium text-surface-foreground">Importing...</p>
-          <p className="text-body-small text-surface-variant-foreground">
+          <p className="text-title-medium text-on-surface">Importing...</p>
+          <p className="text-body-small text-on-surface-variant">
             {rows.length} records with org structure, positions, and roles
           </p>
         </div>
@@ -838,11 +838,11 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
           <Card key={stat.label} variant="elevated">
             <CardContent className="flex items-center gap-3 p-3">
               <div className={`flex items-center justify-center w-9 h-9 rounded-full ${stat.color} shrink-0`}>
-                <Icon name={stat.icon} size={18} className="text-primary-container-foreground" />
+                <Icon name={stat.icon} size={18} className="text-on-primary-container" />
               </div>
               <div>
-                <p className="text-title-large text-surface-foreground leading-tight">{stat.value}</p>
-                <p className="text-label-small text-surface-variant-foreground">{stat.label}</p>
+                <p className="text-title-large text-on-surface leading-tight">{stat.value}</p>
+                <p className="text-label-small text-on-surface-variant">{stat.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -854,11 +854,11 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
         <Card variant="outlined" className="border-secondary/30">
           <CardContent className="flex items-start gap-3 p-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary-container shrink-0">
-              <Icon name="workspaces" size={16} className="text-secondary-container-foreground" />
+              <Icon name="workspaces" size={16} className="text-on-secondary-container" />
             </div>
             <div>
-              <p className="text-label-medium text-surface-foreground">{duplicateRows} multi-squad allocation{duplicateRows !== 1 ? "s" : ""}</p>
-              <p className="text-body-small text-surface-variant-foreground">
+              <p className="text-label-medium text-on-surface">{duplicateRows} multi-squad allocation{duplicateRows !== 1 ? "s" : ""}</p>
+              <p className="text-body-small text-on-surface-variant">
                 Members appearing on multiple rows will be split across squads automatically.
               </p>
             </div>
@@ -869,7 +869,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
       {/* Data breakdown */}
       <Card variant="outlined">
         <CardContent className="p-3 space-y-3">
-          <p className="text-label-medium text-surface-foreground">Data Breakdown</p>
+          <p className="text-label-medium text-on-surface">Data Breakdown</p>
           <div className="flex flex-wrap gap-2">
             {permCount > 0 && <AssistChip leadingIcon={<Icon name="badge" />}>{permCount} Perm</AssistChip>}
             {subConCount > 0 && <AssistChip leadingIcon={<Icon name="engineering" />}>{subConCount} SubCon</AssistChip>}
@@ -892,7 +892,7 @@ function PreviewStep({ importPreview, columnMappings, orgLevelOrder, isPending }
           {orgLevelOrder.length > 0 && (
             <>
               <Divider />
-              <p className="text-label-medium text-surface-foreground">Org Structure</p>
+              <p className="text-label-medium text-on-surface">Org Structure</p>
               <div className="flex flex-wrap gap-2">
                 {orgLevelOrder.map((colIdx, levelIdx) => {
                   const typeName = columnMappings[colIdx]?.unitTypeName || columnMappings[colIdx]?.csvHeader;
