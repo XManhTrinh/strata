@@ -142,7 +142,7 @@ function SortableColumnItem({
           aria-label={`Toggle ${label} column`}
           className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
         />
-        <span className="text-[12px] text-on-surface truncate">{label}</span>
+        <span className="text-body-small text-on-surface truncate">{label}</span>
       </label>
     </div>
   );
@@ -469,7 +469,7 @@ export default function PeoplePage() {
             {person.isSuperAdmin && <AssistChip>Admin</AssistChip>}
             {(person.roles ?? []).map((r) => <AssistChip key={r.id}>{r.name}</AssistChip>)}
             {!person.isSuperAdmin && (person.roles ?? []).length === 0 && (
-              <span className="text-[12px] text-on-surface-variant">No role</span>
+              <span className="text-body-small text-on-surface-variant">No role</span>
             )}
           </div>
         );
@@ -494,12 +494,12 @@ export default function PeoplePage() {
             <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <h6 className="text-title-medium mb-2">Unable to load members</h6>
+            <h2 className="text-title-medium mb-2">Unable to load members</h2>
             <p className="text-body-medium text-on-surface-variant mb-6">
               {error?.message || "Something went wrong while fetching member data."}
             </p>
-            <Button variant="tonal" onClick={() => refetch()}>
-              <Icon name="refresh" size={18} />Retry
+            <Button variant="filled" onClick={() => refetch()} leadingIcon={<Icon name="refresh" />}>
+              Retry
             </Button>
           </CardContent>
         </Card>
@@ -650,11 +650,11 @@ export default function PeoplePage() {
       {/* Empty State */}
       {!isLoading && people.length === 0 && (
         <Card variant="elevated" className="max-w-lg mx-auto">
-          <CardContent className="flex flex-col items-center py-16 px-8 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/8 mb-6">
-              <Icon name="people" size={40} className="text-primary" />
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-primary/8 mb-4">
+              <Icon name="people" size={24} className="text-primary" />
             </div>
-            <h5 className="text-title-large mb-2">No members yet</h5>
+            <h2 className="text-title-large mb-2">No members yet</h2>
             <p className="text-body-medium text-on-surface-variant mb-6 max-w-sm">
               Import your org data from a CSV in Settings, or add members one by one.
             </p>
@@ -662,7 +662,7 @@ export default function PeoplePage() {
               <Link href="/admin/settings">
                 <Button variant="tonal" leadingIcon={<Icon name="upload" />}>Import in Settings</Button>
               </Link>
-              <Button onClick={openAdd} leadingIcon={<Icon name="person_add" />}>Add Member</Button>
+              <Button variant="filled" onClick={openAdd} leadingIcon={<Icon name="person_add" />}>Add Member</Button>
             </div>
           </CardContent>
         </Card>
@@ -727,7 +727,7 @@ export default function PeoplePage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <Avatar name={person.fullName} size="lg" alt={person.fullName} />
                   <div className="flex-1 min-w-0">
-                    <h6 className="text-title-medium truncate">{person.fullName}</h6>
+                    <h3 className="text-title-medium truncate">{person.fullName}</h3>
                     <p className="text-body-medium text-on-surface-variant truncate">{displayEmail(person.email)}</p>
                     {person.orgUnitName && (
                       <p className="text-body-small text-on-surface-variant mt-0.5">{person.orgUnitName}</p>
@@ -786,7 +786,7 @@ export default function PeoplePage() {
         </DialogContent>
         <DialogActions>
           <Button type="button" variant="text" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-          <Button variant="text" type="submit" form="add-member-form" disabled={createMutation.isPending}>
+          <Button variant="filled" type="submit" form="add-member-form" disabled={createMutation.isPending}>
             {createMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
@@ -817,7 +817,7 @@ export default function PeoplePage() {
         </DialogContent>
         <DialogActions>
           <Button type="button" variant="text" onClick={() => setEditPerson(null)}>Cancel</Button>
-          <Button variant="text" type="submit" form="edit-member-form" disabled={updateMutation.isPending}>
+          <Button variant="filled" type="submit" form="edit-member-form" disabled={updateMutation.isPending}>
             {updateMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
@@ -868,7 +868,7 @@ export default function PeoplePage() {
         </DialogContent>
         <DialogActions>
           <Button type="button" variant="text" onClick={() => { setShowSaveViewDialog(false); setNewViewName(""); }}>Cancel</Button>
-          <Button variant="text" onClick={handleSaveView} disabled={createViewMutation.isPending}>
+          <Button variant="filled" onClick={handleSaveView} disabled={createViewMutation.isPending}>
             {createViewMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
@@ -892,7 +892,7 @@ export default function PeoplePage() {
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={() => setShowBatchRoleDialog(false)}>Cancel</Button>
-          <Button variant="text" onClick={handleBatchAssignRole} disabled={!batchRoleId || assignRoleMutation.isPending}>
+          <Button variant="filled" onClick={handleBatchAssignRole} disabled={!batchRoleId || assignRoleMutation.isPending}>
             {assignRoleMutation.isPending ? "Assigning..." : "Assign"}
           </Button>
         </DialogActions>
