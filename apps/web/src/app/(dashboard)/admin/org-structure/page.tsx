@@ -33,7 +33,12 @@ import {
 } from "@/services";
 import { useOrgUnitTypes } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 import { OrgUnitFlow } from "@/components/flow-org/OrgUnitFlow";
 
 // Legacy compatibility type for interactive ListItem
@@ -156,9 +161,9 @@ function TreeNode({
           <span className="shrink-0" style={{ color: unit.typeColor }}>
             <Icon name={unit.typeIcon} size={18} />
           </span>
-          <span className="text-[14px] leading-5 font-medium text-on-surface">{unit.name}</span>
+          <span className="text-body-medium font-medium text-on-surface">{unit.name}</span>
           <span
-            className="inline-flex items-center h-5 text-[11px] font-medium px-2 rounded-full"
+            className="inline-flex items-center h-5 text-label-small px-2 rounded-full"
             style={{ backgroundColor: unit.typeColor + "20", color: unit.typeColor }}
           >
             {unit.typeName}
@@ -218,10 +223,10 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
       <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
         <Icon name="account_tree" size={40} className="text-primary" />
       </div>
-      <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+      <h2 className="text-headline-small text-on-surface mb-2">
         No units found
       </h2>
-      <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-xs">
+      <p className="text-body-medium text-on-surface-variant mb-6 max-w-xs">
         Create your first organization unit to start building your hierarchy.
       </p>
       <Button onClick={onCreateClick} leadingIcon={<Icon name="add" />}>
@@ -240,10 +245,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+        <h2 className="text-headline-small text-on-surface mb-2">
           Unable to load structure
         </h2>
-        <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
+        <p className="text-body-medium text-on-surface-variant mb-6">
           Something went wrong loading your hierarchy. Please try again.
         </p>
         <Button variant="tonal" onClick={onRetry}>
@@ -286,7 +291,7 @@ function OrgUnitDialog({
         {editing ? "Edit Organization Unit" : "Create Organization Unit"}
       </DialogTitle>
       <DialogContent>
-        <p className="text-sm text-on-surface-variant mb-4">
+        <p className="text-body-medium text-on-surface-variant mb-4">
           {editing
             ? "Update the details for this organization unit."
             : "Add a new unit to your organization hierarchy."}
@@ -351,6 +356,7 @@ function OrgUnitDialog({
 export default function OrgStructurePage() {
   const toast = useToast();
   const companyId = useCompanyId();
+  const reduced = useReducedMotionContext();
 
   // ── Local state ────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -462,7 +468,7 @@ export default function OrgStructurePage() {
     return (
       <div className="space-y-6">
         <TopAppBar
-          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Hierarchy</h1>}
+          title={<h1 className="text-headline-medium">Hierarchy</h1>}
           subtitle="Build and manage your organization's hierarchical structure."
         />
         <ErrorState onRetry={() => refetch()} />
@@ -474,7 +480,7 @@ export default function OrgStructurePage() {
   return (
     <motion.div
       className="flex flex-col h-full min-h-0 gap-6 overflow-hidden"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -483,7 +489,7 @@ export default function OrgStructurePage() {
       {/* ── Page header ────────────────────────────────────────────────── */}
       <TopAppBar
         className="justify-between shrink-0"
-        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Hierarchy</h1>}
+        title={<h1 className="text-headline-medium">Hierarchy</h1>}
         subtitle="Build and manage your organization's hierarchical structure."
         actions={
           <Button onClick={() => openCreate()} leadingIcon={<Icon name="add" />}>
