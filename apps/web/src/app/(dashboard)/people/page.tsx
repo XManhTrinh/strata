@@ -71,7 +71,12 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 import { escapeCsvField } from "@/lib/csv";
 import { displayEmail, isPlaceholderEmail } from "@/lib/utils";
 
@@ -152,6 +157,7 @@ function SortableColumnItem({
 
 export default function PeoplePage() {
   const toast = useToast();
+  const reduced = useReducedMotionContext();
   const companyId = useCompanyId();
 
   // DnD sensors for column reordering
@@ -511,7 +517,7 @@ export default function PeoplePage() {
   return (
     <motion.div
       className="flex flex-col h-full min-h-0 gap-4"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
