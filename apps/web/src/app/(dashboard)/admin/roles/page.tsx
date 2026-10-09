@@ -35,7 +35,8 @@ import {
   type RolePermissionDetail,
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import { pageTransitionVariants, defaultTransition, resolveAnimationVariants } from "@/lib/motion";
 
 // Legacy compatibility type for interactive ListItem
 // Legacy compatibility - TypeScript cast for interactive list items
@@ -165,7 +166,7 @@ function ErrorState() {
           <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
             <Icon name="error" size={24} className="text-error" />
           </div>
-          <h6 className="text-title-medium mb-1">Unable to load roles</h6>
+          <h2 className="text-title-medium mb-1">Unable to load roles</h2>
           <p className="text-body-medium text-on-surface-variant">
             Something went wrong. Please try again later.
           </p>
@@ -184,7 +185,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
         <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
           <Icon name="shield" size={40} className="text-primary" />
         </div>
-        <h5 className="text-title-large mb-2">No roles yet</h5>
+        <h2 className="text-title-large mb-2">No roles yet</h2>
         <p className="text-body-medium text-on-surface-variant mb-6">
           Create your first role to start managing permissions.
         </p>
@@ -335,6 +336,7 @@ function PermissionMatrix({
   onExpandAll: () => void; onCollapseAll: () => void;
   readOnly?: boolean;
 }) {
+  const reduced = useReducedMotionContext();
   const [showScopeGuide, setShowScopeGuide] = useState(false);
 
   if (!features.length) {
@@ -343,7 +345,7 @@ function PermissionMatrix({
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-variant/50 mb-4">
           <Icon name="lock" size={24} className="text-on-surface-variant/60" />
         </div>
-        <h6 className="text-title-medium mb-1">No features available</h6>
+        <h2 className="text-title-medium mb-1">No features available</h2>
         <p className="text-body-medium text-on-surface-variant">Features will appear here once configured.</p>
       </div>
     );
@@ -363,7 +365,7 @@ function PermissionMatrix({
             <Tooltip>What do the scopes mean?</Tooltip>
           </TooltipTrigger>
         </div>
-        <Button variant="text" onClick={allExpanded ? onCollapseAll : onExpandAll} className="text-xs h-8">
+        <Button variant="text" onClick={allExpanded ? onCollapseAll : onExpandAll} className="text-label-large h-8">
           {allExpanded ? "Collapse all" : "Expand all"}
         </Button>
       </div>
@@ -391,7 +393,7 @@ function PermissionMatrix({
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+                  transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0, 0, 1] }}
                   className="overflow-hidden"
                 >
                   <Divider />
@@ -423,7 +425,7 @@ function PermissionMatrix({
                             aria-label={`Scope for ${fp.displayName}`}
                             selectedKey={scope} disabled={readOnly || !isEnabled}
                             onSelectionChange={(key) => onScopeChange(feature.key, fp.key, String(key) as Scope)}
-                            className={`h-8 w-35 text-xs border-outline-variant ${readOnly || !isEnabled ? "opacity-40" : ""}`}
+                            className={`h-8 w-35 text-label-small border-outline-variant ${readOnly || !isEnabled ? "opacity-40" : ""}`}
                             variant="outlined"
                           >
                             {SCOPE_OPTIONS.map((s) => (
@@ -449,6 +451,7 @@ function PermissionMatrix({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function RolesPage() {
+  const reduced = useReducedMotionContext();
   const toast = useToast();
   const companyId = useCompanyId();
 
@@ -595,7 +598,7 @@ export default function RolesPage() {
   // ── Loading ────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+      <motion.div className="flex flex-col h-full" variants={resolveAnimationVariants(pageTransitionVariants, reduced)} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
         <PageHeader onCreateClick={() => {}} onAddAdmin={() => {}} isAddingAdmin={false} showAddAdmin={false} />
         <LoadingSkeleton />
       </motion.div>
@@ -605,7 +608,7 @@ export default function RolesPage() {
   // ── Error ──────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+      <motion.div className="flex flex-col h-full" variants={resolveAnimationVariants(pageTransitionVariants, reduced)} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
         <PageHeader onCreateClick={() => {}} onAddAdmin={() => {}} isAddingAdmin={false} showAddAdmin={false} />
         <ErrorState />
       </motion.div>
@@ -615,7 +618,7 @@ export default function RolesPage() {
   // ── Empty ──────────────────────────────────────────────────────────────
   if (roles.length === 0) {
     return (
-      <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+      <motion.div className="flex flex-col h-full" variants={resolveAnimationVariants(pageTransitionVariants, reduced)} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
         <PageHeader onCreateClick={() => setShowCreateModal(true)} onAddAdmin={handleAddAdmin} isAddingAdmin={createAdminRoleMutation.isPending} showAddAdmin={!hasAdminRole} />
         <EmptyState onCreateClick={() => setShowCreateModal(true)} />
         <CreateRoleDialog open={showCreateModal} onOpenChange={setShowCreateModal} name={newRoleName} onNameChange={setNewRoleName} description={newRoleDescription} onDescriptionChange={setNewRoleDescription} onSubmit={handleCreateRole} isPending={createRoleMutation.isPending} />
@@ -627,7 +630,7 @@ export default function RolesPage() {
   const featureCatalog: AdminFeature[] = allFeatures ?? [];
 
   return (
-    <motion.div className="flex flex-col h-[calc(100vh-100px)]" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+    <motion.div className="flex flex-col h-[calc(100vh-100px)]" variants={resolveAnimationVariants(pageTransitionVariants, reduced)} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       <PageHeader onCreateClick={() => setShowCreateModal(true)} onAddAdmin={handleAddAdmin} isAddingAdmin={createAdminRoleMutation.isPending} showAddAdmin={!hasAdminRole} />
 
       {/* Master-Detail */}
@@ -647,7 +650,7 @@ export default function RolesPage() {
                     key={role.id}
                     selected={isSelected}
                     leading={<Icon name={role.isSystem ? "shield_person" : "shield"} size={24} className={isSelected ? "text-primary" : "text-on-surface-variant"} />}
-                    trailing={role.isSystem ? <AssistChip className="text-[11px] h-6 px-2">System</AssistChip> : undefined}
+                    trailing={role.isSystem ? <AssistChip className="text-label-small h-6 px-2">System</AssistChip> : undefined}
                     supportingText={role.description ?? undefined}
                     onClick={() => handleRoleSelect(role.id)}
                   >
@@ -675,7 +678,7 @@ export default function RolesPage() {
               <div className="shrink-0 min-h-21 flex items-center px-6 border-b border-outline-variant bg-surface-container-low/50">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h6 className="text-title-medium truncate">{selectedRole.name}</h6>
+                    <h2 className="text-title-medium truncate">{selectedRole.name}</h2>
                     {selectedRole.isSystem && <AssistChip className="shrink-0">System</AssistChip>}
                   </div>
                   {selectedRole.description && (
