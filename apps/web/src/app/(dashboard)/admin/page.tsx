@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import {
-  TopAppBar,
-  Card,
-  List,
-  ListItem,
-} from "@vkieu/mui";
+import { TopAppBar, Card } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 interface SettingsCard {
   title: string;
@@ -74,6 +74,7 @@ const settingsCards: SettingsCard[] = [
 ];
 
 export default function SettingsPage() {
+  const reduced = useReducedMotionContext();
   const { hasPermission } = useUserPermissions();
 
   const visibleCards = settingsCards.filter((card) =>
@@ -83,7 +84,7 @@ export default function SettingsPage() {
   return (
     <motion.div
       className="space-y-6"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -92,28 +93,38 @@ export default function SettingsPage() {
       {/* Header */}
       <TopAppBar title={<h1 className="text-headline-medium">Settings</h1>} subtitle="Platform configuration and preferences." />
 
-      {/* Settings List */}
-      <Card variant="elevated">
-        <CardContent className="p-0">
-          <List aria-label="Settings menu">
-            {visibleCards.map((card) => (
-              <Link key={card.href} href={card.href}>
-                <ListItem
-                  leading={
-                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/12">
-                      <Icon name={card.icon} size={24} className="text-primary" />
+      {/* Settings Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {visibleCards.map((card, index) => (
+          <motion.div
+            key={card.href}
+            variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
+            initial="initial"
+            animate="enter"
+            transition={{
+              ...defaultTransition,
+              delay: reduced ? 0 : index * 0.05,
+            }}
+          >
+            <Card variant="outlined" className="h-full transition-shadow hover:shadow-md">
+              <Link href={card.href} className="block h-full">
+                <CardContent className="flex h-full flex-col">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-container">
+                      <Icon name={card.icon} size={24} className="text-on-primary-container" />
                     </div>
-                  }
-                  supportingText={card.description}
-                  trailing={<Icon name="chevron_right" size={24} className="text-on-surface-variant" />}
-                >
-                  {card.title}
-                </ListItem>
+                    <Icon name="chevron_right" size={24} className="text-on-surface-variant" />
+                  </div>
+                  <h2 className="text-title-medium">{card.title}</h2>
+                  <p className="mt-2 text-body-medium text-on-surface-variant">
+                    {card.description}
+                  </p>
+                </CardContent>
               </Link>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
     </motion.div>
   );
 }

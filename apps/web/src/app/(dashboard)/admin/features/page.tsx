@@ -17,7 +17,12 @@ import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 // ─── Feature metadata ─────────────────────────────────────────────────────────
 
@@ -97,7 +102,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h5 className="text-title-large mb-2">Unable to load features</h5>
+        <h2 className="text-title-large mb-2">Unable to load features</h2>
         <p className="text-body-medium text-on-surface-variant mb-6">
           Something went wrong. Please try again.
         </p>
@@ -119,7 +124,7 @@ function EmptyState({ hasSearch }: { hasSearch: boolean }) {
         <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
           <Icon name="extension" size={40} className="text-primary" />
         </div>
-        <h5 className="text-title-large mb-2">No features found</h5>
+        <h2 className="text-title-large mb-2">No features found</h2>
         <p className="text-body-medium text-on-surface-variant">
           {hasSearch ? "Try adjusting your search query." : "No features are registered yet."}
         </p>
@@ -136,12 +141,14 @@ function FeatureCard({
   onToggle,
   onExpand,
   isToggling,
+  reduced,
 }: {
   feature: FeatureRow;
   isExpanded: boolean;
   onToggle: () => void;
   onExpand: () => void;
   isToggling: boolean;
+  reduced: boolean;
 }) {
   const meta = FEATURE_META[feature.key] ?? DEFAULT_META;
 
@@ -167,7 +174,7 @@ function FeatureCard({
         </div>
 
         {/* Title + key */}
-        <h6 className="text-title-medium">{feature.displayName}</h6>
+        <h3 className="text-title-medium">{feature.displayName}</h3>
         <span className="text-label-small text-on-surface-variant font-mono mt-0.5">
           {feature.key}
         </span>
@@ -185,7 +192,7 @@ function FeatureCard({
           <Button
             variant="text"
             onClick={onExpand}
-            className="text-xs h-8"
+            className="text-label-large h-8"
             trailingIcon={<Icon name={isExpanded ? "expand_less" : "expand_more"} />}
           >
             {isExpanded ? "Hide" : "Details"}
@@ -199,7 +206,7 @@ function FeatureCard({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              transition={{ duration: reduced ? 0 : 0.2, ease: [0.2, 0, 0, 1] }}
               className="overflow-hidden"
             >
               <div className="mt-4 pt-3 border-t border-outline-variant/50 space-y-2.5">
@@ -231,6 +238,7 @@ function FeatureCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FeaturesPage() {
+  const reduced = useReducedMotionContext();
   const toast = useToast();
   const companyId = useCompanyId();
   const { data: companyFeatures, isLoading, error, refetch } = useFeatures(companyId);
@@ -308,7 +316,7 @@ export default function FeaturesPage() {
   return (
     <motion.div
       className="space-y-6"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -339,6 +347,7 @@ export default function FeaturesPage() {
               onToggle={() => handleToggle(feature.featureId, feature.enabled, feature.displayName)}
               onExpand={() => setExpandedFeatureId(expandedFeatureId === feature.id ? null : feature.id)}
               isToggling={toggleFeatureMutation.isPending}
+              reduced={reduced}
             />
           ))}
         </div>
