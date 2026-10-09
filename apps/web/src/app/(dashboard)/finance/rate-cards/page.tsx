@@ -2,20 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import {TopAppBar,Card,Checkbox,
+import {
+  TopAppBar,
+  Card,
+  Checkbox,
   AssistChip,
   Tabs,
   Tab,
-  Button} from "@vkieu/mui";
+  Button,
+  Divider,
+} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 import {
   useAvailableColumns,
   useRateCards,
@@ -130,18 +140,22 @@ function CardTableRow({
       {/* Name + conditions */}
       <TableCell>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-container text-[11px] font-medium text-on-surface-variant shrink-0">
+          <span className="inline-flex items-center justify-center h-5 w-5 shrink-0 rounded-full bg-surface-container-high text-label-small text-on-surface-variant">
             {index + 1}
           </span>
-          <span className="font-medium text-on-surface truncate">{card.name}</span>
-          {card.isDefault && <AssistChip>Default</AssistChip>}
+          <span className="truncate text-body-medium font-medium text-on-surface">
+            {card.name}
+          </span>
+          {card.isDefault && (
+            <AssistChip leadingIcon={<Icon name="star" />}>Default</AssistChip>
+          )}
         </div>
         {!card.isDefault && card.conditions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1 mt-1">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1">
             {card.conditions.map((c, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 text-[11px] rounded bg-surface-container px-1.5 py-0.5 text-on-surface-variant"
+                className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2 py-0.5 text-label-small text-on-surface-variant"
               >
                 <span className="font-medium text-on-surface">{c.column}</span>
                 {OPERATOR_LABEL[c.operator]}
@@ -154,26 +168,26 @@ function CardTableRow({
 
       {/* Per-quarter: working days + quarter total */}
       {quarters.map((q, i) => (
-        <TableCell key={i} className="text-right whitespace-nowrap">
-          <div className="text-[13px] text-on-surface">{fmtGBP(q.total)}</div>
-          <div className="text-[11px] text-on-surface-variant">
+        <TableCell key={i} className="whitespace-nowrap text-right">
+          <div className="text-body-small text-on-surface">{fmtGBP(q.total)}</div>
+          <div className="text-label-small text-on-surface-variant">
             {q.days} day{q.days !== 1 ? "s" : ""}{q.dayRate ? ` · ${fmtGBP(q.dayRate)}/d` : ""}
           </div>
         </TableCell>
       ))}
 
       {/* Annual */}
-      <TableCell className="text-right font-semibold whitespace-nowrap">
+      <TableCell className="whitespace-nowrap text-right font-brand font-semibold text-on-surface">
         {fmtGBP(annualCost(card))}
       </TableCell>
 
       {/* Actions */}
-      <TableCell className="text-right w-16">
+      <TableCell className="w-16 text-right">
         <div className="flex items-center justify-end gap-1">
           <button
             type="button"
             onClick={() => onEdit(card)}
-            className="text-on-surface-variant hover:text-primary transition-colors"
+            className="text-on-surface-variant transition-colors hover:text-primary"
             aria-label="Edit rate card"
           >
             <Icon name="edit" size={18} />
@@ -181,7 +195,7 @@ function CardTableRow({
           <button
             type="button"
             onClick={() => onDelete(card)}
-            className="text-on-surface-variant hover:text-error transition-colors"
+            className="text-on-surface-variant transition-colors hover:text-error"
             aria-label="Delete rate card"
           >
             <Icon name="delete" size={18} />
@@ -189,6 +203,28 @@ function CardTableRow({
         </div>
       </TableCell>
     </TableRow>
+  );
+}
+
+// ─── Loading Skeleton ──────────────────────────────────────────────────────────
+
+function RateCardsSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i} variant="elevated">
+          <CardContent className="flex flex-col gap-3 p-6">
+            <SkeletonGroup label="Loading rate cards">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-6" corner="full" />
+                <Skeleton className="h-5 w-40" corner="extra-small" />
+              </div>
+              <Skeleton className="h-20 w-full" corner="medium" />
+            </SkeletonGroup>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }
 
@@ -209,6 +245,7 @@ interface TabModel {
 }
 
 export default function RateCardsPage() {
+  const reduced = useReducedMotionContext();
   const toast = useToast();
   const companyId = useCompanyId();
 
@@ -520,23 +557,26 @@ export default function RateCardsPage() {
     return (
       <div
         key={key}
-        className="space-y-2 rounded-xl"
+        className="flex flex-col gap-3 rounded-xl"
         style={color ? { borderLeft: `3px solid ${color}`, paddingLeft: 12 } : undefined}
       >
         <div className="flex items-center gap-2">
           <Checkbox
- selected={allOn}
+            selected={allOn}
             indeterminate={someOn}
             onSelectedChange={() => toggleGroup(groupCards)}
             aria-label={`Select all in ${title}`}
           />
-          <span style={color ? { color } : undefined} className={color ? undefined : "text-on-surface-variant"}>
+          <span
+            style={color ? { color } : undefined}
+            className={color ? undefined : "text-on-surface-variant"}
+          >
             <Icon name={group ? "folder" : "folder_off"} size={18} />
           </span>
-          <h6 className="text-title-small">{title}</h6>
-          <p className="text-body-small text-on-surface-variant">
-            ({groupCards.length})
-          </p>
+          <h2 className="text-title-small text-on-surface">{title}</h2>
+          <span className="text-body-small text-on-surface-variant">
+            {groupCards.length} card{groupCards.length !== 1 ? "s" : ""}
+          </span>
           <div className="flex-1" />
           {group && (
             <>
@@ -546,7 +586,7 @@ export default function RateCardsPage() {
               <button
                 type="button"
                 onClick={() => openEditGroup(group)}
-                className="text-on-surface-variant hover:text-primary transition-colors"
+                className="text-on-surface-variant transition-colors hover:text-primary"
                 aria-label="Edit group"
               >
                 <Icon name="edit" size={16} />
@@ -554,7 +594,7 @@ export default function RateCardsPage() {
               <button
                 type="button"
                 onClick={() => handleDeleteGroup(group)}
-                className="text-on-surface-variant hover:text-error transition-colors"
+                className="text-on-surface-variant transition-colors hover:text-error"
                 aria-label="Delete group"
               >
                 <Icon name="delete" size={16} />
@@ -569,11 +609,11 @@ export default function RateCardsPage() {
         </div>
 
         {groupCards.length === 0 ? (
-          <p className="text-body-small text-on-surface-variant pl-7">
+          <p className="pl-7 text-body-small text-on-surface-variant">
             No cards in this group yet.
           </p>
         ) : (
-          <div className="overflow-x-auto border border-outline-variant rounded-lg">
+          <div className="overflow-x-auto rounded-lg border border-outline-variant">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -611,8 +651,8 @@ export default function RateCardsPage() {
 
   return (
     <motion.div
-      className="space-y-6"
-      variants={pageTransitionVariants}
+      className="flex flex-col gap-6"
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -633,7 +673,7 @@ export default function RateCardsPage() {
             <Button variant="tonal" onClick={openCreateSet} leadingIcon={<Icon name="add" />}>
               New tab
             </Button>
-            <Button onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
+            <Button variant="filled" onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
               New rate card
             </Button>
           </div>
@@ -642,48 +682,50 @@ export default function RateCardsPage() {
 
       {/* Toolbar: global select-all + apply */}
       {orderedCards.length > 0 && (
-        <div className="flex items-center justify-between gap-3">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <Checkbox
-          selected={allSelected}
-              indeterminate={someSelected}
-              onSelectedChange={toggleAll}
-              aria-label="Select all rate cards"
-            />
-            <p className="text-body-medium text-on-surface-variant">
-              {selected.size > 0 ? `${selected.size} selected` : "Select all"}
-            </p>
-          </label>
-          <Button
-            variant="tonal"
-            onClick={() => handleApply(Array.from(selected))}
-            disabled={selected.size === 0 || applyCards.isPending}
-            leadingIcon={<Icon name="playlist_add_check" />}
-          >
-            {applyCards.isPending ? "Applying…" : "Apply to matching members"}
-          </Button>
-        </div>
+        <section aria-label="Bulk actions">
+          <Card variant="elevated">
+            <CardContent className="flex items-center justify-between gap-3 p-4">
+              <label className="flex cursor-pointer select-none items-center gap-2">
+                <Checkbox
+                  selected={allSelected}
+                  indeterminate={someSelected}
+                  onSelectedChange={toggleAll}
+                  aria-label="Select all rate cards"
+                />
+                <span className="text-body-medium text-on-surface-variant">
+                  {selected.size > 0 ? `${selected.size} selected` : "Select all"}
+                </span>
+              </label>
+              <Button
+                variant="tonal"
+                onClick={() => handleApply(Array.from(selected))}
+                disabled={selected.size === 0 || applyCards.isPending}
+                leadingIcon={<Icon name="playlist_add_check" />}
+              >
+                {applyCards.isPending ? "Applying…" : "Apply to matching members"}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
       )}
 
       {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" corner="extra-large" />
-          ))}
-        </div>
+        <RateCardsSkeleton />
       ) : tabs.length === 0 ? (
-        <Card variant="elevated">
-          <CardContent className="flex flex-col items-center py-16 text-center">
-            <Icon name="request_quote" size={40} className="text-on-surface-variant/30 mb-4" />
-            <h6 className="text-title-medium mb-1">No rate cards yet</h6>
-            <p className="text-body-medium text-on-surface-variant mb-4">
+        <Card variant="elevated" className="mx-auto max-w-lg">
+          <CardContent className="flex flex-col items-center px-8 py-12 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-container-high">
+              <Icon name="request_quote" size={24} className="text-on-surface-variant" />
+            </div>
+            <p className="mb-1 text-title-medium">No rate cards yet</p>
+            <p className="mb-6 text-body-medium text-on-surface-variant">
               Create a tab (e.g. &ldquo;Digital&rdquo;), add groups inside it, then create rate cards.
             </p>
             <div className="flex items-center gap-2">
               <Button variant="tonal" onClick={openCreateSet} leadingIcon={<Icon name="add" />}>
                 New tab
               </Button>
-              <Button onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
+              <Button variant="filled" onClick={() => openCreate(null)} leadingIcon={<Icon name="add" />}>
                 New rate card
               </Button>
             </div>
@@ -693,63 +735,71 @@ export default function RateCardsPage() {
         <Tabs selectedKey={activeTabModel?.id ?? ""} onSelectionChange={(k) => setActiveTab(k as string)} variant="primary" scrollable>
           {tabs.map((t) => (
             <Tab key={t.id} title={t.name}>
-              <div className="space-y-6">
-              {/* Tab header actions */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  {t.set?.color && (
-                    <span
-                      className="inline-block w-3 h-3 rounded-full"
-                      style={{ backgroundColor: t.set.color }}
-                      aria-hidden
-                    />
-                  )}
-                  <h6 className="text-title-medium">{t.name}</h6>
-                  {t.name.includes("(Demo)") && (
-                    <AssistChip leadingIcon={<Icon name="bolt" />}>
-                      Demo
-                    </AssistChip>
-                  )}
-                  {t.set?.description && (
-                    <p className="text-body-small text-on-surface-variant">
-                      {t.set.description}
-                    </p>
-                  )}
+              <div className="flex flex-col gap-6 pt-4">
+                {/* Tab header actions */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {t.set?.color && (
+                      <span
+                        className="inline-block h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: t.set.color }}
+                        aria-hidden
+                      />
+                    )}
+                    <h2 className="text-title-medium text-on-surface">{t.name}</h2>
+                    {t.name.includes("(Demo)") && (
+                      <AssistChip leadingIcon={<Icon name="bolt" />}>
+                        Demo
+                      </AssistChip>
+                    )}
+                    {t.set?.description && (
+                      <span className="truncate text-body-small text-on-surface-variant">
+                        {t.set.description}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button variant="text" size="xs" onClick={() => openCreateGroup(t.set?.id ?? null)} leadingIcon={<Icon name="create_new_folder" />}>
+                      Group
+                    </Button>
+                    {t.set && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openEditSet(t.set!)}
+                          className="text-on-surface-variant transition-colors hover:text-primary"
+                          aria-label="Rename tab"
+                        >
+                          <Icon name="edit" size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSet(t.set!)}
+                          className="text-on-surface-variant transition-colors hover:text-error"
+                          aria-label="Delete tab"
+                        >
+                          <Icon name="delete" size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button variant="text" size="xs" onClick={() => openCreateGroup(t.set?.id ?? null)} leadingIcon={<Icon name="create_new_folder" />}>
-                    Group
-                  </Button>
-                  {t.set && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => openEditSet(t.set!)}
-                        className="text-on-surface-variant hover:text-primary transition-colors"
-                        aria-label="Rename tab"
-                      >
-                        <Icon name="edit" size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSet(t.set!)}
-                        className="text-on-surface-variant hover:text-error transition-colors"
-                        aria-label="Delete tab"
-                      >
-                        <Icon name="delete" size={16} />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
 
-              {t.buckets.length === 0 ? (
-                <p className="text-body-small text-on-surface-variant">
-                  No groups in this tab yet. Add a group to start creating rate cards.
-                </p>
-              ) : (
-                t.buckets.map((b) => renderBucket(b))
-              )}
+                <Divider />
+
+                {t.buckets.length === 0 ? (
+                  <div className="flex flex-col items-center px-8 py-12 text-center">
+                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-surface-container-high">
+                      <Icon name="folder_open" size={24} className="text-on-surface-variant" />
+                    </div>
+                    <p className="mb-1 text-title-medium">No groups in this tab yet</p>
+                    <p className="text-body-medium text-on-surface-variant">
+                      Add a group to start creating rate cards.
+                    </p>
+                  </div>
+                ) : (
+                  t.buckets.map((b) => renderBucket(b))
+                )}
               </div>
             </Tab>
           ))}
