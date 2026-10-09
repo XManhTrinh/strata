@@ -16,10 +16,11 @@ import {
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
   IconButton,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Select } from "@/components/ui/select";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -302,31 +303,31 @@ function OrgUnitDialog({
           />
           <Select
             label="Type"
-            value={formData.typeId}
-            onValueChange={(value) => onFormChange({ ...formData, typeId: value })}
+            selectedKey={formData.typeId}
+            onSelectionChange={(key) =>
+              onFormChange({ ...formData, typeId: key == null ? "" : String(key) })
+            }
             placeholder="Select a type..."
             variant="outlined"
-            options={orgUnitTypes.map((t) => ({
-              value: t.id,
-              label: t.name,
-            }))}
-          />
+          >
+            {orgUnitTypes.map((t) => (
+              <SelectItem key={t.id}>{t.name}</SelectItem>
+            ))}
+          </Select>
           <Select
             label="Parent Unit"
-            value={formData.parentId || "none"}
-            onValueChange={(value) =>
-              onFormChange({ ...formData, parentId: value === "none" ? "" : value })
+            selectedKey={formData.parentId || "none"}
+            onSelectionChange={(key) =>
+              onFormChange({ ...formData, parentId: key === "none" || key == null ? "" : String(key) })
             }
             placeholder="None (root level)"
             variant="outlined"
-            options={[
-              { value: "none", label: "None (root level)" },
-              ...orgUnits.map((u) => ({
-                value: u.id,
-                label: u.name,
-              })),
+          >
+            {[
+              <SelectItem key="none">None (root level)</SelectItem>,
+              ...orgUnits.map((u) => <SelectItem key={u.id}>{u.name}</SelectItem>),
             ]}
-          />
+          </Select>
         </div>
       </DialogContent>
       <DialogActions>

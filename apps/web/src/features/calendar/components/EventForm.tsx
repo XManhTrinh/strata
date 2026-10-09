@@ -9,8 +9,9 @@ import {
   TextField,
   Checkbox,
   Button,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
-import { Select } from "@/components/ui/select";
 import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
@@ -134,14 +135,14 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
           <Select
             label="Event Type"
-            value={eventTypeId}
-            onValueChange={setEventTypeId}
+            selectedKey={eventTypeId}
+            onSelectionChange={(key) => setEventTypeId(key == null ? "" : String(key))}
             variant="outlined"
-            options={EVENT_TYPES.map((type) => ({
-              value: type.id,
-              label: type.name,
-            }))}
-          />
+          >
+            {EVENT_TYPES.map((type) => (
+              <SelectItem key={type.id}>{type.name}</SelectItem>
+            ))}
+          </Select>
 
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
             <Checkbox aria-label="Toggle"
@@ -196,22 +197,25 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
           <Select
             label="Visibility"
-            value={visibility}
-            onValueChange={(v) => setVisibility(v as EventVisibility)}
+            selectedKey={visibility}
+            onSelectionChange={(key) => setVisibility(String(key) as EventVisibility)}
             variant="outlined"
-            options={VISIBILITY_OPTIONS}
-          />
+          >
+            {VISIBILITY_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </Select>
 
           <Select
             label="Recurrence"
-            value={recurrence}
-            onValueChange={(v) => setRecurrence(v as RecurrenceFrequency | "")}
+            selectedKey={recurrence}
+            onSelectionChange={(key) => setRecurrence((key == null ? "" : String(key)) as RecurrenceFrequency | "")}
             variant="outlined"
-            options={RECURRENCE_OPTIONS.map((opt) => ({
-              value: opt.value,
-              label: opt.label,
-            }))}
-          />
+          >
+            {RECURRENCE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </Select>
 
         </form>
       </DialogContent>

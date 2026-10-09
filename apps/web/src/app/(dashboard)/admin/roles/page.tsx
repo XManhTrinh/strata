@@ -14,11 +14,12 @@ import {SearchBar,
   ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
-  IconButton} from "@vkieu/mui";
+  IconButton,
+  Select,
+  SelectItem} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
-import { Select } from "@/components/ui/select";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -420,12 +421,16 @@ function PermissionMatrix({
                             {fp.displayName}
                           </Typography>
                           <Select
-                            value={scope} disabled={readOnly || !isEnabled}
-                            onValueChange={(v) => onScopeChange(feature.key, fp.key, v as Scope)}
+                            aria-label={`Scope for ${fp.displayName}`}
+                            selectedKey={scope} disabled={readOnly || !isEnabled}
+                            onSelectionChange={(key) => onScopeChange(feature.key, fp.key, String(key) as Scope)}
                             className={`h-8 w-35 text-xs border-outline-variant ${readOnly || !isEnabled ? "opacity-40" : ""}`}
                             variant="outlined"
-                            options={SCOPE_OPTIONS.map((s) => ({ value: s, label: SCOPE_LABELS[s] }))}
-                          />
+                          >
+                            {SCOPE_OPTIONS.map((s) => (
+                              <SelectItem key={s}>{SCOPE_LABELS[s]}</SelectItem>
+                            ))}
+                          </Select>
                         </div>
                       );
                     })}

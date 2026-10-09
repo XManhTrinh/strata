@@ -8,8 +8,9 @@ import {
   DialogActions,
   TextField,
   Button,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
-import { Select } from "@/components/ui/select";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
@@ -159,14 +160,14 @@ export function LeaveRequestForm({
 
           <Select
             label="Leave Type"
-            value={leaveTypeId}
-            onValueChange={setLeaveTypeId}
+            selectedKey={leaveTypeId}
+            onSelectionChange={(key) => setLeaveTypeId(key == null ? "" : String(key))}
             variant="outlined"
-            options={LEAVE_TYPES.map((type) => ({
-              value: type.id,
-              label: type.name,
-            }))}
-          />
+          >
+            {LEAVE_TYPES.map((type) => (
+              <SelectItem key={type.id}>{type.name}</SelectItem>
+            ))}
+          </Select>
 
           {selectedBalance && (
             <div className="rounded-lg bg-surface-variant/50 p-3 flex items-center gap-2">

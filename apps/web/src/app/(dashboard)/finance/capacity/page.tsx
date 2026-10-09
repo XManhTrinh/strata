@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "motion/react";
 import {TopAppBar,Card,InputChip,
   Tabs,
   Tab,
-  Button} from "@vkieu/mui";
+  Button,
+  Select,
+  SelectItem} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
-import { Select } from "@/components/ui/select";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
@@ -583,7 +584,11 @@ export default function CapacityPage() {
         subtitle={`FTE allocation ${groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing`}
         actions={
           <div className="flex items-center gap-3">
-            <Select value={String(fiscalYear)} onValueChange={(v) => setFiscalYear(Number(v))} variant="outlined" options={yearOptions} className="w-32" />
+            <Select aria-label="Fiscal year" selectedKey={String(fiscalYear)} onSelectionChange={(key) => setFiscalYear(Number(key))} variant="outlined" className="w-32">
+              {yearOptions.map((o) => (
+                <SelectItem key={o.value}>{o.label}</SelectItem>
+              ))}
+            </Select>
           </div>
         }
       />
@@ -641,23 +646,26 @@ export default function CapacityPage() {
         <div className="flex items-center gap-3 shrink-0">
           <Select
             variant="outlined"
-            value={groupBy}
-            onValueChange={setGroupBy}
-            options={groupByOptions}
+            selectedKey={groupBy}
+            onSelectionChange={(key) => setGroupBy(key == null ? "" : String(key))}
             className="w-40"
             label="Group by"
-          />
+          >
+            {groupByOptions.map((o) => (
+              <SelectItem key={o.value}>{o.label}</SelectItem>
+            ))}
+          </Select>
           <Select
+            aria-label="Employment type"
             variant="outlined"
-            value={employmentFilter}
-            onValueChange={(v) => setEmploymentFilter(v as "all" | "Perm" | "SubCon")}
-            options={[
-              { value: "all", label: "All Types" },
-              { value: "Perm", label: "Permanent" },
-              { value: "SubCon", label: "Contractors" },
-            ]}
+            selectedKey={employmentFilter}
+            onSelectionChange={(key) => setEmploymentFilter(String(key) as "all" | "Perm" | "SubCon")}
             className="w-40"
-          />
+          >
+            <SelectItem key="all">All Types</SelectItem>
+            <SelectItem key="Perm">Permanent</SelectItem>
+            <SelectItem key="SubCon">Contractors</SelectItem>
+          </Select>
         </div>
       </div>
 

@@ -55,8 +55,9 @@ These components were removed from `@vkieu/mui` and are provided as local polyfi
 |---|---|
 | `Icon` | `@/components/ui/icon` |
 | `Typography` | `@/components/ui/typography` |
-| `Select` | `@/components/ui/select` |
 | `CardContent`, `CardHeader`, `CardTitle`, `CardFooter`, `CardDescription` | `@/components/ui/card-content` |
+
+`Select` (with `SelectItem`) and `Autocomplete` (with `AutocompleteItem`) now come from `@vkieu/mui` — the local `select` and `combo-box` polyfills were removed.
 
 All polyfills use the same M3 CSS variable token names as the new `@vkieu/mui` CSS variables.
 

@@ -8,8 +8,9 @@ import {
   DialogActions,
   TextField,
   Button,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
-import { Select } from "@/components/ui/select";
 import { Typography } from "@/components/ui/typography";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardGroup, RateCardSet, UpsertRateCardGroupInput } from "@/services";
@@ -99,11 +100,14 @@ export function RateCardGroupDialog({
           <Select
             variant="outlined"
             label="Tab"
-            value={setId}
-            onValueChange={setSetId}
-            options={setOptions}
+            selectedKey={setId}
+            onSelectionChange={(key) => setSetId(key == null ? "" : String(key))}
             className="w-full"
-          />
+          >
+            {setOptions.map((o) => (
+              <SelectItem key={o.value}>{o.label}</SelectItem>
+            ))}
+          </Select>
           <ColorPicker value={color} onChange={setColor} label="Color" />
           {error && (
             <Typography variant="body-small" color="error">

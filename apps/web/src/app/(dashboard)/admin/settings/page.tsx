@@ -8,11 +8,12 @@ import {
   Divider, List, ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Select } from "@/components/ui/select";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
@@ -344,10 +345,13 @@ export default function SettingsPage() {
                     <Select
                       variant="outlined"
                       label="Fiscal Year Start Month"
-                      value={fiscalYearStart}
-                      onValueChange={(v) => setFiscalYearStart(v)}
-                      options={monthLabels.map((label, i) => ({ value: String(i + 1), label }))}
-                    />
+                      selectedKey={fiscalYearStart}
+                      onSelectionChange={(key) => setFiscalYearStart(key == null ? "" : String(key))}
+                    >
+                      {monthLabels.map((label, i) => (
+                        <SelectItem key={String(i + 1)}>{label}</SelectItem>
+                      ))}
+                    </Select>
                   </CardContent>
                 </Card>
               </div>

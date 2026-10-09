@@ -7,9 +7,10 @@ import {
   SideSheet,
   useTheme,
   type ColorMode,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
-import { Select } from "@/components/ui/select";
 
 const MODES: { value: ColorMode; label: string }[] = [
   { value: "light", label: "Light" },
@@ -47,10 +48,14 @@ export function ThemeControls() {
         <div className="flex flex-col gap-2">
           <span className="text-label-large text-on-surface-variant">Theme</span>
           <Select
-            value={theme}
-            onValueChange={setTheme}
-            options={themes.map((t) => ({ value: t, label: t }))}
-          />
+            aria-label="Theme"
+            selectedKey={theme}
+            onSelectionChange={(key) => setTheme(key == null ? "" : String(key))}
+          >
+            {themes.map((t) => (
+              <SelectItem key={t}>{t}</SelectItem>
+            ))}
+          </Select>
         </div>
       )}
     </div>

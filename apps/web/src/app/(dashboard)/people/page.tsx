@@ -40,11 +40,12 @@ import {
   Divider,
   Button,
   IconButton,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { Typography } from "@/components/ui/typography";
-import { Select } from "@/components/ui/select";
 import {
   usePeople,
   useCreatePerson,
@@ -551,14 +552,15 @@ export default function PeoplePage() {
           <Select
             variant="outlined"
             label="View"
-            value={selectedViewId}
-            onValueChange={handleSelectView}
-            options={[
-              { value: "", label: "Default" },
-              ...tableViews.map((v) => ({ value: v.id, label: v.name })),
-            ]}
+            selectedKey={selectedViewId}
+            onSelectionChange={(key) => handleSelectView(key == null ? "" : String(key))}
             className="min-w-35"
-          />
+          >
+            {[
+              <SelectItem key="">Default</SelectItem>,
+              ...tableViews.map((v) => <SelectItem key={v.id}>{v.name}</SelectItem>),
+            ]}
+          </Select>
 
           {selectedViewId && (
             <TooltipTrigger placement="top">
@@ -770,10 +772,14 @@ export default function PeoplePage() {
             <Select
               variant="outlined"
               label="Role"
-              value={formData.roleId ?? ""}
-              onValueChange={(value) => setFormData({ ...formData, roleId: value || undefined })}
-              options={[{ value: "", label: "No role (basic access)" }, ...roles.map((r) => ({ value: r.id, label: r.name }))]}
-            />
+              selectedKey={formData.roleId ?? ""}
+              onSelectionChange={(key) => setFormData({ ...formData, roleId: key == null ? undefined : String(key) || undefined })}
+            >
+              {[
+                <SelectItem key="">No role (basic access)</SelectItem>,
+                ...roles.map((r) => <SelectItem key={r.id}>{r.name}</SelectItem>),
+              ]}
+            </Select>
             <TextField variant="outlined" label="Phone" type="tel" className="w-full" value={formData.phone ?? ""} onChange={(value) => setFormData({ ...formData, phone: value })} />
             <TextField variant="outlined" label="Address" className="w-full" value={formData.address ?? ""} onChange={(value) => setFormData({ ...formData, address: value })} />
             <TextField variant="outlined" label="Date of Birth" type="date" className="w-full" value={formData.dateOfBirth} onChange={(value) => setFormData({ ...formData, dateOfBirth: value })} />
@@ -877,10 +883,13 @@ export default function PeoplePage() {
           <Select
             variant="outlined"
             label="Role"
-            value={batchRoleId}
-            onValueChange={setBatchRoleId}
-            options={roles.map((r) => ({ value: r.id, label: r.name }))}
-          />
+            selectedKey={batchRoleId}
+            onSelectionChange={(key) => setBatchRoleId(key == null ? "" : String(key))}
+          >
+            {roles.map((r) => (
+              <SelectItem key={r.id}>{r.name}</SelectItem>
+            ))}
+          </Select>
         </DialogContent>
         <DialogActions>
           <Button variant="text" onClick={() => setShowBatchRoleDialog(false)}>Cancel</Button>

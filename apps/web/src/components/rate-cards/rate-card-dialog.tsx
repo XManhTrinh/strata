@@ -10,11 +10,13 @@ import {
   Switch,
   Divider,
   Button,
+  Select,
+  SelectItem,
+  Autocomplete,
+  AutocompleteItem,
 } from "@vkieu/mui";
-import { Select } from "@/components/ui/select";
 import { Icon } from "@/components/ui/icon";
 import { Typography } from "@/components/ui/typography";
-import { ComboBox } from "@/components/ui/combo-box";
 import type {
   RateCard,
   RateCardGroup,
@@ -225,11 +227,14 @@ export function RateCardDialog({
           <Select
             variant="outlined"
             label="Group"
-            value={groupId}
-            onValueChange={setGroupId}
-            options={groupOptions}
+            selectedKey={groupId}
+            onSelectionChange={(key) => setGroupId(key == null ? "" : String(key))}
             className="w-full"
-          />
+          >
+            {groupOptions.map((o) => (
+              <SelectItem key={o.value}>{o.label}</SelectItem>
+            ))}
+          </Select>
 
           <div className="flex items-center justify-between gap-3 rounded-lg border border-outline-variant px-4 py-3">
             <div>
@@ -301,27 +306,43 @@ export function RateCardDialog({
                   {conditions.map((c, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Select
+                        aria-label="Column"
                         variant="outlined"
-                        value={c.column}
-                        onValueChange={(v) => updateCondition(i, { column: v })}
-                        options={columnOptions}
-                        searchable
+                        selectedKey={c.column}
+                        onSelectionChange={(key) => updateCondition(i, { column: key == null ? "" : String(key) })}
                         className="flex-1"
-                      />
+                      >
+                        {columnOptions.map((o) => (
+                          <SelectItem key={o.value}>{o.label}</SelectItem>
+                        ))}
+                      </Select>
                       <Select
+                        aria-label="Operator"
                         variant="outlined"
-                        value={c.operator}
-                        onValueChange={(v) => updateCondition(i, { operator: v as RateCardRuleOperator })}
-                        options={OPERATOR_OPTIONS}
+                        selectedKey={c.operator}
+                        onSelectionChange={(key) => updateCondition(i, { operator: String(key) as RateCardRuleOperator })}
                         className="w-44"
-                      />
-                      <ComboBox
-                        value={c.value}
-                        onChange={(v) => updateCondition(i, { value: v })}
-                        options={valuesByColumn.get(c.column) ?? []}
+                      >
+                        {OPERATOR_OPTIONS.map((o) => (
+                          <SelectItem key={o.value}>{o.label}</SelectItem>
+                        ))}
+                      </Select>
+                      <Autocomplete
+                        aria-label="value"
+                        allowsCustomValue
+                        variant="outlined"
+                        inputValue={c.value}
+                        onInputChange={(v) => updateCondition(i, { value: v })}
+                        onSelectionChange={(key) => {
+                          if (key != null) updateCondition(i, { value: String(key) });
+                        }}
                         placeholder="value"
                         className="flex-1"
-                      />
+                      >
+                        {(valuesByColumn.get(c.column) ?? []).map((s) => (
+                          <AutocompleteItem key={s}>{s}</AutocompleteItem>
+                        ))}
+                      </Autocomplete>
                       <button
                         type="button"
                         onClick={() => removeCondition(i)}

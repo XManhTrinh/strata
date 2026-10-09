@@ -25,10 +25,11 @@ import {
   DialogActions,
   Divider,
   Button,
+  Select,
+  SelectItem,
 } from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Select } from "@/components/ui/select";
 import { parseCsvLine, autoDetectMapping, detectUnitTypeName, detectUnitTypeIcon, detectUnitTypeColor } from "@/lib/csv";
 import { useRoles } from "@/services";
 import type { ImportMemberRow } from "@/services";
@@ -560,13 +561,16 @@ function MappingStep({
               </div>
               <div className="min-w-0 flex items-center">
                 <Select
+                  aria-label="Map column"
                   variant="outlined"
-                  value={mapping.target}
-                  onValueChange={(val) => onMappingChange(idx, val as MappingTarget)}
-                  options={MAPPING_OPTIONS}
-                  searchable
+                  selectedKey={mapping.target}
+                  onSelectionChange={(key) => onMappingChange(idx, String(key) as MappingTarget)}
                   className="w-full text-[11px]"
-                />
+                >
+                  {MAPPING_OPTIONS.map((o) => (
+                    <SelectItem key={o.value}>{o.label}</SelectItem>
+                  ))}
+                </Select>
               </div>
               <div className="flex items-center justify-end gap-1">
                 <button
@@ -657,18 +661,22 @@ function MappingStep({
               will be matched against this field.
             </p>
             <Select
+              aria-label="Line manager match field"
               variant="outlined"
-              value={lineManagerMatchField}
-              onValueChange={onLineManagerMatchFieldChange}
-              options={[
-                { value: "email", label: "Email" },
-                { value: "fullName", label: "Full Name" },
+              selectedKey={lineManagerMatchField}
+              onSelectionChange={(key) => onLineManagerMatchFieldChange(key == null ? "" : String(key))}
+              className="w-full"
+            >
+              {[
+                <SelectItem key="email">Email</SelectItem>,
+                <SelectItem key="fullName">Full Name</SelectItem>,
                 ...columnMappings
                   .filter((m) => m.target === "extra")
-                  .map((m) => ({ value: m.csvHeader, label: `${m.csvHeader} (metadata)` })),
+                  .map((m) => (
+                    <SelectItem key={m.csvHeader}>{`${m.csvHeader} (metadata)`}</SelectItem>
+                  )),
               ]}
-              className="w-full"
-            />
+            </Select>
           </CardContent>
         </Card>
       )}
@@ -684,15 +692,17 @@ function MappingStep({
             Assigned to all imported members. Leave empty for no role.
           </p>
           <Select
+            aria-label="Default role"
             variant="outlined"
-            value={importDefaultRoleId}
-            onValueChange={onDefaultRoleChange}
-            options={[
-              { value: "", label: "No role" },
-              ...roles.map((r) => ({ value: r.id, label: r.name })),
-            ]}
+            selectedKey={importDefaultRoleId}
+            onSelectionChange={(key) => onDefaultRoleChange(key == null ? "" : String(key))}
             className="w-full"
-          />
+          >
+            {[
+              <SelectItem key="">No role</SelectItem>,
+              ...roles.map((r) => <SelectItem key={r.id}>{r.name}</SelectItem>),
+            ]}
+          </Select>
         </CardContent>
       </Card>
     </div>

@@ -11,12 +11,13 @@ import {
   MenuItem,
   MenuGroup,
   IconButton,
+  Select,
+  SelectItem,
   type TopAppBarScrollBehavior,
 } from "@vkieu/mui";
 import { useAuth } from "@/lib/auth";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Icon } from "@/components/ui/icon";
-import { Select } from "@/components/ui/select";
 import { Avatar } from "@vkieu/mui/vk";
 import { AvatarProgressRing } from "@/components/import/avatar-progress-ring";
 import { useImportProgress } from "@/components/import/import-progress-provider";
@@ -59,13 +60,17 @@ export function Header({ className, scrollBehavior, scrollRef }: HeaderProps) {
             <div className="hidden lg:flex items-center gap-2">
               <Icon name="visibility" size={18} className="text-on-surface-variant" />
               <Select
-                value={role}
-                onValueChange={(value) => setRole(value)}
+                aria-label="View as role"
+                selectedKey={role}
+                onSelectionChange={(key) => setRole(key == null ? "" : String(key))}
                 placeholder="View as..."
                 variant="outlined"
-                options={roleOptions}
                 className="h-9 w-44 text-[13px]"
-              />
+              >
+                {roleOptions.map((o) => (
+                  <SelectItem key={o.value}>{o.label}</SelectItem>
+                ))}
+              </Select>
             </div>
             <Tooltip>Preview as different role</Tooltip>
           </TooltipTrigger>

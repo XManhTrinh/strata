@@ -13,10 +13,11 @@ import {SearchBar,
   ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
-  IconButton} from "@vkieu/mui";
+  IconButton,
+  Select,
+  SelectItem} from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Select } from "@/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -392,9 +393,9 @@ function PositionDialog({
           <div className="grid grid-cols-2 gap-3">
             <Select
               label="Min Level"
-              value={formData.minLevelId || ""}
-              onValueChange={(value) => {
-                const newMin = value;
+              selectedKey={formData.minLevelId || ""}
+              onSelectionChange={(key) => {
+                const newMin = key == null ? "" : String(key);
                 const minLevel = levels.find((l) => l.id === newMin);
                 const maxLevel = levels.find((l) => l.id === formData.maxLevelId);
                 const shouldClearMax = minLevel && maxLevel && maxLevel.rank < minLevel.rank;
@@ -406,22 +407,28 @@ function PositionDialog({
               }}
               placeholder="Select min level"
               variant="outlined"
-              options={sortedLevels.map((level) => ({
-                value: level.id,
-                label: `${level.label} — ${level.displayName || level.label}`,
-              }))}
-            />
+            >
+              {sortedLevels.map((level) => (
+                <SelectItem key={level.id}>
+                  {`${level.label} — ${level.displayName || level.label}`}
+                </SelectItem>
+              ))}
+            </Select>
             <Select
               label="Max Level"
-              value={formData.maxLevelId || ""}
-              onValueChange={(value) => onFormChange({ ...formData, maxLevelId: value })}
+              selectedKey={formData.maxLevelId || ""}
+              onSelectionChange={(key) =>
+                onFormChange({ ...formData, maxLevelId: key == null ? "" : String(key) })
+              }
               placeholder="Select max level"
               variant="outlined"
-              options={maxLevelOptions.map((level) => ({
-                value: level.id,
-                label: `${level.label} — ${level.displayName || level.label}`,
-              }))}
-            />
+            >
+              {maxLevelOptions.map((level) => (
+                <SelectItem key={level.id}>
+                  {`${level.label} — ${level.displayName || level.label}`}
+                </SelectItem>
+              ))}
+            </Select>
           </div>
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
             <Checkbox aria-label="Toggle"
@@ -511,15 +518,14 @@ function CareerLevelDialog({
             />
             <Select
               label="Track"
-              value={formData.track}
-              onValueChange={(value) => onFormChange({ ...formData, track: value })}
+              selectedKey={formData.track}
+              onSelectionChange={(key) => onFormChange({ ...formData, track: key == null ? "" : String(key) })}
               placeholder="Track (optional)"
               variant="outlined"
-              options={[
-                { value: "IC", label: "Individual Contributor" },
-                { value: "Management", label: "Management" },
-              ]}
-            />
+            >
+              <SelectItem key="IC">Individual Contributor</SelectItem>
+              <SelectItem key="Management">Management</SelectItem>
+            </Select>
           </div>
         </div>
       </DialogContent>
