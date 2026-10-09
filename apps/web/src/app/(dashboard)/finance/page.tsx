@@ -5,7 +5,12 @@ import { motion } from "motion/react";
 import { TopAppBar, Card } from "@vkieu/mui";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 // ─── Finance hub sections ─────────────────────────────────────────────────────
 
@@ -48,41 +53,62 @@ const FINANCE_LINKS: FinanceLink[] = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FinancePage() {
+  const reduced = useReducedMotionContext();
+
   return (
     <motion.div
-      className="space-y-6"
-      variants={pageTransitionVariants}
+      className="flex flex-col gap-6"
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
       transition={defaultTransition}
     >
-      <TopAppBar title={<h1 className="text-headline-medium">Finance</h1>} subtitle="Budgets, capacity planning, and rate cards." />
+      {/* ─── Page Header ─────────────────────────────────────────────────── */}
+      <TopAppBar
+        title={<h1 className="text-headline-medium">Finance</h1>}
+        subtitle="Budgets, capacity planning, and rate cards."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FINANCE_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="block group">
-            <Card
-              variant="elevated"
-              className="h-full transition-shadow group-hover:shadow-md"
+      {/* ─── Hub Navigation Cards ────────────────────────────────────────── */}
+      <section aria-label="Finance sections">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {FINANCE_LINKS.map((link, index) => (
+            <motion.div
+              key={link.href}
+              variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
+              initial="initial"
+              whileInView="enter"
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                ...defaultTransition,
+                delay: reduced ? 0 : index * 0.05,
+              }}
             >
-              <CardContent className="p-6">
-                <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-full ${link.tint} mb-4`}
+              <Link href={link.href} className="group block h-full">
+                <Card
+                  variant="elevated"
+                  className="h-full transition-shadow group-hover:shadow-md"
                 >
-                  <Icon name={link.icon} size={26} className={link.iconColor} />
-                </div>
-                <h5 className="text-title-large mb-1">
-                  {link.title}
-                </h5>
-                <p className="text-body-medium text-on-surface-variant">
-                  {link.description}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+                  <CardContent className="flex flex-col gap-3 p-6">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-full ${link.tint}`}
+                    >
+                      <Icon name={link.icon} size={24} className={link.iconColor} />
+                    </div>
+                    <div>
+                      <h3 className="text-title-large">{link.title}</h3>
+                      <p className="mt-1 text-body-medium text-on-surface-variant">
+                        {link.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </motion.div>
   );
 }
