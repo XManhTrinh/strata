@@ -2,13 +2,19 @@
 
 import React, { useMemo, useState, useCallback, useEffect, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {TopAppBar,Card,InputChip,
+import {
+  TopAppBar,
+  Card,
+  InputChip,
+  AssistChip,
+  Divider,
   Tabs,
   Tab,
   Button,
   Select,
-  SelectItem} from "@vkieu/mui";
-import { CardContent } from "@/components/ui/card-content";
+  SelectItem,
+} from "@vkieu/mui";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import {
@@ -23,7 +29,12 @@ import {
 } from "@/services";
 import type { SquadCapacitySummary, PeriodValues, MemberAllocation, UpsertAllocationDto } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";
 import { VirtualizedAllocationTable } from "@/components/capacity/virtualized-allocation-table";
 
@@ -93,18 +104,47 @@ function draftsEqual(a: DraftMap, b: DraftMap): boolean {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, sub, icon, color }: {
-  label: string; value: string; sub?: string; icon: string; color: string;
-}) {
+interface StatCardProps {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: string;
+  tint: string;
+  iconColor: string;
+}
+
+function StatCard({ label, value, sub, icon, tint, iconColor }: StatCardProps) {
   return (
     <Card variant="elevated">
-      <CardContent className="p-5">
-        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${color} mb-3`}>
-          <Icon name={icon} size={24} className="text-on-primary-container" />
+      <CardContent className="flex flex-col gap-3 p-6">
+        <div
+          className={`flex items-center justify-center h-10 w-10 rounded-full ${tint}`}
+        >
+          <Icon name={icon} size={20} className={iconColor} />
         </div>
-        <p className="text-body-small text-on-surface-variant uppercase tracking-wide">{label}</p>
-        <h3 className="text-headline-medium mt-1">{value}</h3>
-        {sub && <p className="text-body-small text-on-surface-variant mt-1">{sub}</p>}
+        <div>
+          <p className="font-brand text-display-small text-on-surface">{value}</p>
+          <p className="mt-1 text-body-medium text-on-surface-variant">{label}</p>
+          {sub && (
+            <p className="mt-0.5 text-label-small text-on-surface-variant">{sub}</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <Card variant="elevated">
+      <CardContent className="flex flex-col gap-3 p-6">
+        <SkeletonGroup label="Loading capacity data">
+          <Skeleton className="h-10 w-10" corner="full" />
+          <div className="space-y-2">
+            <Skeleton className="h-11 w-28" corner="extra-small" />
+            <Skeleton className="h-4 w-24" corner="extra-small" />
+          </div>
+        </SkeletonGroup>
       </CardContent>
     </Card>
   );
@@ -113,6 +153,7 @@ function StatCard({ label, value, sub, icon, color }: {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CapacityPage() {
+  const reduced = useReducedMotionContext();
   const toast = useToast();
   const companyId = useCompanyId();
   const currentYear = new Date().getFullYear();
@@ -575,20 +616,30 @@ export default function CapacityPage() {
     divisionTabs.find((d) => d.id === activeDivisionId)?.name ?? "";
 
   return (
-    <motion.div className="space-y-6" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
-      {/* Header */}
+    <motion.div
+      className="flex flex-col gap-6"
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      transition={defaultTransition}
+    >
+      {/* ─── Page Header ─────────────────────────────────────────────────── */}
       <TopAppBar
-        className="justify-between"
         title={<h1 className="text-headline-medium">Capacity Planning</h1>}
         subtitle={`FTE allocation ${groupBy === "squad" ? "per squad" : groupBy === "all" ? "— all members" : `grouped by ${groupByOptions.find((o) => o.value === groupBy)?.label ?? groupBy}`} · P1–P12 monthly phasing`}
         actions={
-          <div className="flex items-center gap-3">
-            <Select aria-label="Fiscal year" selectedKey={String(fiscalYear)} onSelectionChange={(key) => setFiscalYear(Number(key))} variant="outlined" className="w-32">
-              {yearOptions.map((o) => (
-                <SelectItem key={o.value}>{o.label}</SelectItem>
-              ))}
-            </Select>
-          </div>
+          <Select
+            aria-label="Fiscal year"
+            selectedKey={String(fiscalYear)}
+            onSelectionChange={(key) => setFiscalYear(Number(key))}
+            variant="outlined"
+            className="w-32"
+          >
+            {yearOptions.map((o) => (
+              <SelectItem key={o.value}>{o.label}</SelectItem>
+            ))}
+          </Select>
         }
       />
 
@@ -602,26 +653,32 @@ export default function CapacityPage() {
       )}
 
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} variant="elevated"><CardContent className="p-5 space-y-3">
-              <SkeletonGroup label="Loading capacity data">
-                <Skeleton className="h-10 w-10" corner="full" /><Skeleton className="h-3 w-20" corner="extra-small" /><Skeleton className="h-7 w-28" corner="extra-small" />
-              </SkeletonGroup>
-            </CardContent></Card>
-          ))}
-        </div>
+        <section aria-label="Loading capacity">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))}
+          </div>
+        </section>
       ) : isError ? (
-        <Card variant="elevated" className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center py-12 text-center">
-            <Icon name="error" size={32} className="text-error mb-3" />
-            <p className="text-body-medium text-on-surface-variant">{error?.message || "Failed to load"}</p>
+        <Card variant="filled" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
+              <Icon name="error" size={24} className="text-error" />
+            </div>
+            <p className="text-title-medium mb-2">Something went wrong</p>
+            <p className="text-body-medium text-on-surface-variant">
+              {error?.message || "Failed to load capacity data. Please try again."}
+            </p>
           </CardContent>
         </Card>
       ) : (squads ?? []).length === 0 ? (
-        <Card variant="elevated" className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center py-12 text-center">
-            <Icon name="groups" size={32} className="text-on-surface-variant mb-3" />
+        <Card variant="elevated" className="max-w-lg mx-auto">
+          <CardContent className="flex flex-col items-center py-12 px-8 text-center">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-surface-container-high mb-3">
+              <Icon name="groups" size={24} className="text-on-surface-variant" />
+            </div>
+            <p className="text-title-medium mb-1">No allocations yet</p>
             <p className="text-body-medium text-on-surface-variant">
               No allocations in {activeDivisionName || "this division"} yet.
             </p>
@@ -630,75 +687,133 @@ export default function CapacityPage() {
       ) : (
       <>
 
-      {/* Filters Row */}
-      <div className="flex items-center justify-between gap-3">
-        {/* Left: Org unit tree multi-select */}
-        <OrgUnitTreeSelect
-          tree={orgUnits}
-          selectedIds={selectedSquadIds}
-          onSelectionChange={setSelectedSquadIds}
-          placeholder="Filter by org unit..."
-          className="w-1/4"
-        />
-
-        {/* Right: Group by + Employment type selects */}
-        <div className="flex items-center gap-3 shrink-0">
-          <Select
-            variant="outlined"
-            selectedKey={groupBy}
-            onSelectionChange={(key) => setGroupBy(key == null ? "" : String(key))}
-            className="w-40"
-            label="Group by"
-          >
-            {groupByOptions.map((o) => (
-              <SelectItem key={o.value}>{o.label}</SelectItem>
-            ))}
-          </Select>
-          <Select
-            aria-label="Employment type"
-            variant="outlined"
-            selectedKey={employmentFilter}
-            onSelectionChange={(key) => setEmploymentFilter(String(key) as "all" | "Perm" | "SubCon")}
-            className="w-40"
-          >
-            <SelectItem key="all">All Types</SelectItem>
-            <SelectItem key="Perm">Permanent</SelectItem>
-            <SelectItem key="SubCon">Contractors</SelectItem>
-          </Select>
+      {/* ─── KPI Cards ──────────────────────────────────────────────────── */}
+      <section aria-label="Capacity metrics">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              label: "Avg Monthly FTE",
+              value: fmtFTE(avgMonthlyFTE),
+              sub: `${totalMembers} members`,
+              icon: "groups",
+              tint: "bg-primary/12",
+              iconColor: "text-primary",
+            },
+            {
+              label: "Permanent",
+              value: fmtNum(totalPerm),
+              sub: `${totalMembers > 0 ? Math.round((totalPerm / totalMembers) * 100) : 0}% of headcount`,
+              icon: "badge",
+              tint: "bg-secondary/12",
+              iconColor: "text-secondary",
+            },
+            {
+              label: "Contractors",
+              value: fmtNum(totalSubCon),
+              sub: `${totalMembers > 0 ? Math.round((totalSubCon / totalMembers) * 100) : 0}% of headcount`,
+              icon: "engineering",
+              tint: "bg-tertiary/12",
+              iconColor: "text-tertiary",
+            },
+            {
+              label: "Annual Cost",
+              value: fmtGBP(annualCostTotal),
+              sub: `FY ${fiscalYear}`,
+              icon: "payments",
+              tint: "bg-error/12",
+              iconColor: "text-error",
+            },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
+              initial="initial"
+              animate="enter"
+              transition={{
+                ...defaultTransition,
+                delay: reduced ? 0 : index * 0.05,
+              }}
+            >
+              <StatCard {...stat} />
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </section>
 
-      {/* Applied org unit filters */}
-      {selectedSquadIds.size > 0 && (
-        <div className="flex flex-wrap items-center gap-1">
-          {(squads ?? [])
-            .filter((s) => selectedSquadIds.has(s.orgUnitId))
-            .map((s) => (
-              <InputChip key={s.orgUnitId} onRemove={() => {
-                const next = new Set(selectedSquadIds);
-                next.delete(s.orgUnitId);
-                setSelectedSquadIds(next);
-              }}>
-                {s.orgUnitName}
-              </InputChip>
-            ))}
+      <Divider />
+
+      {/* ─── Filters Row ────────────────────────────────────────────────── */}
+      <section aria-label="Filters" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Left: Org unit tree multi-select */}
+          <OrgUnitTreeSelect
+            tree={orgUnits}
+            selectedIds={selectedSquadIds}
+            onSelectionChange={setSelectedSquadIds}
+            placeholder="Filter by org unit..."
+            className="w-full sm:w-72"
+          />
+
+          {/* Right: Group by + Employment type selects */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Select
+              variant="outlined"
+              selectedKey={groupBy}
+              onSelectionChange={(key) => setGroupBy(key == null ? "" : String(key))}
+              className="w-40"
+              label="Group by"
+            >
+              {groupByOptions.map((o) => (
+                <SelectItem key={o.value}>{o.label}</SelectItem>
+              ))}
+            </Select>
+            <Select
+              aria-label="Employment type"
+              variant="outlined"
+              selectedKey={employmentFilter}
+              onSelectionChange={(key) => setEmploymentFilter(String(key) as "all" | "Perm" | "SubCon")}
+              className="w-40"
+            >
+              <SelectItem key="all">All Types</SelectItem>
+              <SelectItem key="Perm">Permanent</SelectItem>
+              <SelectItem key="SubCon">Contractors</SelectItem>
+            </Select>
+          </div>
         </div>
-      )}
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Avg Monthly FTE" value={fmtFTE(avgMonthlyFTE)} sub={`${totalMembers} members`} icon="groups" color="bg-primary-container" />
-        <StatCard label="Permanent" value={fmtNum(totalPerm)} sub={`${totalMembers > 0 ? Math.round((totalPerm / totalMembers) * 100) : 0}% of headcount`} icon="badge" color="bg-secondary-container" />
-        <StatCard label="Contractors" value={fmtNum(totalSubCon)} sub={`${totalMembers > 0 ? Math.round((totalSubCon / totalMembers) * 100) : 0}% of headcount`} icon="engineering" color="bg-tertiary-container" />
-        <StatCard label="Annual Cost" value={fmtGBP(annualCostTotal)} sub={`FY ${fiscalYear}`} icon="payments" color="bg-error-container" />
-      </div>
+        {/* Applied org unit filters */}
+        {selectedSquadIds.size > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {(squads ?? [])
+              .filter((s) => selectedSquadIds.has(s.orgUnitId))
+              .map((s) => (
+                <InputChip
+                  key={s.orgUnitId}
+                  onRemove={() => {
+                    const next = new Set(selectedSquadIds);
+                    next.delete(s.orgUnitId);
+                    setSelectedSquadIds(next);
+                  }}
+                >
+                  {s.orgUnitName}
+                </InputChip>
+              ))}
+          </div>
+        )}
+      </section>
 
-      {/* FTE Phasing */}
-          {/* Bulk expand / collapse */}
+      {/* ─── FTE Phasing ────────────────────────────────────────────────── */}
+      <section aria-label="FTE phasing" className="flex flex-col gap-4">
+          {/* Section heading + bulk expand / collapse */}
           {groupedData.length > 0 && (
-            <div className="flex justify-end">
-              <Button variant="text" onClick={handleToggleAll}>
-                <Icon name={allExpanded ? "unfold_less" : "unfold_more"} size={18} />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-title-medium text-on-surface">FTE Phasing</h2>
+                <AssistChip leadingIcon={<Icon name="grid_view" />}>
+                  {fmtNum(groupedData.length)} {groupBy === "squad" ? "squads" : "groups"}
+                </AssistChip>
+              </div>
+              <Button variant="text" onClick={handleToggleAll} leadingIcon={<Icon name={allExpanded ? "unfold_less" : "unfold_more"} />}>
                 {allExpanded ? "Collapse all" : "Expand all"}
               </Button>
             </div>
@@ -707,9 +822,11 @@ export default function CapacityPage() {
           {/* FTE Phasing Table per Squad */}
           {groupedData.length === 0 ? (
             <Card variant="elevated">
-              <CardContent className="flex flex-col items-center py-16 text-center">
-                <Icon name="stacked_bar_chart" size={40} className="text-on-surface-variant/30 mb-4" />
-                <h6 className="text-title-medium mb-1">No capacity data</h6>
+              <CardContent className="flex flex-col items-center py-16 px-8 text-center">
+                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-surface-container-high mb-3">
+                  <Icon name="stacked_bar_chart" size={24} className="text-on-surface-variant" />
+                </div>
+                <p className="text-title-medium mb-1">No capacity data</p>
                 <p className="text-body-medium text-on-surface-variant">Import members to generate default allocations.</p>
               </CardContent>
             </Card>
@@ -737,7 +854,7 @@ export default function CapacityPage() {
                       type="button"
                       onClick={() => toggleSquad(expandKey)}
                       aria-expanded={isExpanded}
-                      className="w-full px-5 py-4 border-b border-outline-variant flex items-center justify-between gap-3 text-left hover:bg-on-surface/4 transition-colors"
+                      className={`w-full px-6 py-4 flex items-center justify-between gap-3 text-left hover:bg-on-surface/4 transition-colors ${isExpanded ? "border-b border-outline-variant" : ""}`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <Icon
@@ -746,13 +863,13 @@ export default function CapacityPage() {
                           className="text-on-surface-variant shrink-0"
                         />
                         <div className="min-w-0">
-                          <h6 className="text-title-medium">{squad.orgUnitName}</h6>
+                          <h3 className="text-title-medium text-on-surface truncate">{squad.orgUnitName}</h3>
                           <p className="text-body-small text-on-surface-variant">
                             {squad.parentName ? `${squad.parentName} · ` : ""}{squad.members.length} members · {squad.permCount} perm · {squad.subConCount} contractors
                           </p>
                         </div>
                       </div>
-                      <span className="shrink-0 inline-flex items-center h-8 rounded-lg bg-secondary-container px-3 text-sm font-medium text-on-secondary-container">
+                      <span className="shrink-0 inline-flex items-center h-8 rounded-lg bg-secondary-container px-3 text-label-large text-on-secondary-container">
                         {fmtFTE(sumPeriods(squadFTETotals) / 12)} avg FTE
                       </span>
                     </button>
@@ -787,13 +904,13 @@ export default function CapacityPage() {
                         <TableHead className="w-12" />
                         <TableHead className="w-12" />
                         {PERIODS.map((pk) => (
-                          <TableHead key={pk} className="text-center w-14 text-[11px]">{pk.toUpperCase()}</TableHead>
+                          <TableHead key={pk} className="text-center w-14 text-label-small">{pk.toUpperCase()}</TableHead>
                         ))}
                         <TableHead className="text-right w-24">Total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow className="font-semibold">
+                      <TableRow className="font-medium text-on-surface">
                         <TableCell>FTE</TableCell><TableCell /><TableCell />
                         {PERIODS.map((pk) => (
                           <TableCell key={pk} className="text-center">{fmtFTE(totalFTE[pk])}</TableCell>
@@ -803,9 +920,9 @@ export default function CapacityPage() {
                       <TableRow className="text-on-surface-variant">
                         <TableCell>Cost</TableCell><TableCell /><TableCell />
                         {PERIODS.map((pk) => (
-                          <TableCell key={pk} className="text-center text-[12px]">{fmtGBP(totalCost[pk])}</TableCell>
+                          <TableCell key={pk} className="text-center text-body-small">{fmtGBP(totalCost[pk])}</TableCell>
                         ))}
-                        <TableCell className="text-right font-semibold text-on-surface">{fmtGBP(annualCostTotal)}</TableCell>
+                        <TableCell className="text-right font-medium text-on-surface">{fmtGBP(annualCostTotal)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -813,23 +930,28 @@ export default function CapacityPage() {
               </CardContent>
             </Card>
           )}
+      </section>
 
           {/* Floating Save Bar */}
           <AnimatePresence>
             {isDirty && (
               <motion.div
-                initial={{ y: 80, opacity: 0 }}
+                initial={reduced ? { opacity: 0 } : { y: 80, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 80, opacity: 0 }}
-                transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-container border border-outline-variant rounded-full px-6 py-3 shadow-xl flex items-center gap-4"
+                exit={reduced ? { opacity: 0 } : { y: 80, opacity: 0 }}
+                transition={{ duration: reduced ? 0 : 0.2, ease: [0.2, 0, 0, 1] }}
+                className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border border-outline-variant bg-surface-container px-6 py-3 shadow-xl"
               >
                 <p className="text-body-small text-on-surface-variant">
                   <span className="font-medium text-on-surface">{changeCount}</span> unsaved change{changeCount !== 1 ? "s" : ""}
                 </p>
                 <Button variant="text" onClick={handleDiscard} disabled={saveAllocationsMutation.isPending}>Discard</Button>
-                <Button onClick={handleSave} disabled={saveAllocationsMutation.isPending}>
-                  <Icon name="save" size={18} />
+                <Button
+                  variant="filled"
+                  onClick={handleSave}
+                  disabled={saveAllocationsMutation.isPending}
+                  leadingIcon={<Icon name={saveAllocationsMutation.isPending ? "progress_activity" : "save"} className={saveAllocationsMutation.isPending ? "animate-spin" : undefined} />}
+                >
                   {saveAllocationsMutation.isPending ? "Saving..." : "Save"}
                 </Button>
               </motion.div>
@@ -843,12 +965,12 @@ export default function CapacityPage() {
         <>
           <div className="fixed inset-0 z-50" onClick={() => setContextMenu(null)} />
           <div
-            className="fixed z-50 min-w-50 rounded-lg border border-outline-variant bg-surface shadow-xl py-1"
+            className="fixed z-50 min-w-50 overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low py-1 shadow-xl"
             style={{ left: contextMenu.x, top: contextMenu.y }}
           >
-            <div className="px-3 py-2 border-b border-outline-variant">
-              <p className="text-body-small text-on-surface-variant font-medium">Allocate to squad</p>
-              <p className="text-body-small truncate">{contextMenu.fullName}</p>
+            <div className="border-b border-outline-variant px-3 py-2">
+              <p className="text-label-medium text-on-surface-variant">Allocate to squad</p>
+              <p className="text-body-small text-on-surface truncate">{contextMenu.fullName}</p>
             </div>
             <div className="max-h-75 overflow-y-auto py-1">
               {(squads ?? [])
@@ -859,7 +981,7 @@ export default function CapacityPage() {
                     key={s.orgUnitId}
                     type="button"
                     onClick={() => handleAllocateToSquad(contextMenu.membershipId, s.orgUnitId)}
-                    className="w-full text-left px-3 py-2 text-[13px] hover:bg-on-surface/8 transition-colors flex items-center gap-2"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-body-small text-on-surface transition-colors hover:bg-on-surface/8"
                   >
                     <Icon name="add" size={16} className="text-primary" />
                     {s.orgUnitName}
@@ -869,7 +991,7 @@ export default function CapacityPage() {
                 .filter((s) => s.orgUnitId !== contextMenu.currentSquadId)
                 .filter((s) => !localDraft.has(draftKey(contextMenu.membershipId, s.orgUnitId)))
                 .length === 0 && (
-                <p className="text-body-small text-on-surface-variant px-3 py-2">Already in all squads</p>
+                <p className="px-3 py-2 text-body-small text-on-surface-variant">Already in all squads</p>
               )}
             </div>
           </div>
