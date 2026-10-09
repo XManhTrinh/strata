@@ -1,13 +1,22 @@
 "use client";
 
 import { useState, useEffect, useRef, type FormEvent } from "react";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
-import { Button, TextField, Divider, Card } from "@vkieu/mui";
+import { Button, TextField, Divider, Card, IconButton } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
+// Standalone route (outside the dashboard shell) — read the reduced-motion
+// preference from the underlying hook directly, not the shell context.
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -29,6 +38,8 @@ export default function RegisterPage() {
   const { loginWithGoogle, isAuthenticated, checkSession } = useAuth();
   const router = useRouter();
   const checked = useRef(false);
+  const reduced = useReducedMotion();
+  const cardVariants = resolveAnimationVariants(pageTransitionVariants, reduced);
 
   useEffect(() => {
     if (!checked.current) {
@@ -118,152 +129,186 @@ export default function RegisterPage() {
   if (success) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-        <Card variant="elevated" className="w-full max-w-100">
-          <CardContent className="flex flex-col items-center gap-6 py-10 px-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <Icon name="mark_email_read" size={40} className="text-primary" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-headline-small">
-                Check your email
-              </h1>
-              <p className="text-body-medium text-on-surface-variant max-w-xs">
-                We sent a confirmation link to <strong>{email}</strong>. Click the link to
-                activate your account.
-              </p>
-            </div>
-            <Link href="/login" className="text-[14px] font-medium text-primary hover:text-primary/80 transition-colors">
-              Back to sign in
-            </Link>
-          </CardContent>
-        </Card>
+        <motion.div
+          className="w-full max-w-100"
+          variants={cardVariants}
+          initial="initial"
+          animate="enter"
+          transition={defaultTransition}
+        >
+          <Card variant="elevated" className="w-full">
+            <CardContent className="flex flex-col items-center gap-6 py-10 px-6 text-center">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container"
+                aria-hidden="true"
+              >
+                <Icon name="mark_email_read" size={40} className="text-on-primary-container" />
+              </div>
+              <div className="space-y-2">
+                <h1 className="font-brand text-headline-small">Check your email</h1>
+                <p className="text-body-medium text-on-surface-variant max-w-xs">
+                  We sent a confirmation link to <strong>{email}</strong>. Click the link to
+                  activate your account.
+                </p>
+              </div>
+              <Link
+                href="/login"
+                className="text-label-large font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Back to sign in
+              </Link>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
     );
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">
-      <Card variant="elevated" className="w-full max-w-100">
-        <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-            <Icon name="shield" size={40} className="text-primary" filled />
-          </div>
-
-          <div className="text-center space-y-1">
-            <h1 className="text-headline-small">
-              Create your account
-            </h1>
-            <p className="text-body-large text-on-surface-variant">
-              Get started with Strata for free
-            </p>
-          </div>
-
-          <div className="w-full space-y-5">
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              {error && (
-                <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3">
-                  <Icon name="error" size={20} className="text-error shrink-0" />
-                  <p className="text-body-medium text-error">{error}</p>
-                </div>
-              )}
-
-              <TextField
-                id="fullName" type="text" variant="outlined" label="Full name"
-                className="w-full"
-                value={fullName}
-                onChange={(value) => { setFullName(value); if (nameError) validateName(value); }}
-                onBlur={() => validateName(fullName)}
-                placeholder="Jane Smith"
-                invalid={!!nameError} errorMessage={nameError}
-                autoComplete="name"
-                leadingIcon={<Icon name="person" size={20} />}
-                aria-invalid={!!nameError}
-              />
-
-              <TextField
-                id="companyName" type="text" variant="outlined" label="Workspace name"
-                className="w-full"
-                value={companyName}
-                onChange={(value) => { setCompanyName(value); if (companyError) validateCompany(value); }}
-                onBlur={() => validateCompany(companyName)}
-                placeholder="My team or Acme Inc."
-                invalid={!!companyError} errorMessage={companyError}
-                autoComplete="organization"
-                leadingIcon={<Icon name="apartment" size={20} />}
-                aria-invalid={!!companyError}
-              />
-
-              <TextField
-                id="email" type="email" variant="outlined" label="Email"
-                className="w-full"
-                value={email}
-                onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
-                onBlur={() => validateEmail(email)}
-                placeholder="you@company.com"
-                invalid={!!emailError} errorMessage={emailError}
-                autoComplete="email"
-                leadingIcon={<Icon name="mail" size={20} />}
-                aria-invalid={!!emailError}
-              />
-
-              <TextField
-                id="password" type={showPassword ? "text" : "password"} variant="outlined" label="Password"
-                className="w-full"
-                value={password}
-                onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
-                onBlur={() => validatePassword(password)}
-                placeholder="Min. 8 characters"
-                invalid={!!passwordError} errorMessage={passwordError}
-                autoComplete="new-password"
-                leadingIcon={<Icon name="lock" size={20} />}
-                trailingIcon={
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-on-surface-variant hover:text-on-surface transition-colors" aria-label={showPassword ? "Hide password" : "Show password"}>
-                    <Icon name={showPassword ? "visibility_off" : "visibility"} size={20} />
-                  </button>
-                }
-                aria-invalid={!!passwordError}
-              />
-
-              <TextField
-                id="confirmPassword" type={showConfirmPassword ? "text" : "password"} variant="outlined" label="Confirm password"
-                className="w-full"
-                value={confirmPassword}
-                onChange={(value) => { setConfirmPassword(value); if (confirmError) validateConfirmPassword(value); }}
-                onBlur={() => validateConfirmPassword(confirmPassword)}
-                placeholder="Re-enter your password"
-                invalid={!!confirmError} errorMessage={confirmError}
-                autoComplete="new-password"
-                leadingIcon={<Icon name="lock" size={20} />}
-                trailingIcon={
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="p-1 text-on-surface-variant hover:text-on-surface transition-colors" aria-label={showConfirmPassword ? "Hide password" : "Show password"}>
-                    <Icon name={showConfirmPassword ? "visibility_off" : "visibility"} size={20} />
-                  </button>
-                }
-                aria-invalid={!!confirmError}
-              />
-
-              <Button type="submit" variant="filled" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? "Creating account..." : "Create account"}
-              </Button>
-            </form>
-
-            <div className="relative flex items-center gap-4">
-              <Divider className="flex-1" />
-              <span className="text-label-small text-on-surface-variant uppercase">Or continue with</span>
-              <Divider className="flex-1" />
+      <motion.div
+        className="w-full max-w-100"
+        variants={cardVariants}
+        initial="initial"
+        animate="enter"
+        transition={defaultTransition}
+      >
+        <Card variant="elevated" className="w-full">
+          <CardContent className="flex flex-col items-center gap-6 py-8 px-6">
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-container"
+              aria-hidden="true"
+            >
+              <Icon name="shield" size={40} className="text-on-primary-container" filled />
             </div>
 
-            <Button type="button" variant="tonal" className="w-full" leadingIcon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
-              Sign up with Google
-            </Button>
+            <div className="text-center space-y-1">
+              <h1 className="font-brand text-headline-small">Create your account</h1>
+              <p className="text-body-large text-on-surface-variant">
+                Get started with Strata for free
+              </p>
+            </div>
 
-            <p className="text-body-medium text-on-surface-variant text-center">
-              Already have an account?{" "}
-              <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">Sign in</Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="w-full space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                {error && (
+                  <div
+                    role="alert"
+                    className="flex items-center gap-2 rounded-xl bg-error-container px-4 py-3"
+                  >
+                    <Icon name="error" size={20} className="text-on-error-container shrink-0" />
+                    <p className="text-body-medium text-on-error-container">{error}</p>
+                  </div>
+                )}
+
+                <TextField
+                  id="fullName" type="text" variant="outlined" label="Full name"
+                  className="w-full"
+                  value={fullName}
+                  onChange={(value) => { setFullName(value); if (nameError) validateName(value); }}
+                  onBlur={() => validateName(fullName)}
+                  placeholder="Jane Smith"
+                  invalid={!!nameError} errorMessage={nameError}
+                  autoComplete="name"
+                  leadingIcon={<Icon name="person" size={20} />}
+                  aria-invalid={!!nameError}
+                />
+
+                <TextField
+                  id="companyName" type="text" variant="outlined" label="Workspace name"
+                  className="w-full"
+                  value={companyName}
+                  onChange={(value) => { setCompanyName(value); if (companyError) validateCompany(value); }}
+                  onBlur={() => validateCompany(companyName)}
+                  placeholder="My team or Acme Inc."
+                  invalid={!!companyError} errorMessage={companyError}
+                  autoComplete="organization"
+                  leadingIcon={<Icon name="apartment" size={20} />}
+                  aria-invalid={!!companyError}
+                />
+
+                <TextField
+                  id="email" type="email" variant="outlined" label="Email"
+                  className="w-full"
+                  value={email}
+                  onChange={(value) => { setEmail(value); if (emailError) validateEmail(value); }}
+                  onBlur={() => validateEmail(email)}
+                  placeholder="you@company.com"
+                  invalid={!!emailError} errorMessage={emailError}
+                  autoComplete="email"
+                  leadingIcon={<Icon name="mail" size={20} />}
+                  aria-invalid={!!emailError}
+                />
+
+                <TextField
+                  id="password" type={showPassword ? "text" : "password"} variant="outlined" label="Password"
+                  className="w-full"
+                  value={password}
+                  onChange={(value) => { setPassword(value); if (passwordError) validatePassword(value); }}
+                  onBlur={() => validatePassword(password)}
+                  placeholder="Min. 8 characters"
+                  invalid={!!passwordError} errorMessage={passwordError}
+                  autoComplete="new-password"
+                  leadingIcon={<Icon name="lock" size={20} />}
+                  trailingIcon={
+                    <IconButton
+                      type="button"
+                      variant="standard"
+                      size="sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      icon={<Icon name={showPassword ? "visibility_off" : "visibility"} size={20} />}
+                    />
+                  }
+                  aria-invalid={!!passwordError}
+                />
+
+                <TextField
+                  id="confirmPassword" type={showConfirmPassword ? "text" : "password"} variant="outlined" label="Confirm password"
+                  className="w-full"
+                  value={confirmPassword}
+                  onChange={(value) => { setConfirmPassword(value); if (confirmError) validateConfirmPassword(value); }}
+                  onBlur={() => validateConfirmPassword(confirmPassword)}
+                  placeholder="Re-enter your password"
+                  invalid={!!confirmError} errorMessage={confirmError}
+                  autoComplete="new-password"
+                  leadingIcon={<Icon name="lock" size={20} />}
+                  trailingIcon={
+                    <IconButton
+                      type="button"
+                      variant="standard"
+                      size="sm"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      icon={<Icon name={showConfirmPassword ? "visibility_off" : "visibility"} size={20} />}
+                    />
+                  }
+                  aria-invalid={!!confirmError}
+                />
+
+                <Button type="submit" variant="filled" disabled={isSubmitting} className="w-full">
+                  {isSubmitting ? "Creating account..." : "Create account"}
+                </Button>
+              </form>
+
+              <div className="relative flex items-center gap-4">
+                <Divider className="flex-1" />
+                <span className="text-label-small text-on-surface-variant uppercase">Or continue with</span>
+                <Divider className="flex-1" />
+              </div>
+
+              <Button type="button" variant="tonal" className="w-full" leadingIcon={<Icon name="public" size={20} />} onClick={() => loginWithGoogle("/dashboard")}>
+                Sign up with Google
+              </Button>
+
+              <p className="text-body-medium text-on-surface-variant text-center">
+                Already have an account?{" "}
+                <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">Sign in</Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </main>
   );
 }
