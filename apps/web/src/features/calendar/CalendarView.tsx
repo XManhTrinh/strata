@@ -6,6 +6,7 @@ import { formatMonthYear } from "./utils/calendar.utils";
 import {
   TopAppBar,
   AssistChip,
+  Card,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -14,6 +15,7 @@ import {
   IconButton,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
+import { CardContent } from "@/components/ui/card-content";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";
 import { useLeaveBalances } from "./hooks/useLeaveBalances";
 import { CalendarGrid } from "./components/CalendarGrid";
@@ -21,6 +23,7 @@ import { FilterSelector } from "./components/FilterSelector";
 import { LeaveBalancePanel } from "./components/LeaveBalancePanel";
 import { LeaveRequestForm } from "./components/LeaveRequestForm";
 import { EventForm } from "./components/EventForm";
+import { ApprovalActions } from "./components/ApprovalActions";
 import { useUserPermissions } from "@/hooks/use-user-permissions";
 
 /** Mock accessible scope data */
@@ -81,7 +84,7 @@ function EventDetailDialog({
     <Dialog open={!!event} onOpenChange={(open) => !open && onClose()}>
       <DialogTitle>{event.title}</DialogTitle>
       <DialogContent>
-        <p className="text-sm text-on-surface-variant mb-4">{event.ownerName}</p>
+        <p className="text-body-medium text-on-surface-variant mb-4">{event.ownerName}</p>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-label-large">Type:</span>
@@ -99,7 +102,7 @@ function EventDetailDialog({
                 <span className="text-label-large">Status:</span>
                 <AssistChip
                   className={
-                    event.leaveRequest.status === "PENDING" ? "text-amber-600 dark:text-amber-400" :
+                    event.leaveRequest.status === "PENDING" ? "text-tertiary" :
                     event.leaveRequest.status === "REJECTED" ? "text-error" : ""
                   }
                 >
@@ -203,7 +206,7 @@ export function CalendarView() {
         className="justify-between gap-3 flex-wrap sm:flex-nowrap"
         title={
           <div className="flex items-center gap-4">
-            <h5 className="text-title-large">Calendar</h5>
+            <h1 className="text-headline-medium">Calendar</h1>
             <div className="flex items-center gap-1">
               <IconButton variant="standard" size="xs" onClick={goToPreviousMonth} aria-label="Previous month" icon={<Icon name="chevron_left" size={20} />} />
               <span className="text-label-large min-w-40 text-center">
@@ -264,34 +267,41 @@ export function CalendarView() {
 
           {pendingRequests.length > 0 && (
             <div className="mt-6">
-              <h6 className="text-title-small mb-3">
+              <h2 className="text-title-small mb-3">
                 {canApprove || canReject ? "Pending Approvals" : "Pending Requests"}
-              </h6>
+              </h2>
               <div className="space-y-2">
                 {pendingRequests.map((event) => (
-                  <div key={event.id} className="rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/10 p-2.5">
-                    <span className="text-label-large truncate">{event.title}</span>
-                    <p className="text-body-small text-on-surface-variant mt-0.5">
-                      {event.leaveRequest?.workingDays} days
-                    </p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      {canApprove && (
-                        <button type="button" onClick={() => handleApprove(event.id)} className="text-[11px] font-medium text-tertiary hover:underline">
-                          Approve
-                        </button>
-                      )}
-                      {canReject && (
-                        <button type="button" onClick={() => handleReject(event.id)} className="text-[11px] font-medium text-error hover:underline">
-                          Reject
-                        </button>
+                  <Card key={event.id} variant="outlined">
+                    <CardContent className="flex flex-col gap-2 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-label-large truncate">{event.title}</span>
+                        <AssistChip leadingIcon={<Icon name="schedule" />}>
+                          Pending
+                        </AssistChip>
+                      </div>
+                      <p className="text-body-small text-on-surface-variant">
+                        {event.leaveRequest?.workingDays} days
+                      </p>
+                      {(canApprove || canReject) && (
+                        <ApprovalActions
+                          eventId={event.id}
+                          onApprove={handleApprove}
+                          onReject={handleReject}
+                        />
                       )}
                       {canCancel && !(canApprove || canReject) && (
-                        <button type="button" onClick={() => handleCancel(event.id)} className="text-[11px] font-medium text-error hover:underline">
+                        <Button
+                          variant="text"
+                          size="xs"
+                          className="self-start text-error"
+                          onClick={() => handleCancel(event.id)}
+                        >
                           Cancel Request
-                        </button>
+                        </Button>
                       )}
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </div>

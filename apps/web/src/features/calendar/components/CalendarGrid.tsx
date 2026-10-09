@@ -180,7 +180,7 @@ export function CalendarGrid({
         {weekdayLabels.map((label) => (
           <div
             key={label}
-            className={`px-2 py-2 text-center text-xs font-medium uppercase tracking-wider ${
+            className={`px-2 py-2 text-center text-label-small uppercase tracking-wider ${
               label === "Sat" || label === "Sun"
                 ? "text-on-surface-variant/60 bg-surface-variant/30"
                 : "text-on-surface-variant"
@@ -214,7 +214,7 @@ export function CalendarGrid({
                     className={`border-outline-variant px-1.5 pt-1 pb-0.5 cursor-pointer transition-colors ${
                       dayIdx < colCount - 1 ? "border-r" : ""
                     } ${!isCurrentMonth ? "bg-surface-variant/20" : ""
-                    } ${isWeekend && showWeekends ? "bg-orange-50/40 dark:bg-orange-950/10" : ""} ${
+                    } ${isWeekend && showWeekends ? "bg-surface-variant/30" : ""} ${
                       inDragRange ? "bg-primary/10" : "hover:bg-surface-variant/30"
                     }`}
                     onMouseDown={(e) => {
@@ -224,7 +224,7 @@ export function CalendarGrid({
                     onMouseEnter={() => handleMouseEnter(date)}
                   >
                     <span
-                      className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+                      className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-label-medium ${
                         todayHighlight
                           ? "bg-primary text-on-primary"
                           : isCurrentMonth
@@ -251,7 +251,7 @@ export function CalendarGrid({
                   return (
                     <div
                       key={bar.event.id + "-" + weekIdx}
-                      className={`absolute pointer-events-auto text-[10px] font-medium px-1.5 py-0.5 truncate cursor-pointer ${
+                      className={`absolute pointer-events-auto text-label-small px-1.5 py-0.5 truncate cursor-pointer ${
                         colors.bg
                       } ${colors.text} ${
                         isPending ? "border border-dashed " + colors.border : ""

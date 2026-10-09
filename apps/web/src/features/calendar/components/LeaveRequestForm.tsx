@@ -145,15 +145,20 @@ export function LeaveRequestForm({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogTitle>Request Leave</DialogTitle>
       <DialogContent>
-        <p className="mb-4">Submit a leave request for approval.</p>
+        <p className="mb-4 text-body-medium text-on-surface-variant">
+          Submit a leave request for approval.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4" id="leave-form">
           {errors.length > 0 && (
-            <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
-              {errors.map((err) => (
-                <p className="text-body-small text-error" key={err}>
-                  {err}
-                </p>
-              ))}
+            <div className="flex items-start gap-2 rounded-lg bg-error-container p-3 text-on-error-container">
+              <Icon name="error" size={16} className="mt-0.5 shrink-0 text-error" />
+              <div className="space-y-0.5">
+                {errors.map((err) => (
+                  <p className="text-body-small" key={err}>
+                    {err}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
 
@@ -220,7 +225,7 @@ export function LeaveRequestForm({
         <Button type="button" variant="text" onClick={handleClose}>
           Cancel
         </Button>
-        <Button type="submit" form="leave-form" variant="text">
+        <Button type="submit" form="leave-form" variant="filled">
           Submit Request
         </Button>
       </DialogActions>

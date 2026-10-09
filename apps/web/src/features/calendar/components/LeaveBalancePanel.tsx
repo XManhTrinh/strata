@@ -13,7 +13,7 @@ interface LeaveBalancePanelProps {
 export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePanelProps) {
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-      <h6 className="text-title-small">Leave Balances</h6>
+      <h2 className="text-title-small">Leave Balances</h2>
 
       <div className="mt-4 space-y-4">
         {balances.map((balance) => {
@@ -36,12 +36,12 @@ export function LeaveBalancePanel({ balances, onRequestLeave }: LeaveBalancePane
                 </div>
                 <div className="flex items-center gap-1.5">
                   {isLow && (
-                    <AssistChip className="h-5 text-[10px] px-1.5 text-amber-800 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300">
+                    <AssistChip className="h-5 px-1.5 text-label-small text-tertiary bg-tertiary-container">
                       Low
                     </AssistChip>
                   )}
                   {isDepleted && (
-                    <AssistChip className="h-5 text-[10px] px-1.5 text-error bg-error-container dark:bg-error-container/30">
+                    <AssistChip className="h-5 px-1.5 text-label-small text-error bg-error-container">
                       Depleted
                     </AssistChip>
                   )}

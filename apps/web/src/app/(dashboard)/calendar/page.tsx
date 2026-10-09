@@ -10,9 +10,15 @@ import {
   useCalendarEvents,
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 export default function CalendarPage() {
+  const reduced = useReducedMotionContext();
   const companyId = useCompanyId();
   const {
     isLoading,
@@ -61,19 +67,20 @@ export default function CalendarPage() {
   if (isError) {
     return (
       <div className="h-[calc(100vh-64px-24px)] flex items-center justify-center">
-        <Card variant="elevated" className="max-w-lg">
+        <Card variant="filled" className="max-w-lg">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <h5 className="text-title-large mb-2">
-              Unable to load calendar
-            </h5>
+            <p className="text-title-medium mb-2">Unable to load calendar</p>
             <p className="text-body-medium text-on-surface-variant mb-6">
               {error?.message || "Failed to load calendar data. Please try again."}
             </p>
-            <Button variant="tonal" onClick={() => refetch()}>
-              <Icon name="refresh" size={18} />
+            <Button
+              variant="filled"
+              leadingIcon={<Icon name="refresh" />}
+              onClick={() => refetch()}
+            >
               Retry
             </Button>
           </CardContent>
@@ -85,7 +92,7 @@ export default function CalendarPage() {
   return (
     <motion.div
       className="h-[calc(100vh-64px-24px)]"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"

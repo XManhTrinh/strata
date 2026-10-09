@@ -12,14 +12,14 @@ export function TeamAvailabilityBar({ available, total }: TeamAvailabilityBarPro
     percentage > 75
       ? "bg-tertiary"
       : percentage >= 50
-        ? "bg-yellow-500"
+        ? "bg-secondary"
         : "bg-error";
 
   const textColor =
     percentage > 75
       ? "text-tertiary"
       : percentage >= 50
-        ? "text-yellow-700 dark:text-yellow-300"
+        ? "text-secondary"
         : "text-error";
 
   return (

@@ -12,6 +12,7 @@ import {
   Select,
   SelectItem,
 } from "@vkieu/mui";
+import { Icon } from "@/components/ui/icon";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
 interface EventFormProps {
@@ -111,15 +112,20 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogTitle>Create Event</DialogTitle>
       <DialogContent>
-        <p className="mb-4">Add a new event to the calendar.</p>
+        <p className="mb-4 text-body-medium text-on-surface-variant">
+          Add a new event to the calendar.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4" id="event-form">
           {errors.length > 0 && (
-            <div className="rounded-lg bg-error-container p-3 dark:bg-error-container/20">
-              {errors.map((err) => (
-                <p className="text-body-small text-error" key={err}>
-                  {err}
-                </p>
-              ))}
+            <div className="flex items-start gap-2 rounded-lg bg-error-container p-3 text-on-error-container">
+              <Icon name="error" size={16} className="mt-0.5 shrink-0 text-error" />
+              <div className="space-y-0.5">
+                {errors.map((err) => (
+                  <p className="text-body-small" key={err}>
+                    {err}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
 
@@ -149,7 +155,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
               selected={allDay}
               onSelectedChange={(checked) => setAllDay(checked === true)}
             />
-            <label htmlFor="all-day" className="text-sm text-on-surface cursor-pointer select-none">
+            <label htmlFor="all-day" className="text-body-medium text-on-surface cursor-pointer select-none">
               All Day
             </label>
           </div>
@@ -222,7 +228,7 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
         <Button type="button" variant="text" onClick={handleClose}>
           Cancel
         </Button>
-        <Button type="submit" form="event-form" variant="text">
+        <Button type="submit" form="event-form" variant="filled">
           Create Event
         </Button>
       </DialogActions>

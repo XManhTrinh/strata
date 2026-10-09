@@ -24,7 +24,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
       title={`${event.title}${event.leaveRequest ? ` (${event.leaveRequest.status})` : ""}${event.notes ? `\n${event.notes}` : ""}`}
     >
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${colors.dot}`} aria-hidden="true" />
-      <span className={`truncate text-[11px] font-medium ${colors.text} ${textStyle}`}>
+      <span className={`truncate text-label-small ${colors.text} ${textStyle}`}>
         {event.title}
       </span>
     </button>
