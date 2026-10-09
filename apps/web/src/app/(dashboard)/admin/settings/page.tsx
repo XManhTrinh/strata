@@ -17,7 +17,8 @@ import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import { pageTransitionVariants, defaultTransition, resolveAnimationVariants } from "@/lib/motion";
 import { CsvImportDialog } from "@/components/import";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ const STAT_CONFIG = [
 // ─── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  const reduced = useReducedMotionContext();
   const toast = useToast();
   const companyId = useCompanyId();
   const { data: company, isLoading, isError, error } = useCompanySettings(companyId);
@@ -164,7 +166,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error-container mb-4">
                 <Icon name="error" size={28} className="text-on-error-container" />
               </div>
-              <h6 className="text-title-medium mb-1">Unable to load settings</h6>
+              <h2 className="text-title-medium mb-1">Unable to load settings</h2>
               <p className="text-body-medium text-on-surface-variant">{error?.message || "Something went wrong."}</p>
             </CardContent>
           </Card>
@@ -175,7 +177,7 @@ export default function SettingsPage() {
 
   // ─── Main ─────────────────────────────────────────────────────────────────
   return (
-    <motion.div className="flex flex-col h-full" variants={pageTransitionVariants} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
+    <motion.div className="flex flex-col h-full" variants={resolveAnimationVariants(pageTransitionVariants, reduced)} initial="initial" animate="enter" exit="exit" transition={defaultTransition}>
       {/* Header */}
       <TopAppBar
         className="justify-between shrink-0"
@@ -201,7 +203,7 @@ export default function SettingsPage() {
                 <Icon name={stat.icon} size={20} className={stat.iconColor} />
               </div>
               <div className="min-w-0">
-                <h4 className="text-headline-small leading-tight">{statValues[i]}</h4>
+                <p className="text-headline-small leading-tight">{statValues[i]}</p>
                 <span className="text-label-small text-on-surface-variant">{stat.label}</span>
               </div>
             </CardContent>
@@ -248,7 +250,7 @@ export default function SettingsPage() {
           {activeSection === "general" && (
             <div className="space-y-6">
               <div>
-                <h5 className="text-title-large">General</h5>
+                <h2 className="text-title-large">General</h2>
                 <p className="text-body-medium text-on-surface-variant mt-1">Basic workspace information.</p>
               </div>
 
@@ -260,7 +262,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
                         <Icon name="edit" size={20} className="text-on-primary-container" />
                       </div>
-                      <h6 className="text-title-small">Company Profile</h6>
+                      <h3 className="text-title-small">Company Profile</h3>
                     </div>
                     <TextField
                       variant="outlined"
@@ -289,13 +291,13 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
                         <Icon name="info" size={20} className="text-on-secondary-container" />
                       </div>
-                      <h6 className="text-title-small">Workspace Details</h6>
+                      <h3 className="text-title-small">Workspace Details</h3>
                     </div>
                     <List aria-label="List" className="py-0">
                       <ListItem
                         supportingText="Workspace ID"
                         trailing={
-                          <AssistChip className="font-mono text-[11px]">{company?.id}</AssistChip>
+                          <AssistChip className="font-mono text-label-small">{company?.id}</AssistChip>
                         }
                       >
                         Identifier
@@ -319,7 +321,7 @@ export default function SettingsPage() {
           {activeSection === "financial" && (
             <div className="space-y-6">
               <div>
-                <h5 className="text-title-large">Financial Settings</h5>
+                <h2 className="text-title-large">Financial Settings</h2>
                 <p className="text-body-medium text-on-surface-variant mt-1">Currency, fiscal year, and cost calculation parameters.</p>
               </div>
 
@@ -330,7 +332,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
                         <Icon name="currency_exchange" size={20} className="text-on-tertiary-container" />
                       </div>
-                      <h6 className="text-title-small">Currency & Fiscal Year</h6>
+                      <h3 className="text-title-small">Currency & Fiscal Year</h3>
                     </div>
                     <TextField
                       variant="outlined"
@@ -361,7 +363,7 @@ export default function SettingsPage() {
           {activeSection === "import" && (
             <div className="space-y-6">
               <div>
-                <h5 className="text-title-large">Data Import</h5>
+                <h2 className="text-title-large">Data Import</h2>
                 <p className="text-body-medium text-on-surface-variant mt-1">
                   Import members, org structure, positions, and roles from a CSV file.
                 </p>
@@ -374,7 +376,7 @@ export default function SettingsPage() {
                       <Icon name="upload_file" size={24} className="text-on-primary-container" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h6 className="text-title-small">CSV Import</h6>
+                      <h3 className="text-title-small">CSV Import</h3>
                       <p className="text-body-medium text-on-surface-variant mt-1">
                         Upload a CSV file to bulk-import members and automatically create your
                         org hierarchy (divisions, tribes, squads), positions, grades, and role
@@ -403,7 +405,7 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-container">
                       <Icon name="lightbulb" size={20} className="text-on-tertiary-container" />
                     </div>
-                    <h6 className="text-title-small">Import Tips</h6>
+                    <h3 className="text-title-small">Import Tips</h3>
                   </div>
                   <List aria-label="List" className="py-0">
                     <ListItem
@@ -443,7 +445,7 @@ export default function SettingsPage() {
           {activeSection === "danger" && (
             <div className="space-y-6">
               <div>
-                <h5 className="text-title-large text-error">Danger Zone</h5>
+                <h2 className="text-title-large text-error">Danger Zone</h2>
                 <p className="text-body-medium text-on-surface-variant mt-1">Destructive actions that cannot be undone.</p>
               </div>
 
