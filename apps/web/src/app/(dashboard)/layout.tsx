@@ -3,7 +3,6 @@
 import { type ReactNode } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { ReducedMotionProvider } from "@/components/accessibility/reduced-motion";
-import { CommandPalette } from "@/components/navigation/command-palette";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { CompanyProvider } from "@/components/auth/company-provider";
 import { ImportProgressProvider } from "@/components/import/import-progress-provider";
@@ -19,7 +18,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {children}
               </div>
             </DashboardShell>
-            <CommandPalette />
           </ReducedMotionProvider>
         </ImportProgressProvider>
       </CompanyProvider>

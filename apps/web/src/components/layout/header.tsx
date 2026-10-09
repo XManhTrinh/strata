@@ -16,7 +16,7 @@ import {
   type TopAppBarScrollBehavior,
 } from "@vkieu/mui";
 import { useAuth } from "@/lib/auth";
-import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { Icon } from "@/components/ui/icon";
 import { Avatar } from "@vkieu/mui/vk";
 import { AvatarProgressRing } from "@/components/import/avatar-progress-ring";
@@ -76,24 +76,7 @@ export function Header({ className, scrollBehavior, scrollRef }: HeaderProps) {
           </TooltipTrigger>
 
           {/* Notifications */}
-          <NotificationDropdown />
-
-          {/* Search / Command palette */}
-          <TooltipTrigger placement="bottom">
-            <IconButton
-              variant="standard"
-              size="sm"
-              aria-label="Search"
-              className="hidden sm:inline-flex"
-              onClick={() => {
-                window.dispatchEvent(
-                  new KeyboardEvent("keydown", { key: "k", metaKey: true })
-                );
-              }}
-              icon={<Icon name="search" size={24} />}
-            />
-            <Tooltip>Search (⌘K)</Tooltip>
-          </TooltipTrigger>
+          <NotificationPanel />
 
           {/* User menu */}
           <div className="relative inline-flex items-center justify-center">
