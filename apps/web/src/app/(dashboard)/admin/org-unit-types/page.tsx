@@ -39,7 +39,12 @@ import {
   type AdminOrgUnitType,
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { ColorPicker } from "@/components/ui/color-picker";
 
@@ -110,10 +115,10 @@ function EmptyState({
       <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
         <Icon name="label" size={40} className="text-primary" />
       </div>
-      <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+      <h2 className="text-headline-small text-on-surface mb-2">
         {hasSearch ? "No types match your search" : "No unit types yet"}
       </h2>
-      <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-xs">
+      <p className="text-body-medium text-on-surface-variant mb-6 max-w-xs">
         {hasSearch
           ? "Try a different search term or clear the search."
           : "Create your first organization unit type to start building your hierarchy."}
@@ -136,10 +141,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+        <h2 className="text-headline-small text-on-surface mb-2">
           Unable to load types
         </h2>
-        <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
+        <p className="text-body-medium text-on-surface-variant mb-6">
           Something went wrong. Please try again.
         </p>
         <Button variant="tonal" onClick={onRetry}>
@@ -179,7 +184,7 @@ function TypeRow({
               <Icon name={icon} size={18} />
             </span>
           </div>
-          <span className="text-[14px] font-medium text-on-surface">{row.name}</span>
+          <span className="text-label-large text-on-surface">{row.name}</span>
         </div>
       </TableCell>
       <TableCell className="text-on-surface-variant">
@@ -191,7 +196,7 @@ function TypeRow({
             className="inline-block h-4 w-4 rounded-full border border-outline-variant"
             style={{ backgroundColor: color }}
           />
-          <span className="text-[12px] text-on-surface-variant font-mono">{color}</span>
+          <span className="text-label-small text-on-surface-variant font-mono">{color}</span>
         </div>
       </TableCell>
       <TableCell>
@@ -354,10 +359,10 @@ function TypeDialog({
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-[14px] font-medium text-on-surface truncate">
+              <p className="text-label-large text-on-surface truncate">
                 {formData.name || "Type name"}
               </p>
-              <p className="text-[12px] text-on-surface-variant truncate">
+              <p className="text-body-small text-on-surface-variant truncate">
                 {formData.description || "Description"}
               </p>
             </div>
@@ -385,6 +390,7 @@ function TypeDialog({
 export default function OrgUnitTypesPage() {
   const toast = useToast();
   const companyId = useCompanyId();
+  const reduced = useReducedMotionContext();
 
   // ── Local state ────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -493,7 +499,7 @@ export default function OrgUnitTypesPage() {
     return (
       <div className="space-y-6">
         <TopAppBar
-          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Organization Unit Types</h1>}
+          title={<h1 className="text-headline-medium">Organization Unit Types</h1>}
           subtitle="Define the types of organizational units used in your company structure."
         />
         <ErrorState onRetry={() => refetch()} />
@@ -505,7 +511,7 @@ export default function OrgUnitTypesPage() {
   return (
     <motion.div
       className="space-y-6"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -514,7 +520,7 @@ export default function OrgUnitTypesPage() {
       {/* ── Page header ────────────────────────────────────────────────── */}
       <TopAppBar
         className="justify-between"
-        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Organization Unit Types</h1>}
+        title={<h1 className="text-headline-medium">Organization Unit Types</h1>}
         subtitle="Define the types of organizational units used in your company structure."
         actions={
           <Button onClick={openCreate} className="shrink-0" leadingIcon={<Icon name="add" />}>

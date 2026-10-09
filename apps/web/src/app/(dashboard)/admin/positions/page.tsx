@@ -40,7 +40,12 @@ import {
   type CareerLevel,
 } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { pageTransitionVariants, defaultTransition } from "@/lib/motion";
+import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
+import {
+  pageTransitionVariants,
+  defaultTransition,
+  resolveAnimationVariants,
+} from "@/lib/motion";
 
 // Legacy compatibility type for interactive ListItem
 // Legacy compatibility - TypeScript cast for interactive list items
@@ -144,10 +149,10 @@ function EmptyState({
       <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/8 mb-6">
         <Icon name="work" size={40} className="text-primary" />
       </div>
-      <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+      <h2 className="text-headline-small text-on-surface mb-2">
         {hasSearch ? "No positions match your search" : "No positions yet"}
       </h2>
-      <p className="text-[14px] leading-5 text-on-surface-variant mb-6 max-w-xs">
+      <p className="text-body-medium text-on-surface-variant mb-6 max-w-xs">
         {hasSearch
           ? "Try a different search term or clear the search."
           : "Create your first position to define roles in your organization."}
@@ -170,10 +175,10 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
           <Icon name="error" size={24} className="text-error" />
         </div>
-        <h2 className="text-[22px] leading-7 font-normal text-on-surface mb-2">
+        <h2 className="text-headline-small text-on-surface mb-2">
           Unable to load positions
         </h2>
-        <p className="text-[14px] leading-5 text-on-surface-variant mb-6">
+        <p className="text-body-medium text-on-surface-variant mb-6">
           Something went wrong. Please try again.
         </p>
         <Button variant="tonal" onClick={onRetry}>
@@ -210,11 +215,11 @@ function PositionRow({
             <Icon name="work" size={18} className="text-primary" />
           </div>
           <div className="min-w-0">
-            <span className="text-[14px] font-medium text-on-surface block truncate">
+            <span className="text-label-large text-on-surface block truncate">
               {row.name}
             </span>
             {row.description && (
-              <span className="text-[12px] text-on-surface-variant block truncate max-w-60">
+              <span className="text-body-small text-on-surface-variant block truncate max-w-60">
                 {row.description}
               </span>
             )}
@@ -222,7 +227,7 @@ function PositionRow({
         </div>
       </TableCell>
       <TableCell>
-        <span className="text-[14px] text-on-surface">{levelRange}</span>
+        <span className="text-body-medium text-on-surface">{levelRange}</span>
       </TableCell>
       <TableCell>
         <span className="flex items-center gap-1.5">
@@ -231,7 +236,7 @@ function PositionRow({
             size={18}
             className={row.canHaveDirectReports ? "text-tertiary" : "text-outline"}
           />
-          <span className="text-[14px] text-on-surface">
+          <span className="text-body-medium text-on-surface">
             {row.canHaveDirectReports ? "Yes" : "No"}
           </span>
         </span>
@@ -438,7 +443,7 @@ function PositionDialog({
                 onFormChange({ ...formData, canHaveDirectReports: checked === true })
               }
             />
-            <label htmlFor="pos-reports" className="text-[14px] leading-5 text-on-surface cursor-pointer select-none">
+            <label htmlFor="pos-reports" className="text-body-medium text-on-surface cursor-pointer select-none">
               Can have direct reports
             </label>
           </div>
@@ -550,6 +555,7 @@ function CareerLevelDialog({
 export default function PositionsPage() {
   const toast = useToast();
   const companyId = useCompanyId();
+  const reduced = useReducedMotionContext();
 
   // ── Local state ────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -689,7 +695,7 @@ export default function PositionsPage() {
     return (
       <div className="space-y-6">
         <TopAppBar
-          title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Positions</h1>}
+          title={<h1 className="text-headline-medium">Positions</h1>}
           subtitle="Configure positions with career levels and reporting capabilities."
         />
         <ErrorState onRetry={() => refetch()} />
@@ -701,7 +707,7 @@ export default function PositionsPage() {
   return (
     <motion.div
       className="space-y-6"
-      variants={pageTransitionVariants}
+      variants={resolveAnimationVariants(pageTransitionVariants, reduced)}
       initial="initial"
       animate="enter"
       exit="exit"
@@ -710,7 +716,7 @@ export default function PositionsPage() {
       {/* ── Page header ────────────────────────────────────────────────── */}
       <TopAppBar
         className="justify-between"
-        title={<h1 className="text-[28px] leading-9 font-normal text-on-surface">Positions</h1>}
+        title={<h1 className="text-headline-medium">Positions</h1>}
         subtitle="Configure positions with career levels and reporting capabilities."
         actions={
           <div className="flex items-center gap-2 shrink-0">
