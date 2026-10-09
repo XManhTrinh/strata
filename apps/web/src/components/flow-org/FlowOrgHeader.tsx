@@ -110,9 +110,9 @@ export default function FlowOrgHeader({
         className="justify-between gap-4"
         title={
           <div className="flex items-center gap-4 shrink-0">
-            <h5 className="text-title-large">Org Chart</h5>
-            {/* Segmented toggle */}
-            <div className="flex items-center bg-surface-container-highest/50 rounded-full p-1">
+            <h1 className="text-headline-medium">Org Chart</h1>
+            {/* Reporting / Departments view toggle (no SegmentedButton export — refined Button pill) */}
+            <div className="flex items-center gap-1 bg-surface-container-highest/50 rounded-full p-1">
               <Button
                 variant={viewMode === "reporting" ? "tonal" : "text"}
                 size="xs"
@@ -196,7 +196,7 @@ export default function FlowOrgHeader({
                     <button
                       type="button"
                       onClick={() => onFocusPerson?.(node.id)}
-                      className="cursor-pointer hover:underline"
+                      className="cursor-pointer rounded px-1 py-0.5 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
                     >
                       <span
                         className={`text-label-small ${isLast ? "text-primary font-medium" : "text-on-surface-variant"}`}

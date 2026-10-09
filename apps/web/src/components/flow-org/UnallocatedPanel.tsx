@@ -38,9 +38,9 @@ export default function UnallocatedPanel({
         </div>
       )}
 
-      <span className="text-label-small text-on-surface-variant uppercase tracking-wider mb-3">
+      <p className="block text-label-small text-on-surface-variant uppercase tracking-wider mb-3">
         Unallocated · {persons.length}
-      </span>
+      </p>
 
       {persons.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-center">
@@ -65,7 +65,7 @@ export default function UnallocatedPanel({
                 <div className="flex items-center gap-2 min-w-0">
                   <Avatar name={person.fullName} src={person.avatarUrl} size="sm" decorative />
                   <div className="min-w-0">
-                    <span className="text-label-large truncate">{person.fullName}</span>
+                    <p className="text-label-large truncate">{person.fullName}</p>
                     <p className="text-body-small text-on-surface-variant truncate">
                       {person.title}
                     </p>
@@ -85,7 +85,7 @@ export default function UnallocatedPanel({
                   {person.squads.map((squad) => (
                     <span
                       key={squad}
-                      className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                      className="bg-secondary-container text-on-secondary-container text-label-small px-1.5 py-0.5 rounded-full"
                     >
                       {squad}
                     </span>

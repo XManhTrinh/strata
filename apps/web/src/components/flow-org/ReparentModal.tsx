@@ -70,7 +70,9 @@ export default function ReparentModal({
           Reassign {directReportCount} {directReportCount === 1 ? "report" : "reports"}
         </DialogTitle>
         <DialogContent>
-          <p className="mb-4">Choose who should manage {personName}&apos;s direct reports.</p>
+          <p className="mb-4 text-body-medium text-on-surface-variant">
+            Choose who should manage {personName}&apos;s direct reports.
+          </p>
           <SearchBar
           aria-label="Search"
             value={search}
@@ -116,24 +118,36 @@ export default function ReparentModal({
     <Dialog open onOpenChange={(open) => !open && onCancel()} icon={<Icon name="drag_indicator" />}>
       <DialogTitle>Move {personName}</DialogTitle>
       <DialogContent>
-        <p className="mb-4">
+        <p className="mb-4 text-body-medium text-on-surface-variant">
           {personName} has{" "}
-          <strong>{directReportCount}</strong>{" "}
+          <strong className="text-on-surface">{directReportCount}</strong>{" "}
           direct {directReportCount === 1 ? "report" : "reports"}.
           What should happen to them?
         </p>
         <div className="flex flex-col gap-2">
-          <Button variant="filled" onClick={onMoveWithReports} className="w-full justify-start gap-3">
-            <Icon name="group" size={20} />
+          <Button
+            variant="filled"
+            onClick={onMoveWithReports}
+            className="w-full justify-start"
+            leadingIcon={<Icon name="group" size={20} />}
+          >
             Move together with reports
           </Button>
-          <Button variant="tonal" onClick={onLeaveReports} className="w-full justify-start gap-3">
-            <Icon name="person_remove" size={20} />
+          <Button
+            variant="tonal"
+            onClick={onLeaveReports}
+            className="w-full justify-start"
+            leadingIcon={<Icon name="person_remove" size={20} />}
+          >
             Leave reports under current parent
           </Button>
           {targetIsUnallocated && (
-            <Button variant="tonal" onClick={() => setShowPicker(true)} className="w-full justify-start gap-3">
-              <Icon name="swap_horiz" size={20} />
+            <Button
+              variant="tonal"
+              onClick={() => setShowPicker(true)}
+              className="w-full justify-start"
+              leadingIcon={<Icon name="swap_horiz" size={20} />}
+            >
               Reassign reports to someone else
             </Button>
           )}

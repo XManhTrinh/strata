@@ -12,6 +12,7 @@ import {
   DialogActions,
   Card,
   Button,
+  LoadingIndicator,
 } from "@vkieu/mui";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
@@ -208,7 +209,7 @@ export default function OrgChartPage() {
           </div>
         </SkeletonGroup>
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <LoadingIndicator aria-label="Loading org chart" />
         </div>
       </div>
     );
@@ -220,13 +221,20 @@ export default function OrgChartPage() {
       <div className="flex flex-col h-[calc(100vh-100px)] items-center justify-center">
         <Card variant="elevated" className="max-w-sm">
           <CardContent className="flex flex-col items-center py-12 px-8 text-center">
-            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-error/12 mb-4">
+            <div className="flex items-center justify-center h-14 w-14 rounded-full bg-error/12 mb-4">
               <Icon name="error" size={24} className="text-error" />
             </div>
-            <h6 className="text-title-medium mb-2">Unable to load org chart</h6>
-            <p className="text-body-medium text-on-surface-variant">
+            <h2 className="text-title-medium mb-2">Unable to load org chart</h2>
+            <p className="text-body-medium text-on-surface-variant mb-6">
               {error}
             </p>
+            <Button
+              variant="filled"
+              leadingIcon={<Icon name="refresh" />}
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -272,10 +280,15 @@ export default function OrgChartPage() {
           <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-surface-container border border-outline-variant px-4 py-2 shadow-lg">
             <Icon name="center_focus_strong" size={18} className="text-primary" />
             <p className="text-body-small text-on-surface-variant">
-              Focused on <span className="font-medium text-on-surface">{focusedPerson.fullName}</span>
+              Focused on{" "}
+              <span className="text-label-large text-on-surface">{focusedPerson.fullName}</span>
             </p>
-            <Button variant="text" size="xs" onClick={clearFocus}>
-              <Icon name="close" size={16} />
+            <Button
+              variant="text"
+              size="xs"
+              onClick={clearFocus}
+              leadingIcon={<Icon name="close" size={16} />}
+            >
               Exit focus
             </Button>
           </div>
@@ -314,7 +327,7 @@ export default function OrgChartPage() {
         <Dialog open onOpenChange={() => setPendingGroupMove(null)} icon={<Icon name="group" />} role="alertdialog">
           <DialogTitle>Move {pendingGroupMove.persons.length} people</DialogTitle>
           <DialogContent>
-            <p>
+            <p className="text-body-medium text-on-surface-variant">
               Move all {pendingGroupMove.persons.length} direct reports{" "}
               {pendingGroupMove.targetId
                 ? `under ${filteredPersons.find((p) => p.id === pendingGroupMove.targetId)?.fullName ?? "the target"}`
@@ -324,6 +337,7 @@ export default function OrgChartPage() {
           <DialogActions>
               <Button variant="text" onClick={() => setPendingGroupMove(null)}>Cancel</Button>
               <Button
+                variant="filled"
                 onClick={() => {
                   for (const p of pendingGroupMove.persons) void wrappedReparent(p.id, pendingGroupMove.targetId, true);
                   setPendingGroupMove(null);

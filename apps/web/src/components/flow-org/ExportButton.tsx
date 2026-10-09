@@ -30,8 +30,12 @@ export default function ExportButton() {
   }, [getNodes]);
 
   return (
-    <Button variant="outlined" size="xs" onClick={handleExport}>
-      <Icon name="download" size={18} />
+    <Button
+      variant="outlined"
+      size="xs"
+      onClick={handleExport}
+      leadingIcon={<Icon name="download" size={18} />}
+    >
       Export
     </Button>
   );
