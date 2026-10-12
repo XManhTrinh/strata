@@ -18,7 +18,6 @@ interface UnallocatedPanelProps {
 
 export default function UnallocatedPanel({
   persons,
-  matchedIds,
   isDropTarget,
   onEdit,
   onDragStart,

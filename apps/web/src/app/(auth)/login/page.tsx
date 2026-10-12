@@ -28,17 +28,20 @@ export default function LoginPage() {
   const { login, loginWithGoogle, isLoading, error, isAuthenticated, checkSession } = useAuth();
   const router = useRouter();
   const checked = useRef(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const reduced = useReducedMotion();
   const cardVariants = resolveAnimationVariants(pageTransitionVariants, reduced);
 
-  // Check session once on mount
+  // Check session once on mount. The ref guards against a double-invoke; the
+  // state flag drives the skeleton. Reading state (not a ref) in render lets
+  // the component re-render when the check completes.
   useEffect(() => {
     if (!checked.current) {
       checked.current = true;
       checkSession();
+      setSessionChecked(true);
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [checkSession]);
 
   // Redirect to dashboard once authenticated
   useEffect(() => {
@@ -82,7 +85,7 @@ export default function LoginPage() {
   };
 
   // Show skeleton only during initial session check, not during login attempt
-  const showSkeleton = isLoading && !email && !password && !checked.current;
+  const showSkeleton = isLoading && !email && !password && !sessionChecked;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface p-4">

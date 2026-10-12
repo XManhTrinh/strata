@@ -232,10 +232,21 @@ function OrgUnitFlowInner({ tree, onEdit, onAddChild, onArchive }: OrgUnitFlowIn
   const [nodes, setNodes] = useState<Node[]>(layout.nodes);
   const [edges, setEdges] = useState<Edge[]>(layout.edges);
 
-  useEffect(() => {
+  // Mirror the derived layout into ReactFlow-owned node/edge state once per
+  // distinct `layout` object (so ReactFlow can own drag mutations). Done during
+  // render via a state sentinel rather than a synchronous setState in an effect.
+  const [syncedLayout, setSyncedLayout] = useState(layout);
+  if (layout !== syncedLayout) {
+    setSyncedLayout(layout);
     setNodes(layout.nodes);
     setEdges(layout.edges);
-    setTimeout(() => fitView({ padding: 0.15, duration: 300 }), 50);
+  }
+
+  // Fitting the viewport is an external-system (ReactFlow) call and belongs in
+  // an effect. Schedule it ~50ms after each layout change.
+  useEffect(() => {
+    const timer = setTimeout(() => fitView({ padding: 0.15, duration: 300 }), 50);
+    return () => clearTimeout(timer);
   }, [layout, fitView]);
 
   return (

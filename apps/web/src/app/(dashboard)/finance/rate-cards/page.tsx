@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
   TopAppBar,
@@ -337,13 +337,10 @@ export default function RateCardsPage() {
     return result;
   }, [sets, groups, cardsByGroup]);
 
-  // Keep the active tab valid as sets change.
-  useEffect(() => {
-    if (tabs.length === 0) return;
-    if (!tabs.some((t) => t.id === activeTab)) {
-      setActiveTab(tabs[0].id);
-    }
-  }, [tabs, activeTab]);
+  // Keep the active tab valid as sets change — derived during render instead of
+  // syncing via a setState-in-effect. Falls back to the first tab when the
+  // current selection no longer exists (and is undefined when there are none).
+  const effectiveTab = tabs.some((t) => t.id === activeTab) ? activeTab : tabs[0]?.id;
 
   const allSelected = orderedCards.length > 0 && orderedCards.every((c) => selected.has(c.id));
   const someSelected = selected.size > 0 && !allSelected;
@@ -647,7 +644,7 @@ export default function RateCardsPage() {
     );
   };
 
-  const activeTabModel = tabs.find((t) => t.id === activeTab) ?? tabs[0];
+  const activeTabModel = tabs.find((t) => t.id === effectiveTab) ?? tabs[0];
 
   return (
     <motion.div

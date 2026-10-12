@@ -225,7 +225,7 @@ export default function PeoplePage() {
   const [selectedViewId, setSelectedViewId] = useState<string>("");
 
   // ── Derived data ──────────────────────────────────────────────────────────
-  const people = data?.data ?? [];
+  const people = useMemo(() => data?.data ?? [], [data]);
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
 
   // ── Batch selection ───────────────────────────────────────────────────────
@@ -291,8 +291,13 @@ export default function PeoplePage() {
     return [...core, ...org, ...meta];
   }, [orgLevelTypes, metadataKeys]);
 
-  // Initialize column order when metadata keys change
-  useEffect(() => {
+  // Initialize/merge column order whenever the available columns change. Runs
+  // once per distinct `allColumns` object (as the previous `[allColumns]`
+  // effect did) via the render-phase sync-on-identity pattern; the functional
+  // updater with the no-op early return keeps the user's ordering intact.
+  const [syncedColumns, setSyncedColumns] = useState<typeof allColumns | null>(null);
+  if (allColumns !== syncedColumns) {
+    setSyncedColumns(allColumns);
     setColumnOrder((prev) => {
       const allKeys = allColumns.map((c) => c.key);
       // Keep existing order, append any new columns
@@ -301,7 +306,7 @@ export default function PeoplePage() {
       if (newKeys.length === 0 && existing.length === allKeys.length) return prev;
       return [...existing, ...newKeys];
     });
-  }, [allColumns]);
+  }
 
   // Show org hierarchy columns (Division, Tribe, …) by default the first time
   // they appear, so the full structure is visible without configuring columns.

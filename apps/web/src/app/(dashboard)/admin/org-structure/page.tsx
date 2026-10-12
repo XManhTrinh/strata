@@ -120,7 +120,7 @@ function TreeNode({
   const hasChildren = unit.children.length > 0;
 
   return (
-    <div role="treeitem" aria-expanded={hasChildren ? expanded : undefined}>
+    <div role="treeitem" aria-selected={false} aria-expanded={hasChildren ? expanded : undefined}>
       <div style={{ paddingInlineStart: `${depth * 24}px` }}>
         <ListItemWithClick
           className="group rounded-lg"

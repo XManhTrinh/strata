@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useCallback, useEffect, useRef, useDeferredValue } from "react";
+import React, { useMemo, useState, useCallback, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   TopAppBar,
@@ -14,7 +14,7 @@ import {
   Select,
   SelectItem,
 } from "@vkieu/windmorph";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
+import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import {
@@ -164,11 +164,6 @@ export default function CapacityPage() {
 
   // Collapsible squad tables — only expanded squads mount their table DOM
   const [expandedSquads, setExpandedSquads] = useState<Set<string>>(new Set());
-  // Signature of the squad SET (group mode + squad ids) we last computed a
-  // default expansion for. Keyed on structure — NOT allocation values — so that
-  // editing a cell (which changes groupedData's identity but not which squads
-  // exist) never resets the user's expand/collapse state.
-  const initialExpandRef = useRef<string | null>(null);
 
   // Context menu for allocating member to another squad
   const [contextMenu, setContextMenu] = useState<{
@@ -186,16 +181,15 @@ export default function CapacityPage() {
     [orgUnits],
   );
   const [activeDivisionId, setActiveDivisionId] = useState<string>("");
-  useEffect(() => {
-    if (!activeDivisionId && divisionTabs.length > 0) {
-      setActiveDivisionId(divisionTabs[0].id);
-    }
-  }, [divisionTabs, activeDivisionId]);
+  // The first division acts as the default until the user picks another one.
+  // Derived during render (mirrors the admin/roles `effectiveSelectedId`
+  // pattern) instead of syncing via a setState-in-effect.
+  const effectiveDivisionId = activeDivisionId || divisionTabs[0]?.id || "";
 
   const { data: squads, isLoading, isError, error } = useCapacitySummary(
     companyId,
     fiscalYear,
-    activeDivisionId || undefined,
+    effectiveDivisionId || undefined,
     true, // require a division — never fetch the whole company at once
   );
   const { data: companySettings } = useCompanySettings(companyId);
@@ -208,14 +202,16 @@ export default function CapacityPage() {
   const [localDraft, setLocalDraft] = useState<DraftMap>(new Map());
   const [serverDraft, setServerDraft] = useState<DraftMap>(new Map());
 
-  // Sync server → local on data load
-  useEffect(() => {
-    if (squads) {
-      const draft = buildDraftFromServer(squads);
-      setServerDraft(draft);
-      setLocalDraft(new Map(draft.entries()));
-    }
-  }, [squads]);
+  // Sync server → local once per distinct `squads` object (mirrors the previous
+  // `[squads]` effect) via the render-phase sync-on-identity pattern, so local
+  // edits are not clobbered on unrelated re-renders.
+  const [syncedSquads, setSyncedSquads] = useState<typeof squads>(undefined);
+  if (squads && squads !== syncedSquads) {
+    setSyncedSquads(squads);
+    const draft = buildDraftFromServer(squads);
+    setServerDraft(draft);
+    setLocalDraft(new Map(draft.entries()));
+  }
 
   const isDirty = !draftsEqual(serverDraft, localDraft);
 
@@ -438,11 +434,13 @@ export default function CapacityPage() {
 
   // Compute the default expansion ONCE per squad set. With many squads or many
   // total members, default everything collapsed so we don't mount huge tables at
-  // once. Because the guard is keyed on the structural signature, editing a cell
-  // never re-runs this and never resets the user's expand/collapse choices.
-  useEffect(() => {
-    if (initialExpandRef.current === squadSetSignature) return;
-    initialExpandRef.current = squadSetSignature;
+  // once. Because the guard is keyed on the structural signature (held in state,
+  // not a ref), editing a cell never re-runs this and never resets the user's
+  // expand/collapse choices. Render-phase sync-on-change replaces the previous
+  // setState-in-effect.
+  const [initialExpandSignature, setInitialExpandSignature] = useState<string | null>(null);
+  if (initialExpandSignature !== squadSetSignature) {
+    setInitialExpandSignature(squadSetSignature);
 
     const totalMemberRows = groupedData.reduce((s, sq) => s + sq.members.length, 0);
     const collapseByDefault = groupedData.length > MANY_SQUADS || totalMemberRows > MANY_MEMBERS;
@@ -452,7 +450,7 @@ export default function CapacityPage() {
     } else {
       setExpandedSquads(new Set(groupedData.map(squadExpandKey)));
     }
-  }, [squadSetSignature, groupedData, squadExpandKey]);
+  }
 
   const allExpanded = groupedData.length > 0 && groupedData.every((sq) => expandedSquads.has(squadExpandKey(sq)));
 
@@ -513,7 +511,7 @@ export default function CapacityPage() {
     });
     setContextMenu(null);
     toast.success("Added squad allocation — adjust FTE and save");
-  }, []);
+  }, [toast]);
 
   const handleSave = () => {
     if (!isDirty) return;
@@ -613,7 +611,7 @@ export default function CapacityPage() {
 
   // ─── Loading ────────────────────────────────────────────────────────────
   const activeDivisionName =
-    divisionTabs.find((d) => d.id === activeDivisionId)?.name ?? "";
+    divisionTabs.find((d) => d.id === effectiveDivisionId)?.name ?? "";
 
   return (
     <motion.div
@@ -645,7 +643,7 @@ export default function CapacityPage() {
 
       {/* Division tabs — capacity loads per division (lazy). */}
       {divisionTabs.length > 0 && (
-        <Tabs selectedKey={activeDivisionId} onSelectionChange={(k) => setActiveDivisionId(k as string)} variant="primary" scrollable>
+        <Tabs selectedKey={effectiveDivisionId} onSelectionChange={(k) => setActiveDivisionId(k as string)} variant="primary" scrollable>
           {divisionTabs.map((d) => (
               <Tab key={d.id} title={d.name} />
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -136,24 +136,30 @@ export function RateCardDialog({
 
   const firstColumn = availableColumns[0]?.column ?? "";
 
-  useEffect(() => {
-    if (!open) return;
-    setName(card?.name ?? "");
-    setIsDefault(card?.isDefault ?? false);
-    setGroupId(card?.groupId ?? defaultGroupId ?? NO_GROUP);
-    setConditions(card?.conditions ?? []);
-    setError(null);
-    setQuarters(
-      card
-        ? {
-            1: { dayRate: numStr(card.q1DayRate), workingDays: numStr(card.q1WorkingDays) },
-            2: { dayRate: numStr(card.q2DayRate), workingDays: numStr(card.q2WorkingDays) },
-            3: { dayRate: numStr(card.q3DayRate), workingDays: numStr(card.q3WorkingDays) },
-            4: { dayRate: numStr(card.q4DayRate), workingDays: numStr(card.q4WorkingDays) },
-          }
-        : emptyQuarters(),
-    );
-  }, [open, card, defaultGroupId]);
+  // Repopulate the form every time the dialog transitions to open, mirroring
+  // the previous "reset on open" effect via the render-phase state-sentinel
+  // pattern (no synchronous setState inside an effect).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(card?.name ?? "");
+      setIsDefault(card?.isDefault ?? false);
+      setGroupId(card?.groupId ?? defaultGroupId ?? NO_GROUP);
+      setConditions(card?.conditions ?? []);
+      setError(null);
+      setQuarters(
+        card
+          ? {
+              1: { dayRate: numStr(card.q1DayRate), workingDays: numStr(card.q1WorkingDays) },
+              2: { dayRate: numStr(card.q2DayRate), workingDays: numStr(card.q2WorkingDays) },
+              3: { dayRate: numStr(card.q3DayRate), workingDays: numStr(card.q3WorkingDays) },
+              4: { dayRate: numStr(card.q4DayRate), workingDays: numStr(card.q4WorkingDays) },
+            }
+          : emptyQuarters(),
+      );
+    }
+  }
 
   // ── Condition handlers ──
   const addCondition = () =>

@@ -50,7 +50,24 @@ export function ColorPicker({
 
   const allColors = extraColors ? [...extraColors, ...M3_PALETTE] : M3_PALETTE;
 
-  useEffect(() => { if (!open) setHexInput(value); }, [value, open]);
+  // While the picker is closed the hex field tracks the committed `value`;
+  // while open the user's in-progress typing is kept. The previous effect ran
+  // `if (!open) setHexInput(value)` whenever `value` or `open` changed, i.e. it
+  // reset the field both when the committed value changed while closed AND on
+  // the open→closed transition. Reproduced here during render via state
+  // sentinels (no setState in an effect).
+  const [wasOpen, setWasOpen] = useState(open);
+  const [syncedClosedValue, setSyncedClosedValue] = useState(value);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (!open) {
+      setSyncedClosedValue(value);
+      setHexInput(value);
+    }
+  } else if (!open && syncedClosedValue !== value) {
+    setSyncedClosedValue(value);
+    setHexInput(value);
+  }
 
   // Portal target
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);

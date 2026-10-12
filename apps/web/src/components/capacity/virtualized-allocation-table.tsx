@@ -292,6 +292,8 @@ export function VirtualizedAllocationTable({
     );
   }, []);
 
+  // TanStack Virtual's useVirtualizer is not React-Compiler-compatible; the Compiler safely skips memoizing this component. The result is consumed locally with no behavior impact, and there is no code-level fix.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: members.length,
     getScrollElement: () => scrollRef.current,

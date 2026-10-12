@@ -69,16 +69,13 @@ function loadActiveJob(): ActiveJob | null {
 export function ImportProgressProvider({ children }: { children: ReactNode }) {
   const companyId = useCompanyId();
   const queryClient = useQueryClient();
-  const [job, setJob] = useState<ActiveJob | null>(null);
+  // Restore any in-flight job from localStorage via a lazy initializer so the
+  // persisted job is read once at init (SSR-safe: loadActiveJob returns null on
+  // the server) without a setState in a mount effect.
+  const [job, setJob] = useState<ActiveJob | null>(() => loadActiveJob());
   const [progress, setProgress] = useState<ImportJobProgress | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const refreshedRef = useRef(false);
-
-  // Restore any in-flight job on mount (survives refresh).
-  useEffect(() => {
-    const existing = loadActiveJob();
-    if (existing) setJob(existing);
-  }, []);
 
   const persist = useCallback((next: ActiveJob | null) => {
     try {

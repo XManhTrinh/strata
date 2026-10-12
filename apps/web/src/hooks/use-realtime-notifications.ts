@@ -33,7 +33,7 @@ export function useRealtimeNotifications(companyId: string) {
           schema: "public",
           table: "Notification",
         },
-        (payload) => {
+        () => {
           // Refresh notification queries — bell badge will update
           queryClient.invalidateQueries({ queryKey: ["notifications", companyId] });
         },

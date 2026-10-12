@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import {
   ReactFlow,
   Background,
@@ -251,9 +252,12 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
                 className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-2 ring-outline overflow-hidden"
               >
                 {p.avatarUrl ? (
-                  <img
+                  <Image
                     src={p.avatarUrl}
                     alt={p.fullName}
+                    width={32}
+                    height={32}
+                    unoptimized
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -273,9 +277,12 @@ function GhostOverlay({ info, zoom }: { info: OverlayInfo; zoom: number }) {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0 overflow-hidden">
               {info.person.avatarUrl ? (
-                <img
+                <Image
                   src={info.person.avatarUrl}
                   alt={info.person.fullName}
+                  width={32}
+                  height={32}
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -347,17 +354,14 @@ function OrgFlowInner({
     return ids;
   }, [tree]);
 
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
-
-  const prevTreeRef = useRef(tree);
-  if (prevTreeRef.current !== tree) {
-    prevTreeRef.current = tree;
-    setCollapsedIds(defaultCollapsed);
-  }
-
-  const initializedRef = useRef(false);
-  if (!initializedRef.current && defaultCollapsed.size > 0) {
-    initializedRef.current = true;
+  // Seed the collapsed set from the initial tree via a lazy initializer, then
+  // reset it whenever `tree` changes. The reset uses setState-during-render on
+  // a changed prop (tracked in state, not a ref) — the pattern React allows —
+  // so no ref is read during render.
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => defaultCollapsed);
+  const [syncedTree, setSyncedTree] = useState(tree);
+  if (syncedTree !== tree) {
+    setSyncedTree(tree);
     setCollapsedIds(defaultCollapsed);
   }
 
@@ -433,13 +437,23 @@ function OrgFlowInner({
   );
   const fittedSignatureRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    layoutRef.current = layout;
-    const shouldSkip = skipFitViewRef.current;
-    skipFitViewRef.current = false;
+  // Mirror the derived layout into ReactFlow-owned node/edge state once per
+  // distinct `layout` object (so ReactFlow can own drag position mutations).
+  // Done during render via a state sentinel rather than a synchronous setState
+  // in an effect.
+  const [syncedLayout, setSyncedLayout] = useState(layout);
+  if (syncedLayout !== layout) {
+    setSyncedLayout(layout);
     setNodes(layout.nodes);
     setEdges(layout.edges);
-    if (shouldSkip) {
+  }
+
+  // Keep the layout ref current (read by drag handlers) and carry the
+  // skip-fit-view bookkeeping. Ref reads/writes live in the effect, not render.
+  useEffect(() => {
+    layoutRef.current = layout;
+    if (skipFitViewRef.current) {
+      skipFitViewRef.current = false;
       fittedSignatureRef.current = layoutSignature;
     }
   }, [layout, layoutSignature]);
@@ -505,8 +519,8 @@ function OrgFlowInner({
     []
   );
 
-  const onNodeDragStart: OnNodeDrag = useCallback(
-    ((e, node) => {
+  const onNodeDragStart = useCallback<OnNodeDrag>(
+    (e, node) => {
       const clientX = "clientX" in e ? e.clientX : (e as unknown as TouchEvent).touches?.[0]?.clientX ?? 0;
       const clientY = "clientY" in e ? e.clientY : (e as unknown as TouchEvent).touches?.[0]?.clientY ?? 0;
       if (node.id.startsWith("group-")) {
@@ -530,12 +544,12 @@ function OrgFlowInner({
         y: clientY,
         overCanvas: true,
       });
-    }) as OnNodeDrag,
+    },
     [persons]
   );
 
-  const onNodeDrag: OnNodeDrag = useCallback(
-    ((e, node) => {
+  const onNodeDrag = useCallback<OnNodeDrag>(
+    (e, node) => {
       const clientX = "clientX" in e ? e.clientX : (e as unknown as TouchEvent).touches?.[0]?.clientX ?? 0;
       const clientY = "clientY" in e ? e.clientY : (e as unknown as TouchEvent).touches?.[0]?.clientY ?? 0;
       setGhost((prev) =>
@@ -557,12 +571,12 @@ function OrgFlowInner({
         setDomHighlight(target, prev);
         dropTargetRef.current = target;
       }
-    }) as OnNodeDrag,
+    },
     [persons, isOverUnallocatedPanel]
   );
 
-  const onNodeDragStop: OnNodeDrag = useCallback(
-    ((e, node) => {
+  const onNodeDragStop = useCallback<OnNodeDrag>(
+    (e, node) => {
       const clientX = "clientX" in e ? e.clientX : (e as unknown as TouchEvent).changedTouches?.[0]?.clientX ?? 0;
       const clientY = "clientY" in e ? e.clientY : (e as unknown as TouchEvent).changedTouches?.[0]?.clientY ?? 0;
       setGhost(null);
@@ -596,7 +610,7 @@ function OrgFlowInner({
         setSkipFitView();
         triggerReparent(draggedId, target, persons, reparent, onPendingDrop);
       }
-    }) as OnNodeDrag,
+    },
     [
       persons,
       reparent,

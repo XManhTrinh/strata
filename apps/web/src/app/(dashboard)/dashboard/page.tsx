@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
 import {
   TopAppBar,
@@ -109,18 +110,27 @@ export default function DashboardPage() {
     refetch: refetchLeave,
   } = useLeaveRequests(companyId);
 
+  // Query the next 30 days from "today". Computed once via a lazy state
+  // initializer so the impure Date.now()/new Date() calls run a single time at
+  // mount — never during a tracked render — and the range stays stable for the
+  // session.
+  const [eventRange] = useState(() => {
+    const now = Date.now();
+    return {
+      startDate: new Date(now).toISOString().split("T")[0],
+      endDate: new Date(now + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+    };
+  });
+
   const {
     data: eventsData,
     isLoading: eventsLoading,
     isError: eventsError,
     error: eventsErr,
     refetch: refetchEvents,
-  } = useCalendarEvents(companyId, {
-    startDate: new Date().toISOString().split("T")[0],
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0],
-  });
+  } = useCalendarEvents(companyId, eventRange);
 
   const isLoading = employeesLoading || leaveLoading || eventsLoading;
   const hasError = employeesError || leaveError || eventsError;

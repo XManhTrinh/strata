@@ -1,7 +1,7 @@
 "use client";
 import type React from "react";
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {SearchBar,
   TopAppBar,Card,AssistChip,
@@ -474,7 +474,7 @@ export default function RolesPage() {
   const [pendingRoleSwitch, setPendingRoleSwitch] = useState<string | null>(null);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  const roles: AdminRole[] = backendRoles ?? [];
+  const roles: AdminRole[] = useMemo(() => backendRoles ?? [], [backendRoles]);
   const hasAdminRole = roles.some((r) => r.isSystem);
   const effectiveSelectedId = selectedRoleId ?? roles[0]?.id ?? null;
   const selectedRole = roles.find((r) => r.id === effectiveSelectedId) ?? roles[0];
@@ -488,25 +488,31 @@ export default function RolesPage() {
   const { data: companyFeatures } = useFeatures(companyId);
   const disabledFeatureKeys = useMemo(() => new Set((companyFeatures ?? []).filter((cf) => !cf.enabled).map((cf) => cf.feature?.key).filter(Boolean)), [companyFeatures]);
 
-  const lastSyncedRoleId = useRef<string | null>(null);
+  // Which role id, and which permission-detail object, the drafts are currently
+  // synced to. Held in state (not a ref) so the sync can run during render
+  // without reading a ref mid-render. Handlers reset `syncedRoleId` to null to
+  // force a re-sync for the next selection/mutation result.
+  const [syncedRoleId, setSyncedRoleId] = useState<string | null>(null);
+  const [syncedDetail, setSyncedDetail] = useState<typeof rolePermissionDetail>(undefined);
 
-  useEffect(() => {
-    if (rolePermissionDetail && effectiveSelectedId !== lastSyncedRoleId.current) {
+  if (rolePermissionDetail) {
+    if (effectiveSelectedId !== syncedRoleId) {
+      // Newly selected (or force-resynced) role: adopt the server permissions.
+      setSyncedRoleId(effectiveSelectedId);
+      setSyncedDetail(rolePermissionDetail);
       const d = buildServerDraft(rolePermissionDetail);
       setServerDraft(d);
       setLocalDraft(new Map(d));
-      lastSyncedRoleId.current = effectiveSelectedId;
-    }
-  }, [rolePermissionDetail, effectiveSelectedId]);
-
-  useEffect(() => {
-    if (rolePermissionDetail && effectiveSelectedId === lastSyncedRoleId.current) {
+    } else if (rolePermissionDetail !== syncedDetail) {
+      // Same role, but the backend returned fresh permissions.
+      setSyncedDetail(rolePermissionDetail);
       const ns = buildServerDraft(rolePermissionDetail);
-      if (draftsEqual(ns, serverDraft)) return;
-      setServerDraft(ns);
-      setLocalDraft(new Map(ns));
+      if (!draftsEqual(ns, serverDraft)) {
+        setServerDraft(ns);
+        setLocalDraft(new Map(ns));
+      }
     }
-  }, [rolePermissionDetail]);
+  }
 
   const isDirty = !draftsEqual(serverDraft, localDraft);
   const diff = useMemo(() => computeDiff(serverDraft, localDraft), [serverDraft, localDraft]);
@@ -516,11 +522,11 @@ export default function RolesPage() {
 
   const handleRoleSelect = useCallback((roleId: string) => {
     if (isDirty) { setPendingRoleSwitch(roleId); setShowUnsavedDialog(true); }
-    else { lastSyncedRoleId.current = null; setSelectedRoleId(roleId); }
+    else { setSyncedRoleId(null); setSelectedRoleId(roleId); }
   }, [isDirty]);
 
   const handleDiscardAndSwitch = useCallback(() => {
-    if (pendingRoleSwitch) { lastSyncedRoleId.current = null; setSelectedRoleId(pendingRoleSwitch); }
+    if (pendingRoleSwitch) { setSyncedRoleId(null); setSelectedRoleId(pendingRoleSwitch); }
     setPendingRoleSwitch(null); setShowUnsavedDialog(false);
   }, [pendingRoleSwitch]);
 
@@ -530,7 +536,7 @@ export default function RolesPage() {
     if (!effectiveSelectedId || !isDirty) return;
     bulkPermissionMutation.mutate(
       { companyId, roleId: effectiveSelectedId, add: diff.add, remove: diff.remove },
-      { onSuccess: () => { toast.success(`Saved ${changeCount} change${changeCount !== 1 ? "s" : ""}`); lastSyncedRoleId.current = null; }, onError: (err) => toast.error(err.message || "Failed to save") },
+      { onSuccess: () => { toast.success(`Saved ${changeCount} change${changeCount !== 1 ? "s" : ""}`); setSyncedRoleId(null); }, onError: (err) => toast.error(err.message || "Failed to save") },
     );
   }, [effectiveSelectedId, isDirty, bulkPermissionMutation, companyId, diff, changeCount, toast]);
 
@@ -557,7 +563,7 @@ export default function RolesPage() {
     if (!newRoleName.trim()) return;
     createRoleMutation.mutate(
       { companyId, name: newRoleName.trim(), description: newRoleDescription.trim() || undefined },
-      { onSuccess: (r) => { toast.success("Role created"); lastSyncedRoleId.current = null; setSelectedRoleId(r.id); setNewRoleName(""); setNewRoleDescription(""); setShowCreateModal(false); }, onError: (e) => toast.error(e.message || "Failed to create role") },
+      { onSuccess: (r) => { toast.success("Role created"); setSyncedRoleId(null); setSelectedRoleId(r.id); setNewRoleName(""); setNewRoleDescription(""); setShowCreateModal(false); }, onError: (e) => toast.error(e.message || "Failed to create role") },
     );
   }, [companyId, newRoleName, newRoleDescription, createRoleMutation, toast]);
 
@@ -565,7 +571,7 @@ export default function RolesPage() {
     if (!selectedRole) return;
     createRoleMutation.mutate(
       { companyId, name: `${selectedRole.name} (Copy)`, description: selectedRole.description || undefined },
-      { onSuccess: (r) => { toast.success("Role duplicated"); lastSyncedRoleId.current = null; setSelectedRoleId(r.id); }, onError: (e) => toast.error(e.message || "Failed to duplicate role") },
+      { onSuccess: (r) => { toast.success("Role duplicated"); setSyncedRoleId(null); setSelectedRoleId(r.id); }, onError: (e) => toast.error(e.message || "Failed to duplicate role") },
     );
   }, [selectedRole, companyId, createRoleMutation, toast]);
 
@@ -573,7 +579,7 @@ export default function RolesPage() {
     createAdminRoleMutation.mutate(
       { companyId },
       {
-        onSuccess: (r) => { toast.success("Admin role created with all permissions"); lastSyncedRoleId.current = null; setSelectedRoleId(r.id); },
+        onSuccess: (r) => { toast.success("Admin role created with all permissions"); setSyncedRoleId(null); setSelectedRoleId(r.id); },
         onError: (e) => toast.error(e.message || "Failed to create Admin role"),
       },
     );
@@ -587,7 +593,7 @@ export default function RolesPage() {
         onSuccess: () => {
           toast.success("Role deleted");
           setShowDeleteDialog(false);
-          lastSyncedRoleId.current = null;
+          setSyncedRoleId(null);
           setSelectedRoleId(null);
         },
         onError: (e) => toast.error(e.message || "Failed to delete role"),

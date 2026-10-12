@@ -9,7 +9,6 @@ import {SearchBar,
   TextField,
   TooltipTrigger,
   Tooltip,
-  List,
   ListItem,
   Dialog, DialogContent, DialogTitle, DialogActions,
   Button,
@@ -317,7 +316,8 @@ function PositionCard({
                   className={row.archived ? "text-error" : ""}
                   onClick={(e) => {
                     e.stopPropagation();
-                    row.archived ? onDelete(row.id) : onArchive(row.id);
+                    if (row.archived) onDelete(row.id);
+                    else onArchive(row.id);
                   }}
                   icon={<Icon name={row.archived ? "delete_forever" : "archive"} size={18} />}
                 />
@@ -573,7 +573,7 @@ export default function PositionsPage() {
   // ── Data ───────────────────────────────────────────────────────────────
   const { data: positions = [], isLoading, error, refetch } = usePositions(companyId);
   const { data: careerLevelScheme } = useCareerLevels(companyId);
-  const levels = careerLevelScheme?.levels ?? [];
+  const levels = useMemo(() => careerLevelScheme?.levels ?? [], [careerLevelScheme]);
   const createMutation = useCreatePosition();
   const updateMutation = useUpdatePosition();
   const archiveMutation = useArchivePosition();

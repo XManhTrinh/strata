@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import {
   TopAppBar, AssistChip,
@@ -67,15 +67,19 @@ export default function SettingsPage() {
   const [fiscalYearStart, setFiscalYearStart] = useState("1");
   const [currency, setCurrency] = useState("GBP");
 
-  useEffect(() => {
-    if (company) {
-      setName(company.name);
-      setSlug(company.slug);
-      const s = company.settings as Record<string, unknown>;
-      setFiscalYearStart(String(s.fiscalYearStart ?? "1"));
-      setCurrency(String(s.currency ?? "GBP"));
-    }
-  }, [company]);
+  // Populate the form once per distinct `company` object (mirrors the previous
+  // `[company]` effect) using the render-phase "sync when source identity
+  // changes" pattern — no synchronous setState inside an effect, and no
+  // clobbering of in-progress edits on unrelated re-renders.
+  const [syncedCompany, setSyncedCompany] = useState<typeof company>(undefined);
+  if (company && company !== syncedCompany) {
+    setSyncedCompany(company);
+    setName(company.name);
+    setSlug(company.slug);
+    const s = company.settings as Record<string, unknown>;
+    setFiscalYearStart(String(s.fiscalYearStart ?? "1"));
+    setCurrency(String(s.currency ?? "GBP"));
+  }
 
   const isDirty = company && (
     name !== company.name ||

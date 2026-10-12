@@ -169,7 +169,7 @@ export function CsvImportDialog({ companyId }: CsvImportDialogProps) {
       reader.readAsText(file);
       e.target.value = ""; // allow re-selecting the same file
     },
-    [],
+    [toast],
   );
 
   // ── Column mapping change ───────────────────────────────────────────────

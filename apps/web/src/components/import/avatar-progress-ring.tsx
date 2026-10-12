@@ -62,7 +62,12 @@ function colorAt(pct: number): string {
 function useAnimatedValue(target: number, duration = 500): number {
   const [value, setValue] = useState(target);
   const valueRef = useRef(target);
-  valueRef.current = value;
+  // Keep the ref in sync with the latest displayed value from an effect (ref
+  // writes during render are disallowed). The tween effect reads this as its
+  // start value, so animations still begin from whatever is currently shown.
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {

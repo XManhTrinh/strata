@@ -33,10 +33,20 @@ export function useOrgTree(repository: PersonRepository): UseOrgTreeReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  // When the repository changes we must flip back to the loading state before
+  // the next fetch resolves. Doing it during render (keyed on the repository
+  // identity, tracked in state) keeps the exact observable sequence — loading
+  // true immediately on a repository change — without a synchronous setState in
+  // the effect body. The effect below only runs the async fetch.
+  const [syncedRepository, setSyncedRepository] = useState(repository);
+  if (repository !== syncedRepository) {
+    setSyncedRepository(repository);
     setLoading(true);
     setError(null);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
     repository.fetchAll().then(
       (data) => {
         if (!cancelled) {

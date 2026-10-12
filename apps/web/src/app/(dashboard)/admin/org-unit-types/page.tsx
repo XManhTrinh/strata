@@ -12,9 +12,7 @@ import {
   Tooltip,
   TextField,
   Dialog, DialogContent, DialogTitle, DialogActions,
-  List,
   ListItem,
-  Divider,
   Button,
   IconButton,
 } from "@vkieu/windmorph";
@@ -269,7 +267,8 @@ function TypeCard({
                   aria-label={row.archived ? "Restore" : "Archive"}
                   onClick={(e) => {
                     e.stopPropagation();
-                    row.archived ? onRestore(row.id) : onArchive(row.id);
+                    if (row.archived) onRestore(row.id);
+                    else onArchive(row.id);
                   }}
                   icon={<Icon name={row.archived ? "unarchive" : "archive"} size={18} />}
                 />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -35,13 +35,19 @@ export function RateCardSetDialog({
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setName(set?.name ?? "");
-    setDescription(set?.description ?? "");
-    setColor(set?.color ?? DEFAULT_COLOR);
-    setError(null);
-  }, [open, set]);
+  // Repopulate the form every time the dialog transitions to open, mirroring
+  // the previous "reset on open" effect. This uses the React "adjust state
+  // while rendering when a value changes" pattern (state sentinel, no effect).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(set?.name ?? "");
+      setDescription(set?.description ?? "");
+      setColor(set?.color ?? DEFAULT_COLOR);
+      setError(null);
+    }
+  }
 
   const handleSubmit = () => {
     if (!name.trim()) {

@@ -156,7 +156,7 @@ export default function OrgChartPage() {
   }, [matchedIds, filteredPersons]);
 
   // ── Callbacks ──────────────────────────────────────────────────────────
-  const onEdit = useCallback((_person: Person) => {
+  const onEdit = useCallback(() => {
     // TODO: open person detail panel
   }, []);
 

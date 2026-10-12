@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -53,14 +53,20 @@ export function RateCardGroupDialog({
     [sets],
   );
 
-  useEffect(() => {
-    if (!open) return;
-    setName(group?.name ?? "");
-    setDescription(group?.description ?? "");
-    setColor(group?.color ?? DEFAULT_COLOR);
-    setSetId(group?.setId ?? defaultSetId ?? NO_SET);
-    setError(null);
-  }, [open, group, defaultSetId]);
+  // Repopulate the form every time the dialog transitions to open, mirroring
+  // the previous "reset on open" effect via the render-phase state-sentinel
+  // pattern (no synchronous setState inside an effect).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(group?.name ?? "");
+      setDescription(group?.description ?? "");
+      setColor(group?.color ?? DEFAULT_COLOR);
+      setSetId(group?.setId ?? defaultSetId ?? NO_SET);
+      setError(null);
+    }
+  }
 
   const handleSubmit = () => {
     if (!name.trim()) {

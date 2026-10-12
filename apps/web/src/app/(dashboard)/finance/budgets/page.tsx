@@ -191,7 +191,7 @@ export default function BudgetsPage() {
     pageSize: 500,
   });
 
-  const members = data?.data ?? [];
+  const members = useMemo(() => data?.data ?? [], [data]);
 
   const totalAnnualCost = useMemo(
     () => members.reduce((sum, m) => sum + (m.annualCost ?? 0), 0),
