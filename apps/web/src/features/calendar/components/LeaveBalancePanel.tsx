@@ -1,7 +1,7 @@
 "use client";
 
 import { ProgressBar } from "@strata/ui";
-import { AssistChip, Button } from "@vkieu/mui";
+import { AssistChip, Button } from "@vkieu/windmorph";
 import type { LeaveBalance } from "../types/calendar.types";
 import { getAvailableBalance } from "../utils/calendar.utils";
 

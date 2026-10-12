@@ -11,7 +11,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 

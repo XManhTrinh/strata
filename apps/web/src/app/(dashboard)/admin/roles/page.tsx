@@ -16,10 +16,10 @@ import {SearchBar,
   Button,
   IconButton,
   Select,
-  SelectItem} from "@vkieu/mui";
+  SelectItem} from "@vkieu/windmorph";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
   useRoles,

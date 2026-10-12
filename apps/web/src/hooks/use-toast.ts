@@ -6,7 +6,7 @@ import { useSnackbar } from "@/lib/snackbar";
 /**
  * Drop-in replacement for the `toast` object from `sonner`.
  *
- * Backed by `@vkieu/mui` SnackbarHost — must be rendered above
+ * Backed by `@vkieu/windmorph` SnackbarHost — must be rendered above
  * any component that calls `useToast()`.
  *
  * @example

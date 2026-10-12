@@ -10,7 +10,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
 import { calculateWorkingDays, getAvailableBalance } from "../utils/calendar.utils";

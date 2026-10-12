@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * Provides layout primitives for composing card content:
  * CardHeader, CardTitle, CardDescription, CardContent, CardFooter.
  *
- * Use these inside a Card component (from @vkieu/mui or a local wrapper).
+ * Use these inside a Card component (from @vkieu/windmorph or a local wrapper).
  */
 
 const CardHeader = React.forwardRef<

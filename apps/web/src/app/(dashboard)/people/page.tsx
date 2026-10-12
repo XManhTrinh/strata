@@ -42,7 +42,7 @@ import {
   IconButton,
   Select,
   SelectItem,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import {
@@ -60,8 +60,8 @@ import {
 } from "@/services";
 import type { Person, CreatePersonRequest } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
-import { Avatar } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Avatar } from "@vkieu/windmorph/vk";
 import {
   Table,
   TableHeader,

@@ -2,7 +2,7 @@
 import type React from "react";
 
 import { useEffect, useRef } from "react";
-import { Divider, List, ListItem } from "@vkieu/mui";
+import { Divider, List, ListItem } from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 
 // Legacy compatibility type for interactive ListItem

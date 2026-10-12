@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@vkieu/mui";
+import { Button } from "@vkieu/windmorph";
 
 interface ApprovalActionsProps {
   eventId: string;

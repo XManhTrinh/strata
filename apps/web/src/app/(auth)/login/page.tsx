@@ -5,10 +5,10 @@ import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { Button, TextField, Divider, Card, IconButton } from "@vkieu/mui";
+import { Button, TextField, Divider, Card, IconButton } from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import {
   pageTransitionVariants,
   defaultTransition,

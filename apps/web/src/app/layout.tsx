@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { cookies } from "next/headers";
-import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@vkieu/mui/next";
+import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@vkieu/windmorph/next";
 import { Providers } from "./providers";
 import "material-symbols/rounded.css";
 import "./globals.css";

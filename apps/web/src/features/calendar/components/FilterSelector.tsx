@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Checkbox, Button } from "@vkieu/mui";
+import { Checkbox, Button } from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import type { OrgUnit } from "../types/calendar.types";
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { TopAppBar, Card } from "@vkieu/mui";
+import { TopAppBar, Card } from "@vkieu/windmorph";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";

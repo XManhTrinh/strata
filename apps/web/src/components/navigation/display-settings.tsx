@@ -9,7 +9,7 @@ import {
   type ColorMode,
   Select,
   SelectItem,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 
 const MODES: { value: ColorMode; label: string }[] = [

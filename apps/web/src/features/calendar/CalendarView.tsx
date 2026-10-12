@@ -13,7 +13,7 @@ import {
   DialogActions,
   Button,
   IconButton,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { useCalendarEvents } from "./hooks/useCalendarEvents";

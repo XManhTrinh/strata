@@ -11,10 +11,10 @@ import {
   Tab,
   Button,
   Divider,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";

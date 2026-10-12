@@ -14,11 +14,11 @@ import {
   Select,
   SelectItem,
   type TopAppBarScrollBehavior,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { useAuth } from "@/lib/auth";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { Icon } from "@/components/ui/icon";
-import { Avatar } from "@vkieu/mui/vk";
+import { Avatar } from "@vkieu/windmorph/vk";
 import { AvatarProgressRing } from "@/components/import/avatar-progress-ring";
 import { useImportProgress } from "@/components/import/import-progress-provider";
 import { useRoles } from "@/services";

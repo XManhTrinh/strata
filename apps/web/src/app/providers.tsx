@@ -6,7 +6,7 @@ import {
   ThemeProvider,
   SnackbarHost,
   useSnackbarHostState,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { SnackbarContext } from "@/lib/snackbar";
 
 function makeQueryClient() {

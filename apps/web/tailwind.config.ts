@@ -3,7 +3,7 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: [
     "./src/**/*.{ts,tsx}",
-    "./node_modules/@vkieu/mui/src/**/*.{ts,tsx}",
+    "./node_modules/@vkieu/windmorph/src/**/*.{ts,tsx}",
   ],
   darkMode: "class",
   theme: {

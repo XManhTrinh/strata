@@ -15,7 +15,7 @@ import {SearchBar,
   Button,
   IconButton,
   Select,
-  SelectItem} from "@vkieu/mui";
+  SelectItem} from "@vkieu/windmorph";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import {
@@ -26,7 +26,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import { useToast } from "@/hooks/use-toast";
 import {
   usePositions,

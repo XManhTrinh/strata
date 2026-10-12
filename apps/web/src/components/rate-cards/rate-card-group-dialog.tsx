@@ -10,7 +10,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardGroup, RateCardSet, UpsertRateCardGroupInput } from "@/services";
 

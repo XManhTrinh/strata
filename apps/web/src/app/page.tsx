@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Button, Card } from "@vkieu/mui";
+import { Button, Card } from "@vkieu/windmorph";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import {

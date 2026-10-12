@@ -8,7 +8,7 @@ import {
   DialogActions,
   TextField,
   Button,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardSet, UpsertRateCardSetInput } from "@/services";
 

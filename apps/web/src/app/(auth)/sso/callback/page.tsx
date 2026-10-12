@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LoadingIndicator } from "@vkieu/mui";
+import { LoadingIndicator } from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 
 /**

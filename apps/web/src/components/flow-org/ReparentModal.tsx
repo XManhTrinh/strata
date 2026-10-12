@@ -11,10 +11,10 @@ import {
   List,
   ListItem,
   Button,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { Icon } from "@/components/ui/icon";
 import { Person } from "@/lib/org-tree/types";
-import { Avatar } from "@vkieu/mui/vk";
+import { Avatar } from "@vkieu/windmorph/vk";
 
 // Legacy compatibility type for interactive ListItem
 // Legacy compatibility - TypeScript cast for interactive list items

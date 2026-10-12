@@ -9,11 +9,11 @@ import {
   Divider,
   AssistChip,
   Button,
-} from "@vkieu/mui";
+} from "@vkieu/windmorph";
 import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
 import { Icon } from "@/components/ui/icon";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/mui/vk";
+import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
 import { useCompanyId } from "@/hooks/use-company";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
 import {

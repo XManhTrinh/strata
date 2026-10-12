@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@vkieu/mui/styles.css";
+@import "@vkieu/windmorph/styles.css";
 
 /* Restore cursor: pointer on interactive elements (Tailwind v4 preflight sets default) */
 button,
