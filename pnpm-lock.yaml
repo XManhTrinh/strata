@@ -183,7 +183,7 @@ importers:
         version: 3.14.13(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@vkieu/windmorph':
         specifier: XManhTrinh/windmorph#path:packages/ui
-        version: https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+        version: https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       '@xyflow/react':
         specifier: ^12.4.0
         version: 12.11.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -312,7 +312,7 @@ importers:
     dependencies:
       '@vkieu/windmorph':
         specifier: XManhTrinh/windmorph#path:packages/ui
-        version: https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+        version: https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
     devDependencies:
       '@types/react':
         specifier: ^19.1.0
@@ -321,8 +321,8 @@ importers:
         specifier: ^19.1.0
         version: 19.2.4(@types/react@19.2.18)
       motion:
-        specifier: ^12.0.0
-        version: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^14.0.0
+        version: 14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.1.0
         version: 19.2.8
@@ -596,12 +596,6 @@ packages:
 
   '@emnapi/wasi-threads@1.2.1':
     resolution: {integrity: sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==}
-
-  '@emotion/is-prop-valid@1.4.0':
-    resolution: {integrity: sha512-QgD4fyscGcbbKwJmqNvUMSE02OsHUa+lAWKdEUIJKgqe5IwRSKd7+KhibEWdaKwgjLj0DRSHA9biAIqGBk05lw==}
-
-  '@emotion/memoize@0.9.0':
-    resolution: {integrity: sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==}
 
   '@esbuild/aix-ppc64@0.28.1':
     resolution: {integrity: sha512-Svl7tq8k/08+p6CXPpRjQ1fKX+1odH/BQbb48fV6fj3CWHhsoIOoY87w1oHXm0qEpkIK3ZfVgp0hed3XBXzXMQ==}
@@ -3356,20 +3350,6 @@ packages:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
 
-  framer-motion@12.43.0:
-    resolution: {integrity: sha512-1eaL3RvR/kAlbG7UYcpMptEyzPoENO0c6w7ZnB3/hh2vSAz/6uGAFn6fdoqTBguNstf3MsFhJHsD/0DHiclG+g==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
   framer-motion@14.0.0:
     resolution: {integrity: sha512-QAtHmybrDFSliyW1sexMtSQTQd+1jw2ajibEmzpuI4XdPVzQkn+dAzJMm2sW3pl9MJuSS4xN51djQ7huhlP/VA==}
     peerDependencies:
@@ -4244,31 +4224,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  motion-dom@12.43.0:
-    resolution: {integrity: sha512-azKON4d9S65PEoFUiQTMTgPheEmzf2QngdRc50AKfJp9Q9mmcBVw22c8eMq9k8kxOFHdL7+WZY7N/5F/lwiDag==}
-
   motion-dom@14.0.0:
     resolution: {integrity: sha512-aU3ApXo1yTpeUi3JU+jbDk2TELjxPE3MbBMUP7nZHlARb6RweJK+ojmLjpuB0YsY6zhbBl1YWGo8LMsI1/Llqw==}
 
-  motion-utils@12.39.0:
-    resolution: {integrity: sha512-8nadJAJjTtqRkmRF36FoJTrywK9nnFmnPwnSMyxaOCU7GDjN9RTMJIxx9De8ErM+vpPhMccr/6fo5WciyQLnMQ==}
-
   motion-utils@14.0.0:
     resolution: {integrity: sha512-jBsyjVxTTRZNeuvd/v+btVXr90LQkYl4HhRu9T2ARc+PMnvkmjsjRVeAg4Qm10b6TlTw+kykWI8gu/6LuvpLSQ==}
-
-  motion@12.43.0:
-    resolution: {integrity: sha512-BQgQbSa9Hn3/mtbib0MK53y6JSANa+YKUKlaYnWzAVDH424RYQ5LVpV3pNiWH00BA2z4ojsSdMzqT7g2FQwjuQ==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
 
   motion@14.0.0:
     resolution: {integrity: sha512-oGc2lkge2lkRZCP+J8/JsnYu4NFjqP1MtXirNdetn3QbvK2JqwM9A200EdT4C598KfzDhjLT12zF21xDM4Oilw==}
@@ -5840,14 +5800,6 @@ snapshots:
   '@emnapi/wasi-threads@1.2.1':
     dependencies:
       tslib: 2.8.1
-    optional: true
-
-  '@emotion/is-prop-valid@1.4.0':
-    dependencies:
-      '@emotion/memoize': 0.9.0
-    optional: true
-
-  '@emotion/memoize@0.9.0':
     optional: true
 
   '@esbuild/aix-ppc64@0.28.1':
@@ -7456,23 +7408,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vkieu/windmorph@https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
-    dependencies:
-      '@internationalized/date': 3.12.4
-      clsx: 2.1.1
-      libphonenumber-js: 1.13.15
-      motion: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react: 19.2.8
-      react-aria: 3.53.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react-dom: 19.2.8(react@19.2.8)
-      react-stately: 3.51.0(react@19.2.8)
-      tailwind-merge: 3.7.0
-      tailwind-variants: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
-    optionalDependencies:
-      next: 16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      tailwindcss: 4.3.3
-
-  '@vkieu/windmorph@https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@vkieu/windmorph@https://codeload.github.com/XManhTrinh/windmorph/tar.gz/a8bb2fa7802fd9372cc9c3ba146a3dd0ae40a38e#path:packages/ui(motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(next@16.3.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
       '@internationalized/date': 3.12.4
       clsx: 2.1.1
@@ -8932,16 +8868,6 @@ snapshots:
 
   forwarded@0.2.0: {}
 
-  framer-motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
-    dependencies:
-      motion-dom: 12.43.0
-      motion-utils: 12.39.0
-      tslib: 2.8.1
-    optionalDependencies:
-      '@emotion/is-prop-valid': 1.4.0
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-
   framer-motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       motion-dom: 14.0.0
@@ -9996,26 +9922,11 @@ snapshots:
 
   mkdirp@1.0.4: {}
 
-  motion-dom@12.43.0:
-    dependencies:
-      motion-utils: 12.39.0
-
   motion-dom@14.0.0:
     dependencies:
       motion-utils: 14.0.0
 
-  motion-utils@12.39.0: {}
-
   motion-utils@14.0.0: {}
-
-  motion@12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
-    dependencies:
-      framer-motion: 12.43.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      tslib: 2.8.1
-    optionalDependencies:
-      '@emotion/is-prop-valid': 1.4.0
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
 
   motion@14.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
