@@ -115,7 +115,7 @@ Tasks marked `*` are optional (tests) and can be deferred for a faster first cut
 
 - [ ] 10. Frontend AssistantPanel UI
   - [ ] 10.1 Create `apps/web/src/components/assistant/assistant-panel.tsx`
-    - `@vkieu/mui` panel/drawer: scrollable transcript, `TextField` input, send `Button`, in-progress indicator
+    - `@windmorph/react` panel/drawer: scrollable transcript, `TextField` input, send `Button`, in-progress indicator
     - Local conversation state; send `{ message, history }`, append reply; company id from `useCompanyId()`
     - Error surface with retry; disable submit while pending
     - Accessibility: `role="log"` transcript, labeled input, Enter-to-send, focus management

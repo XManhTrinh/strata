@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design describes the concrete changes needed to bring the `@vkieu/mui` component library into full compliance with Material Design 3 Expressive token specifications. The library already exists and functions correctly — this is a targeted audit-and-fix pass, not a rewrite.
+This design describes the concrete changes needed to bring the `@windmorph/react` component library into full compliance with Material Design 3 Expressive token specifications. The library already exists and functions correctly — this is a targeted audit-and-fix pass, not a rewrite.
 
 The audit covers **10 component groups** (Buttons, Selection Controls, Chips, Cards, Select, Tabs, Navigation, Menu, Snackbar, and Remaining) against five dimensions:
 

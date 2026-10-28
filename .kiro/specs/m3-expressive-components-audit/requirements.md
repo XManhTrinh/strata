@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines the comprehensive audit of all components in the `@vkieu/mui` library (located at `/Users/xuan-manh.trinh/workplace/web/mui/src/`) against Material Design 3 (M3) Expressive guidelines. The audit verifies dimensional tokens, color tokens, typography, elevation, shape, state layers, motion, and consumer-friendliness (no forced position/width on root wrappers). All styling uses Tailwind CSS v4 canonical utility classes.
+This specification defines the comprehensive audit of all components in the `@windmorph/react` library (located at `/Users/xuan-manh.trinh/workplace/web/mui/src/`) against Material Design 3 (M3) Expressive guidelines. The audit verifies dimensional tokens, color tokens, typography, elevation, shape, state layers, motion, and consumer-friendliness (no forced position/width on root wrappers). All styling uses Tailwind CSS v4 canonical utility classes.
 
 ## Glossary
 

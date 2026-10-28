@@ -85,7 +85,7 @@ This spec covers **Phase 1: read-only**. The assistant can answer questions and 
 #### Acceptance Criteria
 
 1. THE Assistant_Panel SHALL provide a message input, a send action, and a scrollable Conversation view showing user and assistant messages in order.
-2. THE Assistant_Panel SHALL be built with `@vkieu/mui` components consistent with Strata's design conventions.
+2. THE Assistant_Panel SHALL be built with `@windmorph/react` components consistent with Strata's design conventions.
 3. WHILE the assistant is generating a reply, THE Assistant_Panel SHALL show a visible in-progress indicator and SHALL disable duplicate submissions.
 4. WHEN the Assistant_API returns an error, THE Assistant_Panel SHALL show the error to the user and allow retry.
 5. THE Assistant_Panel SHALL send the Company_ID from the active workspace context with each request.

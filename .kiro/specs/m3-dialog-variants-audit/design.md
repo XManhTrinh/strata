@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design describes the technical approach for achieving full Material Design 3 Expressive dialog compliance across five variants (basic, icon, full-screen, alert, scrollable) in the `@vkieu/mui` component library (web/React), and the migration of the Strata application's custom `ConfirmDialog` to the library's Dialog component.
+This design describes the technical approach for achieving full Material Design 3 Expressive dialog compliance across five variants (basic, icon, full-screen, alert, scrollable) in the `@windmorph/react` component library (web/React), and the migration of the Strata application's custom `ConfirmDialog` to the library's Dialog component.
 
 Key M3 Expressive principles applied:
 - **Tonal elevation** — no drop shadows; hierarchy expressed via surface color tokens (`surface-container-high`)
@@ -23,7 +23,7 @@ The design preserves the existing Radix-based architecture and Tailwind CSS styl
 
 ```mermaid
 graph TD
-    subgraph "@vkieu/mui Dialog"
+    subgraph "@windmorph/react Dialog"
         DialogRoot["Dialog (Radix Root)"]
         DialogTrigger["DialogTrigger"]
         DialogPortal["DialogPortal"]
@@ -154,7 +154,7 @@ The existing `ConfirmDialog` in `packages/ui/src/confirm-dialog.tsx` will be dep
   description="This cannot be undone."
 />
 
-// After (using @vkieu/mui Dialog with alert prop):
+// After (using @windmorph/react Dialog with alert prop):
 <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
   <DialogContent alert icon="delete">
     <DialogHeader centered>

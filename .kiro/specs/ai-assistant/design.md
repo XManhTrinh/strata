@@ -187,7 +187,7 @@ Posts to `/companies/${companyId}/assistant/chat` via the existing `apiClient` (
 
 #### `AssistantPanel` (`apps/web/src/components/assistant/assistant-panel.tsx`)
 
-- A `@vkieu/mui`-based panel/drawer: scrollable message list, `TextField` input, send `Button`, in-progress indicator.
+- A `@windmorph/react`-based panel/drawer: scrollable message list, `TextField` input, send `Button`, in-progress indicator.
 - Holds local conversation state; sends `{ message, history }` and appends the reply.
 - Company_ID from `useCompanyId()`.
 - Accessible: `role="log"` for the transcript, labeled input, keyboard send (Enter), disabled state while pending, error surface with retry.

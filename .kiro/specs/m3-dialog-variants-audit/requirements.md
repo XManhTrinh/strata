@@ -2,13 +2,13 @@
 
 ## Introduction
 
-This specification covers a deep audit of all Material Design 3 Expressive Dialog variants in the `@vkieu/mui` component library and the Strata application. The goal is to ensure complete M3 Expressive spec compliance across five dialog variants (basic, icon, full-screen, alert, scrollable), verify all variant configurations are supported, and apply remaining visual tweaks to align the Strata dialog usage with M3 Expressive guidelines for web/React.
+This specification covers a deep audit of all Material Design 3 Expressive Dialog variants in the `@windmorph/react` component library and the Strata application. The goal is to ensure complete M3 Expressive spec compliance across five dialog variants (basic, icon, full-screen, alert, scrollable), verify all variant configurations are supported, and apply remaining visual tweaks to align the Strata dialog usage with M3 Expressive guidelines for web/React.
 
-The current `@vkieu/mui` Dialog component supports basic, icon, and full-screen variants via Radix UI primitives. This audit identifies gaps (alert dialog variant, scrollable content handling) and ensures visual fidelity with the M3 Expressive specification for all variants. Key M3 Expressive changes from base M3 include: tonal elevation (no drop shadows), spring-based physics motion (replacing easing+duration), semantic shape tokens, and updated padding structures.
+The current `@windmorph/react` Dialog component supports basic, icon, and full-screen variants via Radix UI primitives. This audit identifies gaps (alert dialog variant, scrollable content handling) and ensures visual fidelity with the M3 Expressive specification for all variants. Key M3 Expressive changes from base M3 include: tonal elevation (no drop shadows), spring-based physics motion (replacing easing+duration), semantic shape tokens, and updated padding structures.
 
 ## Glossary
 
-- **Dialog_Component**: The `DialogContent` React component in `@vkieu/mui` that renders M3-compliant dialog containers using Radix UI Dialog primitives
+- **Dialog_Component**: The `DialogContent` React component in `@windmorph/react` that renders M3-compliant dialog containers using Radix UI Dialog primitives
 - **Basic_Dialog**: An M3 dialog with title, supporting text, and action buttons using start-aligned layout with 28dp corner radius
 - **Icon_Dialog**: An M3 dialog with a hero icon centered above the title, triggering center-aligned layout for title and description
 - **Full_Screen_Dialog**: An M3 dialog that occupies the entire viewport on mobile (0dp radius) with a 56dp header bar containing a close icon, falling back to a centered dialog on larger screens
@@ -19,7 +19,7 @@ The current `@vkieu/mui` Dialog component supports basic, icon, and full-screen 
 - **Tonal_Elevation**: M3 Expressive elevation model where hierarchy is conveyed through surface color tints (e.g., `surface-container-high`) rather than drop shadows
 - **Spring_Motion**: M3 Expressive physics-based animation system that replaces fixed easing curves and durations with spring interpolation for natural, fluid motion
 - **Shape_Token**: Semantic design tokens (e.g., `corner-extra-large` = 28px) that abstract shape values for future theming and shape morphing support
-- **Strata_Application**: The web frontend at `apps/web/` that consumes the `@vkieu/mui` component library
+- **Strata_Application**: The web frontend at `apps/web/` that consumes the `@windmorph/react` component library
 - **Radix_Dialog**: The `@radix-ui/react-dialog` primitive library providing accessible dialog behavior (focus trap, portal, overlay)
 
 ## Requirements
@@ -112,11 +112,11 @@ The current `@vkieu/mui` Dialog component supports basic, icon, and full-screen 
 
 ### Requirement 7: Strata Application Dialog Migration
 
-**User Story:** As a developer, I want the Strata application to use the `@vkieu/mui` Dialog component consistently for all dialog use cases, so that the UI is visually cohesive and follows M3 guidelines.
+**User Story:** As a developer, I want the Strata application to use the `@windmorph/react` Dialog component consistently for all dialog use cases, so that the UI is visually cohesive and follows M3 guidelines.
 
 #### Acceptance Criteria
 
-1. THE Strata_Application SHALL replace the custom `ConfirmDialog` component in `packages/ui/` with the `@vkieu/mui` Dialog component, using `role="alertdialog"` on the DialogContent element and providing both a confirm and cancel action button in the DialogFooter for confirmation scenarios
+1. THE Strata_Application SHALL replace the custom `ConfirmDialog` component in `packages/ui/` with the `@windmorph/react` Dialog component, using `role="alertdialog"` on the DialogContent element and providing both a confirm and cancel action button in the DialogFooter for confirmation scenarios
 2. WHEN the Strata_Application renders a delete confirmation, THE Strata_Application SHALL use the Dialog_Component with the `icon` prop set to a delete-themed icon name and with `role="alertdialog"` on the DialogContent element
 3. WHEN a dialog contains a form with 5 or more input fields (text fields, selects, checkboxes, radio buttons, or textareas), THE Strata_Application SHALL render the Dialog_Component with the `fullScreen` prop enabled
 4. WHEN dialog body content height exceeds the available viewport height minus the dialog header and footer, THE Strata_Application SHALL ensure the dialog content area is scrollable by applying `overflow-y: auto` with a maximum height constraint equal to `90vh` minus the combined height of the dialog header, footer, and padding

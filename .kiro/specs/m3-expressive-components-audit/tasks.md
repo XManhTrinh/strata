@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan performs an audit-and-fix pass across all components in the `@vkieu/mui` library against M3 Expressive token specifications. Components are grouped by priority: HIGH priority targets known gaps identified in the design document, MEDIUM priority covers components that need thorough verification, and LOWER priority covers components believed to be compliant but needing confirmation. Each task is self-contained — a sub-agent can read the component, compare against the spec tables in the design document, and fix discrepancies in a single pass.
+This plan performs an audit-and-fix pass across all components in the `@windmorph/react` library against M3 Expressive token specifications. Components are grouped by priority: HIGH priority targets known gaps identified in the design document, MEDIUM priority covers components that need thorough verification, and LOWER priority covers components believed to be compliant but needing confirmation. Each task is self-contained — a sub-agent can read the component, compare against the spec tables in the design document, and fix discrepancies in a single pass.
 
 ## Tasks
 
@@ -353,7 +353,7 @@ This plan performs an audit-and-fix pass across all components in the `@vkieu/mu
 - Each task references specific requirements for traceability
 - Checkpoints ensure incremental validation between priority tiers
 - This is an audit-and-fix pass — not a rewrite. Each task reads the component, compares against the M3 Expressive spec tables in the design document, and fixes only the discrepancies
-- The `@vkieu/mui` library lives at `/Users/xuan-manh.trinh/workplace/web/mui/src/`
+- The `@windmorph/react` library lives at `/Users/xuan-manh.trinh/workplace/web/mui/src/`
 - All fixes use Tailwind CSS v4 canonical utility classes
 - Component APIs (props, TypeScript interfaces) remain unchanged — only CSS classes and animation parameters are modified
 - The design document's "Token Mapping Tables" section is the source of truth for each component's expected classes

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan covers enhancing the `@vkieu/mui` Dialog component to support all five M3 Expressive dialog variants (basic, icon, full-screen, alert, scrollable) for web/React, then migrating the Strata application's custom `ConfirmDialog` to use the library component. Key M3 Expressive principles: tonal elevation (no shadows), spring physics motion, semantic shape tokens, and section-specific padding. Work proceeds from library-level component changes, through testing, to application-level migration and documentation.
+This plan covers enhancing the `@windmorph/react` Dialog component to support all five M3 Expressive dialog variants (basic, icon, full-screen, alert, scrollable) for web/React, then migrating the Strata application's custom `ConfirmDialog` to use the library component. Key M3 Expressive principles: tonal elevation (no shadows), spring physics motion, semantic shape tokens, and section-specific padding. Work proceeds from library-level component changes, through testing, to application-level migration and documentation.
 
 ## Tasks
 
@@ -128,10 +128,10 @@ This plan covers enhancing the `@vkieu/mui` Dialog component to support all five
 - [x] 5. Checkpoint - Library component changes verified
   - Ensure all tests pass, ask the user if questions arise.
 
-- [x] 6. Migrate Strata ConfirmDialog to @vkieu/mui Dialog
-  - [x] 6.1 Replace ConfirmDialog usage with @vkieu/mui Dialog alert variant
+- [x] 6. Migrate Strata ConfirmDialog to @windmorph/react Dialog
+  - [x] 6.1 Replace ConfirmDialog usage with @windmorph/react Dialog alert variant
     - Update all usages in `apps/web/` that import from `packages/ui` ConfirmDialog
-    - Replace with `@vkieu/mui` Dialog using `alert` prop, DialogContent with confirm/cancel buttons in DialogFooter
+    - Replace with `@windmorph/react` Dialog using `alert` prop, DialogContent with confirm/cancel buttons in DialogFooter
     - For delete confirmations, use the Dialog with `icon="delete"` and `alert` props
     - Ensure `onOpenChange` callback handles close from action buttons only
     - _Requirements: 7.1, 7.2_
@@ -194,7 +194,7 @@ This plan covers enhancing the `@vkieu/mui` Dialog component to support all five
 - Checkpoints ensure incremental validation
 - Property tests validate universal correctness properties from the design document using `fast-check`
 - Unit tests validate specific examples and edge cases
-- The `@vkieu/mui` library lives at `/Users/xuan-manh.trinh/workplace/web/mui` — all component changes are made there
+- The `@windmorph/react` library lives at `/Users/xuan-manh.trinh/workplace/web/mui` — all component changes are made there
 - The Strata application lives at `/Users/xuan-manh.trinh/workplace/web/strata` — migration tasks target `apps/web/` and `packages/ui/`
 - The existing dialog component already supports basic, icon, and full-screen variants — tasks 3.x audit and fix rather than implement from scratch
 
