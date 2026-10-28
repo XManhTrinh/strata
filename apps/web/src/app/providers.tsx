@@ -6,8 +6,9 @@ import {
   ThemeProvider,
   SnackbarHost,
   useSnackbarHostState,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { SnackbarContext } from "@/lib/snackbar";
+import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -38,7 +39,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider storage="cookie">
+      <ThemeProvider themes={STRATA_THEMES} defaultTheme={STRATA_DEFAULT_THEME} storage="cookie">
         <SnackbarContext.Provider value={snackbarState}>
           <SnackbarHost state={snackbarState} className="fixed inset-x-0 bottom-0 z-50" />
           {children}

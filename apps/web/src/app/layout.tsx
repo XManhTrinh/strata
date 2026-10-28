@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { cookies } from "next/headers";
-import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@vkieu/windmorph/next";
+import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@windmorph/react/next";
+import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme";
 import { Providers } from "./providers";
 import "material-symbols/rounded.css";
 import "./globals.css";
@@ -24,7 +25,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const theme = getThemeFromCookies(await cookies(), {
-    defaults: { mode: "system" },
+    themes: STRATA_THEMES,
+    defaults: { theme: STRATA_DEFAULT_THEME, mode: "system" },
   });
 
   return (
