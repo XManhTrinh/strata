@@ -13,13 +13,13 @@ import {
   Card,
   Button,
   LoadingIndicator,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { MOCK_VACANCIES } from "@/lib/org-tree/mock-data";
 import { useOrgChartPeople, useOrgUnitTree } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import OrgFlow from "@/components/flow-org/OrgFlow";
 import FlowOrgHeader from "@/components/flow-org/FlowOrgHeader";
 import ReparentModal from "@/components/flow-org/ReparentModal";

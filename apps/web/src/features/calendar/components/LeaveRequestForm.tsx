@@ -10,7 +10,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type { CalendarEvent, LeaveBalance } from "../types/calendar.types";
 import { calculateWorkingDays, getAvailableBalance } from "../utils/calendar.utils";
@@ -164,8 +164,8 @@ export function LeaveRequestForm({
 
           <Select
             label="Leave Type"
-            selectedKey={leaveTypeId}
-            onSelectionChange={(key) => setLeaveTypeId(key == null ? "" : String(key))}
+            value={leaveTypeId}
+            onChange={(key) => setLeaveTypeId(key == null ? "" : String(key))}
             variant="outlined"
           >
             {LEAVE_TYPES.map((type) => (

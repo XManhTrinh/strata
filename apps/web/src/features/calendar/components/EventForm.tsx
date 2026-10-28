@@ -11,7 +11,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type { CalendarEvent, EventVisibility, RecurrenceFrequency } from "../types/calendar.types";
 
@@ -140,8 +140,8 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
           <Select
             label="Event Type"
-            selectedKey={eventTypeId}
-            onSelectionChange={(key) => setEventTypeId(key == null ? "" : String(key))}
+            value={eventTypeId}
+            onChange={(key) => setEventTypeId(key == null ? "" : String(key))}
             variant="outlined"
           >
             {EVENT_TYPES.map((type) => (
@@ -152,8 +152,8 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
             <Checkbox aria-label="Toggle"
   id="all-day"
-              selected={allDay}
-              onSelectedChange={(checked) => setAllDay(checked === true)}
+              checked={allDay}
+              onCheckedChange={(checked) => setAllDay(checked === true)}
             />
             <label htmlFor="all-day" className="text-body-medium text-on-surface cursor-pointer select-none">
               All Day
@@ -202,8 +202,8 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
           <Select
             label="Visibility"
-            selectedKey={visibility}
-            onSelectionChange={(key) => setVisibility(String(key) as EventVisibility)}
+            value={visibility}
+            onChange={(key) => setVisibility(String(key) as EventVisibility)}
             variant="outlined"
           >
             {VISIBILITY_OPTIONS.map((opt) => (
@@ -213,8 +213,8 @@ export function EventForm({ isOpen, onClose, onSubmit, defaultDate }: EventFormP
 
           <Select
             label="Recurrence"
-            selectedKey={recurrence}
-            onSelectionChange={(key) => setRecurrence((key == null ? "" : String(key)) as RecurrenceFrequency | "")}
+            value={recurrence}
+            onChange={(key) => setRecurrence((key == null ? "" : String(key)) as RecurrenceFrequency | "")}
             variant="outlined"
           >
             {RECURRENCE_OPTIONS.map((opt) => (

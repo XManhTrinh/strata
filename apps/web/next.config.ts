@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: [
-    "@vkieu/windmorph",
+    "@windmorph/react",
+    "@windmorph/react-pro",
     "@strata/ui",
     "@strata/validation",
     "@strata/shared-types",

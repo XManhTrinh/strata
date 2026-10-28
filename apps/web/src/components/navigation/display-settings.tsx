@@ -9,7 +9,7 @@ import {
   type ColorMode,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 
 const MODES: { value: ColorMode; label: string }[] = [
@@ -49,8 +49,8 @@ export function ThemeControls() {
           <span className="text-label-large text-on-surface-variant">Theme</span>
           <Select
             aria-label="Theme"
-            selectedKey={theme}
-            onSelectionChange={(key) => setTheme(key == null ? "" : String(key))}
+            value={theme}
+            onChange={(key) => setTheme(key == null ? "" : String(key))}
           >
             {themes.map((t) => (
               <SelectItem key={t}>{t}</SelectItem>

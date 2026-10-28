@@ -16,12 +16,7 @@
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "motion": "^14.0.0",
-    "@vkieu/windmorph": "*"
-  },
-  "peerDependenciesMeta": {
-    "@vkieu/windmorph": {
-      "optional": true
-    }
+    "@windmorph/react-pro": "*"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",
@@ -29,6 +24,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "motion": "^14.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@windmorph/react-pro": "github:XManhTrinh/windmorph-pro#6ee20a907b3c3b3cb57c4d7829f122d6e51e7e05",
+    "@windmorph/react": "^0.1.1"
   }
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { TopAppBar, Card } from "@vkieu/windmorph";
+import { TopAppBar, Card } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import { useUserPermissions } from "@/hooks/use-user-permissions";

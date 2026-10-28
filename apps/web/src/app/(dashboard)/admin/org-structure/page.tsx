@@ -18,10 +18,10 @@ import {
   IconButton,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import {
   useOrgUnits,
@@ -308,8 +308,8 @@ function OrgUnitDialog({
           />
           <Select
             label="Type"
-            selectedKey={formData.typeId}
-            onSelectionChange={(key) =>
+            value={formData.typeId}
+            onChange={(key) =>
               onFormChange({ ...formData, typeId: key == null ? "" : String(key) })
             }
             placeholder="Select a type..."
@@ -321,8 +321,8 @@ function OrgUnitDialog({
           </Select>
           <Select
             label="Parent Unit"
-            selectedKey={formData.parentId || "none"}
-            onSelectionChange={(key) =>
+            value={formData.parentId || "none"}
+            onChange={(key) =>
               onFormChange({ ...formData, parentId: key === "none" || key == null ? "" : String(key) })
             }
             placeholder="None (root level)"

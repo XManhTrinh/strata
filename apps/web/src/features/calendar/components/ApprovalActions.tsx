@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@vkieu/windmorph";
+import { Button } from "@windmorph/react";
 
 interface ApprovalActionsProps {
   eventId: string;

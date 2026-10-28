@@ -10,10 +10,10 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanySettings, useUpdateCompanySettings, useResetAllData } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -350,8 +350,8 @@ export default function SettingsPage() {
                     <Select
                       variant="outlined"
                       label="Fiscal Year Start Month"
-                      selectedKey={fiscalYearStart}
-                      onSelectionChange={(key) => setFiscalYearStart(key == null ? "" : String(key))}
+                      value={fiscalYearStart}
+                      onChange={(key) => setFiscalYearStart(key == null ? "" : String(key))}
                     >
                       {monthLabels.map((label, i) => (
                         <SelectItem key={String(i + 1)}>{label}</SelectItem>

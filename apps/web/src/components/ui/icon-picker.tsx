@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "@/components/ui/icon";
-import { TextField } from "@vkieu/windmorph";
+import { TextField } from "@windmorph/react";
 import { cn } from "@/lib/utils";
 
 // ─── Curated Material Symbols ───────────────────────────────────────────────────

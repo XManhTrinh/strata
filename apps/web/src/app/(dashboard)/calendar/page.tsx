@@ -2,10 +2,10 @@
 
 import { motion } from "motion/react";
 import { CalendarView } from "@/features/calendar/CalendarView";
-import { Button, Card } from "@vkieu/windmorph";
+import { Button, Card } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import {
   useCalendarEvents,
 } from "@/services";

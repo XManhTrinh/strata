@@ -13,10 +13,10 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
@@ -629,8 +629,8 @@ export default function CapacityPage() {
         actions={
           <Select
             aria-label="Fiscal year"
-            selectedKey={String(fiscalYear)}
-            onSelectionChange={(key) => setFiscalYear(Number(key))}
+            value={String(fiscalYear)}
+            onChange={(key) => setFiscalYear(Number(key))}
             variant="outlined"
             className="w-32"
           >
@@ -643,7 +643,7 @@ export default function CapacityPage() {
 
       {/* Division tabs — capacity loads per division (lazy). */}
       {divisionTabs.length > 0 && (
-        <Tabs selectedKey={effectiveDivisionId} onSelectionChange={(k) => setActiveDivisionId(k as string)} variant="primary" scrollable>
+        <Tabs value={effectiveDivisionId} onChange={(k) => setActiveDivisionId(k as string)} variant="primary" scrollable>
           {divisionTabs.map((d) => (
               <Tab key={d.id} title={d.name} />
             ))}
@@ -756,8 +756,8 @@ export default function CapacityPage() {
           <div className="flex items-center gap-3 shrink-0">
             <Select
               variant="outlined"
-              selectedKey={groupBy}
-              onSelectionChange={(key) => setGroupBy(key == null ? "" : String(key))}
+              value={groupBy}
+              onChange={(key) => setGroupBy(key == null ? "" : String(key))}
               className="w-40"
               label="Group by"
             >
@@ -768,8 +768,8 @@ export default function CapacityPage() {
             <Select
               aria-label="Employment type"
               variant="outlined"
-              selectedKey={employmentFilter}
-              onSelectionChange={(key) => setEmploymentFilter(String(key) as "all" | "Perm" | "SubCon")}
+              value={employmentFilter}
+              onChange={(key) => setEmploymentFilter(String(key) as "all" | "Perm" | "SubCon")}
               className="w-40"
             >
               <SelectItem key="all">All Types</SelectItem>

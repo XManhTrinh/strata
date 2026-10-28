@@ -42,7 +42,7 @@ import {
   IconButton,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import {
@@ -60,8 +60,8 @@ import {
 } from "@/services";
 import type { Person, CreatePersonRequest } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
-import { Avatar } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
+import { Avatar } from "@windmorph/react-pro";
 import {
   Table,
   TableHeader,
@@ -141,9 +141,9 @@ function SortableColumnItem({
       </button>
       <label className={`flex items-center gap-1.5 flex-1 min-w-0 ${isCore ? "" : "cursor-pointer hover:bg-on-surface/4"} rounded px-0.5`}>
         <Checkbox
-          selected={selected}
+          checked={selected}
           disabled={isCore}
-          onSelectedChange={isCore ? undefined : () => onToggle()}
+          onCheckedChange={isCore ? undefined : () => onToggle()}
           aria-label={`Toggle ${label} column`}
           className="w-6 h-6 [&>span:first-of-type]:w-5 [&>span:first-of-type]:h-5"
         />
@@ -562,8 +562,8 @@ export default function PeoplePage() {
           <Select
             variant="outlined"
             label="View"
-            selectedKey={selectedViewId}
-            onSelectionChange={(key) => handleSelectView(key == null ? "" : String(key))}
+            value={selectedViewId}
+            onChange={(key) => handleSelectView(key == null ? "" : String(key))}
             className="min-w-35"
           >
             {[
@@ -701,9 +701,9 @@ export default function PeoplePage() {
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
-                      selected={people.length > 0 && selectedIds.size === people.length}
+                      checked={people.length > 0 && selectedIds.size === people.length}
                       indeterminate={selectedIds.size > 0 && selectedIds.size < people.length}
-                      onSelectedChange={toggleSelectAll}
+                      onCheckedChange={toggleSelectAll}
                       aria-label="Select all"
                     />
                     </TableHead>
@@ -715,7 +715,7 @@ export default function PeoplePage() {
                   {people.map((person) => (
                     <TableRow key={person.id} className={selectedIds.has(person.id) ? "bg-primary/5" : ""}>
                       <TableCell className="w-10">
-                        <Checkbox selected={selectedIds.has(person.id)} onSelectedChange={() => toggleSelect(person.id)} aria-label="Select row" />
+                        <Checkbox checked={selectedIds.has(person.id)} onCheckedChange={() => toggleSelect(person.id)} aria-label="Select row" />
                       </TableCell>
                       {visibleColumns.map((col) => <TableCell key={col.key}>{renderCell(person, col.key)}</TableCell>)}
                       <TableCell className="text-right">
@@ -761,7 +761,7 @@ export default function PeoplePage() {
               </p>
               <div className="flex gap-2">
                 <Button variant="outlined" size="xs" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} leadingIcon={<Icon name="chevron_left" />}>Previous</Button>
-                <Button variant="outlined" size="xs" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} trailingIcon={<Icon name="chevron_right" />}>Next</Button>
+                <Button variant="outlined" size="xs" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} leadingIcon={<Icon name="chevron_right" />}>Next</Button>
               </div>
             </div>
           )}
@@ -782,8 +782,8 @@ export default function PeoplePage() {
             <Select
               variant="outlined"
               label="Role"
-              selectedKey={formData.roleId ?? ""}
-              onSelectionChange={(key) => setFormData({ ...formData, roleId: key == null ? undefined : String(key) || undefined })}
+              value={formData.roleId ?? ""}
+              onChange={(key) => setFormData({ ...formData, roleId: key == null ? undefined : String(key) || undefined })}
             >
               {[
                 <SelectItem key="">No role (basic access)</SelectItem>,
@@ -893,8 +893,8 @@ export default function PeoplePage() {
           <Select
             variant="outlined"
             label="Role"
-            selectedKey={batchRoleId}
-            onSelectionChange={(key) => setBatchRoleId(key == null ? "" : String(key))}
+            value={batchRoleId}
+            onChange={(key) => setBatchRoleId(key == null ? "" : String(key))}
           >
             {roles.map((r) => (
               <SelectItem key={r.id}>{r.name}</SelectItem>

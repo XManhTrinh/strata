@@ -14,7 +14,7 @@ import {SearchBar,
   Button,
   IconButton,
   Select,
-  SelectItem} from "@vkieu/windmorph";
+  SelectItem} from "@windmorph/react";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import {
@@ -25,7 +25,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import {
   usePositions,
@@ -398,8 +398,8 @@ function PositionDialog({
           <div className="grid grid-cols-2 gap-3">
             <Select
               label="Min Level"
-              selectedKey={formData.minLevelId || ""}
-              onSelectionChange={(key) => {
+              value={formData.minLevelId || ""}
+              onChange={(key) => {
                 const newMin = key == null ? "" : String(key);
                 const minLevel = levels.find((l) => l.id === newMin);
                 const maxLevel = levels.find((l) => l.id === formData.maxLevelId);
@@ -421,8 +421,8 @@ function PositionDialog({
             </Select>
             <Select
               label="Max Level"
-              selectedKey={formData.maxLevelId || ""}
-              onSelectionChange={(key) =>
+              value={formData.maxLevelId || ""}
+              onChange={(key) =>
                 onFormChange({ ...formData, maxLevelId: key == null ? "" : String(key) })
               }
               placeholder="Select max level"
@@ -438,8 +438,8 @@ function PositionDialog({
           <div className="flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
             <Checkbox aria-label="Toggle"
   id="pos-reports"
-              selected={formData.canHaveDirectReports}
-              onSelectedChange={(checked) =>
+              checked={formData.canHaveDirectReports}
+              onCheckedChange={(checked) =>
                 onFormChange({ ...formData, canHaveDirectReports: checked === true })
               }
             />
@@ -523,8 +523,8 @@ function CareerLevelDialog({
             />
             <Select
               label="Track"
-              selectedKey={formData.track}
-              onSelectionChange={(key) => onFormChange({ ...formData, track: key == null ? "" : String(key) })}
+              value={formData.track}
+              onChange={(key) => onFormChange({ ...formData, track: key == null ? "" : String(key) })}
               placeholder="Track (optional)"
               variant="outlined"
             >

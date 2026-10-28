@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { SnackbarHostState } from "@vkieu/windmorph";
+import { SnackbarHostState } from "@windmorph/react";
 
 export const SnackbarContext = createContext<SnackbarHostState | null>(null);
 

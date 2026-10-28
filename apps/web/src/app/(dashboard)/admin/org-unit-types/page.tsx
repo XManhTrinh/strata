@@ -15,7 +15,7 @@ import {
   ListItem,
   Button,
   IconButton,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
 import {
@@ -26,7 +26,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import {
   useOrgUnitTypes,

@@ -14,11 +14,11 @@ import {
   Select,
   SelectItem,
   type TopAppBarScrollBehavior,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { useAuth } from "@/lib/auth";
 import { NotificationPanel } from "@/components/notifications/notification-panel";
 import { Icon } from "@/components/ui/icon";
-import { Avatar } from "@vkieu/windmorph/vk";
+import { Avatar } from "@windmorph/react-pro";
 import { AvatarProgressRing } from "@/components/import/avatar-progress-ring";
 import { useImportProgress } from "@/components/import/import-progress-provider";
 import { useRoles } from "@/services";
@@ -61,8 +61,8 @@ export function Header({ className, scrollBehavior, scrollRef }: HeaderProps) {
               <Icon name="visibility" size={18} className="text-on-surface-variant" />
               <Select
                 aria-label="View as role"
-                selectedKey={role}
-                onSelectionChange={(key) => setRole(key == null ? "" : String(key))}
+                value={role}
+                onChange={(key) => setRole(key == null ? "" : String(key))}
                 placeholder="View as..."
                 variant="outlined"
                 className="h-9 w-44 text-[13px]"
@@ -92,7 +92,7 @@ export function Header({ className, scrollBehavior, scrollRef }: HeaderProps) {
                 icon={<Avatar size="sm" name="User" decorative />}
               />
               <Menu
-                placement="bottom end"
+                placement="bottom-end"
                 onAction={(key) => {
                   if (key === "sign-out") logout();
                 }}

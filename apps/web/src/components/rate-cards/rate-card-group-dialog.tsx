@@ -10,7 +10,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { ColorPicker } from "@/components/ui/color-picker";
 import type { RateCardGroup, RateCardSet, UpsertRateCardGroupInput } from "@/services";
 
@@ -105,8 +105,8 @@ export function RateCardGroupDialog({
           <Select
             variant="outlined"
             label="Tab"
-            selectedKey={setId}
-            onSelectionChange={(key) => setSetId(key == null ? "" : String(key))}
+            value={setId}
+            onChange={(key) => setSetId(key == null ? "" : String(key))}
             className="w-full"
           >
             {setOptions.map((o) => (

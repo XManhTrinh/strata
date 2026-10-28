@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { type NodeProps, Handle, Position } from "@xyflow/react";
-import { Avatar } from "@vkieu/windmorph/vk";
+import { Avatar } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
 import { Person } from "@/lib/org-tree/types";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { IconButton, TopAppBar } from "@vkieu/windmorph";
+import { IconButton, TopAppBar } from "@windmorph/react";
 import type { RefObject } from "react";
 import { Icon } from "@/components/ui/icon";
 import { DisplaySettings } from "./display-settings";

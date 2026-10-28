@@ -11,10 +11,10 @@ import {
   Tab,
   Button,
   Divider,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
@@ -131,8 +131,8 @@ function CardTableRow({
     <TableRow>
       <TableCell className="w-10">
         <Checkbox
-          selected={checked}
-          onSelectedChange={() => onToggle(card.id)}
+          checked={checked}
+          onCheckedChange={() => onToggle(card.id)}
           aria-label={`Select ${card.name}`}
         />
       </TableCell>
@@ -559,9 +559,9 @@ export default function RateCardsPage() {
       >
         <div className="flex items-center gap-2">
           <Checkbox
-            selected={allOn}
+            checked={allOn}
             indeterminate={someOn}
-            onSelectedChange={() => toggleGroup(groupCards)}
+            onCheckedChange={() => toggleGroup(groupCards)}
             aria-label={`Select all in ${title}`}
           />
           <span
@@ -684,9 +684,9 @@ export default function RateCardsPage() {
             <CardContent className="flex items-center justify-between gap-3 p-4">
               <label className="flex cursor-pointer select-none items-center gap-2">
                 <Checkbox
-                  selected={allSelected}
+                  checked={allSelected}
                   indeterminate={someSelected}
-                  onSelectedChange={toggleAll}
+                  onCheckedChange={toggleAll}
                   aria-label="Select all rate cards"
                 />
                 <span className="text-body-medium text-on-surface-variant">
@@ -729,7 +729,7 @@ export default function RateCardsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Tabs selectedKey={activeTabModel?.id ?? ""} onSelectionChange={(k) => setActiveTab(k as string)} variant="primary" scrollable>
+        <Tabs value={activeTabModel?.id ?? ""} onChange={(k) => setActiveTab(k as string)} variant="primary" scrollable>
           {tabs.map((t) => (
             <Tab key={t.id} title={t.name}>
               <div className="flex flex-col gap-6 pt-4">

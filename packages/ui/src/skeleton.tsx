@@ -1,2 +1,2 @@
-export { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
-export type { SkeletonProps, SkeletonGroupProps } from "@vkieu/windmorph/vk";
+export { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
+export type { SkeletonProps, SkeletonGroupProps } from "@windmorph/react-pro";

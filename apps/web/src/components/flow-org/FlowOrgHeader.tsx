@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { OrgChartViewMode } from "@/lib/org-tree/types";
-import { TopAppBar, FilterChip, AssistChip, SearchBar, Button } from "@vkieu/windmorph";
+import { TopAppBar, FilterChip, AssistChip, SearchBar, Button } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type { OrganizationUnit } from "@/services";
 import { OrgUnitTreeSelect } from "@/components/ui/org-unit-tree-select";

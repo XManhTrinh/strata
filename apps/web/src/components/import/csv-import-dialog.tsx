@@ -27,7 +27,7 @@ import {
   Button,
   Select,
   SelectItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
 import { parseCsvLine, autoDetectMapping, detectUnitTypeName, detectUnitTypeIcon, detectUnitTypeColor } from "@/lib/csv";
@@ -563,8 +563,8 @@ function MappingStep({
                 <Select
                   aria-label="Map column"
                   variant="outlined"
-                  selectedKey={mapping.target}
-                  onSelectionChange={(key) => onMappingChange(idx, String(key) as MappingTarget)}
+                  value={mapping.target}
+                  onChange={(key) => onMappingChange(idx, String(key) as MappingTarget)}
                   className="w-full text-[11px]"
                 >
                   {MAPPING_OPTIONS.map((o) => (
@@ -663,8 +663,8 @@ function MappingStep({
             <Select
               aria-label="Line manager match field"
               variant="outlined"
-              selectedKey={lineManagerMatchField}
-              onSelectionChange={(key) => onLineManagerMatchFieldChange(key == null ? "" : String(key))}
+              value={lineManagerMatchField}
+              onChange={(key) => onLineManagerMatchFieldChange(key == null ? "" : String(key))}
               className="w-full"
             >
               {[
@@ -694,8 +694,8 @@ function MappingStep({
           <Select
             aria-label="Default role"
             variant="outlined"
-            selectedKey={importDefaultRoleId}
-            onSelectionChange={(key) => onDefaultRoleChange(key == null ? "" : String(key))}
+            value={importDefaultRoleId}
+            onChange={(key) => onDefaultRoleChange(key == null ? "" : String(key))}
             className="w-full"
           >
             {[

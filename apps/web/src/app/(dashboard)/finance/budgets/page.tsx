@@ -8,14 +8,14 @@ import {
   AssistChip,
   Button,
   Divider,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import {
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import {
   Table,
   TableHeader,

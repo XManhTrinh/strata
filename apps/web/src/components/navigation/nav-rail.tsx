@@ -1,6 +1,6 @@
 "use client";
 
-import { NavigationRail, NavigationRailItem } from "@vkieu/windmorph";
+import { NavigationRail, NavigationRailItem } from "@windmorph/react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";

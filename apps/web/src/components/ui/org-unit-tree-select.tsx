@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { Checkbox, SearchBar, Button } from "@vkieu/windmorph";
+import { Checkbox, SearchBar, Button } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type { OrganizationUnit } from "@/services";
 
@@ -243,9 +243,9 @@ export function OrgUnitTreeSelect({
 
                     {/* Checkbox */}
                     <Checkbox aria-label="Toggle"
- selected={state === "checked"}
+ checked={state === "checked"}
                       indeterminate={state === "indeterminate"}
-                      onSelectedChange={() => toggleSelect(node)}
+                      onCheckedChange={() => toggleSelect(node)}
                       className="shrink-0"
                     />
 

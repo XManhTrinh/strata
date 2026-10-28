@@ -9,10 +9,10 @@ import {
   AssistChip,
   Switch,
   Button,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { CardContent } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import { useFeatures, useToggleFeature, type CompanyFeature } from "@/services";
 import { useCompanyId } from "@/hooks/use-company";
@@ -164,8 +164,8 @@ function FeatureCard({
           </div>
           <div onClick={(e) => e.stopPropagation()}>
             <Switch
-              selected={feature.enabled}
-              onSelectedChange={onToggle}
+              checked={feature.enabled}
+              onCheckedChange={onToggle}
               disabled={isToggling}
               aria-label={`${feature.enabled ? "Disable" : "Enable"} ${feature.displayName}`}
             />
@@ -192,7 +192,7 @@ function FeatureCard({
             variant="text"
             onClick={onExpand}
             className="text-label-large h-8"
-            trailingIcon={<Icon name={isExpanded ? "expand_less" : "expand_more"} />}
+            leadingIcon={<Icon name={isExpanded ? "expand_less" : "expand_more"} />}
           >
             {isExpanded ? "Hide" : "Details"}
           </Button>

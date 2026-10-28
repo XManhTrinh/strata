@@ -1,6 +1,6 @@
 "use client";
 
-import { NavigationBar, NavigationBarItem, NavigationRail } from "@vkieu/windmorph";
+import { NavigationBar, NavigationBarItem, NavigationRail } from "@windmorph/react";
 import { usePathname } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import { RouteAnnouncer } from "@/components/accessibility/route-announcer";

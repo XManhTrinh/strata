@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Checkbox, Button } from "@vkieu/windmorph";
+import { Checkbox, Button } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type { OrgUnit } from "../types/calendar.types";
 
@@ -97,8 +97,8 @@ export function FilterSelector({
               <div key={orgUnit.id} className="mb-2">
                 <div className="flex items-center gap-2 rounded px-2 py-1 hover:bg-surface-variant cursor-pointer" onClick={() => toggleOrgUnit(orgUnit.id)}>
                   <Checkbox aria-label="Toggle"
- selected={selectedOrgUnitIds.includes(orgUnit.id)}
-                    onSelectedChange={() => toggleOrgUnit(orgUnit.id)}
+ checked={selectedOrgUnitIds.includes(orgUnit.id)}
+                    onCheckedChange={() => toggleOrgUnit(orgUnit.id)}
                   />
                   <span className="text-label-large">{orgUnit.name}</span>
                   <span className="text-body-small text-on-surface-variant">({orgUnit.members.length})</span>
@@ -107,8 +107,8 @@ export function FilterSelector({
                   {orgUnit.members.map((member) => (
                     <div key={member.id} className="flex items-center gap-2 rounded px-2 py-0.5 hover:bg-surface-variant cursor-pointer" onClick={() => toggleMember(member.id)}>
                       <Checkbox aria-label="Toggle"
- selected={selectedUserIds.includes(member.id)}
-                        onSelectedChange={() => toggleMember(member.id)}
+ checked={selectedUserIds.includes(member.id)}
+                        onCheckedChange={() => toggleMember(member.id)}
                       />
                       <span className="text-body-small">{member.name}</span>
                     </div>

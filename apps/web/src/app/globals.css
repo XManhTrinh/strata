@@ -1,5 +1,8 @@
 @import "tailwindcss";
-@import "@vkieu/windmorph/styles.css";
+@import "@windmorph/react/styles.css";
+@import "@windmorph/react-pro/styles.css";
+@source "../../node_modules/@windmorph/react";
+@source "../../node_modules/@windmorph/react-pro";
 
 /* Restore cursor: pointer on interactive elements (Tailwind v4 preflight sets default) */
 button,

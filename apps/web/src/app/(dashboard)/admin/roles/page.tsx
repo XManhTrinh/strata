@@ -16,10 +16,10 @@ import {SearchBar,
   Button,
   IconButton,
   Select,
-  SelectItem} from "@vkieu/windmorph";
+  SelectItem} from "@windmorph/react";
 import { CardContent } from "@/components/ui/card-content";
 import { Icon } from "@/components/ui/icon";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useToast } from "@/hooks/use-toast";
 import {
   useRoles,
@@ -401,9 +401,9 @@ function PermissionMatrix({
                     {!readOnly && (
                       <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low/50">
                         <Checkbox
-                          selected={assignedCount === feature.permissions.length && assignedCount > 0}
+                          checked={assignedCount === feature.permissions.length && assignedCount > 0}
                           indeterminate={assignedCount > 0 && assignedCount < feature.permissions.length}
-                          onSelectedChange={(c) => onSelectAll(feature, c === true)}
+                          onCheckedChange={(c) => onSelectAll(feature, c === true)}
                           aria-label={`${assignedCount === feature.permissions.length ? "Deselect" : "Select"} all permissions for ${feature.displayName}`}
                         />
                         <span className="text-body-small text-on-surface-variant font-medium">
@@ -417,14 +417,14 @@ function PermissionMatrix({
                       const scope = (localDraft.get(key) as Scope) ?? "OWN";
                       return (
                         <div key={fp.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-on-surface/4 transition-colors">
-                          <Checkbox selected={isEnabled} disabled={readOnly} onSelectedChange={(c) => onToggle(feature.key, fp.key, c === true)} aria-label={`Toggle ${fp.displayName}`} />
+                          <Checkbox checked={isEnabled} disabled={readOnly} onCheckedChange={(c) => onToggle(feature.key, fp.key, c === true)} aria-label={`Toggle ${fp.displayName}`} />
                           <span className={`text-body-medium ${isEnabled ? "text-on-surface" : "text-on-surface-variant"} flex-1 min-w-0 truncate`}>
                             {fp.displayName}
                           </span>
                           <Select
                             aria-label={`Scope for ${fp.displayName}`}
-                            selectedKey={scope} disabled={readOnly || !isEnabled}
-                            onSelectionChange={(key) => onScopeChange(feature.key, fp.key, String(key) as Scope)}
+                            value={scope} disabled={readOnly || !isEnabled}
+                            onChange={(key) => onScopeChange(feature.key, fp.key, String(key) as Scope)}
                             className={`h-8 w-35 text-label-small border-outline-variant ${readOnly || !isEnabled ? "opacity-40" : ""}`}
                             variant="outlined"
                           >

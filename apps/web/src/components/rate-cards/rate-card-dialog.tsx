@@ -14,7 +14,7 @@ import {
   SelectItem,
   Autocomplete,
   AutocompleteItem,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import type {
   RateCard,
@@ -232,8 +232,8 @@ export function RateCardDialog({
           <Select
             variant="outlined"
             label="Group"
-            selectedKey={groupId}
-            onSelectionChange={(key) => setGroupId(key == null ? "" : String(key))}
+            value={groupId}
+            onChange={(key) => setGroupId(key == null ? "" : String(key))}
             className="w-full"
           >
             {groupOptions.map((o) => (
@@ -248,7 +248,7 @@ export function RateCardDialog({
                 Matches any member not caught by a higher-priority card. Conditions ignored.
               </p>
             </div>
-            <Switch selected={isDefault} onSelectedChange={setIsDefault} aria-label="Default fallback" />
+            <Switch checked={isDefault} onCheckedChange={setIsDefault} aria-label="Default fallback" />
           </div>
 
           {/* Conditions */}
@@ -313,8 +313,8 @@ export function RateCardDialog({
                       <Select
                         aria-label="Column"
                         variant="outlined"
-                        selectedKey={c.column}
-                        onSelectionChange={(key) => updateCondition(i, { column: key == null ? "" : String(key) })}
+                        value={c.column}
+                        onChange={(key) => updateCondition(i, { column: key == null ? "" : String(key) })}
                         className="flex-1"
                       >
                         {columnOptions.map((o) => (
@@ -324,8 +324,8 @@ export function RateCardDialog({
                       <Select
                         aria-label="Operator"
                         variant="outlined"
-                        selectedKey={c.operator}
-                        onSelectionChange={(key) => updateCondition(i, { operator: String(key) as RateCardRuleOperator })}
+                        value={c.operator}
+                        onChange={(key) => updateCondition(i, { operator: String(key) as RateCardRuleOperator })}
                         className="w-44"
                       >
                         {OPERATOR_OPTIONS.map((o) => (
@@ -334,11 +334,11 @@ export function RateCardDialog({
                       </Select>
                       <Autocomplete
                         aria-label="value"
-                        allowsCustomValue
+                        allowCustomValue
                         variant="outlined"
                         inputValue={c.value}
                         onInputChange={(v) => updateCondition(i, { value: v })}
-                        onSelectionChange={(key) => {
+                        onChange={(key) => {
                           if (key != null) updateCondition(i, { value: String(key) });
                         }}
                         placeholder="value"

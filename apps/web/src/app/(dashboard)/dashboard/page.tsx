@@ -10,11 +10,11 @@ import {
   Divider,
   AssistChip,
   Button,
-} from "@vkieu/windmorph";
+} from "@windmorph/react";
 import { usePeople, useLeaveRequests, useCalendarEvents } from "@/services";
 import { Icon } from "@/components/ui/icon";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card-content";
-import { Skeleton, SkeletonGroup } from "@vkieu/windmorph/vk";
+import { Skeleton, SkeletonGroup } from "@windmorph/react-pro";
 import { useCompanyId } from "@/hooks/use-company";
 import { useReducedMotionContext } from "@/components/accessibility/reduced-motion";
 import {
