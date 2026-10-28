@@ -93,9 +93,9 @@ environments. Each task leaves the repository building.
     - _Requirements: 8.4_
 
 - [ ] 9. Environments and monitoring (needs the product owner's accounts)
-  - [ ] 9.1 Supabase staging and production projects in Frankfurt
+  - [ ] 9.1 Supabase staging and production projects in Ireland (`eu-west-1`)
     - _Requirements: 9.1_
-  - [ ] 9.2 Vercel project with server code in Frankfurt and per-environment variables
+  - [ ] 9.2 Vercel project with server code in Dublin (`dub1`) and per-environment variables
     - _Requirements: 9.2_
   - [ ] 9.3 Sentry (EU) for browser, server and Edge Functions, with personal data scrubbing
         (wired once the Sentry project exists)

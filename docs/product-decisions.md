@@ -44,7 +44,8 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 
 ### Hosting
 
-- **v1: one EU region** (Frankfurt). Supabase and Vercel server code run there, next to the data;
+- **v1: one EU region: Ireland** (Supabase `eu-west-1`, Vercel `dub1`). Chosen over Frankfurt
+  as the better midpoint for UK and US users; Romania and Central Europe add about 25ms. Supabase and Vercel server code run there, next to the data;
   Vercel serves static content worldwide from its global network.
 - **Every workspace records its data region** from day one.
 - **Later:** dedicated deployments in other regions (e.g. UK, US) for customers who require their

@@ -151,8 +151,8 @@ types, so that the schema is reviewable and reproducible.
 
 #### Acceptance Criteria
 
-1. Staging and Production SHALL each have a Supabase project in the Frankfurt region.
-2. THE Vercel project SHALL run server code in Frankfurt and have preview, staging and production
+1. Staging and Production SHALL each have a Supabase project in the Ireland region (`eu-west-1`).
+2. THE Vercel project SHALL run server code in Dublin (`dub1`, set in `vercel.json`) and have preview, staging and production
    environments with their own variables.
 3. THE App SHALL report errors to Sentry with EU data storage from browser, server and Edge
    Functions, without sending personal data.

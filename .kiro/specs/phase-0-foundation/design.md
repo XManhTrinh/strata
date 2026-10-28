@@ -99,7 +99,7 @@ create function app.set_updated_at() ...    -- trigger: new.updated_at = now()
 
 ### Owner actions (cannot be automated here)
 
-- Create the Supabase staging and production projects (Frankfurt) and the Vercel project; add the
+- Create the Supabase staging and production projects (Ireland, `eu-west-1`) and the Vercel project; add the
   variables.
 - Create a fine-grained read-only GitHub token for `windmorph-pro` and add it as
   `WINDMORPH_PRO_TOKEN` in GitHub and Vercel.

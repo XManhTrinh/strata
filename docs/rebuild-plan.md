@@ -248,8 +248,8 @@ end-to-end happy path, audit logging and English strings are complete.
    generation.
 4. Tooling: ESLint, Prettier, Vitest, Playwright, pgTAP via `supabase test db`.
 5. CI on GitHub Actions: lint, typecheck, unit, database tests, end-to-end smoke, type drift.
-6. Environments: Supabase staging and production projects in Frankfurt, Vercel preview and
-   production with server code in Frankfurt, error monitoring with EU data storage.
+6. Environments: Supabase staging and production projects in Ireland (`eu-west-1`), Vercel preview and
+   production with server code in Dublin (`dub1`), error monitoring with EU data storage.
 7. Replace `.kiro/steering` and `.kiro/specs` with steering and specs that match this plan, plus
    a `CLAUDE.md` pointing to the same sources (done before Phase 0 started).
 8. Install every dependency fresh at its latest stable version; only what is used (`knip` in CI);

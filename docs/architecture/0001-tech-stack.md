@@ -90,14 +90,14 @@ colour/icon picker, breadcrumbs. Where to build them (windmorph-pro or the app) 
 
 ### Quality and delivery
 
-| Concern        | Choice                                                                                                                                                                                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit tests     | Vitest (rate-card engine, capacity maths, leave rules, CSV mapping)                                                                                                                                                                         |
-| Database tests | pgTAP via `supabase test db` (RLS policies and RPCs)                                                                                                                                                                                        |
-| End-to-end     | Playwright                                                                                                                                                                                                                                  |
-| CI             | GitHub Actions: lint, typecheck, unit, db tests against local Supabase, e2e smoke, type-gen drift check                                                                                                                                     |
-| Hosting        | Vercel (web) + Supabase Cloud, both in one EU region (Frankfurt); Vercel serves static content globally, server code runs next to the database. Each workspace records its data region so dedicated regional deployments can be added later |
-| Environments   | Supabase local for dev; separate Supabase projects for preview/staging and production                                                                                                                                                       |
+| Concern        | Choice                                                                                                                                                                                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit tests     | Vitest (rate-card engine, capacity maths, leave rules, CSV mapping)                                                                                                                                                                                                            |
+| Database tests | pgTAP via `supabase test db` (RLS policies and RPCs)                                                                                                                                                                                                                           |
+| End-to-end     | Playwright                                                                                                                                                                                                                                                                     |
+| CI             | GitHub Actions: lint, typecheck, unit, db tests against local Supabase, e2e smoke, type-gen drift check                                                                                                                                                                        |
+| Hosting        | Vercel (web) + Supabase Cloud, both in one EU region, Ireland (Supabase `eu-west-1`, Vercel `dub1`); Vercel serves static content globally, server code runs next to the database. Each workspace records its data region so dedicated regional deployments can be added later |
+| Environments   | Supabase local for dev; separate Supabase projects for preview/staging and production                                                                                                                                                                                          |
 
 ## Removed
 

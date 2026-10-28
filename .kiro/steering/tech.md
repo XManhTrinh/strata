@@ -24,7 +24,7 @@ The stack decision, with the reasons, is in:
   `react-hook-form` (complex forms only), `zod`, `next-intl`, `papaparse`, SheetJS, `exceljs`,
   Resend + React Email, Sentry.
 - **Tests:** Vitest, Playwright, pgTAP (`supabase test db`). **CI:** GitHub Actions.
-- **Hosting:** Vercel + Supabase Cloud, one EU region (Frankfurt).
+- **Hosting:** Vercel + Supabase Cloud, one EU region: Ireland (Supabase `eu-west-1`, Vercel `dub1`).
 
 ## Dependencies
 
