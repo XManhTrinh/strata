@@ -5,7 +5,9 @@ services:
     region: eu-west-1
     plan: free
     rootDir: .
-    buildCommand: NPM_CONFIG_PRODUCTION=false pnpm install && pnpm --filter @strata/database build && pnpm --filter @strata/api build
+    # The workspace install includes the web app, which installs Windmorph Pro from its private
+    # repo; PRO_READ_TOKEN is a fine-grained, read-only GitHub token for XManhTrinh/windmorph-pro.
+    buildCommand: test -n "$PRO_READ_TOKEN" && git config --global url."https://x-access-token:$PRO_READ_TOKEN@github.com/XManhTrinh/windmorph-pro".insteadOf https://github.com/XManhTrinh/windmorph-pro && NPM_CONFIG_PRODUCTION=false pnpm install && pnpm --filter @strata/database build && pnpm --filter @strata/api build
     startCommand: cd apps/api && node dist/main.js
     envVars:
       - key: PORT
@@ -23,4 +25,6 @@ services:
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: PRO_READ_TOKEN
         sync: false
