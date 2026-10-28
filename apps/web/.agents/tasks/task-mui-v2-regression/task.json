@@ -1,7 +1,0 @@
-{
-  "task_id": "task-mui-v2-regression",
-  "task_description": "Fix four UI regressions caused by the @vkieu/mui v2 migration: (1) TextField renders at 280px — add className='w-full'; (2) Icon inside Button children misaligns — move to leadingIcon/trailingIcon props or convert icon-only Buttons to IconButton; (3) Nested scroll container inside DialogContent — remove max-h-* and overflow-y-auto from inner wrapper divs; (4) FilterChip used as display label shows unwanted toggle checkmark — convert display-only usages to AssistChip.",
-  "status": "completed",
-  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
-  "blocked_reason": null
-}

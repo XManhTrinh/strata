@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextRouterProvider, getThemeFromCookies, themeAttributes } from "@windmorph/react/next";
-import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme";
+import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme-config";
 import { Providers } from "./providers";
 import "material-symbols/rounded.css";
 import "./globals.css";

@@ -8,7 +8,7 @@ import {
   useSnackbarHostState,
 } from "@windmorph/react";
 import { SnackbarContext } from "@/lib/snackbar";
-import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme";
+import { STRATA_DEFAULT_THEME, STRATA_THEMES } from "@/lib/theme-config";
 
 function makeQueryClient() {
   return new QueryClient({

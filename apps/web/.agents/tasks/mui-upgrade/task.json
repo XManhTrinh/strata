@@ -1,7 +1,0 @@
-{
-  "task_id": "task-mui-upgrade",
-  "task_description": "Upgrade @vkieu/mui to the new monorepo version: fix CSS import, replace ThemeProvider/SnackbarProvider with new API, create local polyfills for removed components (Icon, Typography, Select, Card sub-components), migrate all 55 consumer files to new component names and APIs, update steering docs.",
-  "status": "pending",
-  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
-  "blocked_reason": null
-}
