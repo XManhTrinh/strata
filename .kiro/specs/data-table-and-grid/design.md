@@ -2,13 +2,13 @@
 
 ## Foundations
 
-| Part | DataTable | DataGrid |
-|---|---|---|
-| Structure and accessibility | `react-aria-components` Table | Own ARIA grid keyboard model with React Aria focus helpers |
-| Virtualization | React Aria `Virtualizer` | `@tanstack/react-virtual` (rows and columns) |
-| Drag and drop (column reorder) | React Aria drag and drop | Same |
-| Styling | `tailwind-variants` + Windmorph tokens | Same |
-| Inputs | Windmorph Checkbox, Menu, SearchBar, chips, Select | Windmorph TextField/Select as editors |
+| Part                           | DataTable                                          | DataGrid                                                   |
+| ------------------------------ | -------------------------------------------------- | ---------------------------------------------------------- |
+| Structure and accessibility    | `react-aria-components` Table                      | Own ARIA grid keyboard model with React Aria focus helpers |
+| Virtualization                 | React Aria `Virtualizer`                           | `@tanstack/react-virtual` (rows and columns)               |
+| Drag and drop (column reorder) | React Aria drag and drop                           | Same                                                       |
+| Styling                        | `tailwind-variants` + Windmorph tokens             | Same                                                       |
+| Inputs                         | Windmorph Checkbox, Menu, SearchBar, chips, Select | Windmorph TextField/Select as editors                      |
 
 ## API sketch
 
@@ -45,18 +45,27 @@ type ColumnDef<T> = {
   cell?: (row: T) => ReactNode;
   type?: "text" | "number" | "currency" | "date" | "chip" | "avatar" | "actions";
   align?: "start" | "end" | "center";
-  width?: number; minWidth?: number; maxWidth?: number;
-  sortable?: boolean; filter?: FilterDef; hideable?: boolean;
-  pinnable?: boolean; reorderable?: boolean; resizable?: boolean;
-  editor?: EditorDef<T>;             // DataGrid only
-  validate?: (value: unknown, row: T) => string | null;   // DataGrid only
+  width?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  sortable?: boolean;
+  filter?: FilterDef;
+  hideable?: boolean;
+  pinnable?: boolean;
+  reorderable?: boolean;
+  resizable?: boolean;
+  editor?: EditorDef<T>; // DataGrid only
+  validate?: (value: unknown, row: T) => string | null; // DataGrid only
 };
 
 type TableState = {
-  columnOrder: string[]; hidden: string[]; widths: Record<string, number>;
+  columnOrder: string[];
+  hidden: string[];
+  widths: Record<string, number>;
   pinned: { start: string[]; end: string[] };
   sort: { id: string; desc: boolean }[];
-  filters: Record<string, FilterValue>; search: string;
+  filters: Record<string, FilterValue>;
+  search: string;
   page: { index: number; size: number };
   selection: { ids: string[]; allMatching: boolean };
 };

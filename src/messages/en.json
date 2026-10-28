@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": "Strata",
+    "description": "People, time and capacity planning for organizations of every size."
+  },
+  "home": {
+    "title": "Strata",
+    "subtitle": "People, time and capacity planning for organizations of every size.",
+    "status": "The new foundation is running."
+  },
+  "states": {
+    "loading": "Loading",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "Try again. If it keeps happening, contact support.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you're looking for doesn't exist or you don't have access to it.",
+    "goHome": "Go to home"
+  }
+}

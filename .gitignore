@@ -1,16 +1,26 @@
+# Dependencies and builds
 node_modules
-dist
 .next
-.turbo
-coverage
+out
+dist
 *.tsbuildinfo
+next-env.d.ts
+
+# Tests
+coverage
+playwright-report
+test-results
+blob-report
+
+# Environment
 .env
 .env.*
-.env.local
-.env.*.local
+!.env.example
 
-# macOS
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# OS and tools
 .DS_Store
-
-# Workflow task artifacts
 .agents

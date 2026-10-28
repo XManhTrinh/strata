@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@windmorph/react/styles.css";
+@import "@windmorph/react-pro/styles.css";
+@source "../../node_modules/@windmorph/react";
+@source "../../node_modules/@windmorph/react-pro";
+
+/* Tailwind v4's preflight resets the pointer cursor on buttons. */
+button,
+[role="button"] {
+  cursor: pointer;
+}

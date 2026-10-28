@@ -10,7 +10,8 @@ The stack decision, with the reasons, is in:
 
 ## Stack
 
-- **Next.js 16** (App Router), React 19, TypeScript strict. A single app, no monorepo tooling.
+- **Next.js 16** (App Router), React 19, TypeScript strict, Node 26 LTS, pnpm 12. A single app, no
+  monorepo tooling.
 - **Supabase** is the whole backend: Postgres with RLS, SQL migrations, Auth, RPC (Postgres
   functions), `pg_cron`, `pgmq`, Edge Functions, Realtime, Storage.
 - **UI:** `@windmorph/react` (Material Design 3 Expressive, built on React Aria) and
@@ -32,14 +33,23 @@ The stack decision, with the reasons, is in:
 - Add a package only when it is used; `knip` in CI fails on unused dependencies, files and
   exports. Remove a package in the same change that stops using it.
 - Renovate keeps dependencies current with grouped weekly pull requests.
+- Deliberate exceptions:
+  - **TypeScript:** type checking (`pnpm typecheck`) uses **TypeScript 7** (`typescript-native`,
+    the native compiler). The `typescript` package stays on **6.x** because typescript-eslint,
+    Next.js and editors need its JavaScript API, which TypeScript 7 doesn't have yet. Remove the
+    6.x copy once typescript-eslint supports 7.
+  - **`@types/node` follows the Node LTS major we run on** (Node 26), not newer types.
+- Runtime: **Node 26 LTS** (`.nvmrc`), **pnpm** pinned in `packageManager` (pnpm switches to it
+  automatically).
 
 ## Never
 
 - No NestJS, Prisma, Redis, BullMQ, Turborepo or a separate API service.
 - No `@mui/*`, no other component library, no CSS-in-JS, no chart library with its own look,
   no `@dnd-kit` (use React Aria drag and drop).
-- No `prisma db push`, `supabase db push` to production, or schema changes outside
-  `supabase/migrations`.
+- No schema changes outside `supabase/migrations`: no editing a hosted database by hand (Studio
+  or SQL editor), and never run `supabase db push` from a laptop. Migrations reach staging and
+  production only through the `deploy-db` workflow.
 - Never use the Supabase service (secret) key for a user's request. It is only for jobs and
   admin tasks that cannot run as the user.
 - Never trust the browser for permissions. The UI hides what the database already refuses.
@@ -47,12 +57,12 @@ The stack decision, with the reasons, is in:
 
 ## Where code runs
 
-| Layer | Responsibility |
-|---|---|
-| Postgres | Schema, RLS, permission functions, transactional RPCs, schedules, job queue |
-| Edge Functions | Batch jobs (import, rate-card apply, GDPR export/erase, retention), email |
+| Layer          | Responsibility                                                                 |
+| -------------- | ------------------------------------------------------------------------------ |
+| Postgres       | Schema, RLS, permission functions, transactional RPCs, schedules, job queue    |
+| Edge Functions | Batch jobs (import, rate-card apply, GDPR export/erase, retention), email      |
 | Next.js server | Reads with the user's session, Server Actions with zod, calendar feed, exports |
-| Browser | Windmorph UI; TanStack Query only for live, interactive screens |
+| Browser        | Windmorph UI; TanStack Query only for live, interactive screens                |
 
 Business logic lives in exactly one place (SQL **or** TypeScript), never duplicated.
 

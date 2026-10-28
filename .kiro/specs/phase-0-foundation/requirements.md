@@ -69,7 +69,8 @@ first screen.
 2. THE App SHALL wrap the root layout in Windmorph's `ThemeProvider` using the baseline theme, and
    SHALL read the theme from cookies on the server so the first render has the right mode.
 3. THE App SHALL load Material Symbols and provide one `Icon` component.
-4. THE App SHALL provide a shared Snackbar host and a reduced-motion aware motion helper.
+4. The shared Snackbar host and the reduced-motion aware motion helper SHALL be added with their
+   first use (the Phase 1 shell), because the App contains only code it uses.
 5. THE App SHALL render a placeholder home page using only Windmorph components and tokens.
 
 ### Requirement 4: Translation layer
@@ -94,12 +95,12 @@ types, so that the schema is reviewable and reproducible.
 
 1. THE repository SHALL contain `supabase/config.toml` configured for Strata (site URL, redirect
    URLs, email confirmations on, minimum password length 8, Google provider placeholders).
-2. THE first Migration SHALL enable the `ltree`, `pg_cron`, `pgmq` and `pgtap` extensions and
-   create the shared helpers: `set_updated_at()` trigger function and an `app` schema for
-   permission functions.
+2. THE first Migration SHALL enable the `ltree`, `pg_cron` and `pgmq` extensions and create the
+   shared helpers: `set_updated_at()` trigger function and an `app` schema for permission
+   functions. `pgtap` SHALL be enabled inside the test files only, so it never reaches production.
 3. WHEN `pnpm db:types` runs against the Local_Stack, THE Database_Types SHALL be regenerated.
-4. THE App SHALL provide server, browser and proxy Supabase clients in `src/lib/supabase`, typed
-   with Database_Types.
+4. THE App SHALL provide the proxy Supabase client in `src/lib/supabase`, typed with
+   Database_Types. The server and browser clients SHALL be added with their first use in Phase 1.
 5. THE proxy (`src/proxy.ts`) SHALL refresh the session on every request and verify it with
    `getClaims()`.
 6. THE repository SHALL contain `.env.example` listing every variable, without real values.

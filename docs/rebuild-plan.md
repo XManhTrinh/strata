@@ -13,12 +13,12 @@ are ported from it and re-tested; no file is copied across.
 
 ### 1.1 Responsibilities
 
-| Layer | Does | Does not |
-|---|---|---|
-| **Postgres (Supabase)** | Owns the schema, enforces tenancy and permissions with RLS, runs multi-step changes as transactional functions (RPC), runs schedules (`pg_cron`), queues jobs (`pgmq`) | Render anything; call external services |
-| **Edge Functions** | Long-running or batch jobs: people import, rate-card apply, retention runs, email sending | Hold business rules that must also run elsewhere |
-| **Next.js server** (Server Components, Server Actions, route handlers) | Reads with the user's session, validates input with zod, calls RPCs, serves the calendar feed and file exports | Bypass RLS (the service key is never used for user requests) |
-| **Browser** | Interactive UI with Windmorph; TanStack Query only for live, highly interactive screens | Decide permissions (it only hides what the server already refuses) |
+| Layer                                                                  | Does                                                                                                                                                                   | Does not                                                           |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **Postgres (Supabase)**                                                | Owns the schema, enforces tenancy and permissions with RLS, runs multi-step changes as transactional functions (RPC), runs schedules (`pg_cron`), queues jobs (`pgmq`) | Render anything; call external services                            |
+| **Edge Functions**                                                     | Long-running or batch jobs: people import, rate-card apply, retention runs, email sending                                                                              | Hold business rules that must also run elsewhere                   |
+| **Next.js server** (Server Components, Server Actions, route handlers) | Reads with the user's session, validates input with zod, calls RPCs, serves the calendar feed and file exports                                                         | Bypass RLS (the service key is never used for user requests)       |
+| **Browser**                                                            | Interactive UI with Windmorph; TanStack Query only for live, highly interactive screens                                                                                | Decide permissions (it only hides what the server already refuses) |
 
 Rules that apply everywhere:
 
@@ -93,39 +93,39 @@ on a person's location are stored as dates in that person's time zone.
 
 ### 2.1 Platform and workspaces
 
-| Table | Purpose |
-|---|---|
-| `profiles` | One per `auth.users` row: name, avatar, locale, time zone. Created by a trigger on sign-up |
-| `workspaces` | Name, slug, kind (personal/team/company), template, **data region**, currency, fiscal year start month, default country, time zone, week start, planning settings, subscription plan |
-| `subscription_plans`, `subscription_plan_features` | Plans and the features each allows (only "Free" at launch) |
-| `features`, `feature_dependencies`, `permissions` | Seeded by migration: each feature, what it needs, and its actions |
-| `workspace_features` | Which allowed features the workspace has on |
-| `members` | A person in a workspace. `user_id` is null until they accept an invite (imported people often never sign in). Person key, name, email, country, time zone, status (active/invited/inactive), is_owner |
-| `invitations` | Email, role, optional member to link, token, expiry |
-| `roles`, `role_permissions` | Role = set of (permission, reach). Reach: own, reports, team, team_and_below, units, workspace |
-| `member_roles`, `member_role_units` | Who has which role; the units for "specific units" reach |
-| `audit_log` | Actor, action, table, row, before/after, time. Written by triggers on sensitive tables |
-| `notifications`, `notification_preferences` | In-app list; per-category email choice and daily summary |
-| `jobs` | See 1.2 |
+| Table                                              | Purpose                                                                                                                                                                                               |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profiles`                                         | One per `auth.users` row: name, avatar, locale, time zone. Created by a trigger on sign-up                                                                                                            |
+| `workspaces`                                       | Name, slug, kind (personal/team/company), template, **data region**, currency, fiscal year start month, default country, time zone, week start, planning settings, subscription plan                  |
+| `subscription_plans`, `subscription_plan_features` | Plans and the features each allows (only "Free" at launch)                                                                                                                                            |
+| `features`, `feature_dependencies`, `permissions`  | Seeded by migration: each feature, what it needs, and its actions                                                                                                                                     |
+| `workspace_features`                               | Which allowed features the workspace has on                                                                                                                                                           |
+| `members`                                          | A person in a workspace. `user_id` is null until they accept an invite (imported people often never sign in). Person key, name, email, country, time zone, status (active/invited/inactive), is_owner |
+| `invitations`                                      | Email, role, optional member to link, token, expiry                                                                                                                                                   |
+| `roles`, `role_permissions`                        | Role = set of (permission, reach). Reach: own, reports, team, team_and_below, units, workspace                                                                                                        |
+| `member_roles`, `member_role_units`                | Who has which role; the units for "specific units" reach                                                                                                                                              |
+| `audit_log`                                        | Actor, action, table, row, before/after, time. Written by triggers on sensitive tables                                                                                                                |
+| `notifications`, `notification_preferences`        | In-app list; per-category email choice and daily summary                                                                                                                                              |
+| `jobs`                                             | See 1.2                                                                                                                                                                                               |
 
 Platform staff access (decision 5) is a separate `platform_admins` table checked by its own
 functions, never a customer role.
 
 ### 2.2 Organization and people
 
-| Table | Purpose |
-|---|---|
-| `org_unit_levels` | Workspace-defined levels (e.g. Division, Cluster, Tribe, Squad), ordered, with icon and colour |
-| `org_units` | Tree with `parent_id` and an `ltree` path for fast subtree queries; archived, not deleted |
-| `positions`, `career_level_schemes`, `career_levels` | Positions with a min/max level; the workspace's levelling scheme |
-| `employment_types` | Workspace-defined options, each with a **cost method** (annual salary / day rate) |
-| `custom_fields`, `custom_field_options` | Type, visibility, required, keep-history, import key |
-| `member_assignments` | **Effective-dated** (`valid_from`, `valid_to`): org unit, manager, position, career level, employment type, work schedule, holiday calendar |
-| `member_compensation` | **Effective-dated** salary and day rate with currency. Its own strict RLS |
-| `member_field_values` | Custom field values; effective-dated for fields with keep-history |
-| `reporting_closure`, `org_unit_closure` | Precomputed "who is under whom" for the **current** date, maintained by triggers and a nightly job that applies future-dated changes; history queries use recursive SQL instead |
-| `import_mappings` | Saved column mapping per workspace |
-| `table_views` | Saved columns and filters per table; personal or shared |
+| Table                                                | Purpose                                                                                                                                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `org_unit_levels`                                    | Workspace-defined levels (e.g. Division, Cluster, Tribe, Squad), ordered, with icon and colour                                                                                  |
+| `org_units`                                          | Tree with `parent_id` and an `ltree` path for fast subtree queries; archived, not deleted                                                                                       |
+| `positions`, `career_level_schemes`, `career_levels` | Positions with a min/max level; the workspace's levelling scheme                                                                                                                |
+| `employment_types`                                   | Workspace-defined options, each with a **cost method** (annual salary / day rate)                                                                                               |
+| `custom_fields`, `custom_field_options`              | Type, visibility, required, keep-history, import key                                                                                                                            |
+| `member_assignments`                                 | **Effective-dated** (`valid_from`, `valid_to`): org unit, manager, position, career level, employment type, work schedule, holiday calendar                                     |
+| `member_compensation`                                | **Effective-dated** salary and day rate with currency. Its own strict RLS                                                                                                       |
+| `member_field_values`                                | Custom field values; effective-dated for fields with keep-history                                                                                                               |
+| `reporting_closure`, `org_unit_closure`              | Precomputed "who is under whom" for the **current** date, maintained by triggers and a nightly job that applies future-dated changes; history queries use recursive SQL instead |
+| `import_mappings`                                    | Saved column mapping per workspace                                                                                                                                              |
+| `table_views`                                        | Saved columns and filters per table; personal or shared                                                                                                                         |
 
 Reporting cycles and org-tree cycles are refused by triggers. The "as of date" view of the
 organization is one SQL function (`org_as_of(workspace, date)`) used by the org chart, people
@@ -133,17 +133,17 @@ list and reports.
 
 ### 2.3 Time: calendar, time types and leave
 
-| Table | Purpose |
-|---|---|
-| `work_schedules` | Working days (and later hours) per week; workspace default plus per person via `member_assignments` |
-| `holiday_calendars`, `holidays` | Per country/region, loaded from a maintained holiday data source by a scheduled job, editable per workspace |
-| `time_types` | The settings in decision 10: allowance, approval, away, visibility, paid, who can book, book for others, approver rule |
-| `allowance_policies` | Per time type: yearly amount, accrual (upfront or monthly), carry-over cap, expiry; country templates seed them |
-| `allowance_ledger` | Every balance change as a row: grant, accrual, adjustment, usage, carry-over, expiry. **Balance = sum of rows**, so every number can be explained |
-| `bookings` | Time type, start and end (date + optional half day, or time for events), time zone, recurrence rule, title, notes, status, working days counted |
-| `booking_attendees` | Who a booking is for (one person, or a team for team events) |
-| `booking_approvals` | Approval steps: approver, decision, comment, time. One step in v1; the table allows chains |
-| `calendar_feed_tokens` | Secret links for the one-way calendar feed |
+| Table                           | Purpose                                                                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `work_schedules`                | Working days (and later hours) per week; workspace default plus per person via `member_assignments`                                               |
+| `holiday_calendars`, `holidays` | Per country/region, loaded from a maintained holiday data source by a scheduled job, editable per workspace                                       |
+| `time_types`                    | The settings in decision 10: allowance, approval, away, visibility, paid, who can book, book for others, approver rule                            |
+| `allowance_policies`            | Per time type: yearly amount, accrual (upfront or monthly), carry-over cap, expiry; country templates seed them                                   |
+| `allowance_ledger`              | Every balance change as a row: grant, accrual, adjustment, usage, carry-over, expiry. **Balance = sum of rows**, so every number can be explained |
+| `bookings`                      | Time type, start and end (date + optional half day, or time for events), time zone, recurrence rule, title, notes, status, working days counted   |
+| `booking_attendees`             | Who a booking is for (one person, or a team for team events)                                                                                      |
+| `booking_approvals`             | Approval steps: approver, decision, comment, time. One step in v1; the table allows chains                                                        |
+| `calendar_feed_tokens`          | Secret links for the one-way calendar feed                                                                                                        |
 
 Booking, approving, rejecting, cancelling and adjusting are RPCs: each checks the rules (overlap,
 allowance, who may approve), writes the booking, the approval and the ledger rows in one
@@ -154,15 +154,15 @@ with half days counting 0.5. This is one SQL function, tested against country ex
 
 ### 2.4 Planning: scenarios, capacity and rate cards
 
-| Table | Purpose |
-|---|---|
-| `scenarios` | Fiscal year(s), name, baseline it was copied from, status (draft/submitted/approved), is_live, locked-through period |
-| `planned_roles` | Vacancy: title, org unit, position, employment type, start/end, FTE, filled by (member) |
-| `allocations` | Scenario, member **or** planned role, org unit, period start, FTE. One row per period (no `p1…p12` columns) |
-| `rate_card_sets`, `rate_card_groups` | UI-only organization (tabs and groups) |
-| `rate_cards` | Priority, is default, conditions (on any built-in or custom field) |
-| `rate_card_rates` | **Dated** per period: day rate, working days, currency |
-| `cost_snapshots` | Result of "apply": per scenario, member or planned role, period, rate card used, monthly cost |
+| Table                                | Purpose                                                                                                              |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `scenarios`                          | Fiscal year(s), name, baseline it was copied from, status (draft/submitted/approved), is_live, locked-through period |
+| `planned_roles`                      | Vacancy: title, org unit, position, employment type, start/end, FTE, filled by (member)                              |
+| `allocations`                        | Scenario, member **or** planned role, org unit, period start, FTE. One row per period (no `p1…p12` columns)          |
+| `rate_card_sets`, `rate_card_groups` | UI-only organization (tabs and groups)                                                                               |
+| `rate_cards`                         | Priority, is default, conditions (on any built-in or custom field)                                                   |
+| `rate_card_rates`                    | **Dated** per period: day rate, working days, currency                                                               |
+| `cost_snapshots`                     | Result of "apply": per scenario, member or planned role, period, rate card used, monthly cost                        |
 
 The rate-card engine (priority order, first match wins, ANDed conditions, seven operators,
 monthly cost = day rate × working days) is a pure TypeScript module with full unit tests. "Apply"
@@ -208,24 +208,24 @@ of bookings:
 Material 3 layouts and Windmorph components first; "build" marks components Strata builds in
 `components/ui` (decision 8). Per-device behaviour follows decision 17.
 
-| Area | Screen | Layout | Main components |
-|---|---|---|---|
-| Shell | Navigation | Bottom bar (phone), rail (tablet), expanded rail (desktop); one top app bar per page | `NavigationBar`, `NavigationRail`, `TopAppBar`, `Menu` (workspace switcher) |
-| Auth | Sign in, sign up, reset, invite accept | Single centered pane | `TextField`, `Button`, `Card` |
-| Onboarding | Create workspace (template picker) | Stepper in one pane | `Card`, `RadioGroup`, `Button` |
-| Dashboard | Role dashboard | Card grid | `Card`, `LinearProgressIndicator`, `List` |
-| People | Directory and profile | **List-detail** (tablet/desktop), list then detail (phone); table view on desktop | `ListDetailLayout`, `SearchBar`, `List`, `Avatar`, `Tabs`, data table (build) |
-| People | History and future changes | Timeline inside profile | `List`, `DatePicker`, `Dialog` |
-| Org chart | Chart and person view | Full canvas (tablet/desktop), person view (phone) | `@xyflow/react` + ELK layout, `Avatar`, `Card`, `SideSheet` |
-| Hierarchy | Units and levels | List-detail with tree | tree view (build), `Dialog`, `FabMenu` |
-| Calendar | Month, week, list | Full-width grid; list on phone | calendar grid (build), `ButtonGroup` (view switch), `DatePicker` |
-| Time off | Book, my balances, my requests | Supporting pane (balances beside the form) | `Dialog`/full-screen dialog on phone, `DateRangePicker`, `Select` |
-| Approvals | Pending requests | List-detail | `List`, `Button`, `Snackbar` |
-| Planning | Scenarios, capacity grid, planned roles | Full-width grid (desktop edit, otherwise read-only) | data table (build, virtualized), `Tabs`, `SideSheet`, `Menu` |
-| Rate cards | Sets, groups, cards | List-detail | `Tabs`, `List`, `Dialog`, condition builder (build) |
-| Settings | All settings pages | List-detail (sections left, form right) | `List`, `TextField`, `Switch`, `Select`, colour/icon picker (build) |
-| Import | Upload, map, preview, apply | Stepper; desktop/tablet only | `FileTrigger`, data table (build), `LinearProgressIndicator` |
-| Shared | Empty, loading, error, "open on a larger screen" | — | `EmptyState`, `Skeleton`, `LoadingIndicator` |
+| Area       | Screen                                           | Layout                                                                               | Main components                                                               |
+| ---------- | ------------------------------------------------ | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Shell      | Navigation                                       | Bottom bar (phone), rail (tablet), expanded rail (desktop); one top app bar per page | `NavigationBar`, `NavigationRail`, `TopAppBar`, `Menu` (workspace switcher)   |
+| Auth       | Sign in, sign up, reset, invite accept           | Single centered pane                                                                 | `TextField`, `Button`, `Card`                                                 |
+| Onboarding | Create workspace (template picker)               | Stepper in one pane                                                                  | `Card`, `RadioGroup`, `Button`                                                |
+| Dashboard  | Role dashboard                                   | Card grid                                                                            | `Card`, `LinearProgressIndicator`, `List`                                     |
+| People     | Directory and profile                            | **List-detail** (tablet/desktop), list then detail (phone); table view on desktop    | `ListDetailLayout`, `SearchBar`, `List`, `Avatar`, `Tabs`, data table (build) |
+| People     | History and future changes                       | Timeline inside profile                                                              | `List`, `DatePicker`, `Dialog`                                                |
+| Org chart  | Chart and person view                            | Full canvas (tablet/desktop), person view (phone)                                    | `@xyflow/react` + ELK layout, `Avatar`, `Card`, `SideSheet`                   |
+| Hierarchy  | Units and levels                                 | List-detail with tree                                                                | tree view (build), `Dialog`, `FabMenu`                                        |
+| Calendar   | Month, week, list                                | Full-width grid; list on phone                                                       | calendar grid (build), `ButtonGroup` (view switch), `DatePicker`              |
+| Time off   | Book, my balances, my requests                   | Supporting pane (balances beside the form)                                           | `Dialog`/full-screen dialog on phone, `DateRangePicker`, `Select`             |
+| Approvals  | Pending requests                                 | List-detail                                                                          | `List`, `Button`, `Snackbar`                                                  |
+| Planning   | Scenarios, capacity grid, planned roles          | Full-width grid (desktop edit, otherwise read-only)                                  | data table (build, virtualized), `Tabs`, `SideSheet`, `Menu`                  |
+| Rate cards | Sets, groups, cards                              | List-detail                                                                          | `Tabs`, `List`, `Dialog`, condition builder (build)                           |
+| Settings   | All settings pages                               | List-detail (sections left, form right)                                              | `List`, `TextField`, `Switch`, `Select`, colour/icon picker (build)           |
+| Import     | Upload, map, preview, apply                      | Stepper; desktop/tablet only                                                         | `FileTrigger`, data table (build), `LinearProgressIndicator`                  |
+| Shared     | Empty, loading, error, "open on a larger screen" | —                                                                                    | `EmptyState`, `Skeleton`, `LoadingIndicator`                                  |
 
 Every route has `loading.tsx` and `error.tsx`. Forms use one pattern: zod schema, Server Action,
 field errors on the inputs, `Snackbar` for success.
@@ -305,28 +305,29 @@ first), regional deployments, sensitive-field view log and legal hold, installab
 
 ## 5. Testing, CI and environments
 
-| Level | Tool | Covers |
-|---|---|---|
-| Database | pgTAP (`supabase test db`) | Every RLS policy per role, every RPC's rules and failure cases, working-day function, closure maintenance |
-| Unit | Vitest | Rate-card engine, cost maths, import mapping and change detection, formatting, zod schemas |
-| End to end | Playwright | Sign-up → workspace → invite; import → org chart; book → approve → balance; scenario → apply → totals; at phone, tablet and desktop sizes |
-| Load | Seed generator + scripted queries | 100k-member workspace: list, search, reach checks, capacity totals |
+| Level      | Tool                              | Covers                                                                                                                                    |
+| ---------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Database   | pgTAP (`supabase test db`)        | Every RLS policy per role, every RPC's rules and failure cases, working-day function, closure maintenance                                 |
+| Unit       | Vitest                            | Rate-card engine, cost maths, import mapping and change detection, formatting, zod schemas                                                |
+| End to end | Playwright                        | Sign-up → workspace → invite; import → org chart; book → approve → balance; scenario → apply → totals; at phone, tablet and desktop sizes |
+| Load       | Seed generator + scripted queries | 100k-member workspace: list, search, reach checks, capacity totals                                                                        |
 
 CI runs on every push: lint, typecheck, unit, database tests against local Supabase, end-to-end
-smoke, generated-types drift check. Load tests run nightly. Migrations reach staging on merge and
-production on release, never with `db push`.
+smoke, generated-types drift check. Load tests run nightly. Migrations reach staging when they
+merge to `main` and production through a manually approved run of the same workflow; nobody
+changes a hosted database by hand.
 
 ---
 
 ## 6. Risks
 
-| Risk | Mitigation |
-|---|---|
-| RLS rules become complex and slow at 100k members | Few, well-tested permission functions; closure tables; load tests from Phase 2 |
-| Effective dating adds complexity everywhere | One `org_as_of` function and assignment tables; current-date closures for everyday queries |
-| Windmorph gaps (data table, calendar grid, tree) slow the UI | Build the data table first in Phase 2; keep APIs Windmorph-style so they can move into windmorph-pro |
-| Private `@windmorph/react-pro` install in Vercel and CI | Read-only token for the private repo in both; document the setup in Phase 0 |
-| Holiday data is wrong for some country | Maintained data source, editable per workspace, tests for key countries |
-| Logic in SQL is harder to review | Small functions, pgTAP tests for each rule, logic ported from `main` with its old tests as a reference |
-| Large-client procurement (security reviews, DPA) delays deals | Audit log, retention and DPA in v1; security documentation in Phase 5 |
-| Scope is large | Phases ship usable increments; everything in "Later" stays out until v1 launches |
+| Risk                                                          | Mitigation                                                                                             |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| RLS rules become complex and slow at 100k members             | Few, well-tested permission functions; closure tables; load tests from Phase 2                         |
+| Effective dating adds complexity everywhere                   | One `org_as_of` function and assignment tables; current-date closures for everyday queries             |
+| Windmorph gaps (data table, calendar grid, tree) slow the UI  | Build the data table first in Phase 2; keep APIs Windmorph-style so they can move into windmorph-pro   |
+| Private `@windmorph/react-pro` install in Vercel and CI       | Read-only token for the private repo in both; document the setup in Phase 0                            |
+| Holiday data is wrong for some country                        | Maintained data source, editable per workspace, tests for key countries                                |
+| Logic in SQL is harder to review                              | Small functions, pgTAP tests for each rule, logic ported from `main` with its old tests as a reference |
+| Large-client procurement (security reviews, DPA) delays deals | Audit log, retention and DPA in v1; security documentation in Phase 5                                  |
+| Scope is large                                                | Phases ship usable increments; everything in "Later" stays out until v1 launches                       |

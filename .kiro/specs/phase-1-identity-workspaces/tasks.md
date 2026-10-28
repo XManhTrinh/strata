@@ -9,7 +9,7 @@ settings, and notifications. Every migration lands with its pgTAP tests.
 
 - [ ] 1. Platform catalogue
   - [ ] 1.1 Migration: `features`, `feature_dependencies`, `permissions`, `subscription_plans`,
-    `subscription_plan_features`, seeded with the v1 catalogue and the Free plan
+        `subscription_plan_features`, seeded with the v1 catalogue and the Free plan
     - _Requirements: 7.1, 9.1, 9.5_
   - [ ] 1.2 pgTAP: catalogue is read-only for users
     - _Requirements: 8.1_
@@ -22,11 +22,11 @@ settings, and notifications. Every migration lands with its pgTAP tests.
 
 - [ ] 3. Workspaces, members and roles
   - [ ] 3.1 Migration: `workspaces`, `workspace_features`, `members`, `roles`,
-    `role_permissions`, `member_roles`, `member_role_units`, `org_units`, `org_unit_closure`,
-    `reporting_closure`, `member_last_workspace`, `platform_admins`
+        `role_permissions`, `member_roles`, `member_role_units`, `org_units`, `org_unit_closure`,
+        `reporting_closure`, `member_last_workspace`, `platform_admins`
     - _Requirements: 3.2, 6.1, 7.2, 8.6_
   - [ ] 3.2 Permission functions `app.current_member`, `app.is_owner`, `app.feature_on`,
-    `app.reach`, `app.can`
+        `app.reach`, `app.can`
     - _Requirements: 8.2, 8.5, 7.4, 7.5, 7.6_
   - [ ] 3.3 RLS policies for every table above
     - _Requirements: 8.1, 8.3, 8.4_
@@ -37,7 +37,7 @@ settings, and notifications. Every migration lands with its pgTAP tests.
   - [ ] 3.6 RPC `set_feature` with dependency and plan rules
     - _Requirements: 9.2, 9.3, 9.4, 9.6_
   - [ ] 3.7 pgTAP: cross-workspace isolation, owner invariants, grant-only-what-you-hold,
-    feature rules, `own` and `workspace` reach
+        feature rules, `own` and `workspace` reach
     - _Requirements: 6.5, 7.7, 8.3, 8.4, 8.5, 9.2–9.6_
 
 - [ ] 4. Invitations
@@ -54,7 +54,7 @@ settings, and notifications. Every migration lands with its pgTAP tests.
 
 - [ ] 6. Notifications
   - [ ] 6.1 Migration: `notifications`, `notification_preferences`, email queue trigger,
-    Realtime publication
+        Realtime publication
     - _Requirements: 11.1, 11.2, 11.3_
   - [ ] 6.2 Edge Function: email worker (Resend + React Email templates) and daily digest schedule
     - _Requirements: 11.2, 11.3, 11.5_
@@ -73,12 +73,12 @@ settings, and notifications. Every migration lands with its pgTAP tests.
   - [ ] 8.2 Invitation accept page
     - _Requirements: 5.3, 5.6_
   - [ ] 8.3 `/w/[workspace]` layout resolving the member, last-workspace redirect, not-found for
-    non-members
+        non-members
     - _Requirements: 4.1, 4.3, 4.4_
 
 - [ ] 9. Shell
   - [ ] 9.1 Adaptive navigation (bar / rail / expanded rail), page header, skip link, route
-    announcer
+        announcer
     - _Requirements: 12.1, 12.3, 12.5_
   - [ ] 9.2 Workspace switcher and user menu (profile, theme, sign out)
     - _Requirements: 4.2, 12.4_
@@ -105,5 +105,5 @@ settings, and notifications. Every migration lands with its pgTAP tests.
 
 - [ ] 11. End-to-end
   - [ ] 11.1 Playwright: sign-up → onboarding → invite → accept → role-limited navigation, at
-    three widths, with axe checks
+        three widths, with axe checks
     - _Requirements: 1, 3, 5, 12_

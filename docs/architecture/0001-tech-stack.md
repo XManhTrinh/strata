@@ -29,57 +29,58 @@ Fixed constraints from the product owner: **Next.js**, **Supabase** as the backe
 
 ### Application
 
-| Concern | Choice |
-|---|---|
-| Framework | Next.js 16 App Router, React 19, TypeScript strict |
-| Repo shape | A single Next.js app with `supabase/` alongside it. No Turborepo, no internal packages. (Revisit only if a second app appears.) |
-| Reads | React Server Components using the server Supabase client |
-| Writes | Server Actions (or route handlers where an HTTP endpoint is needed) |
-| Client server-state | TanStack Query, only for highly interactive screens (capacity grid, live lists) |
-| Client UI state | React state and context; no state library unless a real need appears |
-| Dependencies | Latest stable versions at scaffold time; only what is used (`knip` in CI); Renovate for weekly updates |
-| Validation | zod, one schema per form/action, shared by the form and the Server Action (see Forms below) |
-| Session | `@supabase/ssr` in `proxy.ts`, verifying the token server-side (`getClaims()` / `getUser()`, never `getSession()` for auth decisions) |
+| Concern             | Choice                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework           | Next.js 16 App Router, React 19, TypeScript strict                                                                                    |
+| Runtime and tooling | Node 26 LTS, pnpm 12 (pinned in `packageManager`), TypeScript 7 for type checking with TypeScript 6 kept for tools that need its API  |
+| Repo shape          | A single Next.js app with `supabase/` alongside it. No Turborepo, no internal packages. (Revisit only if a second app appears.)       |
+| Reads               | React Server Components using the server Supabase client                                                                              |
+| Writes              | Server Actions (or route handlers where an HTTP endpoint is needed)                                                                   |
+| Client server-state | TanStack Query, only for highly interactive screens (capacity grid, live lists)                                                       |
+| Client UI state     | React state and context; no state library unless a real need appears                                                                  |
+| Dependencies        | Latest stable versions at scaffold time; only what is used (`knip` in CI); Renovate for weekly updates                                |
+| Validation          | zod, one schema per form/action, shared by the form and the Server Action (see Forms below)                                           |
+| Session             | `@supabase/ssr` in `proxy.ts`, verifying the token server-side (`getClaims()` / `getUser()`, never `getSession()` for auth decisions) |
 
 ### Backend: Supabase
 
-| Concern | Choice |
-|---|---|
-| Database | Supabase Postgres; schema owned by SQL migrations in `supabase/migrations` |
-| Types | `supabase gen types typescript`, committed and regenerated in CI |
-| Identity | Supabase Auth (email + Google). `auth.users.id` (UUID) is the only user ID; a `profiles` table keyed by it replaces `User`/`Person` |
-| Authorization | RLS on every table: company membership checks plus SQL helper functions (`is_member`, `is_super_admin`, `has_permission(company, feature, permission)`, scope checks over a recursive org-unit CTE) |
-| Multi-step business logic | Postgres functions (RPC), one transaction each: leave submit/approve/reject/cancel, rate-card apply, org-unit move, set manager, company reset |
-| Scheduled jobs | `pg_cron` (leave accrual, year-end carry-over) |
-| Long-running jobs | Edge Function (CSV import), progress written to a table and pushed via Realtime |
-| Realtime | Notifications and import progress |
-| Files | Supabase Storage (CSV uploads) |
-| Server-only secrets | AI assistant runs in a Next.js route handler or Edge Function, querying with the caller's JWT so RLS applies |
+| Concern                   | Choice                                                                                                                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Database                  | Supabase Postgres; schema owned by SQL migrations in `supabase/migrations`                                                                                                                          |
+| Types                     | `supabase gen types typescript`, committed and regenerated in CI                                                                                                                                    |
+| Identity                  | Supabase Auth (email + Google). `auth.users.id` (UUID) is the only user ID; a `profiles` table keyed by it replaces `User`/`Person`                                                                 |
+| Authorization             | RLS on every table: company membership checks plus SQL helper functions (`is_member`, `is_super_admin`, `has_permission(company, feature, permission)`, scope checks over a recursive org-unit CTE) |
+| Multi-step business logic | Postgres functions (RPC), one transaction each: leave submit/approve/reject/cancel, rate-card apply, org-unit move, set manager, company reset                                                      |
+| Scheduled jobs            | `pg_cron` (leave accrual, year-end carry-over)                                                                                                                                                      |
+| Long-running jobs         | Edge Function (CSV import), progress written to a table and pushed via Realtime                                                                                                                     |
+| Realtime                  | Notifications and import progress                                                                                                                                                                   |
+| Files                     | Supabase Storage (CSV uploads)                                                                                                                                                                      |
+| Server-only secrets       | AI assistant runs in a Next.js route handler or Edge Function, querying with the caller's JWT so RLS applies                                                                                        |
 
 ### UI
 
-| Concern | Choice |
-|---|---|
-| Components | `@windmorph/react` first, `@windmorph/react-pro` for non-M3 components; no other component library, no `@mui/*` |
-| Design guidelines | Material Design 3: canonical layouts (list-detail, supporting pane), window size classes, M3 type roles, color tokens only |
-| Styling | Tailwind CSS v4 with Windmorph tokens, `cn()` (`clsx` + `tailwind-merge`) |
-| Motion | `motion` (`motion/react`), respecting reduced motion |
-| Icons | Material Symbols |
-| Data table | Own `DataTable` with a full API on the `react-aria-components` Table and its virtualizer, styled with Windmorph tokens (Windmorph has no table). No TanStack Table |
-| Data grid | Own `DataGrid` (spreadsheet editing) with a custom keyboard model and TanStack Virtual; AG Grid Community, themed with Windmorph tokens, only as a fallback if performance targets are missed |
-| Component variants | `tailwind-variants` (as Windmorph does) |
-| Org chart | `@xyflow/react` drawing Windmorph components; **ELK (`elkjs`)** for layout of both the reporting chart and the grouped hierarchy view, loaded only on those pages and run in a web worker. Large organizations are expanded on demand, never drawn all at once |
-| Drag and drop | `react-aria-components` drag and drop (keyboard and screen-reader accessible); replaces `@dnd-kit` |
-| Dates and time zones | `@internationalized/date` (as Windmorph's pickers do) |
-| Recurring events | `rrule` (RFC 5545, the format Google and Outlook use) |
-| Public holidays | `date-holidays`, loaded into the holiday tables by a scheduled job |
-| Charts | `@visx` primitives styled with Windmorph tokens; no chart library with its own look |
-| Forms | Simple forms: Server Action + zod. Complex forms: `react-hook-form` with one Windmorph adapter per input type, submitting to a Server Action. The same zod schema validates in the browser and on the server |
-| Translation | `next-intl` |
-| Import files | `papaparse` (CSV, streaming) and SheetJS (Excel) |
-| Excel export | `exceljs` |
-| Email | Resend + React Email |
-| Error monitoring | Sentry with EU data storage |
+| Concern              | Choice                                                                                                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Components           | `@windmorph/react` first, `@windmorph/react-pro` for non-M3 components; no other component library, no `@mui/*`                                                                                                                                                |
+| Design guidelines    | Material Design 3: canonical layouts (list-detail, supporting pane), window size classes, M3 type roles, color tokens only                                                                                                                                     |
+| Styling              | Tailwind CSS v4 with Windmorph tokens, `cn()` (`clsx` + `tailwind-merge`)                                                                                                                                                                                      |
+| Motion               | `motion` (`motion/react`), respecting reduced motion                                                                                                                                                                                                           |
+| Icons                | Material Symbols                                                                                                                                                                                                                                               |
+| Data table           | Own `DataTable` with a full API on the `react-aria-components` Table and its virtualizer, styled with Windmorph tokens (Windmorph has no table). No TanStack Table                                                                                             |
+| Data grid            | Own `DataGrid` (spreadsheet editing) with a custom keyboard model and TanStack Virtual; AG Grid Community, themed with Windmorph tokens, only as a fallback if performance targets are missed                                                                  |
+| Component variants   | `tailwind-variants` (as Windmorph does)                                                                                                                                                                                                                        |
+| Org chart            | `@xyflow/react` drawing Windmorph components; **ELK (`elkjs`)** for layout of both the reporting chart and the grouped hierarchy view, loaded only on those pages and run in a web worker. Large organizations are expanded on demand, never drawn all at once |
+| Drag and drop        | `react-aria-components` drag and drop (keyboard and screen-reader accessible); replaces `@dnd-kit`                                                                                                                                                             |
+| Dates and time zones | `@internationalized/date` (as Windmorph's pickers do)                                                                                                                                                                                                          |
+| Recurring events     | `rrule` (RFC 5545, the format Google and Outlook use)                                                                                                                                                                                                          |
+| Public holidays      | `date-holidays`, loaded into the holiday tables by a scheduled job                                                                                                                                                                                             |
+| Charts               | `@visx` primitives styled with Windmorph tokens; no chart library with its own look                                                                                                                                                                            |
+| Forms                | Simple forms: Server Action + zod. Complex forms: `react-hook-form` with one Windmorph adapter per input type, submitting to a Server Action. The same zod schema validates in the browser and on the server                                                   |
+| Translation          | `next-intl`                                                                                                                                                                                                                                                    |
+| Import files         | `papaparse` (CSV, streaming) and SheetJS (Excel)                                                                                                                                                                                                               |
+| Excel export         | `exceljs`                                                                                                                                                                                                                                                      |
+| Email                | Resend + React Email                                                                                                                                                                                                                                           |
+| Error monitoring     | Sentry with EU data storage                                                                                                                                                                                                                                    |
 
 Every library above is used for logic only; everything visible is a Windmorph component or styled
 with Windmorph tokens. No other component library, CSS-in-JS, or chart library with its own look.
@@ -89,14 +90,14 @@ colour/icon picker, breadcrumbs. Where to build them (windmorph-pro or the app) 
 
 ### Quality and delivery
 
-| Concern | Choice |
-|---|---|
-| Unit tests | Vitest (rate-card engine, capacity maths, leave rules, CSV mapping) |
-| Database tests | pgTAP via `supabase test db` (RLS policies and RPCs) |
-| End-to-end | Playwright |
-| CI | GitHub Actions: lint, typecheck, unit, db tests against local Supabase, e2e smoke, type-gen drift check |
-| Hosting | Vercel (web) + Supabase Cloud, both in one EU region (Frankfurt); Vercel serves static content globally, server code runs next to the database. Each workspace records its data region so dedicated regional deployments can be added later |
-| Environments | Supabase local for dev; separate Supabase projects for preview/staging and production |
+| Concern        | Choice                                                                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit tests     | Vitest (rate-card engine, capacity maths, leave rules, CSV mapping)                                                                                                                                                                         |
+| Database tests | pgTAP via `supabase test db` (RLS policies and RPCs)                                                                                                                                                                                        |
+| End-to-end     | Playwright                                                                                                                                                                                                                                  |
+| CI             | GitHub Actions: lint, typecheck, unit, db tests against local Supabase, e2e smoke, type-gen drift check                                                                                                                                     |
+| Hosting        | Vercel (web) + Supabase Cloud, both in one EU region (Frankfurt); Vercel serves static content globally, server code runs next to the database. Each workspace records its data region so dedicated regional deployments can be added later |
+| Environments   | Supabase local for dev; separate Supabase projects for preview/staging and production                                                                                                                                                       |
 
 ## Removed
 

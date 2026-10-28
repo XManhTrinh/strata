@@ -1,0 +1,2 @@
+-- Demo data for local development only; never runs in production.
+-- Demo personal, team and company workspaces are added in Phase 1.

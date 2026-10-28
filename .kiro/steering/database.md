@@ -12,7 +12,9 @@ change is needed.
 
 - `supabase/migrations` is the **only** source of the schema. Create files with
   `supabase migration new <name>`; never edit a migration that has reached staging.
-- Never `db push` to staging or production; migrations deploy through CI.
+- Never change a hosted database by hand or run `supabase db push` from a laptop; migrations
+  reach staging (automatically, on merge to `main`) and production (manual run, with approval)
+  only through `.github/workflows/deploy-db.yml`.
 - Regenerate types (`supabase gen types typescript --local`) after every migration and commit them.
 - Seed data (`supabase/seed.sql`) is demo data only and never runs in production.
 

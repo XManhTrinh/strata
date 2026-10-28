@@ -1,0 +1,50 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Europe/Bucharest",
+  "minimumReleaseAge": "3 days",
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "packageRules": [
+    {
+      "description": "Windmorph releases together",
+      "matchPackageNames": ["@windmorph/react", "@windmorph/react-pro"],
+      "groupName": "windmorph"
+    },
+    {
+      "description": "Supabase client libraries together",
+      "matchPackageNames": ["@supabase/{/,}**"],
+      "groupName": "supabase"
+    },
+    {
+      "description": "Next.js and its ESLint config together",
+      "matchPackageNames": ["next", "eslint-config-next"],
+      "groupName": "next"
+    },
+    {
+      "description": "Test tooling together",
+      "matchPackageNames": [
+        "vitest",
+        "@vitejs/plugin-react",
+        "happy-dom",
+        "@playwright/test",
+        "@axe-core/playwright"
+      ],
+      "groupName": "test tooling"
+    },
+    {
+      "description": "typescript 6.x is the API copy for typescript-eslint, Next.js and editors; type checking uses typescript-native (TypeScript 7). Drop the pin once typescript-eslint supports 7.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    },
+    {
+      "description": "Node types follow the Node LTS major we run on (26)",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<27"
+    }
+  ]
+}

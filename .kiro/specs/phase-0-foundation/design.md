@@ -52,13 +52,13 @@ pnpm 12 (as today). `pnpm-workspace.yaml` stays only for the `allowBuilds` list 
 `src/lib/env.ts` validates variables with zod at startup and splits public (`NEXT_PUBLIC_*`) from
 server-only values:
 
-| Variable | Scope |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | public |
-| `SUPABASE_SECRET_KEY` | server-only, jobs and admin tasks only |
-| `NEXT_PUBLIC_SITE_URL` | public |
-| `RESEND_API_KEY` | server-only (used from Phase 1) |
-| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` | as named |
+| Variable                                                           | Scope                                  |
+| ------------------------------------------------------------------ | -------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | public                                 |
+| `SUPABASE_SECRET_KEY`                                              | server-only, jobs and admin tasks only |
+| `NEXT_PUBLIC_SITE_URL`                                             | public                                 |
+| `RESEND_API_KEY`                                                   | server-only (used from Phase 1)        |
+| `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`                             | as named                               |
 
 ### Supabase clients
 
@@ -90,7 +90,7 @@ create function app.set_updated_at() ...    -- trigger: new.updated_at = now()
 
 ### CI (`ci.yml`)
 
-1. Checkout, set up pnpm and Node 22, configure git to use `WINDMORPH_PRO_TOKEN` for the private
+1. Checkout, set up pnpm and Node 26 (`.nvmrc`), configure git to use `WINDMORPH_PRO_TOKEN` for the private
    repo, `pnpm install --frozen-lockfile`.
 2. `pnpm lint`, `pnpm typecheck`, `pnpm test`.
 3. `supabase start` (CLI action), `supabase db reset`, `pnpm db:test`, `pnpm db:types` then

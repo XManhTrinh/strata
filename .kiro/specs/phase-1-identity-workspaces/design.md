@@ -61,13 +61,13 @@ All are `stable`, `security definer`, `set search_path = ''`. Policies call them
 
 ## RPCs (transactional)
 
-| RPC | Does |
-|---|---|
-| `create_workspace(name, kind, template, settings)` | Workspace, Owner member, system roles, template features (+ dependencies), root org unit, audit entry |
-| `accept_invitation(token)` | Validates token, links or creates the member, assigns the role, marks used, notifies inviter |
-| `set_feature(ws, feature, enabled, confirm_dependants)` | Applies dependency rules and plan limits |
-| `assign_role(ws, member, role, unit_ids)` / `remove_role(...)` | Enforces "grant only what you hold" |
-| `transfer_ownership(ws, to_member)` / `set_member_status(ws, member, status)` | Enforces "at least one active owner" |
+| RPC                                                                           | Does                                                                                                  |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `create_workspace(name, kind, template, settings)`                            | Workspace, Owner member, system roles, template features (+ dependencies), root org unit, audit entry |
+| `accept_invitation(token)`                                                    | Validates token, links or creates the member, assigns the role, marks used, notifies inviter          |
+| `set_feature(ws, feature, enabled, confirm_dependants)`                       | Applies dependency rules and plan limits                                                              |
+| `assign_role(ws, member, role, unit_ids)` / `remove_role(...)`                | Enforces "grant only what you hold"                                                                   |
+| `transfer_ownership(ws, to_member)` / `set_member_status(ws, member, status)` | Enforces "at least one active owner"                                                                  |
 
 Simple single-row changes (rename workspace, edit role name, mark notification read) go through
 RLS-protected updates from Server Actions.
@@ -87,14 +87,14 @@ morning in each user's time zone.
 
 ## Screens
 
-| Route | Screen |
-|---|---|
-| `/sign-in`, `/sign-up`, `/reset-password`, `/auth/callback`, `/auth/confirm` | Auth |
-| `/onboarding` | Template picker and workspace details |
-| `/invite/[token]` | Accept invitation |
-| `/w/[workspace]` | Placeholder dashboard (real dashboards in Phase 5) |
-| `/w/[workspace]/settings/{general,members,invitations,roles,features,audit}` | Workspace settings |
-| `/account/{profile,notifications}` | Personal settings |
+| Route                                                                        | Screen                                             |
+| ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| `/sign-in`, `/sign-up`, `/reset-password`, `/auth/callback`, `/auth/confirm` | Auth                                               |
+| `/onboarding`                                                                | Template picker and workspace details              |
+| `/invite/[token]`                                                            | Accept invitation                                  |
+| `/w/[workspace]`                                                             | Placeholder dashboard (real dashboards in Phase 5) |
+| `/w/[workspace]/settings/{general,members,invitations,roles,features,audit}` | Workspace settings                                 |
+| `/account/{profile,notifications}`                                           | Personal settings                                  |
 
 The Shell lives in `src/components/shell` and reads the member's effective permissions once per
 request on the server (`app.reach` for each view permission), passing a plain map to the client

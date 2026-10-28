@@ -62,13 +62,13 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 Always included: sign-in, workspaces and templates, members, invites, roles and permissions,
 feature switches.
 
-| Module | Release |
-|---|---|
-| People, hierarchy (org units, positions, career levels, managers), org chart, CSV import | v1 |
-| Calendar and leave (events, leave types, requests, approvals, balances, accrual) | v1 |
-| Capacity and rate cards (monthly FTE allocation, rate-card cost engine, cost totals) | v1 |
-| Budgets (cost reports built on capacity) | Later |
-| AI assistant | Later |
+| Module                                                                                   | Release |
+| ---------------------------------------------------------------------------------------- | ------- |
+| People, hierarchy (org units, positions, career levels, managers), org chart, CSV import | v1      |
+| Calendar and leave (events, leave types, requests, approvals, balances, accrual)         | v1      |
+| Capacity and rate cards (monthly FTE allocation, rate-card cost engine, cost totals)     | v1      |
+| Budgets (cost reports built on capacity)                                                 | Later   |
+| AI assistant                                                                             | Later   |
 
 ## 4. Data
 
@@ -95,14 +95,14 @@ single client.** BT (100k+ people) is expected to be the first large client and 
 example of a large organization's needs; every such need becomes a general feature that any
 workspace can configure or switch on.
 
-| Instead of (client-specific) | Build (general) |
-|---|---|
-| Match people by "UIN" | Each workspace picks its unique person key: employee ID, email, or both |
-| A fixed Division > Cluster > Tribe > Squad tree | Workspace-defined hierarchy levels and names |
-| Fixed Perm/SubCon or Capex/Opex columns | Custom fields per workspace, usable in filters, rate cards and permissions |
-| One CSV layout | Saved column mappings per workspace |
-| One HR system | Pluggable people sources feeding one "apply changes" step |
-| SSO for one client | SSO per workspace |
+| Instead of (client-specific)                    | Build (general)                                                            |
+| ----------------------------------------------- | -------------------------------------------------------------------------- |
+| Match people by "UIN"                           | Each workspace picks its unique person key: employee ID, email, or both    |
+| A fixed Division > Cluster > Tribe > Squad tree | Workspace-defined hierarchy levels and names                               |
+| Fixed Perm/SubCon or Capex/Opex columns         | Custom fields per workspace, usable in filters, rate cards and permissions |
+| One CSV layout                                  | Saved column mappings per workspace                                        |
+| One HR system                                   | Pluggable people sources feeding one "apply changes" step                  |
+| SSO for one client                              | SSO per workspace                                                          |
 
 Large-organization needs, available to any workspace:
 
@@ -157,12 +157,12 @@ virtualized.
 
 ### Performance targets (gate for both)
 
-| Measure | Target |
-|---|---|
-| First rows visible after data arrives | < 100ms |
-| Scrolling through 100k rows | 60 fps |
-| Typing in a grid cell | < 16ms per keystroke |
-| Sort or filter 100k people (server) | < 300ms |
+| Measure                               | Target               |
+| ------------------------------------- | -------------------- |
+| First rows visible after data arrives | < 100ms              |
+| Scrolling through 100k rows           | 60 fps               |
+| Typing in a grid cell                 | < 16ms per keystroke |
+| Sort or filter 100k people (server)   | < 300ms              |
 
 Phase 2 starts with a spike measuring both against these targets. Fallback for DataGrid only:
 AG Grid Community themed with Windmorph tokens.
@@ -202,18 +202,18 @@ Each workspace defines its own fields on people (e.g. Grade, Capex/Opex, Locatio
 Leave, absences, team events and personal events are one concept: **time types**, created and
 edited by each workspace (starter templates suggest common ones). Each type has:
 
-| Setting | Meaning |
-|---|---|
-| Uses an allowance | Deducts from a balance (e.g. 25 days of annual leave), or not |
-| Needs approval | Goes to the type's approver (see Approval), or is booked directly |
-| Person is away | Counts as unavailable in team availability |
-| Visibility | Everyone, team only, or private (others see "busy") |
-| Paid or unpaid | For reports, later for payroll export |
-| Who can book it | Everyone, managers only, or admins only |
-| Book for others | Whether managers/admins can book it on someone's behalf |
+| Setting           | Meaning                                                           |
+| ----------------- | ----------------------------------------------------------------- |
+| Uses an allowance | Deducts from a balance (e.g. 25 days of annual leave), or not     |
+| Needs approval    | Goes to the type's approver (see Approval), or is booked directly |
+| Person is away    | Counts as unavailable in team availability                        |
+| Visibility        | Everyone, team only, or private (others see "busy")               |
+| Paid or unpaid    | For reports, later for payroll export                             |
+| Who can book it   | Everyone, managers only, or admins only                           |
+| Book for others   | Whether managers/admins can book it on someone's behalf           |
 
-Examples: *Annual leave* (allowance, line-manager approval, away); *Training* (no allowance,
-line-manager approval, away); *Event* (no allowance, no approval); *Working from home* (no
+Examples: _Annual leave_ (allowance, line-manager approval, away); _Training_ (no allowance,
+line-manager approval, away); _Event_ (no allowance, no approval); _Working from home_ (no
 allowance, no approval, not away).
 
 - A type can be booked for one person or for a group/team (team events).
@@ -226,12 +226,12 @@ allowance, no approval, not away).
 
 All configured per workspace.
 
-| Rule | Release |
-|---|---|
-| Public holiday calendars (e.g. England, Scotland, US); a workspace default, or one per person by location; holidays are not counted as leave | v1 |
-| Half days (morning or afternoon, 0.5 day) | v1 |
-| Custom working week, per workspace or per person (e.g. Sun–Thu, part-time Mon–Wed) | v1 |
-| Leave in hours | Later |
+| Rule                                                                                                                                         | Release |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Public holiday calendars (e.g. England, Scotland, US); a workspace default, or one per person by location; holidays are not counted as leave | v1      |
+| Half days (morning or afternoon, 0.5 day)                                                                                                    | v1      |
+| Custom working week, per workspace or per person (e.g. Sun–Thu, part-time Mon–Wed)                                                           | v1      |
+| Leave in hours                                                                                                                               | Later   |
 
 ### Approval
 
@@ -253,15 +253,15 @@ the employment type's cost method.
 
 Workspace settings, so each organization plans its own way:
 
-| Setting | Options | Default |
-|---|---|---|
-| Planning period | Monthly or quarterly | Monthly |
-| Planning horizon | Fiscal years ahead | 2 |
-| Allocation unit | FTE (0–1) or percentage | FTE |
-| Over-allocation | Warn or block | Warn |
-| Planning basis | By person, or by position (seats people fill) | By person, with planned roles |
-| Plan lifecycle | Draft → Submitted → Approved; approved plans and past periods locked | On |
-| Cost split | Any custom field (e.g. Capex/Opex) splits cost totals | None |
+| Setting          | Options                                                              | Default                       |
+| ---------------- | -------------------------------------------------------------------- | ----------------------------- |
+| Planning period  | Monthly or quarterly                                                 | Monthly                       |
+| Planning horizon | Fiscal years ahead                                                   | 2                             |
+| Allocation unit  | FTE (0–1) or percentage                                              | FTE                           |
+| Over-allocation  | Warn or block                                                        | Warn                          |
+| Planning basis   | By person, or by position (seats people fill)                        | By person, with planned roles |
+| Plan lifecycle   | Draft → Submitted → Approved; approved plans and past periods locked | On                            |
+| Cost split       | Any custom field (e.g. Capex/Opex) splits cost totals                | None                          |
 
 All plan changes go to the audit log.
 
@@ -313,17 +313,17 @@ All plan changes go to the audit log.
 Responsive web app, decided **per screen** using Material 3 window sizes: phone (< 600px),
 tablet (600–1199px), desktop (≥ 1200px).
 
-| Screen | Phone | Tablet | Desktop |
-|---|---|---|---|
-| Request leave, my balances, my calendar | Full | Full | Full |
-| Approve or reject leave, notifications | Full | Full | Full |
-| People directory, person profile | Search and view | List + detail | List + detail + table |
-| Team calendar | List by day | Week/month grid | Full grid |
-| Org chart | Person view (manager above, reports below, tap to move) | Chart canvas | Chart canvas |
-| Capacity grid | Totals, read-only | Totals + read-only grid | Edit |
-| Rate cards | View only | View only | Edit |
-| People import | "Open on a larger screen" | Full | Full |
-| Admin (roles, hierarchy, settings) | "Open on a larger screen" | Full | Full |
+| Screen                                  | Phone                                                   | Tablet                  | Desktop               |
+| --------------------------------------- | ------------------------------------------------------- | ----------------------- | --------------------- |
+| Request leave, my balances, my calendar | Full                                                    | Full                    | Full                  |
+| Approve or reject leave, notifications  | Full                                                    | Full                    | Full                  |
+| People directory, person profile        | Search and view                                         | List + detail           | List + detail + table |
+| Team calendar                           | List by day                                             | Week/month grid         | Full grid             |
+| Org chart                               | Person view (manager above, reports below, tap to move) | Chart canvas            | Chart canvas          |
+| Capacity grid                           | Totals, read-only                                       | Totals + read-only grid | Edit                  |
+| Rate cards                              | View only                                               | View only               | Edit                  |
+| People import                           | "Open on a larger screen"                               | Full                    | Full                  |
+| Admin (roles, hierarchy, settings)      | "Open on a larger screen"                               | Full                    | Full                  |
 
 - "Open on a larger screen" shows a short summary and a clear message, never a squeezed layout.
 - Navigation adapts: bottom bar on phone, rail on tablet, expanded rail on desktop.

@@ -1,19 +1,38 @@
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+const eslintConfig = [
   {
-    ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**"],
+    ignores: [
+      ".next/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+      "next-env.d.ts",
+      "src/lib/supabase/database.types.ts",
+      "supabase/functions/**",
+      "supabase/.temp/**",
+      "supabase/.branches/**",
+    ],
+  },
+  ...nextCoreWebVitals,
+  ...nextTypeScript,
+  {
+    // eslint-config-next already registers the jsx-a11y plugin; turn on its full recommended set.
+    rules: {
+      ...jsxA11y.flatConfigs.recommended.rules,
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/consistent-type-imports": "error",
+    },
   },
   {
+    // All UI text comes from src/messages through next-intl.
+    files: ["src/**/*.tsx"],
     rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/no-explicit-any": "warn",
+      "react/jsx-no-literals": ["error", { noStrings: false, ignoreProps: true }],
     },
-  }
-);
+  },
+];
+
+export default eslintConfig;
