@@ -42,9 +42,9 @@
       "allowedVersions": "<7"
     },
     {
-      "description": "Node types follow the Node LTS major we run on (26)",
+      "description": "Node types follow the Node major we run on (24 LTS, the newest Vercel offers). Move to 26 with .nvmrc and engines once Vercel supports it.",
       "matchPackageNames": ["@types/node"],
-      "allowedVersions": "<27"
+      "allowedVersions": "<25"
     }
   ]
 }

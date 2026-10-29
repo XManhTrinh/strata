@@ -25,7 +25,7 @@ environments. Each task leaves the repository building.
   - [x] 2.3 Add the scripts `dev`, `build`, `start`, `lint`, `typecheck`, `format`, `knip`,
         `test`, `test:e2e`, `db:test`, `db:types`
     - _Requirements: 2.4_
-  - [x] 2.4 Install each dependency fresh at its latest stable version; Node 26 LTS (`.nvmrc`),
+  - [x] 2.4 Install each dependency fresh at its latest stable version; Node 24 LTS (`.nvmrc`, the newest Vercel offers),
         pnpm 12.16.1 (`packageManager`), TypeScript 7 for type checking with TypeScript 6 for
         tools that need its API; build permissions only for installed packages
     - _Requirements: 2.6, 2.7_

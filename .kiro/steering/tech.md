@@ -10,7 +10,7 @@ The stack decision, with the reasons, is in:
 
 ## Stack
 
-- **Next.js 16** (App Router), React 19, TypeScript strict, Node 26 LTS, pnpm 12. A single app, no
+- **Next.js 16** (App Router), React 19, TypeScript strict, Node 24 LTS, pnpm 12. A single app, no
   monorepo tooling.
 - **Supabase** is the whole backend: Postgres with RLS, SQL migrations, Auth, RPC (Postgres
   functions), `pg_cron`, `pgmq`, Edge Functions, Realtime, Storage.
@@ -38,8 +38,8 @@ The stack decision, with the reasons, is in:
     the native compiler). The `typescript` package stays on **6.x** because typescript-eslint,
     Next.js and editors need its JavaScript API, which TypeScript 7 doesn't have yet. Remove the
     6.x copy once typescript-eslint supports 7.
-  - **`@types/node` follows the Node LTS major we run on** (Node 26), not newer types.
-- Runtime: **Node 26 LTS** (`.nvmrc`), **pnpm** pinned in `packageManager` (pnpm switches to it
+  - **`@types/node` follows the Node LTS major we run on** (Node 24), not newer types.
+- Runtime: **Node 24 LTS** (`.nvmrc`; the newest line Vercel offers. Move .nvmrc, `engines` and `@types/node` to 26 together once Vercel supports it), **pnpm** pinned in `packageManager` (pnpm switches to it
   automatically).
 
 ## Never

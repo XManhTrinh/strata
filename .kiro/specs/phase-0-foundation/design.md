@@ -90,7 +90,7 @@ create function app.set_updated_at() ...    -- trigger: new.updated_at = now()
 
 ### CI (`ci.yml`)
 
-1. Checkout, set up pnpm and Node 26 (`.nvmrc`), configure git to use `WINDMORPH_PRO_TOKEN` for the private
+1. Checkout, set up pnpm and Node 24 (`.nvmrc`), configure git to use `WINDMORPH_PRO_TOKEN` for the private
    repo, `pnpm install --frozen-lockfile`.
 2. `pnpm lint`, `pnpm typecheck`, `pnpm test`.
 3. `supabase start` (CLI action), `supabase db reset`, `pnpm db:test`, `pnpm db:types` then

@@ -7,7 +7,7 @@ Built with Next.js 16, Supabase and Windmorph (Material Design 3). Plans and rul
 
 ## Prerequisites
 
-- **Node 26 LTS** (`nvm install` reads `.nvmrc`)
+- **Node 24 LTS** (`nvm install` reads `.nvmrc`; it matches the version Vercel runs)
 - **pnpm 12** (the exact version in `package.json` is picked automatically)
 - **Supabase CLI** (`brew install supabase/tap/supabase`) and **Docker** for the local stack
 - Read access to the private `XManhTrinh/windmorph-pro` repository (Windmorph Pro installs
