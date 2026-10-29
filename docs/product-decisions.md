@@ -12,6 +12,9 @@ Answers from the product owner that shape the rebuild. See `architecture/0001-te
 - **Every workspace has a hierarchy**, even team and personal ones, so one workspace can hold
   several teams (e.g. Squad A and Squad B) instead of needing a workspace per team.
 - **One user can belong to many workspaces** and switches between them.
+- **Joining is by email invite only in v1:** an admin names each person and their role. Shareable
+  join links come later, with expiry, a usage limit, a fixed starting role and an optional
+  email-domain restriction.
 
 ### Merging workspaces
 
@@ -121,8 +124,9 @@ Large-organization needs, available to any workspace:
 - **Import at scale:** 100k-row files in batches, resumable, with an error report.
 - **Audit log** in v1.
 - **Data residency:** see Hosting below.
-- **Sign-in:** email and Google at launch. SSO (e.g. SAML with Entra ID or Okta) is a per-workspace
-  feature added before large rollouts; the auth design allows it from the start.
+- **Sign-in:** email/password and Google at launch. "Sign in with Microsoft" is not in v1; it comes
+  later together with SSO (e.g. SAML with Entra ID or Okta), a per-workspace feature added before
+  large rollouts. The auth design allows both from the start.
 - Enterprise features (SSO, people-source connectors) switch on per workspace; small workspaces
   never see them.
 - Large clients usually **pilot** with one division first, so a workspace must work well with part
