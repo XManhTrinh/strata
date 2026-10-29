@@ -44,7 +44,7 @@ reach staging and production only through the `deploy-db` workflow.
 
 ## CI and deployment secrets
 
-| Secret                                                                  | Where                                       | Purpose                                                  |
-| ----------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------- |
-| `WINDMORPH_PRO_TOKEN`                                                   | GitHub, Vercel                              | Read-only token for the private Windmorph Pro repository |
-| `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF` | GitHub environments `staging`, `production` | Applying migrations                                      |
+| Secret                | Where                                       | Purpose                                                                               |
+| --------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `WINDMORPH_PRO_TOKEN` | GitHub, Vercel                              | Read-only token for the private Windmorph Pro repository                              |
+| `SUPABASE_DB_URL`     | GitHub environments `staging`, `production` | Session pooler connection string (with the database password) for applying migrations |
