@@ -52,6 +52,7 @@ export type Database = {
         Returns: boolean;
       };
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
+      unit_label: { Args: { p_id: string }; Returns: string };
     };
     Enums: {
       [_ in never]: never;
@@ -98,6 +99,90 @@ export type Database = {
           workspace_id?: string;
         };
         Relationships: [];
+      };
+      career_levels: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          id: string;
+          name: string;
+          rank: number;
+          track: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name: string;
+          rank: number;
+          track?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          rank?: number;
+          track?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "career_levels_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      employment_types: {
+        Row: {
+          archived_at: string | null;
+          cost_method: Database["public"]["Enums"]["cost_method"];
+          created_at: string;
+          id: string;
+          name: string;
+          sort_order: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          cost_method: Database["public"]["Enums"]["cost_method"];
+          created_at?: string;
+          id?: string;
+          name: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          cost_method?: Database["public"]["Enums"]["cost_method"];
+          created_at?: string;
+          id?: string;
+          name?: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employment_types_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       feature_dependencies: {
         Row: {
@@ -384,6 +469,113 @@ export type Database = {
           },
         ];
       };
+      org_unit_levels: {
+        Row: {
+          archived_at: string | null;
+          color: string | null;
+          created_at: string;
+          icon: string | null;
+          id: string;
+          name: string;
+          sort_order: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          color?: string | null;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          name: string;
+          sort_order: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          color?: string | null;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          name?: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "org_unit_levels_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      org_units: {
+        Row: {
+          archived_at: string | null;
+          code: string | null;
+          created_at: string;
+          id: string;
+          level_id: string | null;
+          name: string;
+          parent_id: string | null;
+          path: unknown;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          code?: string | null;
+          created_at?: string;
+          id?: string;
+          level_id?: string | null;
+          name: string;
+          parent_id?: string | null;
+          path: unknown;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          code?: string | null;
+          created_at?: string;
+          id?: string;
+          level_id?: string | null;
+          name?: string;
+          parent_id?: string | null;
+          path?: unknown;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "org_units_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "org_units_workspace_id_level_id_fkey";
+            columns: ["workspace_id", "level_id"];
+            isOneToOne: false;
+            referencedRelation: "org_unit_levels";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "org_units_workspace_id_parent_id_fkey";
+            columns: ["workspace_id", "parent_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       permissions: {
         Row: {
           description: string;
@@ -435,6 +627,65 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      positions: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          description: string;
+          id: string;
+          max_level_id: string | null;
+          min_level_id: string | null;
+          name: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          max_level_id?: string | null;
+          min_level_id?: string | null;
+          name: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          max_level_id?: string | null;
+          min_level_id?: string | null;
+          name?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "positions_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "positions_workspace_id_max_level_id_fkey";
+            columns: ["workspace_id", "max_level_id"];
+            isOneToOne: false;
+            referencedRelation: "career_levels";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "positions_workspace_id_min_level_id_fkey";
+            columns: ["workspace_id", "min_level_id"];
+            isOneToOne: false;
+            referencedRelation: "career_levels";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
       };
       profiles: {
         Row: {
@@ -940,6 +1191,7 @@ export type Database = {
       };
     };
     Enums: {
+      cost_method: "annual_salary" | "day_rate";
       email_delivery: "instant" | "daily" | "none";
       member_status: "active" | "invited" | "inactive";
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
@@ -1059,6 +1311,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      cost_method: ["annual_salary", "day_rate"],
       email_delivery: ["instant", "daily", "none"],
       member_status: ["active", "invited", "inactive"],
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
