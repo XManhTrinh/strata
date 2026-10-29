@@ -13,6 +13,7 @@ export type Database = {
         Args: { p_permission_key: string; p_target_member_id: string; p_workspace_id: string };
         Returns: boolean;
       };
+      check_can_invite: { Args: { p_role_id: string; p_workspace_id: string }; Returns: undefined };
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
@@ -23,6 +24,7 @@ export type Database = {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: boolean;
       };
+      hash_invitation_token: { Args: { p_token: string }; Returns: string };
       held_reaches: {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: Database["public"]["Enums"]["reach"][];
@@ -30,6 +32,17 @@ export type Database = {
       is_member: { Args: { p_workspace_id: string }; Returns: boolean };
       is_owner: { Args: { p_workspace_id: string }; Returns: boolean };
       is_reserved_slug: { Args: { p_slug: string }; Returns: boolean };
+      new_invitation_token: { Args: Record<PropertyKey, never>; Returns: string };
+      notify: {
+        Args: {
+          p_category: Database["public"]["Enums"]["notification_category"];
+          p_kind: string;
+          p_payload?: Json;
+          p_user_id: string;
+          p_workspace_id: string;
+        };
+        Returns: undefined;
+      };
       reach_covers: {
         Args: {
           p_held: Database["public"]["Enums"]["reach"][];
@@ -47,6 +60,43 @@ export type Database = {
   };
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string;
+          actor_user_id: string | null;
+          after: Json | null;
+          at: string;
+          before: Json | null;
+          id: number;
+          row_id: string;
+          table_name: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          actor_user_id?: string | null;
+          after?: Json | null;
+          at?: string;
+          before?: Json | null;
+          id?: never;
+          row_id: string;
+          table_name: string;
+          workspace_id: string;
+        };
+        Update: {
+          action?: string;
+          actor_user_id?: string | null;
+          after?: Json | null;
+          at?: string;
+          before?: Json | null;
+          id?: never;
+          row_id?: string;
+          table_name?: string;
+          workspace_id?: string;
+        };
+        Relationships: [];
+      };
       feature_dependencies: {
         Row: {
           feature_key: string;
@@ -102,6 +152,74 @@ export type Database = {
           sort_order?: number;
         };
         Relationships: [];
+      };
+      invitations: {
+        Row: {
+          accepted_at: string | null;
+          accepted_by: string | null;
+          created_at: string;
+          email: string;
+          expires_at: string;
+          id: string;
+          invited_by: string | null;
+          member_id: string | null;
+          revoked_at: string | null;
+          role_id: string;
+          token_hash: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          created_at?: string;
+          email: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          member_id?: string | null;
+          revoked_at?: string | null;
+          role_id: string;
+          token_hash: string;
+          workspace_id: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          created_at?: string;
+          email?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          member_id?: string | null;
+          revoked_at?: string | null;
+          role_id?: string;
+          token_hash?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invitations_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invitations_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "invitations_workspace_id_role_id_fkey";
+            columns: ["workspace_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
       };
       member_roles: {
         Row: {
@@ -193,6 +311,70 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "members_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: {
+          category: Database["public"]["Enums"]["notification_category"];
+          email_delivery: Database["public"]["Enums"]["email_delivery"];
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category: Database["public"]["Enums"]["notification_category"];
+          email_delivery?: Database["public"]["Enums"]["email_delivery"];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          category?: Database["public"]["Enums"]["notification_category"];
+          email_delivery?: Database["public"]["Enums"]["email_delivery"];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          category: Database["public"]["Enums"]["notification_category"];
+          created_at: string;
+          id: string;
+          kind: string;
+          payload: NonNullable<Json>;
+          read_at: string | null;
+          user_id: string;
+          workspace_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          category: Database["public"]["Enums"]["notification_category"];
+          created_at?: string;
+          id?: string;
+          kind: string;
+          payload?: NonNullable<Json>;
+          read_at?: string | null;
+          user_id: string;
+          workspace_id?: string | null;
+        };
+        Update: {
+          category?: Database["public"]["Enums"]["notification_category"];
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          payload?: NonNullable<Json>;
+          read_at?: string | null;
+          user_id?: string;
+          workspace_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_workspace_id_fkey";
             columns: ["workspace_id"];
             isOneToOne: false;
             referencedRelation: "workspaces";
@@ -661,9 +843,17 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      accept_invitation: { Args: { p_token: string }; Returns: string };
       assign_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
+      };
+      create_invitation: {
+        Args: { p_email: string; p_role_id: string; p_workspace_id: string };
+        Returns: {
+          invitation_id: string;
+          token: string;
+        }[];
       };
       create_workspace: {
         Args: {
@@ -700,7 +890,18 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_invitation: {
+        Args: { p_token: string };
+        Returns: {
+          email: string;
+          inviter_name: string;
+          role_name: string;
+          status: string;
+          workspace_name: string;
+        }[];
+      };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
+      mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       my_permissions: {
         Args: { p_workspace_id: string };
         Returns: {
@@ -712,6 +913,8 @@ export type Database = {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
       };
+      resend_invitation: { Args: { p_invitation_id: string }; Returns: string };
+      revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
       set_feature: {
         Args: {
           p_enabled: boolean;
@@ -735,7 +938,9 @@ export type Database = {
       };
     };
     Enums: {
+      email_delivery: "instant" | "daily" | "none";
       member_status: "active" | "invited" | "inactive";
+      notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
       reach: "own" | "reports" | "team" | "team_and_below" | "units" | "workspace";
       workspace_kind: "personal" | "team" | "company";
     };
@@ -852,7 +1057,9 @@ export const Constants = {
   },
   public: {
     Enums: {
+      email_delivery: ["instant", "daily", "none"],
       member_status: ["active", "invited", "inactive"],
+      notification_category: ["invitation", "access", "time", "planning", "import", "system"],
       reach: ["own", "reports", "team", "team_and_below", "units", "workspace"],
       workspace_kind: ["personal", "team", "company"],
     },

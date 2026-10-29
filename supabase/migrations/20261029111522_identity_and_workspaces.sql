@@ -393,6 +393,8 @@ as $$
 $$;
 
 grant usage on schema app to authenticated;
+-- Used by the workspaces.slug check constraint, which runs as the user who writes the row.
+grant execute on function app.is_reserved_slug(text) to authenticated;
 grant execute on function
   app.current_member_id(uuid),
   app.is_member(uuid),

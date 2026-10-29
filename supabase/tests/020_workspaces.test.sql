@@ -3,7 +3,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(45);
+select plan(46);
 
 -- People ------------------------------------------------------------------------------------------
 
@@ -263,6 +263,10 @@ select throws_ok(
 );
 
 -- Owners ------------------------------------------------------------------------------------------
+
+update public.workspaces set name = 'Acme Group', slug = 'acme-group' where id = (select id from ws);
+select is((select slug from public.workspaces where id = (select id from ws)), 'acme-group',
+  'settings managers can rename the workspace and change its address');
 
 select throws_ok(
   $$ select public.leave_workspace((select id from ws)); set constraints all immediate $$,
