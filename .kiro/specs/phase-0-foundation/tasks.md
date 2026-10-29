@@ -93,9 +93,13 @@ environments. Each task leaves the repository building.
     - _Requirements: 8.4_
 
 - [ ] 9. Environments and monitoring (needs the product owner's accounts)
-  - [ ] 9.1 Supabase staging and production projects in Ireland (`eu-west-1`)
+  - [x] 9.1 Supabase `strata-staging` in Ireland (`eu-west-1`); migrations deploy to it through
+        `deploy-db` with a session pooler connection string (`SUPABASE_DB_URL`). `strata-production`
+        is created later, before launch
     - _Requirements: 9.1_
-  - [ ] 9.2 Vercel project with server code in Dublin (`dub1`) and per-environment variables
+  - [x] 9.2 Vercel project `strata-web` (staging, `https://strata-web-xi.vercel.app`) builds from the
+        repository root with server code in Dublin (`dub1`) and staging variables for Production and
+        Preview. The production Vercel project is created later
     - _Requirements: 9.2_
   - [ ] 9.3 Sentry (EU) for browser, server and Edge Functions, with personal data scrubbing
         (wired once the Sentry project exists)
