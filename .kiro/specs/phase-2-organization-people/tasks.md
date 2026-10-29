@@ -30,10 +30,11 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
 - [x] 4. Saved table views (personal and shared, one default per table)
 
 - [ ] 5. DataTable and DataGrid (`.kiro/specs/data-table-and-grid`)
-  - [ ] 5.1 Spike: prototypes measured against the performance targets with 100k rows and a
-        2,000 × 24 grid; keyboard and screen-reader checks; results recorded in the design
+  - [x] 5.1 Spike: prototypes measured against the performance targets (100 to 100k rows, a
+        2,000 × 24 grid); results and decisions recorded in the design
   - [ ] 5.2 DataTable: columns, sort, selection, bulk actions, filters, pagination, server mode,
-        column settings with reorder, saved views, phone list layout
+        column settings with reorder, saved views, phone list layout; keyboard and screen-reader
+        checks
   - [ ] 5.3 Benchmarks in CI
 
 - [ ] 6. Structure settings

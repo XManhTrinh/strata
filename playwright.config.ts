@@ -5,6 +5,8 @@ const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Performance measurements run only on request: PERF=1 pnpm test:e2e e2e/perf
+  testIgnore: process.env.PERF ? [] : ["**/perf/**"],
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,

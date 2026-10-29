@@ -90,3 +90,42 @@ No Strata imports inside these folders, so they can move to windmorph-pro unchan
 Prototype both with 100k generated people and a 2,000 × 24 grid; measure the targets with
 Playwright performance traces; test with keyboard, VoiceOver and NVDA. Record results in this
 document before building the full components.
+
+## Spike results (2026-10-29)
+
+Measured on a production build in headless Chrome (desktop, 1440 × 900) with
+`e2e/perf/spike.spec.ts` (`STRATA_DEV_PAGES=1 pnpm start`, then `PERF=1 pnpm test:e2e e2e/perf`).
+
+**DataTable: React Aria Table + Virtualizer, rows held in the browser**
+
+| Rows in the browser | First rows | Scroll (avg / p95 frame) | Sort      |
+| ------------------- | ---------- | ------------------------ | --------- |
+| 100                 | 25 ms      | 60 fps / 17.9 ms         | 21 ms     |
+| 1,000               | 36 ms      | 60 fps / 17.4 ms         | 34 ms     |
+| 10,000              | 130 ms     | 56 fps / 23.3 ms         | 167 ms    |
+| 100,000             | 1,298 ms   | 6 fps / 384 ms           | 16,261 ms |
+
+React Aria builds a collection of every row up front, which is fast up to a few thousand rows and
+fails at 100,000. Decisions:
+
+- **Server mode is the default for large data**: the database sorts and filters; the table holds a
+  page (25 / 50 / 100 rows) or a continuously loaded window.
+- **Continuous scrolling caps what it holds at 5,000 rows**, then asks the user to narrow with
+  search or filters.
+- **Client mode is for lists up to about 5,000 rows** (settings lists, import preview pages).
+- **Virtualized modes render in the browser only.** On the server a virtualizer has no viewport and
+  renders every row (the 100k spike page hung server rendering until this was done).
+
+**DataGrid: own ARIA grid + TanStack Virtual (rows and columns), values outside React state**
+
+| Measure                          | Result                    | Target  |
+| -------------------------------- | ------------------------- | ------- |
+| Scroll 2,000 × 24 cells          | 60 fps, p95 frame 17.6 ms | 60 fps  |
+| Keystroke processing (max of 41) | 0.7 ms                    | < 16 ms |
+
+The approach meets the targets with a wide margin; the AG Grid fallback is not needed. Cell values
+live in a mutable store, so typing re-renders only the edited cell.
+
+Notes: a p95 frame of about 17.5 ms is one 60 Hz frame within timer precision. Headless Chrome on
+an Apple-silicon Mac is faster than a typical office laptop, so CI benchmarks compare against a
+saved baseline (fail on a regression over 10%) rather than these absolute numbers.
