@@ -20,7 +20,8 @@
   },
   "common": {
     "appName": "Strata",
-    "or": "or"
+    "or": "or",
+    "cancel": "Cancel"
   },
   "errors": {
     "required": "Required.",
@@ -69,7 +70,15 @@
     "unitHasPeople": "People are in this unit now or from a future date. Move them first.",
     "restoreParentFirst": "Restore the unit it sits under first.",
     "levelInUse": "Units still use this level. Change or archive them first.",
-    "levelOrderBreaksUnits": "This order would put a unit at or above the level of the unit it sits under."
+    "levelOrderBreaksUnits": "This order would put a unit at or above the level of the unit it sits under.",
+    "careerLevelNameRequired": "Enter a name for the level.",
+    "careerLevelNameTaken": "There is already a career level with this name.",
+    "positionNameRequired": "Enter a name for the position.",
+    "positionNameTaken": "There is already a position with this name.",
+    "positionLevelRange": "The lowest level must be on the same track as the highest, and not above it.",
+    "employmentTypeNameRequired": "Enter a name for the employment type.",
+    "employmentTypeNameTaken": "There is already an employment type with this name.",
+    "costMethodRequired": "Choose how people of this type are costed."
   },
   "auth": {
     "signIn": {
@@ -218,6 +227,10 @@
       "hierarchy": {
         "name": "Hierarchy",
         "description": "Levels and units"
+      },
+      "jobs": {
+        "name": "Jobs",
+        "description": "Career levels, positions and employment types"
       },
       "features": {
         "name": "Features",
@@ -693,5 +706,64 @@
     "cancel": "Cancel",
     "save": "Save",
     "add": "Add"
+  },
+  "jobs": {
+    "title": "Jobs",
+    "intro": "The building blocks of each person's job record. Archived entries stay on past records but can't be chosen for new ones.",
+    "actions": "Actions for {name}",
+    "edit": "Edit",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archived": "Archived",
+    "archivedDone": "{name} archived",
+    "restored": "{name} restored",
+    "reordered": "Order saved",
+    "saved": "{name} saved",
+    "added": "{name} added",
+    "save": "Save",
+    "add": "Add",
+    "name": "Name",
+    "showArchived": "Show archived",
+    "levels": {
+      "title": "Career levels",
+      "intro": "One ladder, junior first. Tracks, such as Individual contributor and Management, are optional.",
+      "empty": "No career levels yet.",
+      "add": "Add level",
+      "noTrack": "No track",
+      "track": "Track",
+      "trackHelp": "Optional. Levels on the same track are ranked against each other.",
+      "dialogAdd": "Add career level",
+      "dialogEdit": "Edit career level"
+    },
+    "positions": {
+      "title": "Positions",
+      "intro": "Job titles, each with the career levels it spans.",
+      "empty": "No positions yet.",
+      "add": "Add position",
+      "description": "Description",
+      "levels": "Levels",
+      "minLevel": "Lowest level",
+      "maxLevel": "Highest level",
+      "anyLevel": "Any level",
+      "status": "Status",
+      "active": "Active",
+      "dialogAdd": "Add position",
+      "dialogEdit": "Edit position"
+    },
+    "types": {
+      "title": "Employment types",
+      "intro": "How people work for you, and how their cost is worked out.",
+      "empty": "No employment types yet.",
+      "add": "Add type",
+      "costMethod": "Cost",
+      "annual_salary": "Annual salary",
+      "day_rate": "Day rate",
+      "annual_salaryHelp": "Costed from yearly pay.",
+      "day_rateHelp": "Costed as day rate × working days.",
+      "dialogAdd": "Add employment type",
+      "dialogEdit": "Edit employment type"
+    }
   }
 }

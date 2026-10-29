@@ -17,3 +17,26 @@ export const unitSchema = z.object({
 export const levelSchema = z.object({
   name: z.string().trim().min(1, { error: "levelNameRequired" }).max(60),
 });
+
+export const careerLevelSchema = z.object({
+  name: z.string().trim().min(1, { error: "careerLevelNameRequired" }).max(60),
+  track: optionalText(60).default(null),
+});
+
+/** "none" is the Select's "any level" choice. */
+const optionalLevel = z
+  .union([z.uuid(), z.literal("none"), z.literal("")])
+  .default("none")
+  .transform((value) => (value === "none" || value === "" ? null : value));
+
+export const positionSchema = z.object({
+  name: z.string().trim().min(1, { error: "positionNameRequired" }).max(120),
+  description: z.string().trim().max(500).default(""),
+  minLevelId: optionalLevel,
+  maxLevelId: optionalLevel,
+});
+
+export const employmentTypeSchema = z.object({
+  name: z.string().trim().min(1, { error: "employmentTypeNameRequired" }).max(60),
+  costMethod: z.enum(["annual_salary", "day_rate"], { error: "costMethodRequired" }),
+});

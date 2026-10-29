@@ -23,7 +23,7 @@ export function Pagination({
   return (
     <div className="text-body-medium text-on-surface-variant flex flex-wrap items-center justify-end gap-4 px-2 py-2">
       <Select
-        className="w-24"
+        className="w-36"
         label={labels.rowsPerPage}
         value={String(page.size)}
         onChange={(key) => key != null && onChange({ index: 0, size: Number(key) })}

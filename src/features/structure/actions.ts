@@ -4,18 +4,10 @@ import { revalidatePath } from "next/cache";
 import type { ErrorKey, FormState } from "@/lib/form-state";
 import { fieldErrorsFrom } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
-import messages from "@/messages/en.json";
+import { errorKey } from "./errors";
 import { levelSchema, unitSchema } from "./schemas";
 
 type Result = { ok: true } | { ok: false; error: ErrorKey };
-
-/** The database's refusals carry the message key as their hint. */
-function errorKey(error: { code?: string; hint?: string | null }, taken: ErrorKey): ErrorKey {
-  if (error.hint && error.hint in messages.errors) return error.hint as ErrorKey;
-  if (error.code === "42501") return "notAllowed";
-  if (error.code === "23505") return taken;
-  return "generic";
-}
 
 function revalidateHierarchy() {
   revalidatePath("/w/[workspace]/settings/hierarchy", "page");
