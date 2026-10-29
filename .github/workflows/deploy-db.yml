@@ -13,6 +13,10 @@ on:
         type: choice
         options: [staging, production]
         default: staging
+      debug:
+        description: Show the Supabase CLI's requests (for troubleshooting token permissions)
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-db-${{ inputs.environment || 'staging' }}
@@ -33,7 +37,7 @@ jobs:
       - uses: supabase/setup-cli@v3
         with:
           version: latest
-      - run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+      - run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" ${{ inputs.debug && '--debug' || '' }}
       - name: Show pending migrations
         run: supabase migration list
       - name: Apply migrations
