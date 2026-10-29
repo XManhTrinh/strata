@@ -27,7 +27,9 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   await owner.getByLabel("Email addresses").fill(inviteeEmail);
   await owner.getByRole("button", { name: "Send invitations" }).click();
   await expect(owner.getByText("Invitation sent")).toBeVisible();
-  await expect(owner.getByText(inviteeEmail)).toBeVisible();
+  await expect(
+    owner.getByRole("list", { name: "Pending invitations" }).getByText(inviteeEmail).first()
+  ).toBeVisible();
 
   const invitee = await (await browser.newContext()).newPage();
   await invitee.goto(await latestLinkFor(inviteeEmail));

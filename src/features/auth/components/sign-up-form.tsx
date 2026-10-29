@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, TextField } from "@windmorph/react";
 import { EmptyState, Link } from "@windmorph/react-pro";
@@ -12,7 +13,7 @@ import { FormError } from "./form-error";
 export function SignUpForm({ next }: { next?: string }) {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
-  const [state, action, pending] = useActionState(signUp, idleFormState);
+  const [state, onSubmit, pending] = useFormAction(signUp, idleFormState);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const fieldErrors = state.fieldErrors ?? {};
@@ -33,7 +34,7 @@ export function SignUpForm({ next }: { next?: string }) {
     <div className="flex flex-col gap-6">
       <FormError error={state.error} />
 
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         {next && <input type="hidden" name="next" value={next} />}
         <input
           type="hidden"

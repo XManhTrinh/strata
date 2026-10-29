@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { IconButton, List, ListItem } from "@windmorph/react";
 import { EmptyState, ListDetailLayout } from "@windmorph/react-pro";
@@ -17,6 +17,7 @@ import { type SettingsSectionKey, visibleSections } from "../sections";
 export function SettingsShell({ children }: { children: ReactNode }) {
   const t = useTranslations("settings");
   const pathname = usePathname();
+  const router = useRouter();
   const { workspace, permissions } = useWorkspace();
   const base = `/w/${workspace.slug}/settings`;
   const sections = visibleSections(permissions);
@@ -37,6 +38,11 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           <List
             aria-label={t("title")}
             selectionMode="single"
+            // In selection mode a click selects rather than following the link, so navigate here.
+            onSelectionChange={(keys) => {
+              const [key] = keys === "all" ? [] : [...keys];
+              if (key && key !== current) router.push(`${base}/${String(key)}`);
+            }}
             selectedKeys={current ? [current] : []}
           >
             {sections.map((section) => (

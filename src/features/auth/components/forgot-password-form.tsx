@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, TextField } from "@windmorph/react";
 import { EmptyState, Link } from "@windmorph/react-pro";
@@ -12,7 +13,7 @@ import { FormError } from "./form-error";
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
-  const [state, action, pending] = useActionState(requestPasswordReset, idleFormState);
+  const [state, onSubmit, pending] = useFormAction(requestPasswordReset, idleFormState);
   const [email, setEmail] = useState("");
 
   if (state.status === "success") {
@@ -35,7 +36,7 @@ export function ForgotPasswordForm() {
   return (
     <div className="flex flex-col gap-6">
       <FormError error={state.error} />
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <TextField
           className="w-full"
           name="email"

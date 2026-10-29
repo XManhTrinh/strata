@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   Button,
@@ -34,7 +35,7 @@ export function InviteDialog({
   const te = useTranslations("errors");
   const { workspace } = useWorkspace();
   const snackbar = useSnackbar();
-  const [state, action, pending] = useActionState(
+  const [state, onSubmit, pending] = useFormAction(
     inviteMembers.bind(null, workspace.id),
     initialState
   );
@@ -59,7 +60,7 @@ export function InviteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} fullScreen="compact">
-      <form action={action} noValidate className="contents">
+      <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{t("title")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">
           <FormError error={state.error} />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Divider, TextField } from "@windmorph/react";
 import { Link } from "@windmorph/react-pro";
@@ -12,7 +13,7 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
   const t = useTranslations("auth");
   const te = useTranslations("errors");
   const tc = useTranslations("common");
-  const [state, action, pending] = useActionState(signIn, idleFormState);
+  const [state, onSubmit, pending] = useFormAction(signIn, idleFormState);
   // Controlled, so the email survives the form reset after a failed attempt.
   const [email, setEmail] = useState("");
   const fieldErrors = state.fieldErrors ?? {};
@@ -21,7 +22,7 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
     <div className="flex flex-col gap-6">
       <FormError error={state.error ?? initialError} />
 
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <input type="hidden" name="next" value={next} />
         <TextField
           className="w-full"

@@ -47,7 +47,9 @@
     "notAllowed": "You don't have permission to do that.",
     "alreadyMember": "Already a member.",
     "alreadyInvited": "Already invited; resend the existing invitation instead.",
-    "emailNotSent": "Invitation created, but the email couldn't be sent. Resend it from the list."
+    "emailNotSent": "Invitation created, but the email couldn't be sent. Resend it from the list.",
+    "roleNameTaken": "A role with that name already exists.",
+    "roleNameRequired": "Enter a name for the role."
   },
   "auth": {
     "signIn": {
@@ -206,7 +208,47 @@
     "chooseTitle": "Choose a section",
     "chooseBody": "Pick a settings section from the list.",
     "largerScreenTitle": "Open on a larger screen",
-    "largerScreenBody": "Workspace settings need more room. Open Strata on a tablet or computer to make changes here."
+    "largerScreenBody": "Workspace settings need more room. Open Strata on a tablet or computer to make changes here.",
+    "general": {
+      "title": "General",
+      "save": "Save changes",
+      "saved": "Settings saved",
+      "addressHint": "Changing the address breaks old links to this workspace."
+    },
+    "features": {
+      "title": "Features",
+      "intro": "Switch on what this workspace uses. Turning a feature off hides it; its data is kept.",
+      "needs": "Needs {features}",
+      "notInPlan": "Not included in your plan",
+      "turnedOn": "{features} turned on",
+      "turnedOff": "{features} turned off",
+      "confirmTitle": "Turn off {feature}?",
+      "confirmBody": "These features depend on it and will be turned off too: {features}.",
+      "confirm": "Turn off",
+      "cancel": "Cancel",
+      "names": {
+        "people": {
+          "name": "People",
+          "description": "Directory, profiles, hierarchy, positions, custom fields and import."
+        },
+        "org_chart": {
+          "name": "Org chart",
+          "description": "Reporting chart and hierarchy views."
+        },
+        "time": {
+          "name": "Calendar and time off",
+          "description": "Calendar, time types, leave, allowances and approvals."
+        },
+        "planning": {
+          "name": "Capacity planning",
+          "description": "Scenarios, planned roles and allocations."
+        },
+        "rate_cards": {
+          "name": "Rate cards",
+          "description": "Cost rules applied to people and planned roles."
+        }
+      }
+    }
   },
   "members": {
     "title": "Members",
@@ -251,5 +293,214 @@
       "resent": "Invitation resent to {email}",
       "revoked": "Invitation to {email} withdrawn"
     }
+  },
+  "permissions": {
+    "members": {
+      "view": {
+        "name": "View members",
+        "description": "See who is in the workspace."
+      },
+      "invite": {
+        "name": "Invite members",
+        "description": "Invite people by email and manage pending invitations."
+      },
+      "manage": {
+        "name": "Manage members",
+        "description": "Deactivate and reactivate members."
+      }
+    },
+    "org_chart": {
+      "view": {
+        "name": "View org chart",
+        "description": "See the reporting chart and hierarchy."
+      }
+    },
+    "people": {
+      "view": {
+        "name": "View people",
+        "description": "See people's profiles."
+      },
+      "edit": {
+        "name": "Edit people",
+        "description": "Change people's details, team, manager and position."
+      },
+      "view_compensation": {
+        "name": "View pay",
+        "description": "See salary and day rate."
+      },
+      "edit_compensation": {
+        "name": "Edit pay",
+        "description": "Change salary and day rate."
+      },
+      "import": {
+        "name": "Import people",
+        "description": "Upload people files and apply the changes."
+      },
+      "export": {
+        "name": "Export people",
+        "description": "Download people lists."
+      },
+      "manage_structure": {
+        "name": "Manage structure",
+        "description": "Edit hierarchy, positions, career levels, employment types and custom fields."
+      }
+    },
+    "planning": {
+      "view": {
+        "name": "View plans",
+        "description": "See scenarios, allocations and costs."
+      },
+      "edit": {
+        "name": "Edit plans",
+        "description": "Change allocations and planned roles."
+      },
+      "approve": {
+        "name": "Approve plans",
+        "description": "Submit, approve and lock scenarios."
+      },
+      "manage_settings": {
+        "name": "Manage planning settings",
+        "description": "Planning period, horizon, units and rules."
+      }
+    },
+    "rate_cards": {
+      "view": {
+        "name": "View rate cards",
+        "description": "See rate cards and rates."
+      },
+      "edit": {
+        "name": "Edit rate cards",
+        "description": "Create and change rate cards."
+      },
+      "apply": {
+        "name": "Apply rate cards",
+        "description": "Apply rate cards to a scenario."
+      }
+    },
+    "roles": {
+      "view": {
+        "name": "View roles",
+        "description": "See roles and their permissions."
+      },
+      "manage": {
+        "name": "Manage roles",
+        "description": "Create, edit, duplicate and archive roles."
+      },
+      "assign": {
+        "name": "Assign roles",
+        "description": "Give roles to members and take them away."
+      }
+    },
+    "time": {
+      "view": {
+        "name": "View time off",
+        "description": "See people's bookings and balances."
+      },
+      "book": {
+        "name": "Book time",
+        "description": "Book time off and events."
+      },
+      "book_for_others": {
+        "name": "Book for others",
+        "description": "Book time on someone else's behalf."
+      },
+      "approve": {
+        "name": "Approve time off",
+        "description": "Approve and reject requests."
+      },
+      "adjust_allowance": {
+        "name": "Adjust allowances",
+        "description": "Correct people's balances."
+      },
+      "manage_settings": {
+        "name": "Manage time settings",
+        "description": "Edit time types, allowance policies, work schedules and holiday calendars."
+      }
+    },
+    "workspace": {
+      "manage_settings": {
+        "name": "Manage workspace settings",
+        "description": "Change name, address, region settings, currency and fiscal year."
+      },
+      "manage_features": {
+        "name": "Manage features",
+        "description": "Switch features on and off."
+      },
+      "view_audit": {
+        "name": "View audit log",
+        "description": "See who changed access and settings, and when."
+      }
+    }
+  },
+  "roles": {
+    "title": "Roles",
+    "intro": "A role is a set of permissions. Give people several roles; their permissions add up.",
+    "newRole": "New role",
+    "system": "Fixed",
+    "archived": "Archived",
+    "back": "Back to roles",
+    "fields": {
+      "name": "Role name",
+      "description": "Description"
+    },
+    "create": "Create role",
+    "cancel": "Cancel",
+    "save": "Save",
+    "duplicate": "Duplicate",
+    "archive": "Archive",
+    "restore": "Restore",
+    "copyOf": "{name} (copy)",
+    "adminNotice": "The Admin role has every permission across the workspace and can't be changed.",
+    "readOnly": "You can see this role but not change it.",
+    "featureOff": "Off in this workspace",
+    "reach": {
+      "none": "No access",
+      "own": "Own",
+      "reports": "My reports",
+      "team": "My team",
+      "team_and_below": "My team and sub-teams",
+      "units": "Specific units",
+      "workspace": "Whole workspace"
+    },
+    "saved": "Saved",
+    "created": "Role created",
+    "archivedDone": "Role archived",
+    "restoredDone": "Role restored",
+    "nameTaken": "A role with that name already exists.",
+    "features": {
+      "workspace": "Workspace",
+      "members": "Members",
+      "roles": "Roles",
+      "people": "People",
+      "org_chart": "Org chart",
+      "time": "Calendar and time off",
+      "planning": "Capacity planning",
+      "rate_cards": "Rate cards"
+    },
+    "reachLabel": "Access for {permission}"
+  },
+  "audit": {
+    "title": "Audit log",
+    "intro": "Changes to access and settings. Entries can't be edited or deleted.",
+    "empty": "No changes recorded yet.",
+    "someone": "Someone",
+    "system": "Strata",
+    "summary": "{actor} {action} {thing}",
+    "actions": {
+      "insert": "added",
+      "update": "changed",
+      "delete": "removed"
+    },
+    "tables": {
+      "workspaces": "workspace settings",
+      "workspace_features": "a feature",
+      "members": "a member",
+      "roles": "a role",
+      "role_permissions": "a role permission",
+      "member_roles": "a role assignment",
+      "invitations": "an invitation"
+    },
+    "fields": "Changed: {fields}",
+    "older": "Older entries"
   }
 }
