@@ -1468,6 +1468,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      table_views: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          name: string;
+          state: NonNullable<Json>;
+          table_key: string;
+          updated_at: string;
+          user_id: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          state: NonNullable<Json>;
+          table_key: string;
+          updated_at?: string;
+          user_id?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          state?: NonNullable<Json>;
+          table_key?: string;
+          updated_at?: string;
+          user_id?: string | null;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "table_views_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       template_features: {
         Row: {
           feature_key: string;
