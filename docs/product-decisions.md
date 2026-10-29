@@ -53,11 +53,11 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 
 ### Environments
 
-| Environment | Web                                                                                             | Database                     | Updated                          |
-| ----------- | ----------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------- |
-| Local       | `http://localhost:3000`                                                                         | `supabase start`             | By the developer                 |
-| Staging     | **`https://strata-web.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging`    | Automatically on merge to `main` |
-| Production  | Custom domain (to be decided)                                                                   | Supabase `strata-production` | Only by an approved release      |
+| Environment | Web                                                                                                | Database                     | Updated                          |
+| ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------- |
+| Local       | `http://localhost:3000`                                                                            | `supabase start`             | By the developer                 |
+| Staging     | **`https://strata-web-xi.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging`    | Automatically on merge to `main` |
+| Production  | Custom domain (to be decided)                                                                      | Supabase `strata-production` | Only by an approved release      |
 
 Preview and staging deployments never use the production database.
 
