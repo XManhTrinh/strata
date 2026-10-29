@@ -37,3 +37,21 @@ export type EmploymentType = {
   costMethod: CostMethod;
   archived: boolean;
 };
+
+export type CustomFieldType =
+  "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
+
+export type FieldOption = { id: string; name: string; archived: boolean };
+
+export type CustomField = {
+  id: string;
+  key: string;
+  /** The field's label, as `name` so it lists like other entries. */
+  name: string;
+  type: CustomFieldType;
+  sensitive: boolean;
+  required: boolean;
+  keepHistory: boolean;
+  archived: boolean;
+  options: FieldOption[];
+};

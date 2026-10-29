@@ -41,12 +41,13 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
     - [ ] Multi-sort, pinned columns, column filters, saved views (with the people directory)
   - [ ] 5.3 Benchmarks in CI
 
-- [ ] 6. Structure settings
+- [x] 6. Structure settings
   - [x] 6.1 Hierarchy: levels, and the unit tree with add, rename, move and archive (Settings >
         Hierarchy; rules for level changes, archiving and reordering in the database)
   - [x] 6.2 Positions, career levels, employment types (Settings > Jobs; a position's level
         range runs up one track)
-  - [ ] 6.3 Custom fields and their options
+  - [x] 6.3 Custom fields and their options (Settings > Custom fields; the key is fixed and the
+        type locks once people have values)
 
 - [ ] 7. People
   - [ ] 7.1 Directory: DataTable in server mode with search, filters, saved views, export

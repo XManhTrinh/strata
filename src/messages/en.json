@@ -78,7 +78,16 @@
     "positionLevelRange": "The lowest level must be on the same track as the highest, and not above it.",
     "employmentTypeNameRequired": "Enter a name for the employment type.",
     "employmentTypeNameTaken": "There is already an employment type with this name.",
-    "costMethodRequired": "Choose how people of this type are costed."
+    "costMethodRequired": "Choose how people of this type are costed.",
+    "fieldLabelRequired": "Enter a label for the field.",
+    "fieldKeyInvalid": "Use lowercase letters, digits and underscores, starting with a letter.",
+    "fieldKeyTaken": "Another field already uses this key.",
+    "fieldKeyFixed": "A field's key can't change, as imports and rate cards use it.",
+    "fieldTypeRequired": "Choose a type.",
+    "fieldTypeLocked": "People already have values for this field, so its type can't change.",
+    "fieldHasNoOptions": "Only choice fields have options.",
+    "optionLabelRequired": "Enter a label for the option.",
+    "optionLabelTaken": "This field already has an option with this label."
   },
   "auth": {
     "signIn": {
@@ -231,6 +240,10 @@
       "jobs": {
         "name": "Jobs",
         "description": "Career levels, positions and employment types"
+      },
+      "fields": {
+        "name": "Custom fields",
+        "description": "Extra details kept about people"
       },
       "features": {
         "name": "Features",
@@ -765,5 +778,45 @@
       "dialogAdd": "Add employment type",
       "dialogEdit": "Edit employment type"
     }
+  },
+  "fields": {
+    "title": "Custom fields",
+    "intro": "Details your organization keeps about people, such as Location, Grade or Capex or Opex. They work like built-in fields in tables, filters, imports and rate cards.",
+    "empty": "No custom fields yet.",
+    "add": "Add field",
+    "actions": "Actions for {name}",
+    "options": "Options",
+    "dialogAdd": "Add custom field",
+    "dialogEdit": "Edit custom field",
+    "label": "Label",
+    "key": "Key",
+    "keyHelp": "Used by imports and rate cards. It can't change later.",
+    "keyFixed": "Key: {key}",
+    "type": "Type",
+    "types": {
+      "text": "Text",
+      "number": "Number",
+      "date": "Date",
+      "single_choice": "Single choice",
+      "multi_choice": "Multiple choice",
+      "person": "Person"
+    },
+    "sensitive": "Sensitive",
+    "sensitiveHelp": "Only people who can see pay for a person see this field. Everyone sees their own.",
+    "required": "Required",
+    "requiredHelp": "Every person needs a value.",
+    "keepHistory": "Keep history",
+    "keepHistoryHelp": "Changes are dated, like job records, so past values stay.",
+    "saved": "{name} saved",
+    "added": "{name} added",
+    "save": "Save",
+    "addButton": "Add",
+    "optionsTitle": "Options for {name}",
+    "optionsEmpty": "No options yet.",
+    "newOption": "New option",
+    "addOption": "Add option",
+    "editOption": "Rename option",
+    "optionAdded": "{name} added",
+    "done": "Done"
   }
 }

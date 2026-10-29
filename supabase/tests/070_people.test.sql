@@ -57,7 +57,7 @@ insert into public.custom_fields (workspace_id, key, label, type, sensitive) val
   ((select ws from ctx), 'bonus_band', 'Bonus band', 'text', true);
 insert into public.member_field_values (workspace_id, member_id, field_id, value)
 select (select ws from ctx), p.member_id, f.id, to_jsonb(f.key || ' of ' || p.name)
-from people p cross join public.custom_fields f where p.member_id is not null;
+from people p cross join public.custom_fields f where p.member_id is not null and f.workspace_id = (select ws from ctx);
 
 -- Roles: Mia Manager, Sam and Tom Member, plus three custom roles for the team and unit reaches.
 insert into public.roles (workspace_id, name) select ws, n from ctx, (values ('Squad helper'), ('Eng lead'), ('HR for Squad B')) as v (n);

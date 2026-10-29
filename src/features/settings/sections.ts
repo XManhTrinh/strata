@@ -1,5 +1,5 @@
 export type SettingsSectionKey =
-  "general" | "members" | "roles" | "hierarchy" | "jobs" | "features" | "audit";
+  "general" | "members" | "roles" | "hierarchy" | "jobs" | "fields" | "features" | "audit";
 
 type SettingsSection = { key: SettingsSectionKey; icon: string; permissions: string[] };
 
@@ -14,6 +14,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   { key: "roles", icon: "admin_panel_settings", permissions: ["roles.view", "roles.manage"] },
   { key: "hierarchy", icon: "account_tree", permissions: ["people.manage_structure"] },
   { key: "jobs", icon: "work", permissions: ["people.manage_structure"] },
+  { key: "fields", icon: "dynamic_form", permissions: ["people.manage_structure"] },
   { key: "features", icon: "toggle_on", permissions: ["workspace.manage_features"] },
   { key: "audit", icon: "history", permissions: ["workspace.view_audit"] },
 ];

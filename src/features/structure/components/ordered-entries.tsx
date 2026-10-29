@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { List, ListItem } from "@windmorph/react";
 import { Tag } from "@windmorph/react-pro";
-import { reorderJobEntries, setJobEntryArchived } from "../job-actions";
+import { type OrderedTable, reorderEntries, setEntryArchived } from "../entry-actions";
 import { useRunAction } from "../use-run-action";
-import { ItemMenu } from "./item-menu";
+import { ItemMenu, type ItemMenuAction } from "./item-menu";
 
 type Entry = { id: string; name: string; archived: boolean };
 
@@ -17,27 +17,33 @@ export function OrderedEntries<E extends Entry>({
   entries,
   supportingText,
   onEdit,
+  extraActions,
 }: {
   label: string;
-  table: "career_levels" | "employment_types";
+  table: OrderedTable;
   entries: E[];
   supportingText?: (entry: E) => ReactNode;
   onEdit: (entry: E) => void;
+  /** More actions after Edit, each handling its own key. */
+  extraActions?: (entry: E) => (ItemMenuAction & { onAction: () => void })[];
 }) {
   const t = useTranslations("jobs");
   const [run, pending] = useRunAction();
 
   function onAction(entry: E, index: number, key: string) {
     if (key === "edit") onEdit(entry);
+    extraActions?.(entry)
+      .find((a) => a.key === key)
+      ?.onAction();
     if (key === "up" || key === "down") {
       const ids = entries.map((e) => e.id);
       const other = index + (key === "up" ? -1 : 1);
       [ids[index], ids[other]] = [ids[other]!, ids[index]!];
-      run(() => reorderJobEntries(table, ids), t("reordered"));
+      run(() => reorderEntries(table, ids), t("reordered"));
     }
     if (key === "archive" || key === "restore") {
       run(
-        () => setJobEntryArchived(table, entry.id, key === "archive"),
+        () => setEntryArchived(table, entry.id, key === "archive"),
         t(key === "archive" ? "archivedDone" : "restored", { name: entry.name })
       );
     }
@@ -58,6 +64,7 @@ export function OrderedEntries<E extends Entry>({
                 onAction={(key) => onAction(entry, index, key)}
                 actions={[
                   { key: "edit", label: t("edit"), icon: "edit" },
+                  ...(extraActions?.(entry) ?? []),
                   index > 0 && { key: "up", label: t("moveUp"), icon: "arrow_upward" },
                   index < entries.length - 1 && {
                     key: "down",

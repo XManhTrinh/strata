@@ -40,3 +40,26 @@ export const employmentTypeSchema = z.object({
   name: z.string().trim().min(1, { error: "employmentTypeNameRequired" }).max(60),
   costMethod: z.enum(["annual_salary", "day_rate"], { error: "costMethodRequired" }),
 });
+
+const flag = z
+  .enum(["true", "false"])
+  .default("false")
+  .transform((value) => value === "true");
+
+export const customFieldSchema = z.object({
+  label: z.string().trim().min(1, { error: "fieldLabelRequired" }).max(80),
+  key: z
+    .string()
+    .regex(/^[a-z][a-z0-9_]{0,59}$/, { error: "fieldKeyInvalid" })
+    .optional(),
+  type: z.enum(["text", "number", "date", "single_choice", "multi_choice", "person"], {
+    error: "fieldTypeRequired",
+  }),
+  sensitive: flag,
+  required: flag,
+  keepHistory: flag,
+});
+
+export const fieldOptionSchema = z.object({
+  name: z.string().trim().min(1, { error: "optionLabelRequired" }).max(80),
+});

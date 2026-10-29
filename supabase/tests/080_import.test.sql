@@ -20,9 +20,10 @@ select ws, n, o from ctx, (values ('Division', 10), ('Squad', 40)) as l (n, o);
 insert into public.custom_fields (workspace_id, key, label, type) select ws, 'skills', 'Skills', 'text' from ctx;
 
 create function pg_temp.levels() returns uuid[] language sql as $$
-  select array[(select id from public.org_unit_levels where name = 'Division'), (select id from public.org_unit_levels where name = 'Squad')]
+  select array[(select id from public.org_unit_levels where workspace_id = (select ws from ctx) and name = 'Division'),
+               (select id from public.org_unit_levels where workspace_id = (select ws from ctx) and name = 'Squad')]
 $$;
-create function pg_temp.member(p_key text) returns uuid language sql as $$ select id from public.members where person_key = p_key $$;
+create function pg_temp.member(p_key text) returns uuid language sql as $$ select id from public.members where workspace_id = (select ws from ctx) and person_key = p_key $$;
 create function pg_temp.run(p_job uuid) returns text language plpgsql as $$
 declare r jsonb; begin
   for i in 1 .. 20 loop

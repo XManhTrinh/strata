@@ -1,6 +1,13 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { CareerLevel, EmploymentType, OrgLevel, OrgUnit, Position } from "./types";
+import type {
+  CareerLevel,
+  CustomField,
+  EmploymentType,
+  OrgLevel,
+  OrgUnit,
+  Position,
+} from "./types";
 
 /** Every level and unit of the workspace, archived ones included. */
 export async function listHierarchy(
@@ -86,4 +93,36 @@ export async function listJobs(workspaceId: string): Promise<{
       archived: e.archived_at !== null,
     })),
   };
+}
+
+/** Custom fields in order with their options, archived included. */
+export async function listCustomFields(workspaceId: string): Promise<CustomField[]> {
+  const supabase = await createClient();
+  const [{ data: fields }, { data: options }] = await Promise.all([
+    supabase
+      .from("custom_fields")
+      .select("id, key, label, type, sensitive, required, keep_history, archived_at")
+      .eq("workspace_id", workspaceId)
+      .order("sort_order")
+      .order("label"),
+    supabase
+      .from("custom_field_options")
+      .select("id, field_id, label, archived_at")
+      .eq("workspace_id", workspaceId)
+      .order("sort_order")
+      .order("label"),
+  ]);
+  return (fields ?? []).map((f) => ({
+    id: f.id,
+    key: f.key,
+    name: f.label,
+    type: f.type,
+    sensitive: f.sensitive,
+    required: f.required,
+    keepHistory: f.keep_history,
+    archived: f.archived_at !== null,
+    options: (options ?? [])
+      .filter((o) => o.field_id === f.id)
+      .map((o) => ({ id: o.id, name: o.label, archived: o.archived_at !== null })),
+  }));
 }

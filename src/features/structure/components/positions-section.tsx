@@ -8,7 +8,8 @@ import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { useDataTableLabels } from "@/hooks/use-data-table-labels";
-import { savePosition, setJobEntryArchived } from "../job-actions";
+import { setEntryArchived } from "../entry-actions";
+import { savePosition } from "../job-actions";
 import type { CareerLevel, Position } from "../types";
 import { useRunAction } from "../use-run-action";
 import { FormDialog } from "./form-dialog";
@@ -50,7 +51,7 @@ export function PositionsSection({
 
   function toggleArchived(p: Position) {
     run(
-      () => setJobEntryArchived("positions", p.id, !p.archived),
+      () => setEntryArchived("positions", p.id, !p.archived),
       t(p.archived ? "restored" : "archivedDone", { name: p.name })
     );
   }

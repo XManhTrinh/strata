@@ -1,17 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import type { ErrorKey, FormState } from "@/lib/form-state";
 import { fieldErrorsFrom } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
 import { errorKey } from "./errors";
 import { careerLevelSchema, employmentTypeSchema, positionSchema } from "./schemas";
-
-type Result = { ok: true } | { ok: false; error: ErrorKey };
-
-const archivable = z.enum(["career_levels", "positions", "employment_types"]);
-const ordered = z.enum(["career_levels", "employment_types"]);
 
 function revalidateJobs() {
   revalidatePath("/w/[workspace]/settings/jobs", "page");
@@ -117,46 +111,4 @@ export async function saveEmploymentType(
   if (error) return failure(error, "employmentTypeNameTaken");
   revalidateJobs();
   return { status: "success" };
-}
-
-/** Puts entries in the given order: a track's career levels (junior first) or employment types. */
-export async function reorderJobEntries(
-  table: z.infer<typeof ordered>,
-  ids: string[]
-): Promise<Result> {
-  const supabase = await createClient();
-  const results = await Promise.all(
-    z
-      .array(z.uuid())
-      .parse(ids)
-      .map((id, index) =>
-        ordered.parse(table) === "career_levels"
-          ? supabase
-              .from("career_levels")
-              .update({ rank: index + 1 })
-              .eq("id", id)
-          : supabase
-              .from("employment_types")
-              .update({ sort_order: (index + 1) * 10 })
-              .eq("id", id)
-      )
-  );
-  revalidateJobs();
-  const failed = results.find((r) => r.error)?.error;
-  return failed ? { ok: false, error: errorKey(failed, "generic") } : { ok: true };
-}
-
-/** Archived entries stay on past records but can't be chosen for new ones. */
-export async function setJobEntryArchived(
-  table: z.infer<typeof archivable>,
-  id: string,
-  archived: boolean
-): Promise<Result> {
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from(archivable.parse(table))
-    .update({ archived_at: archived ? new Date().toISOString() : null })
-    .eq("id", z.uuid().parse(id));
-  revalidateJobs();
-  return error ? { ok: false, error: errorKey(error, "generic") } : { ok: true };
 }
