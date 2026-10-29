@@ -189,17 +189,37 @@ AG Grid Community themed with Windmorph tokens.
 Each workspace defines its own fields on people (e.g. Grade, Capex/Opex, Location, Skills):
 
 - **Type:** text, number, date, single choice, multiple choice, or person.
-- **Visibility:** everyone, managers, HR/admins only, or the person themselves plus HR.
+- **Visibility:** _standard_ (anyone who can see the person) or _sensitive_ (only people with
+  "View pay" reach over that person). A person always sees their own fields. This replaces the
+  earlier four options and reuses the permission model.
 - **Required** or optional; whether it is **filled by import**.
 - Usable everywhere a built-in field is: table columns, filters, search, rate-card conditions,
   import mapping and permissions.
+
+### Structure (Phase 2 schema review)
+
+- **One home team per person** (org chart, "my team", approvals); time split across teams is a
+  capacity allocation (Phase 4).
+- **Hierarchy levels are workspace-defined and ordered**: a unit may skip levels below its parent
+  but never sit under a lower level.
+- **One career ladder per workspace**, with optional tracks (e.g. individual contributor,
+  management).
+- **Every workspace has a root unit** (named after the workspace); Company and Team templates
+  start with "Employee (salary)" and "Contractor (day rate)" employment types.
+- **People have start and end dates**; leaving is a date, never a deletion.
+- **Import files are parsed in the browser and never stored**; only mapped rows are sent, and they
+  are deleted once applied.
 
 ### History (effective dating)
 
 - Changes to a person's team, manager, position, grade, employment type, salary and day rate, plus
   any custom field marked "keep history", are stored with an **effective date**.
 - Changes can be entered ahead of time (e.g. a move on 1 March) and take effect on that date.
-- Org chart, teams and costs can be viewed **as of any date**.
+- Org chart, teams and costs can be viewed **as of any date**: who was where, within today's unit
+  tree. Dating the unit tree itself (units moving or renamed over time) comes later, with reorg
+  planning; until then unit changes are in the audit log.
+- Each change is one dated **job record** (team, manager, position, level, employment type
+  together), so "what was true on a date" is a single lookup.
 - Capacity and cost use the values valid in each period.
 - Re-imports create dated changes rather than overwriting.
 
