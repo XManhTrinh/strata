@@ -37,6 +37,7 @@ export function ForgotPasswordForm() {
       <FormError error={state.error} />
       <form action={action} noValidate className="flex flex-col gap-4">
         <TextField
+          className="w-full"
           name="email"
           type="email"
           label={t("fields.email")}

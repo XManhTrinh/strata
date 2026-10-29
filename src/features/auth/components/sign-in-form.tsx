@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, LabeledDivider, TextField } from "@windmorph/react";
+import { Button, Divider, TextField } from "@windmorph/react";
 import { Link } from "@windmorph/react-pro";
 import { type ErrorKey, idleFormState } from "@/lib/form-state";
 import { signIn, signInWithGoogle } from "../actions";
@@ -24,6 +24,7 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
       <form action={action} noValidate className="flex flex-col gap-4">
         <input type="hidden" name="next" value={next} />
         <TextField
+          className="w-full"
           name="email"
           type="email"
           label={t("fields.email")}
@@ -35,6 +36,7 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
           errorMessage={fieldErrors.email && te(fieldErrors.email)}
         />
         <TextField
+          className="w-full"
           name="password"
           type="password"
           label={t("fields.password")}
@@ -51,7 +53,11 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
         </Button>
       </form>
 
-      <LabeledDivider>{tc("or")}</LabeledDivider>
+      <div className="flex items-center gap-4">
+        <Divider className="flex-1" />
+        <span className="text-label-large text-on-surface-variant">{tc("or")}</span>
+        <Divider className="flex-1" />
+      </div>
 
       <form action={signInWithGoogle}>
         <input type="hidden" name="next" value={next} />

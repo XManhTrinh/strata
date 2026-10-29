@@ -127,6 +127,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
         </RadioGroup>
 
         <TextField
+          className="w-full"
           name="name"
           label={t("fields.name")}
           required
@@ -136,6 +137,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
           errorMessage={fieldErrors.name && te(fieldErrors.name)}
         />
         <TextField
+          className="w-full"
           name="slug"
           label={t("fields.slug")}
           required
@@ -154,6 +156,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
           <legend className="text-title-medium text-on-surface mb-2">{t("regionSection")}</legend>
           <div className="grid gap-4 sm:grid-cols-2">
             <Select
+              className="w-full"
               name="country"
               label={t("fields.country")}
               searchable
@@ -167,6 +170,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
               ))}
             </Select>
             <Select
+              className="w-full"
               name="timeZone"
               label={t("fields.timeZone")}
               searchable
@@ -180,6 +184,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
               ))}
             </Select>
             <Select
+              className="w-full"
               name="currency"
               label={t("fields.currency")}
               searchable
@@ -193,6 +198,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
               ))}
             </Select>
             <Select
+              className="w-full"
               name="fiscalYearStartMonth"
               label={t("fields.fiscalYearStart")}
               value={fiscalStart}
@@ -203,6 +209,7 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
               ))}
             </Select>
             <Select
+              className="w-full"
               name="weekStart"
               label={t("fields.weekStart")}
               value={weekStart}

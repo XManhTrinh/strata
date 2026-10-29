@@ -41,6 +41,7 @@ export function SignUpForm({ next }: { next?: string }) {
           value={Intl.DateTimeFormat().resolvedOptions().timeZone}
         />
         <TextField
+          className="w-full"
           name="fullName"
           label={t("fields.fullName")}
           autoComplete="name"
@@ -51,6 +52,7 @@ export function SignUpForm({ next }: { next?: string }) {
           errorMessage={fieldErrors.fullName && te(fieldErrors.fullName)}
         />
         <TextField
+          className="w-full"
           name="email"
           type="email"
           label={t("fields.email")}
@@ -62,6 +64,7 @@ export function SignUpForm({ next }: { next?: string }) {
           errorMessage={fieldErrors.email && te(fieldErrors.email)}
         />
         <TextField
+          className="w-full"
           name="password"
           type="password"
           label={t("fields.password")}

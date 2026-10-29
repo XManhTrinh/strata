@@ -72,6 +72,7 @@ export function InviteDialog({
             </div>
           )}
           <TextField
+            className="w-full"
             name="emails"
             label={t("emails")}
             multiline
@@ -84,6 +85,7 @@ export function InviteDialog({
             errorMessage={state.fieldErrors?.emails && te(state.fieldErrors.emails)}
           />
           <Select
+            className="w-full"
             name="roleId"
             label={t("role")}
             value={roleId}

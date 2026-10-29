@@ -17,6 +17,7 @@ export function UpdatePasswordForm() {
       <FormError error={state.error} />
       <form action={action} noValidate className="flex flex-col gap-4">
         <TextField
+          className="w-full"
           name="password"
           type="password"
           label={t("fields.newPassword")}
