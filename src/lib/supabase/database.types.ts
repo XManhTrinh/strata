@@ -9,6 +9,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      assignment_on: {
+        Args: { p_date: string; p_member_id: string };
+        Returns: Database["public"]["Tables"]["member_assignments"]["Row"];
+        SetofOptions: {
+          from: "*";
+          to: "member_assignments";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       avatar_owner: { Args: { p_name: string }; Returns: string };
       can: {
         Args: { p_permission_key: string; p_target_member_id: string; p_workspace_id: string };
@@ -21,6 +31,11 @@ export type Database = {
         Returns: string[];
       };
       feature_on: { Args: { p_feature_key: string; p_workspace_id: string }; Returns: boolean };
+      field_is_sensitive: { Args: { p_field_id: string }; Returns: boolean };
+      granted_unit_paths: {
+        Args: { p_permission_key: string; p_workspace_id: string };
+        Returns: unknown[];
+      };
       has_permission: {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: boolean;
@@ -51,6 +66,7 @@ export type Database = {
         };
         Returns: boolean;
       };
+      rebuild_reporting_closure: { Args: { p_workspace_id: string }; Returns: undefined };
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
       unit_label: { Args: { p_id: string }; Returns: string };
     };
@@ -135,6 +151,102 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "career_levels_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      custom_field_options: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          field_id: string;
+          id: string;
+          label: string;
+          sort_order: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          field_id: string;
+          id?: string;
+          label: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          field_id?: string;
+          id?: string;
+          label?: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "custom_field_options_workspace_id_field_id_fkey";
+            columns: ["workspace_id", "field_id"];
+            isOneToOne: false;
+            referencedRelation: "custom_fields";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      custom_fields: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          id: string;
+          keep_history: boolean;
+          key: string;
+          label: string;
+          required: boolean;
+          sensitive: boolean;
+          sort_order: number;
+          type: Database["public"]["Enums"]["custom_field_type"];
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          id?: string;
+          keep_history?: boolean;
+          key: string;
+          label: string;
+          required?: boolean;
+          sensitive?: boolean;
+          sort_order?: number;
+          type: Database["public"]["Enums"]["custom_field_type"];
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          id?: string;
+          keep_history?: boolean;
+          key?: string;
+          label?: string;
+          required?: boolean;
+          sensitive?: boolean;
+          sort_order?: number;
+          type?: Database["public"]["Enums"]["custom_field_type"];
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "custom_fields_workspace_id_fkey";
             columns: ["workspace_id"];
             isOneToOne: false;
             referencedRelation: "workspaces";
@@ -308,6 +420,243 @@ export type Database = {
           },
         ];
       };
+      member_assignments: {
+        Row: {
+          career_level_id: string | null;
+          created_at: string;
+          employment_type_id: string | null;
+          id: string;
+          manager_member_id: string | null;
+          member_id: string;
+          org_unit_id: string;
+          position_id: string | null;
+          updated_at: string;
+          valid_from: string;
+          valid_to: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          career_level_id?: string | null;
+          created_at?: string;
+          employment_type_id?: string | null;
+          id?: string;
+          manager_member_id?: string | null;
+          member_id: string;
+          org_unit_id: string;
+          position_id?: string | null;
+          updated_at?: string;
+          valid_from: string;
+          valid_to?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          career_level_id?: string | null;
+          created_at?: string;
+          employment_type_id?: string | null;
+          id?: string;
+          manager_member_id?: string | null;
+          member_id?: string;
+          org_unit_id?: string;
+          position_id?: string | null;
+          updated_at?: string;
+          valid_from?: string;
+          valid_to?: string | null;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_assignments_workspace_id_career_level_id_fkey";
+            columns: ["workspace_id", "career_level_id"];
+            isOneToOne: false;
+            referencedRelation: "career_levels";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_employment_type_id_fkey";
+            columns: ["workspace_id", "employment_type_id"];
+            isOneToOne: false;
+            referencedRelation: "employment_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_manager_member_id_fkey";
+            columns: ["workspace_id", "manager_member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_org_unit_id_fkey";
+            columns: ["workspace_id", "org_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_position_id_fkey";
+            columns: ["workspace_id", "position_id"];
+            isOneToOne: false;
+            referencedRelation: "positions";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      member_compensation: {
+        Row: {
+          annual_salary: number | null;
+          created_at: string;
+          currency: string;
+          day_rate: number | null;
+          id: string;
+          member_id: string;
+          updated_at: string;
+          valid_from: string;
+          valid_to: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          annual_salary?: number | null;
+          created_at?: string;
+          currency: string;
+          day_rate?: number | null;
+          id?: string;
+          member_id: string;
+          updated_at?: string;
+          valid_from: string;
+          valid_to?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          annual_salary?: number | null;
+          created_at?: string;
+          currency?: string;
+          day_rate?: number | null;
+          id?: string;
+          member_id?: string;
+          updated_at?: string;
+          valid_from?: string;
+          valid_to?: string | null;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_compensation_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "member_compensation_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      member_field_values: {
+        Row: {
+          created_at: string;
+          field_id: string;
+          id: string;
+          member_id: string;
+          updated_at: string;
+          valid_from: string;
+          valid_to: string | null;
+          value: NonNullable<Json>;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          field_id: string;
+          id?: string;
+          member_id: string;
+          updated_at?: string;
+          valid_from?: string;
+          valid_to?: string | null;
+          value: NonNullable<Json>;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          field_id?: string;
+          id?: string;
+          member_id?: string;
+          updated_at?: string;
+          valid_from?: string;
+          valid_to?: string | null;
+          value?: NonNullable<Json>;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_field_values_workspace_id_field_id_fkey";
+            columns: ["workspace_id", "field_id"];
+            isOneToOne: false;
+            referencedRelation: "custom_fields";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_field_values_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      member_role_units: {
+        Row: {
+          member_role_id: string;
+          org_unit_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          member_role_id: string;
+          org_unit_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          member_role_id?: string;
+          org_unit_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_role_units_workspace_id_member_role_id_fkey";
+            columns: ["workspace_id", "member_role_id"];
+            isOneToOne: false;
+            referencedRelation: "member_roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_role_units_workspace_id_org_unit_id_fkey";
+            columns: ["workspace_id", "org_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       member_roles: {
         Row: {
           assigned_at: string;
@@ -356,10 +705,12 @@ export type Database = {
           country: string | null;
           created_at: string;
           email: string | null;
+          end_date: string | null;
           full_name: string;
           id: string;
           is_owner: boolean;
           person_key: string | null;
+          start_date: string | null;
           status: Database["public"]["Enums"]["member_status"];
           time_zone: string | null;
           updated_at: string;
@@ -371,10 +722,12 @@ export type Database = {
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          end_date?: string | null;
           full_name: string;
           id?: string;
           is_owner?: boolean;
           person_key?: string | null;
+          start_date?: string | null;
           status?: Database["public"]["Enums"]["member_status"];
           time_zone?: string | null;
           updated_at?: string;
@@ -385,10 +738,12 @@ export type Database = {
           country?: string | null;
           created_at?: string;
           email?: string | null;
+          end_date?: string | null;
           full_name?: string;
           id?: string;
           is_owner?: boolean;
           person_key?: string | null;
+          start_date?: string | null;
           status?: Database["public"]["Enums"]["member_status"];
           time_zone?: string | null;
           updated_at?: string;
@@ -726,6 +1081,50 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      reporting_closure: {
+        Row: {
+          depth: number;
+          manager_member_id: string;
+          member_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          depth: number;
+          manager_member_id: string;
+          member_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          depth?: number;
+          manager_member_id?: string;
+          member_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reporting_closure_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_closure_workspace_id_manager_member_id_fkey";
+            columns: ["workspace_id", "manager_member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "reporting_closure_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
           },
         ];
       };
@@ -1192,6 +1591,7 @@ export type Database = {
     };
     Enums: {
       cost_method: "annual_salary" | "day_rate";
+      custom_field_type: "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
       email_delivery: "instant" | "daily" | "none";
       member_status: "active" | "invited" | "inactive";
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
@@ -1312,6 +1712,7 @@ export const Constants = {
   public: {
     Enums: {
       cost_method: ["annual_salary", "day_rate"],
+      custom_field_type: ["text", "number", "date", "single_choice", "multi_choice", "person"],
       email_delivery: ["instant", "daily", "none"],
       member_status: ["active", "invited", "inactive"],
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
