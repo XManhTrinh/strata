@@ -1,0 +1,60 @@
+-- Shared pgTAP helpers. Include at the top of a test file, after `begin;`, with:
+--   \ir _helpers.psql
+-- Everything here lives in the test transaction and is rolled back with it.
+
+create extension if not exists pgtap with schema extensions;
+
+create schema if not exists tests;
+
+-- Creates a confirmed auth user and returns its id. The profile trigger runs as in production.
+create or replace function tests.create_user(p_email text, p_full_name text default null)
+returns uuid
+language plpgsql
+as $$
+declare
+  v_id uuid := gen_random_uuid();
+begin
+  insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_user_meta_data,
+                          raw_app_meta_data, created_at, updated_at)
+  values (v_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p_email,
+          now(), jsonb_build_object('full_name', coalesce(p_full_name, split_part(p_email, '@', 1))),
+          '{"provider": "email"}', now(), now());
+  return v_id;
+end;
+$$;
+
+-- Acts as the given user for the rest of the transaction (as PostgREST does for a request).
+create or replace function tests.authenticate_as(p_user_id uuid)
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', p_user_id, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+end;
+$$;
+
+create or replace function tests.authenticate_as_anon()
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('role', 'anon')::text, true);
+  perform set_config('role', 'anon', true);
+end;
+$$;
+
+-- Back to the migration owner, bypassing RLS, to set up or inspect data.
+create or replace function tests.clear_authentication()
+returns void
+language plpgsql
+as $$
+begin
+  perform set_config('role', 'postgres', true);
+  perform set_config('request.jwt.claims', null, true);
+end;
+$$;
+
+grant usage on schema tests to anon, authenticated;
+grant execute on all functions in schema tests to anon, authenticated;
