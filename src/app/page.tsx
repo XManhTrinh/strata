@@ -1,8 +1,30 @@
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { EmptyState } from "@windmorph/react-pro";
-import { Icon } from "@/components/ui/icon";
+import { Button } from "@windmorph/react";
+import { createClient } from "@/lib/supabase/server";
 
+/** Signed in: the last workspace (or onboarding). Signed out: a short landing page. */
 export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getClaims();
+
+  if (auth?.claims.sub) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("last_workspace_id")
+      .eq("id", auth.claims.sub)
+      .maybeSingle();
+
+    // RLS only returns workspaces the user is an active member of.
+    const { data: workspaces } = await supabase
+      .from("workspaces")
+      .select("id, slug")
+      .order("created_at");
+
+    const target = workspaces?.find((w) => w.id === profile?.last_workspace_id) ?? workspaces?.[0];
+    redirect(target ? `/w/${target.slug}` : "/onboarding");
+  }
+
   const t = await getTranslations("home");
 
   return (
@@ -11,12 +33,14 @@ export default async function HomePage() {
       <p className="text-body-large text-on-surface-variant max-w-prose text-center">
         {t("subtitle")}
       </p>
-      <EmptyState
-        variant="filled"
-        size="md"
-        icon={<Icon name="check_circle" />}
-        title={t("status")}
-      />
+      <div className="flex flex-wrap justify-center gap-3">
+        <Button variant="filled" href="/sign-up">
+          {t("getStarted")}
+        </Button>
+        <Button variant="outlined" href="/sign-in">
+          {t("signIn")}
+        </Button>
+      </div>
     </main>
   );
 }

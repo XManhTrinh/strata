@@ -8,7 +8,9 @@ import type { Database } from "./database.types";
  * `getClaims()` checks the token's signature, unlike `getSession()`, which only reads the
  * cookie and must never be used for auth decisions on the server.
  */
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
+export async function updateSession(
+  request: NextRequest
+): Promise<{ response: NextResponse; userId: string | null }> {
   const env = getPublicEnv();
   let response = NextResponse.next({ request });
 
@@ -33,8 +35,14 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   );
 
   // Nothing may run between creating the client and this call, or sessions can be lost.
-  // Route protection is added in Phase 1, when there are protected routes.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
 
-  return response;
+  return { response, userId: data?.claims.sub ?? null };
+}
+
+/** A redirect that keeps any session cookies the refresh just set. */
+export function redirectWithSession(url: URL, sessionResponse: NextResponse): NextResponse {
+  const redirect = NextResponse.redirect(url);
+  for (const cookie of sessionResponse.cookies.getAll()) redirect.cookies.set(cookie);
+  return redirect;
 }

@@ -6,7 +6,8 @@
   "home": {
     "title": "Strata",
     "subtitle": "People, time and capacity planning for organizations of every size.",
-    "status": "The new foundation is running."
+    "getStarted": "Get started",
+    "signIn": "Sign in"
   },
   "states": {
     "loading": "Loading",
@@ -16,5 +17,130 @@
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The page you're looking for doesn't exist or you don't have access to it.",
     "goHome": "Go to home"
+  },
+  "common": {
+    "appName": "Strata",
+    "or": "or"
+  },
+  "errors": {
+    "required": "Required.",
+    "emailInvalid": "Enter a valid email address.",
+    "passwordTooShort": "Use at least 8 characters.",
+    "passwordNeedsLetterAndDigit": "Use at least one letter and one digit.",
+    "nameRequired": "Enter your name.",
+    "invalidCredentials": "That email and password don't match.",
+    "emailNotConfirmed": "Confirm your email first: we sent you a link when you signed up.",
+    "rateLimited": "Too many attempts. Wait a minute and try again.",
+    "providerUnavailable": "Google sign-in isn't available right now. Use email and password.",
+    "linkInvalid": "That link has expired or was already used. Request a new one.",
+    "samePassword": "Choose a password different from your current one.",
+    "generic": "Something went wrong. Try again.",
+    "workspaceNameRequired": "Enter a name for the workspace.",
+    "slugInvalid": "Use 1–40 lower-case letters, digits or hyphens, starting and ending with a letter or digit.",
+    "slugUnavailable": "That address is taken or reserved. Try another.",
+    "countryRequired": "Choose a country.",
+    "timeZoneRequired": "Choose a time zone.",
+    "currencyRequired": "Choose a currency."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in to Strata",
+      "subtitle": "Welcome back.",
+      "submit": "Sign in",
+      "google": "Continue with Google",
+      "forgot": "Forgot password?",
+      "noAccount": "New to Strata?",
+      "createAccount": "Create an account"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "For yourself, your team or your company.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "checkEmailTitle": "Check your email",
+      "checkEmailBody": "We sent a confirmation link to {email}. Open it to finish creating your account."
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "We'll email you a link to choose a new one.",
+      "submit": "Send reset link",
+      "sentTitle": "Check your email",
+      "sentBody": "If an account exists for {email}, a reset link is on its way.",
+      "back": "Back to sign in"
+    },
+    "update": {
+      "title": "Choose a new password",
+      "submit": "Save password"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "passwordHint": "At least 8 characters, with a letter and a digit."
+    }
+  },
+  "onboarding": {
+    "title": "Create a workspace",
+    "subtitle": "Choose how you'll use Strata. You can switch features on or off later.",
+    "templateLabel": "Workspace type",
+    "templates": {
+      "personal": {
+        "name": "Personal",
+        "description": "Your own calendar and time off."
+      },
+      "team": {
+        "name": "Team",
+        "description": "A manager and their team: people, calendar and time off."
+      },
+      "company": {
+        "name": "Company",
+        "description": "A whole organization: people, structure, time off, capacity and cost planning."
+      }
+    },
+    "fields": {
+      "name": "Workspace name",
+      "slug": "Web address",
+      "slugHint": "Letters, digits and hyphens.",
+      "country": "Country",
+      "timeZone": "Time zone",
+      "currency": "Currency",
+      "fiscalYearStart": "Fiscal year starts in",
+      "weekStart": "Week starts on"
+    },
+    "regionSection": "Region and calendar",
+    "submit": "Create workspace",
+    "search": "Search"
+  },
+  "shell": {
+    "skipToContent": "Skip to content",
+    "navigation": "Main navigation",
+    "nav": {
+      "home": "Home",
+      "settings": "Settings"
+    },
+    "switcher": {
+      "label": "Switch workspace",
+      "create": "Create workspace",
+      "current": "Current workspace"
+    },
+    "userMenu": {
+      "label": "Account",
+      "profile": "Profile",
+      "notifications": "Notification settings",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "signOut": "Sign out"
+    }
+  },
+  "dashboard": {
+    "title": "Home",
+    "welcome": "Welcome, {name}",
+    "comingTitle": "Your workspace is ready",
+    "comingBody": "People, calendar and planning arrive here as they're built. Start by inviting your team in Settings.",
+    "openSettings": "Open settings"
   }
 }
