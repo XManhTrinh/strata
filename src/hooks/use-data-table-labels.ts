@@ -11,6 +11,7 @@ export function useDataTableLabels(): DataTableLabels {
   return useMemo(
     () => ({
       search: t("search"),
+      filters: t("filters"),
       columns: t("columns"),
       columnSettingsTitle: t("columnSettingsTitle"),
       showColumn: (column) => t("showColumn", { column }),

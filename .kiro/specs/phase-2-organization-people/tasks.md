@@ -51,6 +51,9 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
 
 - [ ] 7. People
   - [ ] 7.1 Directory: DataTable in server mode with search, filters, saved views, export
+    - [x] `people_directory` RPC (reach worked out once per call, search, unit subtree, position,
+          employment type, leavers, sort, paging); URL-kept state; phone list with filters
+    - [ ] Saved views, export
   - [ ] 7.2 Profile: details, current job, history timeline, future-dated changes, pay (with
         permission), custom fields
   - [ ] 7.3 Add person, edit, set an end date

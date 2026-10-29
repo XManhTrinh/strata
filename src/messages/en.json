@@ -165,6 +165,7 @@
     "navigation": "Main navigation",
     "nav": {
       "home": "Home",
+      "people": "People",
       "settings": "Settings"
     },
     "switcher": {
@@ -649,6 +650,7 @@
   },
   "dataTable": {
     "search": "Search",
+    "filters": "Filters",
     "columns": "Columns",
     "columnSettingsTitle": "Columns",
     "showColumn": "Show {column}",
@@ -818,5 +820,32 @@
     "editOption": "Rename option",
     "optionAdded": "{name} added",
     "done": "Done"
+  },
+  "people": {
+    "title": "People",
+    "empty": "No one matches",
+    "emptyHint": "Try other words or clear the filters.",
+    "columns": {
+      "name": "Name",
+      "unit": "Unit",
+      "position": "Position",
+      "level": "Level",
+      "employmentType": "Employment type",
+      "manager": "Manager",
+      "email": "Email",
+      "startDate": "Start date"
+    },
+    "filters": {
+      "all": "All",
+      "unit": "Unit",
+      "position": "Position",
+      "employmentType": "Employment type",
+      "status": "Status",
+      "statuses": {
+        "current": "Current",
+        "leavers": "Leavers",
+        "all": "Everyone"
+      }
+    }
   }
 }

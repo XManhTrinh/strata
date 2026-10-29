@@ -2,7 +2,7 @@ import { visibleSections } from "@/features/settings/sections";
 import type { WorkspaceContextValue } from "@/features/workspaces/workspace-context";
 
 export type Destination = {
-  key: "home" | "settings";
+  key: "home" | "people" | "settings";
   href: string;
   icon: string;
 };
@@ -11,6 +11,9 @@ export type Destination = {
 export function destinationsFor({ workspace, permissions }: WorkspaceContextValue): Destination[] {
   const base = `/w/${workspace.slug}`;
   const destinations: Destination[] = [{ key: "home", href: base, icon: "home" }];
+  if ((permissions["people.view"]?.length ?? 0) > 0) {
+    destinations.push({ key: "people", href: `${base}/people`, icon: "group" });
+  }
   if (visibleSections(permissions).length > 0) {
     destinations.push({ key: "settings", href: `${base}/settings`, icon: "settings" });
   }

@@ -32,6 +32,8 @@ export type TableState = {
 
 export type DataTableLabels = {
   search: string;
+  /** The button that shows the filters on phones. */
+  filters: string;
   columns: string;
   columnSettingsTitle: string;
   showColumn: (column: string) => string;

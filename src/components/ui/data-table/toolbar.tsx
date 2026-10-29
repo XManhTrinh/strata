@@ -1,8 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { Button, IconButton, TextField } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import type { DataTableLabels, TableState } from "./types";
 
 /** Search, page-specific filters and column settings; replaced by the bulk bar while rows are selected. */
@@ -32,6 +33,9 @@ export function Toolbar({
   labels: DataTableLabels;
 }) {
   const selected = state.selection.allMatching ? total : state.selection.ids.length;
+  // Phones show a list, so columns don't apply, and filters wait behind a button.
+  const phone = useMediaQuery("(max-width: 599px)");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   if (selected > 0) {
     return (
@@ -71,14 +75,28 @@ export function Toolbar({
         value={state.search}
         onChange={onSearch}
       />
-      {filters}
-      <IconButton
-        variant="standard"
-        className="ms-auto"
-        aria-label={labels.columns}
-        icon={<Icon name="view_column" />}
-        onPress={onOpenColumns}
-      />
+      {filters && phone && (
+        <IconButton
+          variant="standard"
+          className="ms-auto"
+          aria-label={labels.filters}
+          aria-expanded={filtersOpen}
+          icon={<Icon name="filter_list" />}
+          onPress={() => setFiltersOpen(!filtersOpen)}
+        />
+      )}
+      {filters && (!phone || filtersOpen) && (
+        <div className="medium:contents flex w-full flex-wrap gap-3">{filters}</div>
+      )}
+      {!phone && (
+        <IconButton
+          variant="standard"
+          className="ms-auto"
+          aria-label={labels.columns}
+          icon={<Icon name="view_column" />}
+          onPress={onOpenColumns}
+        />
+      )}
     </div>
   );
 }

@@ -1819,6 +1819,37 @@ export type Database = {
           reaches: Database["public"]["Enums"]["reach"][];
         }[];
       };
+      people_directory: {
+        Args: {
+          p_descending?: boolean;
+          p_employment_type_id?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_position_id?: string;
+          p_search?: string;
+          p_sort?: string;
+          p_status?: string;
+          p_unit_id?: string;
+          p_workspace_id: string;
+        };
+        Returns: {
+          avatar_path: string;
+          career_level_name: string;
+          email: string;
+          employment_type_name: string;
+          end_date: string;
+          full_name: string;
+          manager_member_id: string;
+          manager_name: string;
+          member_id: string;
+          person_key: string;
+          position_name: string;
+          start_date: string;
+          total_count: number;
+          unit_id: string;
+          unit_name: string;
+        }[];
+      };
       remove_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
