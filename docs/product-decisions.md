@@ -315,6 +315,10 @@ All plan changes go to the audit log.
 - Email goes through **Resend** (SMTP, EU region) on staging and production, for both the app's
   emails (invitations, notifications) and Supabase Auth's (confirmations, password resets). Locally
   everything goes to Mailpit.
+- **Until Strata has a domain**, staging uses Supabase's built-in email for sign-up confirmation
+  and password reset (delivered only to members of the Supabase organization, about 2 an hour);
+  app emails such as invitations are not sent on staging. Buying a domain and setting up Resend is
+  required before other people use staging, and before launch.
 - **Later:** Microsoft Teams and Slack, connected per workspace (e.g. approve leave from a Teams
   message).
 
