@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/components/ui/*/index.ts"],
   "ignore": ["src/lib/supabase/database.types.ts"],
   "ignoreBinaries": ["supabase"]
 }

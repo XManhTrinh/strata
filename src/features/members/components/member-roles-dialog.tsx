@@ -45,7 +45,7 @@ export function MemberRolesDialog({
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
       <DialogTitle>{t("rolesDialogTitle", { name: member.fullName })}</DialogTitle>
       <DialogContent className="flex flex-col gap-3">
         <p className="text-body-medium text-on-surface-variant">{t("rolesDialogBody")}</p>

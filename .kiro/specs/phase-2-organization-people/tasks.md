@@ -35,6 +35,10 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [ ] 5.2 DataTable: columns, sort, selection, bulk actions, filters, pagination, server mode,
         column settings with reorder, saved views, phone list layout; keyboard and screen-reader
         checks
+    - [x] Columns, sort, resize, selection with a bulk bar, search, filters slot, pagination,
+          client and server mode, loading/error/empty states, column settings (show, hide, drag
+          or button reorder), phone list; e2e and axe at three widths
+    - [ ] Multi-sort, pinned columns, column filters, saved views (with the people directory)
   - [ ] 5.3 Benchmarks in CI
 
 - [ ] 6. Structure settings

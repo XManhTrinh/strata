@@ -587,5 +587,26 @@
         "accepted": "{name} joined the workspace"
       }
     }
+  },
+  "dataTable": {
+    "search": "Search",
+    "columns": "Columns",
+    "columnSettingsTitle": "Columns",
+    "showColumn": "Show {column}",
+    "moveUp": "Move {column} up",
+    "moveDown": "Move {column} down",
+    "reset": "Reset",
+    "done": "Done",
+    "selectAll": "Select all on this page",
+    "selectRow": "Select",
+    "selected": "{count, plural, one {# selected} other {# selected}}",
+    "selectAllMatching": "Select all {count}",
+    "clearSelection": "Clear selection",
+    "rowsPerPage": "Rows per page",
+    "range": "{from}–{to} of {total}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "loading": "Loading",
+    "retry": "Try again"
   }
 }

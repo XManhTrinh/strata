@@ -32,7 +32,7 @@ export function NewRoleDialog({
   );
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{copyFrom ? t("duplicate") : t("newRole")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">
