@@ -51,6 +51,16 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 - **Later:** dedicated deployments in other regions (e.g. UK, US) for customers who require their
   data there. The product doesn't change; each region is its own Supabase project.
 
+### Environments
+
+| Environment | Web                                                                                             | Database                     | Updated                          |
+| ----------- | ----------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------- |
+| Local       | `http://localhost:3000`                                                                         | `supabase start`             | By the developer                 |
+| Staging     | **`https://strata-web.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging`    | Automatically on merge to `main` |
+| Production  | Custom domain (to be decided)                                                                   | Supabase `strata-production` | Only by an approved release      |
+
+Preview and staging deployments never use the production database.
+
 ## 2. Billing
 
 - **Paid plans later, not in v1.** Every workspace is on a free plan at launch.

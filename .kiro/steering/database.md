@@ -35,6 +35,13 @@ change is needed.
 ## Security
 
 - **RLS enabled on every table**, with policies for select/insert/update/delete as needed.
+- **Nothing is exposed by default:** new tables, sequences and functions in `public` have no
+  privileges for `anon` or `authenticated`. Each migration grants exactly what it needs (e.g.
+  `grant select, insert on public.members to authenticated;`, `grant execute on function
+public.create_workspace(...) to authenticated;`) next to its policies. `anon` gets nothing unless
+  a feature is genuinely public.
+- An event trigger enables RLS on every new `public` table as a safety net; still write
+  `alter table ... enable row level security` in each migration.
 - Policies use the permission functions only: `current_member(ws)`, `feature_on(ws, feature)`,
   `reach(ws, permission)`, `can(ws, permission, target_member)`. Do not re-implement checks.
 - Functions: `security definer` only when required, always `set search_path = ''` and fully

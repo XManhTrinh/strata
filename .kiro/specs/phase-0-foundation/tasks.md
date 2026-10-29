@@ -50,13 +50,12 @@ environments. Each task leaves the repository building.
   - [x] 4.2 `react/jsx-no-literals` flags literal JSX text
     - _Requirements: 4.4_
 
-- [ ] 5. Supabase
+- [x] 5. Supabase
   - [x] 5.1 Write `supabase/config.toml` for Strata
     - _Requirements: 5.1_
   - [x] 5.2 First migration: extensions, `app` schema, `app.set_updated_at()`
     - _Requirements: 5.2_
-  - [ ] 5.3 Run `pnpm db:types` against the local stack and commit the generated file (needs
-        Docker running; a temporary stand-in is committed until then)
+  - [x] 5.3 Run `pnpm db:types` against the local stack and commit the generated file
     - _Requirements: 5.3_
   - [x] 5.4 Typed proxy client; `src/proxy.ts` with `getClaims()` (server and browser clients
         arrive with their first use in Phase 1)
@@ -75,12 +74,13 @@ environments. Each task leaves the repository building.
   - [x] 6.4 Renovate config with grouped weekly updates and the TypeScript / Node types pins
     - _Requirements: 6.5_
 
-- [ ] 7. Test infrastructure
+- [x] 7. Test infrastructure
   - [x] 7.1 Vitest config and the `env` unit tests
     - _Requirements: 7.1_
   - [x] 7.2 Playwright config with phone, tablet and desktop projects; smoke tests with axe
     - _Requirements: 7.2_
-  - [ ] 7.3 pgTAP test asserting RLS on every `public` table (written; run once Docker is up)
+  - [x] 7.3 pgTAP tests: RLS on every `public` table; new tables get RLS automatically and no
+        API-role privileges; new functions are not executable by default
     - _Requirements: 7.3_
 
 - [x] 8. Continuous integration
