@@ -312,7 +312,9 @@ All plan changes go to the audit log.
 - **v1: in-app + email.** A live in-app list (bell) plus email for the same events (approvals to
   act on, decisions, invites, imports finished).
 - Each user chooses per category which ones they get by email, and can switch to a daily summary.
-- An email service (e.g. Resend or Postmark) is needed regardless for invites and sign-in emails.
+- Email goes through **Resend** (SMTP, EU region) on staging and production, for both the app's
+  emails (invitations, notifications) and Supabase Auth's (confirmations, password resets). Locally
+  everything goes to Mailpit.
 - **Later:** Microsoft Teams and Slack, connected per workspace (e.g. approve leave from a Teams
   message).
 
