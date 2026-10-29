@@ -42,7 +42,8 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [ ] 5.3 Benchmarks in CI
 
 - [ ] 6. Structure settings
-  - [ ] 6.1 Hierarchy: levels, and the unit tree with add, rename, move and archive
+  - [x] 6.1 Hierarchy: levels, and the unit tree with add, rename, move and archive (Settings >
+        Hierarchy; rules for level changes, archiving and reordering in the database)
   - [ ] 6.2 Positions, career levels, employment types
   - [ ] 6.3 Custom fields and their options
 

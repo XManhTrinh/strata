@@ -33,7 +33,14 @@ export function SettingsShell({ children }: { children: ReactNode }) {
         listLabel={t("title")}
         detailLabel={current ? t(`sections.${current}.name`) : t("title")}
         listAs="nav"
-        back={<IconButton href={base} aria-label={t("back")} icon={<Icon name="arrow_back" />} />}
+        back={
+          <IconButton
+            variant="standard"
+            href={base}
+            aria-label={t("back")}
+            icon={<Icon name="arrow_back" />}
+          />
+        }
         list={
           <List
             aria-label={t("title")}

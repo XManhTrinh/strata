@@ -35,12 +35,14 @@ export function Pagination({
       <span aria-live="polite">{labels.range(from, to, total)}</span>
       <span className="flex">
         <IconButton
+          variant="standard"
           aria-label={labels.previousPage}
           icon={<Icon name="chevron_left" />}
           disabled={page.index === 0}
           onPress={() => onChange({ ...page, index: page.index - 1 })}
         />
         <IconButton
+          variant="standard"
           aria-label={labels.nextPage}
           icon={<Icon name="chevron_right" />}
           disabled={to >= total}

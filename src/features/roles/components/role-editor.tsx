@@ -70,6 +70,7 @@ export function RoleEditor({
     <section aria-labelledby="role-title" className="flex max-w-3xl flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <IconButton
+          variant="standard"
           href={`/w/${workspace.slug}/settings/roles`}
           aria-label={t("back")}
           icon={<Icon name="arrow_back" />}

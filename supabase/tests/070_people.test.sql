@@ -30,11 +30,11 @@ select ws, n, o from ctx, (values ('Division', 10), ('Squad', 40)) as l (n, o);
 insert into public.org_units (workspace_id, parent_id, level_id, name, path)
 select ws, root, (select id from public.org_unit_levels where workspace_id = ws and name = 'Division'), 'Engineering', 'x' from ctx;
 insert into public.org_units (workspace_id, parent_id, level_id, name, path)
-select ws, (select id from public.org_units where name = 'Engineering'),
+select ws, (select id from public.org_units where workspace_id = (select ws from ctx) and name = 'Engineering'),
   (select id from public.org_unit_levels where workspace_id = ws and name = 'Squad'), s, 'x'
 from ctx, (values ('Squad A'), ('Squad B')) as v (s);
 
-create function pg_temp.unit(p_name text) returns uuid language sql as $$ select id from public.org_units where name = p_name $$;
+create function pg_temp.unit(p_name text) returns uuid language sql as $$ select id from public.org_units where workspace_id = (select ws from ctx) and name = p_name $$;
 create function pg_temp.member(p_name text) returns uuid language sql as $$ select member_id from people where name = p_name $$;
 grant execute on function pg_temp.unit(text), pg_temp.member(text) to authenticated;
 

@@ -88,6 +88,7 @@ export function NotificationBell() {
   return (
     <>
       <IconButton
+        variant="standard"
         aria-label={unread > 0 ? t("labelUnread", { count: unread }) : t("label")}
         icon={
           unread > 0 ? <BadgedBox badge={<Badge max={99}>{unread}</Badge>}>{icon}</BadgedBox> : icon

@@ -111,6 +111,7 @@ export function MembersSettings({
                   {actions && (
                     <MenuTrigger>
                       <IconButton
+                        variant="standard"
                         aria-label={t("actions", { name: member.fullName })}
                         icon={<Icon name="more_vert" />}
                       />

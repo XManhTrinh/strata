@@ -46,49 +46,49 @@ insert into public.org_units (workspace_id, parent_id, level_id, name, path)
 select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and parent_id is null),
   (select id from lv where name = 'Division'), 'Engineering', 'x';
 insert into public.org_units (workspace_id, parent_id, level_id, name, path)
-select (select id from ws), (select id from public.org_units where name = 'Engineering'),
+select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and name = 'Engineering'),
   (select id from lv where name = 'Tribe'), 'Platform', 'x';
 insert into public.org_units (workspace_id, parent_id, level_id, name, path)
-select (select id from ws), (select id from public.org_units where name = 'Platform'),
+select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and name = 'Platform'),
   (select id from lv where name = 'Squad'), 'Squad A', 'x';
 
 select ok(
-  (select path from public.org_units where name = 'Squad A')
-    operator(extensions.<@) (select path from public.org_units where name = 'Engineering'),
+  (select path from public.org_units where workspace_id = (select id from ws) and name = 'Squad A')
+    operator(extensions.<@) (select path from public.org_units where workspace_id = (select id from ws) and name = 'Engineering'),
   'paths place units under their ancestors'
 );
 
 select lives_ok(
   $$ insert into public.org_units (workspace_id, parent_id, level_id, name, path)
-     select (select id from ws), (select id from public.org_units where name = 'Engineering'),
+     select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and name = 'Engineering'),
        (select id from lv where name = 'Squad'), 'Squad B', 'x' $$,
   'a unit may skip levels (a squad directly under a division)'
 );
 
 select throws_ok(
   $$ insert into public.org_units (workspace_id, parent_id, level_id, name, path)
-     select (select id from ws), (select id from public.org_units where name = 'Squad A'),
+     select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and name = 'Squad A'),
        (select id from lv where name = 'Tribe'), 'Wrong way', 'x' $$,
   '23514', null, 'a unit cannot sit under a lower level'
 );
 
 select throws_ok(
-  $$ update public.org_units set parent_id = (select id from public.org_units where name = 'Squad A')
-     where name = 'Engineering' $$,
+  $$ update public.org_units set parent_id = (select id from public.org_units where workspace_id = (select id from ws) and name = 'Squad A')
+     where workspace_id = (select id from ws) and name = 'Engineering' $$,
   '23514', null, 'a unit cannot move under its own descendants'
 );
 
 insert into public.org_units (workspace_id, parent_id, level_id, name, path)
 select (select id from ws), (select id from public.org_units where workspace_id = (select id from ws) and parent_id is null),
   (select id from lv where name = 'Division'), 'Product', 'x';
-update public.org_units set parent_id = (select id from public.org_units where name = 'Product')
+update public.org_units set parent_id = (select id from public.org_units where workspace_id = (select id from ws) and name = 'Product')
 where name = 'Platform';
 
 select ok(
-  (select path from public.org_units where name = 'Squad A')
-    operator(extensions.<@) (select path from public.org_units where name = 'Product')
-  and not (select path from public.org_units where name = 'Squad A')
-    operator(extensions.<@) (select path from public.org_units where name = 'Engineering'),
+  (select path from public.org_units where workspace_id = (select id from ws) and name = 'Squad A')
+    operator(extensions.<@) (select path from public.org_units where workspace_id = (select id from ws) and name = 'Product')
+  and not (select path from public.org_units where workspace_id = (select id from ws) and name = 'Squad A')
+    operator(extensions.<@) (select path from public.org_units where workspace_id = (select id from ws) and name = 'Engineering'),
   'moving a unit moves its whole subtree'
 );
 

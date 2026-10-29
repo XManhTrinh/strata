@@ -49,6 +49,9 @@ fileMatchPattern: "src/**/*.tsx"
   `errorText`, Snackbar for success. Complex forms use `react-hook-form` through the shared
   Windmorph input adapters.
 - Feedback through the shared Snackbar host; never `window.alert`.
+- `IconButton` defaults to `filled` in Windmorph; pass `variant="standard"` for overflow menus,
+  back arrows and row or toolbar actions (M3), and choose filled or tonal only for emphasis.
+- Database refusals carry the `errors.*` message key as their `hint`; actions show that key.
 - Motion from `motion/react`, M3 durations, always respecting reduced motion.
 
 ## Accessibility (WCAG 2.2 AA)

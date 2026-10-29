@@ -11,7 +11,12 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
-  use: { baseURL, trace: "retain-on-failure" },
+  // SCREENSHOTS=1 keeps the last screen of every test in test-results/, for reviewing layouts.
+  use: {
+    baseURL,
+    trace: "retain-on-failure",
+    screenshot: process.env.SCREENSHOTS ? "on" : "only-on-failure",
+  },
   projects: [
     { name: "phone", use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 } } },
     {

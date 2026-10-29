@@ -15,7 +15,7 @@ export function WorkspaceSwitcher() {
 
   return (
     <MenuTrigger>
-      <IconButton aria-label={t("label")} icon={<Icon name="swap_horiz" />} />
+      <IconButton variant="standard" aria-label={t("label")} icon={<Icon name="swap_horiz" />} />
       <Menu
         aria-label={t("label")}
         onAction={(key) => router.push(key === CREATE_KEY ? "/onboarding" : `/w/${String(key)}`)}

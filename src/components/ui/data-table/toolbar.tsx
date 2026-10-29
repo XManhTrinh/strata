@@ -41,6 +41,7 @@ export function Toolbar({
         className="bg-secondary-container text-on-secondary-container flex min-h-16 flex-wrap items-center gap-2 rounded-xl px-4 py-2"
       >
         <IconButton
+          variant="standard"
           aria-label={labels.clearSelection}
           icon={<Icon name="close" />}
           onPress={onClearSelection}
@@ -72,6 +73,7 @@ export function Toolbar({
       />
       {filters}
       <IconButton
+        variant="standard"
         className="ms-auto"
         aria-label={labels.columns}
         icon={<Icon name="view_column" />}

@@ -97,6 +97,7 @@ export function ColumnSettings<Row>({
               <SelectionCheckbox />
               <span className="flex-1">{column.header}</span>
               <IconButton
+                variant="standard"
                 aria-label={labels.moveUp(column.header)}
                 icon={<Icon name="arrow_upward" />}
                 onPress={() =>
@@ -104,6 +105,7 @@ export function ColumnSettings<Row>({
                 }
               />
               <IconButton
+                variant="standard"
                 aria-label={labels.moveDown(column.header)}
                 icon={<Icon name="arrow_downward" />}
                 onPress={() =>

@@ -26,7 +26,12 @@ export function AccountShell({ children }: { children: ReactNode }) {
       <TopAppBar
         title={t("title")}
         navigationIcon={
-          <IconButton href="/" aria-label={t("back")} icon={<Icon name="arrow_back" />} />
+          <IconButton
+            variant="standard"
+            href="/"
+            aria-label={t("back")}
+            icon={<Icon name="arrow_back" />}
+          />
         }
       />
       <main id="main-content">
@@ -37,7 +42,12 @@ export function AccountShell({ children }: { children: ReactNode }) {
           detailLabel={current ? t(`sections.${current}.name`) : t("title")}
           listAs="nav"
           back={
-            <IconButton href="/account" aria-label={t("title")} icon={<Icon name="arrow_back" />} />
+            <IconButton
+              variant="standard"
+              href="/account"
+              aria-label={t("title")}
+              icon={<Icon name="arrow_back" />}
+            />
           }
           list={
             <List

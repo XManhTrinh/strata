@@ -1102,7 +1102,7 @@ export type Database = {
           level_id?: string | null;
           name: string;
           parent_id?: string | null;
-          path: unknown;
+          path?: unknown;
           updated_at?: string;
           workspace_id: string;
         };
@@ -1821,6 +1821,10 @@ export type Database = {
       };
       remove_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
+        Returns: undefined;
+      };
+      reorder_org_unit_levels: {
+        Args: { p_level_ids: string[]; p_workspace_id: string };
         Returns: undefined;
       };
       resend_invitation: { Args: { p_invitation_id: string }; Returns: string };

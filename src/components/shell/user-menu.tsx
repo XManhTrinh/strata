@@ -35,6 +35,7 @@ export function UserMenu() {
   return (
     <MenuTrigger>
       <IconButton
+        variant="standard"
         aria-label={t("label")}
         icon={
           <Avatar name={user.fullName} src={user.avatarUrl ?? undefined} decorative size="sm" />

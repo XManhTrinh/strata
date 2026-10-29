@@ -1,4 +1,5 @@
-export type SettingsSectionKey = "general" | "members" | "roles" | "features" | "audit";
+export type SettingsSectionKey =
+  "general" | "members" | "roles" | "hierarchy" | "features" | "audit";
 
 type SettingsSection = { key: SettingsSectionKey; icon: string; permissions: string[] };
 
@@ -11,6 +12,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     permissions: ["members.view", "members.invite", "members.manage", "roles.assign"],
   },
   { key: "roles", icon: "admin_panel_settings", permissions: ["roles.view", "roles.manage"] },
+  { key: "hierarchy", icon: "account_tree", permissions: ["people.manage_structure"] },
   { key: "features", icon: "toggle_on", permissions: ["workspace.manage_features"] },
   { key: "audit", icon: "history", permissions: ["workspace.view_audit"] },
 ];
