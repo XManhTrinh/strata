@@ -27,6 +27,11 @@ const eslintConfig = [
     },
   },
   {
+    // Email templates are full HTML documents rendered for mail clients, not Next.js pages.
+    files: ["src/emails/**/*.tsx"],
+    rules: { "@next/next/no-head-element": "off" },
+  },
+  {
     // All UI text comes from src/messages through next-intl.
     files: ["src/**/*.tsx"],
     rules: {

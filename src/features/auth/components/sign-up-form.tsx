@@ -9,7 +9,7 @@ import { idleFormState } from "@/lib/form-state";
 import { signUp } from "../actions";
 import { FormError } from "./form-error";
 
-export function SignUpForm() {
+export function SignUpForm({ next }: { next?: string }) {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
   const [state, action, pending] = useActionState(signUp, idleFormState);
@@ -34,6 +34,7 @@ export function SignUpForm() {
       <FormError error={state.error} />
 
       <form action={action} noValidate className="flex flex-col gap-4">
+        {next && <input type="hidden" name="next" value={next} />}
         <input
           type="hidden"
           name="timeZone"
@@ -77,7 +78,9 @@ export function SignUpForm() {
 
       <p className="text-body-medium text-on-surface-variant flex flex-wrap justify-center gap-x-1">
         <span>{t("signUp.haveAccount")}</span>
-        <Link href="/sign-in">{t("signUp.signIn")}</Link>
+        <Link href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"}>
+          {t("signUp.signIn")}
+        </Link>
       </p>
     </div>
   );

@@ -1,23 +1,15 @@
 import { expectNoA11yViolations } from "./a11y";
 import { expect, test } from "@playwright/test";
-import { latestLinkFor } from "./mailpit";
+import { completeSignUp, uniqueId } from "./helpers";
 
 test("a new user signs up, confirms their email and creates a workspace", async ({
   page,
 }, testInfo) => {
-  const id = `${Date.now()}-${testInfo.project.name}`;
-  const email = `ana-${id}@example.test`;
+  const id = uniqueId(testInfo.project.name);
 
   await page.goto("/sign-up");
-  await page.getByLabel("Full name").fill("Ana Pop");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("secret123");
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByText("Check your email")).toBeVisible();
-
-  await page.goto(await latestLinkFor(email));
+  await completeSignUp(page, "Ana Pop", `ana-${id}@example.test`);
   await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByRole("heading", { name: "Create a workspace" })).toBeVisible();
   await expectNoA11yViolations(page);
 
   await page.getByText("Company", { exact: true }).click();

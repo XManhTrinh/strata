@@ -69,7 +69,7 @@ export async function signUp(_previous: FormState, formData: FormData): Promise<
     email,
     password,
     options: {
-      emailRedirectTo: callbackUrl("/onboarding"),
+      emailRedirectTo: callbackUrl(safeNextPath(formData.get("next")?.toString(), "/onboarding")),
       data: { full_name: fullName, time_zone: timeZone },
     },
   });

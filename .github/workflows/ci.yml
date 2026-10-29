@@ -61,6 +61,8 @@ jobs:
             echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r '.API_URL' <<<"$status")"
             echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(jq -r '.PUBLISHABLE_KEY // .ANON_KEY' <<<"$status")"
             echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+            echo "SMTP_URL=smtp://127.0.0.1:54325"
+            echo "EMAIL_FROM=Strata <no-reply@strata.local>"
           } >> "$GITHUB_ENV"
       - run: pnpm db:test
       - name: Generated database types are up to date

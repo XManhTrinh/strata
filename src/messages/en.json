@@ -40,7 +40,14 @@
     "slugUnavailable": "That address is taken or reserved. Try another.",
     "countryRequired": "Choose a country.",
     "timeZoneRequired": "Choose a time zone.",
-    "currencyRequired": "Choose a currency."
+    "currencyRequired": "Choose a currency.",
+    "emailsRequired": "Enter at least one email address.",
+    "tooManyEmails": "Invite at most 50 people at a time.",
+    "roleRequired": "Choose a role.",
+    "notAllowed": "You don't have permission to do that.",
+    "alreadyMember": "Already a member.",
+    "alreadyInvited": "Already invited; resend the existing invitation instead.",
+    "emailNotSent": "Invitation created, but the email couldn't be sent. Resend it from the list."
   },
   "auth": {
     "signIn": {
@@ -142,5 +149,107 @@
     "comingTitle": "Your workspace is ready",
     "comingBody": "People, calendar and planning arrive here as they're built. Start by inviting your team in Settings.",
     "openSettings": "Open settings"
+  },
+  "emails": {
+    "invitation": {
+      "subject": "{inviter} invited you to {workspace} on Strata",
+      "preview": "Join {workspace} on Strata",
+      "heading": "Join {workspace} on Strata",
+      "body": "{inviter} invited you to join {workspace} as {role}.",
+      "button": "Accept invitation",
+      "linkHint": "Or open this link:",
+      "footer": "This invitation expires in 7 days. If you weren't expecting it, you can ignore this email."
+    }
+  },
+  "invite": {
+    "title": "You're invited",
+    "body": "{inviter} invited {email} to join {workspace} as {role}.",
+    "bodyNoInviter": "{email} is invited to join {workspace} as {role}.",
+    "accept": "Accept and join",
+    "signIn": "Sign in to accept",
+    "createAccount": "Create an account",
+    "wrongAccount": "You're signed in as {current}. This invitation is for {email}: sign out and sign in with that address.",
+    "signOut": "Sign out",
+    "status": {
+      "expired": "This invitation has expired. Ask for a new one.",
+      "revoked": "This invitation was withdrawn.",
+      "accepted": "This invitation has already been used.",
+      "invalid": "This invitation link isn't valid."
+    },
+    "goHome": "Go to Strata"
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "general": {
+        "name": "General",
+        "description": "Name, address, region and calendar"
+      },
+      "members": {
+        "name": "Members",
+        "description": "People and invitations"
+      },
+      "roles": {
+        "name": "Roles",
+        "description": "What each role can do"
+      },
+      "features": {
+        "name": "Features",
+        "description": "Switch features on and off"
+      },
+      "audit": {
+        "name": "Audit log",
+        "description": "Who changed what, and when"
+      }
+    },
+    "back": "Back to settings",
+    "chooseTitle": "Choose a section",
+    "chooseBody": "Pick a settings section from the list.",
+    "largerScreenTitle": "Open on a larger screen",
+    "largerScreenBody": "Workspace settings need more room. Open Strata on a tablet or computer to make changes here."
+  },
+  "members": {
+    "title": "Members",
+    "invite": "Invite people",
+    "you": "You",
+    "owner": "Owner",
+    "status": {
+      "active": "Active",
+      "invited": "Invited",
+      "inactive": "Inactive"
+    },
+    "noRoles": "No roles",
+    "actions": "Actions for {name}",
+    "changeRoles": "Change roles",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "rolesDialogTitle": "Roles for {name}",
+    "rolesDialogBody": "Each role adds permissions. Owners have every permission anyway.",
+    "done": "Done",
+    "cancel": "Cancel",
+    "deactivateTitle": "Deactivate {name}?",
+    "deactivateBody": "They lose access straight away. Their history stays, and you can reactivate them later.",
+    "deactivated": "{name} deactivated",
+    "reactivated": "{name} reactivated",
+    "roleUpdated": "Roles updated",
+    "inviteDialog": {
+      "title": "Invite people",
+      "emails": "Email addresses",
+      "emailsHint": "Separate addresses with commas or new lines.",
+      "role": "Role",
+      "send": "Send invitations",
+      "sent": "{count, plural, one {Invitation sent} other {# invitations sent}}",
+      "failedFor": "Not invited:"
+    },
+    "pending": {
+      "title": "Pending invitations",
+      "empty": "No pending invitations.",
+      "expires": "Expires {date}",
+      "expired": "Expired",
+      "resend": "Resend",
+      "revoke": "Withdraw",
+      "resent": "Invitation resent to {email}",
+      "revoked": "Invitation to {email} withdrawn"
+    }
   }
 }

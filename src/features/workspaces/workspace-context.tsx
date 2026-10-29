@@ -32,3 +32,9 @@ export function useWorkspace(): WorkspaceContextValue {
   if (!value) throw new Error("useWorkspace must be used inside a workspace page.");
   return value;
 }
+
+/** Whether the user holds any of the permissions (at any reach). For showing UI only. */
+export function useCan(...permissionKeys: string[]): boolean {
+  const { permissions } = useWorkspace();
+  return permissionKeys.some((key) => (permissions[key]?.length ?? 0) > 0);
+}

@@ -62,7 +62,9 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
 
       <p className="text-body-medium text-on-surface-variant flex flex-wrap justify-center gap-x-1">
         <span>{t("signIn.noAccount")}</span>
-        <Link href="/sign-up">{t("signIn.createAccount")}</Link>
+        <Link href={next === "/" ? "/sign-up" : `/sign-up?next=${encodeURIComponent(next)}`}>
+          {t("signIn.createAccount")}
+        </Link>
       </p>
     </div>
   );
