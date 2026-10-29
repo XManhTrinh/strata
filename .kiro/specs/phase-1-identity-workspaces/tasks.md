@@ -21,9 +21,9 @@ settings, and notifications. Every migration lands with its pgTAP tests.
     - _Requirements: 2.2, 8.1_
 
 - [ ] 3. Workspaces, members and roles
-  - [ ] 3.1 Migration: `workspaces`, `workspace_features`, `members`, `roles`,
-        `role_permissions`, `member_roles`, `member_role_units`, `org_units`, `org_unit_closure`,
-        `reporting_closure`, `member_last_workspace`, `platform_admins`
+  - [ ] 3.1 Migration: `citext`; `workspaces` (reserved slugs), `workspace_features`, `members`,
+        `roles`, `role_permissions`, `member_roles`, `org_units` (root only), `platform_admins`;
+        `profiles.last_workspace_id`
     - _Requirements: 3.2, 6.1, 7.2, 8.6_
   - [ ] 3.2 Permission functions `app.current_member`, `app.is_owner`, `app.feature_on`,
         `app.reach`, `app.can`

@@ -8,7 +8,7 @@ the Shell, Auth, Onboarding and Settings screens from section 3.
 ## Data model (Phase 1 tables)
 
 ```
-profiles(id → auth.users, full_name, avatar_path, locale, time_zone)
+profiles(id → auth.users, full_name, avatar_path, locale, time_zone, last_workspace_id)
 subscription_plans(key, name)                 seeded: free
 subscription_plan_features(plan_key, feature_key)
 features(key, name, is_core)                  seeded
@@ -17,24 +17,24 @@ permissions(key, feature_key, name)           seeded, e.g. people.view, time.app
 workspaces(id, name, slug unique, kind, template, data_region, country, time_zone, currency,
            fiscal_year_start_month, week_start, plan_key, settings jsonb)
 workspace_features(workspace_id, feature_key, enabled)
-members(id, workspace_id, user_id → auth.users null, person_key, full_name, email,
+members(id, workspace_id, user_id → auth.users null, person_key, full_name, email citext,
         country, time_zone, status, is_owner)
-        unique (workspace_id, user_id), unique (workspace_id, lower(email))
-invitations(id, workspace_id, email, role_id, member_id null, token_hash, expires_at,
+        unique (workspace_id, user_id), unique (workspace_id, email)
+invitations(id, workspace_id, email citext, role_id, member_id null, token_hash, expires_at,
             invited_by, accepted_at, revoked_at)
 roles(id, workspace_id, name, is_system, system_key, archived_at)
 role_permissions(role_id, permission_key, reach)
 member_roles(id, workspace_id, member_id, role_id, assigned_by)
-member_role_units(member_role_id, org_unit_id)
 org_units(id, workspace_id, parent_id, name, path ltree)        root only in Phase 1
-org_unit_closure(workspace_id, ancestor_id, descendant_id, depth)
-reporting_closure(workspace_id, manager_member_id, member_id, depth)   empty until Phase 2
-member_last_workspace(user_id, workspace_id)
 audit_log(id, workspace_id, actor_user_id, action, table_name, row_id, before, after, at)
-notifications(id, workspace_id, user_id, category, payload jsonb, read_at, created_at)
+        index (workspace_id, at desc)
+notifications(id, user_id, workspace_id null, category, payload jsonb, read_at, created_at)
 notification_preferences(user_id, category, email boolean, digest boolean)
 platform_admins(user_id)
 ```
+
+`citext` (case-insensitive text) is enabled for email columns. `workspaces.slug` is checked against
+a reserved list. `member_role_units` is created in Phase 2 with the `units` reach.
 
 `reach` is an enum: `own`, `reports`, `team`, `team_and_below`, `units`, `workspace`, ordered by
 width for "widest reach" comparisons (with `units` handled as a set).
@@ -49,11 +49,9 @@ app.reach(ws uuid, permission text) returns app.reach_grant
                                                   -- widest reach + unit ids, owner = workspace
 app.can(ws uuid, permission text, target uuid) returns boolean
   -- own: target = current member
-  -- reports: exists reporting_closure(manager = me, member = target)
-  -- team: target's current org unit = my current org unit
-  -- team_and_below: target's unit is a descendant of mine (org_unit_closure)
-  -- units: target's unit is a descendant of one of the granted units
   -- workspace: target is a member of ws
+  -- reports, team, team_and_below, units: refused in Phase 1; built in Phase 2 with
+  --   org_unit_closure and reporting_closure (and member_role_units for units)
 ```
 
 All are `stable`, `security definer`, `set search_path = ''`. Policies call them with

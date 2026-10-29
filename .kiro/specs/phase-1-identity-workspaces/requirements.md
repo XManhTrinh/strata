@@ -70,7 +70,11 @@ Sources: `docs/product-decisions.md` (sections 1, 2, 5, 6, 13 and Notifications)
 3. WHEN a Workspace is created, THE system SHALL make the creator its Owner Member, seed the system
    Roles, enable the template's Features, and create the root org unit of its hierarchy.
 4. WHEN a signed-in User belongs to no Workspace, THE system SHALL send them to onboarding.
-5. THE slug SHALL be unique across the platform and editable by the Owner.
+5. THE slug SHALL be unique across the platform and editable by the Owner, and SHALL NOT be one of
+   the reserved names the app uses (e.g. `admin`, `api`, `app`, `auth`, `settings`, `w`,
+   `onboarding`, `account`, `invite`).
+6. Any Workspace, including a personal one, SHALL be able to invite people; the kind only sets the
+   starting configuration.
 
 ### Requirement 4: Switch between workspaces
 
@@ -97,8 +101,9 @@ Sources: `docs/product-decisions.md` (sections 1, 2, 5, 6, 13 and Notifications)
    Workspace with the invited Role.
 4. WHEN an Invitation's email matches an existing unlinked Member, THE system SHALL link that
    Member to the User instead of creating a new Member.
-5. THE system SHALL let admins resend and revoke pending Invitations.
-6. IF an Invitation is expired, revoked or already used, THEN THE system SHALL refuse it with a
+5. Email addresses SHALL be compared case-insensitively everywhere (members, invitations).
+6. THE system SHALL let admins resend and revoke pending Invitations.
+7. IF an Invitation is expired, revoked or already used, THEN THE system SHALL refuse it with a
    clear message.
 
 ### Requirement 6: Members
@@ -122,13 +127,15 @@ Sources: `docs/product-decisions.md` (sections 1, 2, 5, 6, 13 and Notifications)
 #### Acceptance Criteria
 
 1. THE platform SHALL define the catalogue of Features and their Permissions in migrations.
-2. EACH Workspace SHALL have the system Roles Admin (every Permission at `workspace` Reach) and
-   Member (own data plus viewing the directory); system Roles SHALL NOT be deleted, and Admin
-   SHALL NOT be edited.
+2. EACH Workspace SHALL have the system Role Admin (every Permission at `workspace` Reach), which
+   SHALL NOT be edited or deleted. THE template SHALL also seed editable starter Roles: Team:
+   Manager and Member; Company: HR, Finance, Manager and Member; Personal: none (the Owner has
+   everything). Starter Roles that use `reports` or team Reach grant nothing for those
+   Permissions until Phase 2 enforces those Reach levels.
 3. THE system SHALL let admins create, edit, duplicate and archive custom Roles, choosing a Reach
    for each Permission.
-4. WHEN a Role with `units` Reach is assigned, THE system SHALL require choosing one or more org
-   units, and the Reach SHALL cover those units and everything below them.
+4. (Phase 2) WHEN a Role with `units` Reach is assigned, THE system SHALL require choosing one or
+   more org units, and the Reach SHALL cover those units and everything below them.
 5. An Owner SHALL have every Permission at `workspace` Reach regardless of Roles.
 6. Archived Roles SHALL grant nothing.
 7. A Member SHALL only grant Roles whose Permissions they hold themselves at equal or wider Reach.
@@ -147,9 +154,9 @@ UI can expose another workspace's data.
 3. A User SHALL NOT read or change any row of a Workspace they are not an active Member of.
 4. WHEN a Feature is off for a Workspace, THE system SHALL refuse reads and writes of that
    Feature's data.
-5. `own` and `workspace` Reach SHALL be enforced in Phase 1; `reports`, `team`, `team_and_below`
-   and `units` SHALL be implemented in Phase 1 against the closure tables and tested in Phase 2
-   when hierarchy and reporting data exist.
+5. Phase 1 SHALL enforce `own` and `workspace` Reach. `reports`, `team`, `team_and_below` and
+   `units` SHALL be built in Phase 2 together with the hierarchy tables they depend on, so no
+   untested permission code ships; until then `app.can` refuses them.
 6. Platform staff access SHALL use a separate `platform_admins` table and never a customer Role.
 
 ### Requirement 9: Features and plans
@@ -178,6 +185,7 @@ UI can expose another workspace's data.
    Invitations, Features and Workspace settings: actor, action, target, before and after, time.
 2. THE Audit_Log SHALL be append-only for everyone, including Owners.
 3. THE system SHALL let Members with `workspace.view_audit` browse and filter the Audit_Log.
+4. THE Audit_Log SHALL be indexed by workspace and time so it stays fast at millions of rows.
 
 ### Requirement 11: Notifications
 
@@ -191,6 +199,8 @@ UI can expose another workspace's data.
 3. THE system SHALL let each User choose email per category and choose a daily summary instead.
 4. THE system SHALL let a User mark one or all notifications as read.
 5. Phase 1 SHALL send notifications for invitations, role changes and ownership changes.
+6. Notifications SHALL belong to a User, with the Workspace optional, so a person who is invited
+   but not yet a Member can be notified.
 
 ### Requirement 12: App shell
 
