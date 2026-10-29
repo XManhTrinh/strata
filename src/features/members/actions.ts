@@ -148,3 +148,27 @@ export async function acceptInvitation(
     return { ok: false, error: error?.code === "42501" ? "notAllowed" : "linkInvalid" };
   return { ok: true, slug: data };
 }
+
+export async function transferOwnership(
+  workspaceId: string,
+  memberId: string,
+  keepOwnership: boolean
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("transfer_ownership", {
+    p_workspace_id: workspaceId,
+    p_member_id: memberId,
+    p_keep_ownership: keepOwnership,
+  });
+  revalidatePath("/w/[workspace]", "layout");
+  return error ? { ok: false, error: errorKeyFor(error) } : { ok: true };
+}
+
+export async function leaveWorkspace(workspaceId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("leave_workspace", { p_workspace_id: workspaceId });
+  // The "at least one active owner" rule is checked at commit (23514).
+  if (error) return { ok: false, error: error.code === "23514" ? "lastOwner" : errorKeyFor(error) };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { RolesList } from "@/features/roles/components/roles-list";
-import { getWorkspaceId, listRoles } from "@/features/roles/queries";
+import { listRoles } from "@/features/roles/queries";
 
 export default async function RolesSettingsPage({
   params,
@@ -8,7 +8,6 @@ export default async function RolesSettingsPage({
   params: Promise<{ workspace: string }>;
 }) {
   const { workspace: slug } = await params;
-  const workspaceId = await getWorkspaceId(slug);
-  if (!workspaceId) notFound();
+  const workspaceId = await requireSettingsSection(slug, "roles");
   return <RolesList roles={await listRoles(workspaceId)} />;
 }

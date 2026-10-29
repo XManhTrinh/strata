@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { type AuditEntry, AuditLog } from "@/features/audit/components/audit-log";
-import { getWorkspaceId } from "@/features/roles/queries";
+import { AUDIT_TABLES } from "@/features/audit/tables";
 import { createClient } from "@/lib/supabase/server";
 
 const PAGE_SIZE = 50;
@@ -20,11 +20,10 @@ export default async function AuditLogPage({
   searchParams,
 }: {
   params: Promise<{ workspace: string }>;
-  searchParams: Promise<{ before?: string }>;
+  searchParams: Promise<{ before?: string; table?: string; actor?: string }>;
 }) {
-  const [{ workspace: slug }, { before }] = await Promise.all([params, searchParams]);
-  const workspaceId = await getWorkspaceId(slug);
-  if (!workspaceId) notFound();
+  const [{ workspace: slug }, { before, table, actor }] = await Promise.all([params, searchParams]);
+  const workspaceId = await requireSettingsSection(slug, "audit");
 
   const supabase = await createClient();
   let query = supabase
@@ -34,6 +33,10 @@ export default async function AuditLogPage({
     .order("id", { ascending: false })
     .limit(PAGE_SIZE + 1);
   if (before && /^\d+$/.test(before)) query = query.lt("id", Number(before));
+  if (table && (AUDIT_TABLES as readonly string[]).includes(table)) {
+    query = query.eq("table_name", table);
+  }
+  if (actor && /^[0-9a-f-]{36}$/.test(actor)) query = query.eq("actor_user_id", actor);
   const { data: rows } = await query;
 
   const page = (rows ?? []).slice(0, PAGE_SIZE);
@@ -54,7 +57,20 @@ export default async function AuditLogPage({
     at: r.at,
   }));
   const last = page.at(-1);
-  const olderHref = (rows?.length ?? 0) > PAGE_SIZE && last ? `?before=${last.id}` : null;
+  const older = new URLSearchParams({ ...(table && { table }), ...(actor && { actor }) });
+  if (last) older.set("before", String(last.id));
+  const olderHref = (rows?.length ?? 0) > PAGE_SIZE ? `?${older}` : null;
 
-  return <AuditLog entries={entries} olderHref={olderHref} />;
+  // People who can appear as "changed by": the workspace's members with accounts.
+  const { data: members } = await supabase
+    .from("members")
+    .select("user_id, full_name")
+    .eq("workspace_id", workspaceId)
+    .not("user_id", "is", null)
+    .order("full_name");
+  const people = (members ?? []).flatMap((m) =>
+    m.user_id ? [{ id: m.user_id, name: m.full_name }] : []
+  );
+
+  return <AuditLog entries={entries} olderHref={olderHref} people={people} />;
 }

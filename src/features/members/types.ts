@@ -5,6 +5,8 @@ export type MemberRow = {
   status: "active" | "invited" | "inactive";
   isOwner: boolean;
   isYou: boolean;
+  /** Has signed in at least once (imported people may not have an account). */
+  hasAccount: boolean;
   roleIds: string[];
 };
 

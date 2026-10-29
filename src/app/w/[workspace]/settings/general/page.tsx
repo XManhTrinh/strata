@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { GeneralSettingsForm } from "@/features/settings/components/general-settings-form";
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { getPublicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,11 +10,12 @@ export default async function GeneralSettingsPage({
   params: Promise<{ workspace: string }>;
 }) {
   const { workspace: slug } = await params;
+  const workspaceId = await requireSettingsSection(slug, "general");
   const supabase = await createClient();
   const { data: w } = await supabase
     .from("workspaces")
     .select("name, slug, country, time_zone, currency, fiscal_year_start_month, week_start")
-    .eq("slug", slug)
+    .eq("id", workspaceId)
     .maybeSingle();
   if (!w) notFound();
 

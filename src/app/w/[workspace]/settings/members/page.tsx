@@ -1,3 +1,4 @@
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { notFound } from "next/navigation";
 import { MembersSettings } from "@/features/members/components/members-settings";
 import type { MemberRow, PendingInvitation, RoleOption } from "@/features/members/types";
@@ -14,8 +15,8 @@ export default async function MembersSettingsPage({
   const { data: workspace } = await supabase
     .from("workspaces")
     .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
+    .eq("id", await requireSettingsSection(slug, "members"))
+    .single();
   if (!workspace) notFound();
 
   const [{ data: auth }, { data: members }, { data: roles }, { data: invitations }] =
@@ -50,6 +51,7 @@ export default async function MembersSettingsPage({
     status: m.status,
     isOwner: m.is_owner,
     isYou: m.user_id === userId,
+    hasAccount: m.user_id !== null,
     roleIds: m.member_roles.map((mr) => mr.role_id),
   }));
   const roleOptions: RoleOption[] = (roles ?? []).map((r) => ({

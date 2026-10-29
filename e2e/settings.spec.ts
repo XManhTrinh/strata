@@ -68,4 +68,13 @@ test("an owner manages general settings, features, roles and sees the audit log"
     page.getByText("Ana Pop changed workspace settings", { exact: true }).first()
   ).toBeVisible();
   await expectNoA11yViolations(page);
+
+  // Filtering by what changed.
+  await page.getByRole("button", { name: /What changed/ }).click();
+  await page.getByRole("option", { name: "a feature" }).click();
+  await expect(page).toHaveURL(/table=workspace_features/);
+  await expect(page.getByText("Ana Pop changed a feature", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Ana Pop added a role", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(page.getByText("Ana Pop added a role", { exact: true }).first()).toBeVisible();
 });

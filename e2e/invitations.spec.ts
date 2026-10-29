@@ -55,4 +55,44 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   await owner.reload();
   await expect(owner.getByRole("list", { name: "Members" }).getByText("Ben Ionescu")).toBeVisible();
   await expect(owner.getByText("No pending invitations.")).toBeVisible();
+
+  // Ben is a Member: settings show only what that role allows, and nothing else opens.
+  await invitee.getByRole("link", { name: "Settings" }).first().click();
+  await expect(invitee.getByRole("row", { name: /^Members/ })).toBeVisible();
+  for (const hidden of ["General", "Roles", "Features", "Audit log"]) {
+    await expect(invitee.getByRole("row", { name: new RegExp(`^${hidden}`) })).toHaveCount(0);
+  }
+  await invitee.getByRole("row", { name: /^Members/ }).click();
+  await expect(invitee.getByRole("heading", { name: "Members" })).toBeVisible();
+  await expect(invitee.getByRole("button", { name: "Invite people" })).toHaveCount(0);
+  await invitee.goto(invitee.url().replace(/\/members$/, "/general"));
+  await expect(invitee.getByRole("heading", { name: "Page not found" })).toBeVisible();
+
+  // Ownership: the only owner can't leave; after adding Ben as an owner, Ana can.
+  const menuFor = (name: string) => owner.getByRole("button", { name: `Actions for ${name}` });
+  await menuFor("Ana Pop").click();
+  await owner.getByRole("menuitem", { name: "Leave workspace" }).click();
+  await owner
+    .getByRole("alertdialog", { name: "Leave this workspace?" })
+    .getByRole("button", { name: "Leave workspace" })
+    .click();
+  await expect(
+    owner.getByText("You're the only owner. Make someone else an owner before leaving.")
+  ).toBeVisible();
+
+  await menuFor("Ben Ionescu").click();
+  await owner.getByRole("menuitem", { name: "Make owner" }).click();
+  await owner
+    .getByRole("alertdialog", { name: "Make Ben Ionescu an owner?" })
+    .getByRole("button", { name: "Make owner" })
+    .click();
+  await expect(owner.getByText("Ben Ionescu is now an owner")).toBeVisible();
+
+  await menuFor("Ana Pop").click();
+  await owner.getByRole("menuitem", { name: "Leave workspace" }).click();
+  await owner
+    .getByRole("alertdialog", { name: "Leave this workspace?" })
+    .getByRole("button", { name: "Leave workspace" })
+    .click();
+  await expect(owner).toHaveURL(/\/onboarding$/);
 });

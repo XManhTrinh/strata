@@ -22,6 +22,7 @@ import { useSnackbar } from "@/lib/snackbar";
 import { setMemberStatus } from "../actions";
 import type { MemberRow, PendingInvitation, RoleOption } from "../types";
 import { InviteDialog } from "./invite-dialog";
+import { LeaveWorkspaceDialog, MakeOwnerDialog } from "./ownership-dialogs";
 import { MemberRolesDialog } from "./member-roles-dialog";
 import { PendingInvitations } from "./pending-invitations";
 
@@ -44,6 +45,11 @@ export function MembersSettings({
   const [inviteOpen, setInviteOpen] = useState(false);
   const [rolesFor, setRolesFor] = useState<MemberRow | null>(null);
   const [deactivating, setDeactivating] = useState<MemberRow | null>(null);
+  const [makingOwner, setMakingOwner] = useState<MemberRow | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const iAmOwner = members.some((m) => m.isYou && m.isOwner);
+  const canMakeOwner = (m: MemberRow) =>
+    iAmOwner && !m.isYou && !m.isOwner && m.status === "active" && m.hasAccount;
   const [pending, startTransition] = useTransition();
   const roleName = (id: string) => roles.find((r) => r.id === id)?.name ?? "";
 
@@ -78,7 +84,8 @@ export function MembersSettings({
 
       <List aria-label={t("title")}>
         {members.map((member) => {
-          const actions = (canAssign || (canManage && !member.isOwner)) && !member.isYou;
+          const actions =
+            member.isYou || canAssign || (canManage && !member.isOwner) || canMakeOwner(member);
           return (
             <ListItem
               key={member.id}
@@ -106,10 +113,12 @@ export function MembersSettings({
                           if (key === "roles") setRolesFor(member);
                           if (key === "deactivate") setDeactivating(member);
                           if (key === "reactivate") changeStatus(member, "active");
+                          if (key === "make-owner") setMakingOwner(member);
+                          if (key === "leave") setLeaving(true);
                         }}
                       >
                         {[
-                          canAssign && (
+                          !member.isYou && canAssign && (
                             <MenuItem
                               key="roles"
                               leadingIcon={<Icon name="admin_panel_settings" />}
@@ -117,14 +126,27 @@ export function MembersSettings({
                               {t("changeRoles")}
                             </MenuItem>
                           ),
-                          canManage && !member.isOwner && member.status === "active" && (
-                            <MenuItem key="deactivate" leadingIcon={<Icon name="person_off" />}>
-                              {t("deactivate")}
-                            </MenuItem>
-                          ),
-                          canManage && member.status === "inactive" && (
+                          !member.isYou &&
+                            canManage &&
+                            !member.isOwner &&
+                            member.status === "active" && (
+                              <MenuItem key="deactivate" leadingIcon={<Icon name="person_off" />}>
+                                {t("deactivate")}
+                              </MenuItem>
+                            ),
+                          !member.isYou && canManage && member.status === "inactive" && (
                             <MenuItem key="reactivate" leadingIcon={<Icon name="person_check" />}>
                               {t("reactivate")}
+                            </MenuItem>
+                          ),
+                          canMakeOwner(member) && (
+                            <MenuItem key="make-owner" leadingIcon={<Icon name="shield_person" />}>
+                              {t("makeOwner")}
+                            </MenuItem>
+                          ),
+                          member.isYou && (
+                            <MenuItem key="leave" leadingIcon={<Icon name="logout" />}>
+                              {t("leave")}
                             </MenuItem>
                           ),
                         ].filter((item) => item !== false)}
@@ -156,6 +178,8 @@ export function MembersSettings({
       {rolesFor && (
         <MemberRolesDialog member={rolesFor} roles={roles} onClose={() => setRolesFor(null)} />
       )}
+      {makingOwner && <MakeOwnerDialog member={makingOwner} onClose={() => setMakingOwner(null)} />}
+      {leaving && <LeaveWorkspaceDialog onClose={() => setLeaving(false)} />}
       {deactivating && (
         <Dialog open onOpenChange={(open) => !open && setDeactivating(null)}>
           <DialogTitle>{t("deactivateTitle", { name: deactivating.fullName })}</DialogTitle>

@@ -1,3 +1,4 @@
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { notFound } from "next/navigation";
 import {
   type FeatureRow,
@@ -15,8 +16,8 @@ export default async function FeaturesSettingsPage({
   const { data: workspace } = await supabase
     .from("workspaces")
     .select("id, plan_key")
-    .eq("slug", slug)
-    .maybeSingle();
+    .eq("id", await requireSettingsSection(slug, "features"))
+    .single();
   if (!workspace) notFound();
 
   const [{ data: features }, { data: enabled }, { data: dependencies }, { data: planFeatures }] =

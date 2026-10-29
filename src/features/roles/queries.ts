@@ -9,12 +9,6 @@ export type RoleSummary = {
   archived: boolean;
 };
 
-export async function getWorkspaceId(slug: string): Promise<string | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("workspaces").select("id").eq("slug", slug).maybeSingle();
-  return data?.id ?? null;
-}
-
 export async function listRoles(workspaceId: string): Promise<RoleSummary[]> {
   const supabase = await createClient();
   const { data } = await supabase

@@ -1,6 +1,7 @@
+import { requireSettingsSection } from "@/features/settings/require-section";
 import { notFound } from "next/navigation";
 import { RoleEditor } from "@/features/roles/components/role-editor";
-import { getWorkspaceId, listRoles } from "@/features/roles/queries";
+import { listRoles } from "@/features/roles/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function RoleEditorPage({
@@ -9,8 +10,7 @@ export default async function RoleEditorPage({
   params: Promise<{ workspace: string; roleId: string }>;
 }) {
   const { workspace: slug, roleId } = await params;
-  const workspaceId = await getWorkspaceId(slug);
-  if (!workspaceId) notFound();
+  const workspaceId = await requireSettingsSection(slug, "roles");
 
   const role = (await listRoles(workspaceId)).find((r) => r.id === roleId);
   if (!role) notFound();

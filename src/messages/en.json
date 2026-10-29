@@ -49,7 +49,8 @@
     "alreadyInvited": "Already invited; resend the existing invitation instead.",
     "emailNotSent": "Invitation created, but the email couldn't be sent. Resend it from the list.",
     "roleNameTaken": "A role with that name already exists.",
-    "roleNameRequired": "Enter a name for the role."
+    "roleNameRequired": "Enter a name for the role.",
+    "lastOwner": "You're the only owner. Make someone else an owner before leaving."
   },
   "auth": {
     "signIn": {
@@ -292,7 +293,15 @@
       "revoke": "Withdraw",
       "resent": "Invitation resent to {email}",
       "revoked": "Invitation to {email} withdrawn"
-    }
+    },
+    "makeOwner": "Make owner",
+    "makeOwnerTitle": "Make {name} an owner?",
+    "makeOwnerBody": "Owners have every permission, including managing other owners.",
+    "keepOwnership": "I stay an owner too",
+    "ownerAdded": "{name} is now an owner",
+    "leave": "Leave workspace",
+    "leaveTitle": "Leave this workspace?",
+    "leaveBody": "You'll lose access straight away. An admin can invite you back later."
   },
   "permissions": {
     "members": {
@@ -501,7 +510,12 @@
       "invitations": "an invitation"
     },
     "fields": "Changed: {fields}",
-    "older": "Older entries"
+    "older": "Older entries",
+    "filterThing": "What changed",
+    "filterPerson": "Changed by",
+    "all": "All",
+    "clear": "Clear filters",
+    "emptyFiltered": "No changes match these filters."
   },
   "account": {
     "title": "Account",
