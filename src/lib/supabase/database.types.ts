@@ -9,6 +9,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      avatar_owner: { Args: { p_name: string }; Returns: string };
       can: {
         Args: { p_permission_key: string; p_target_member_id: string; p_workspace_id: string };
         Returns: boolean;
@@ -50,6 +51,7 @@ export type Database = {
         };
         Returns: boolean;
       };
+      shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
     };
     Enums: {
       [_ in never]: never;

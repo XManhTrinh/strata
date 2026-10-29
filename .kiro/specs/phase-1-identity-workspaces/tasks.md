@@ -90,28 +90,28 @@ settings, and notifications. Every migration lands with its pgTAP tests.
   - [x] 9.4 Notification bell with live list and mark-as-read
     - _Requirements: 11.1, 11.4_
 
-- [ ] 10. Settings
+- [x] 10. Settings
   - [x] 10.1 General settings
     - _Requirements: 13.1, 3.5_
-  - [ ] 10.2 Members and invitations (invite, resend, revoke, roles, deactivate, ownership)
-        (done except an ownership-transfer screen; the RPC exists and is tested)
+  - [x] 10.2 Members and invitations (invite, resend, revoke, roles, deactivate, ownership)
+        (including make owner and leave workspace)
     - _Requirements: 5.1, 5.2, 5.5, 6.1–6.6, 13.1_
   - [x] 10.3 Roles editor (permissions × reach, specific units picker, duplicate, archive)
         (specific-units picker arrives in Phase 2 with org units)
     - _Requirements: 7.2–7.4, 7.6, 13.1_
   - [x] 10.4 Features page with dependency confirmations
     - _Requirements: 9.2, 9.3, 9.6, 13.1_
-  - [ ] 10.5 Audit log browser with filters
-        (browser with paging done; filters to do)
+  - [x] 10.5 Audit log browser with filters
+        (filters by what changed and by who, kept in the URL)
     - _Requirements: 10.3, 13.1_
-  - [ ] 10.6 Personal profile (avatar upload) and notification preferences
-        (notification preferences and name/time zone done; avatar upload to do)
+  - [x] 10.6 Personal profile (avatar upload) and notification preferences
+        (photos in a private bucket, shown through signed links to co-members only)
     - _Requirements: 2.2, 2.3, 11.3, 13.2_
   - [x] 10.7 Phone behaviour: "open on a larger screen" for admin settings
     - _Requirements: 13.3_
 
-- [ ] 11. End-to-end
-  - [ ] 11.1 Playwright: sign-up → onboarding → invite → accept → role-limited navigation, at
+- [x] 11. End-to-end
+  - [x] 11.1 Playwright: sign-up → onboarding → invite → accept → role-limited navigation, at
         three widths, with axe checks
-        (sign-up, onboarding, invite, accept, settings, account and the live bell are covered; a role-limited navigation check is still to do)
+        (plus settings, account, photos, the live bell, ownership and a Member's limited settings)
     - _Requirements: 1, 3, 5, 12_

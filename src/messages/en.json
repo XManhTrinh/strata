@@ -50,7 +50,9 @@
     "emailNotSent": "Invitation created, but the email couldn't be sent. Resend it from the list.",
     "roleNameTaken": "A role with that name already exists.",
     "roleNameRequired": "Enter a name for the role.",
-    "lastOwner": "You're the only owner. Make someone else an owner before leaving."
+    "lastOwner": "You're the only owner. Make someone else an owner before leaving.",
+    "photoTooLarge": "Choose an image up to 2 MB.",
+    "photoWrongType": "Use a PNG, JPEG or WebP image."
   },
   "auth": {
     "signIn": {
@@ -535,7 +537,13 @@
       "fullName": "Full name",
       "timeZone": "Time zone",
       "save": "Save",
-      "saved": "Profile saved"
+      "saved": "Profile saved",
+      "photo": "Photo",
+      "changePhoto": "Change photo",
+      "removePhoto": "Remove photo",
+      "photoSaved": "Photo updated",
+      "photoRemoved": "Photo removed",
+      "photoHint": "PNG, JPEG or WebP, up to 2 MB."
     },
     "notifications": {
       "title": "Notifications",

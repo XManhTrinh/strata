@@ -90,7 +90,14 @@ export function MembersSettings({
             <ListItem
               key={member.id}
               textValue={member.fullName}
-              leading={<Avatar name={member.fullName} decorative size="md" />}
+              leading={
+                <Avatar
+                  name={member.fullName}
+                  src={member.avatarUrl ?? undefined}
+                  decorative
+                  size="md"
+                />
+              }
               supportingText={member.email ?? undefined}
               trailing={
                 <span className="flex items-center gap-2">

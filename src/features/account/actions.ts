@@ -51,3 +51,30 @@ export async function setEmailDelivery(
     );
   return error ? { ok: false, error: "generic" } : { ok: true };
 }
+
+/** Points the profile at a newly uploaded photo (or none) and deletes the previous file. */
+export async function setAvatar(
+  path: string | null
+): Promise<{ ok: true } | { ok: false; error: ErrorKey }> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getClaims();
+  if (!auth?.claims.sub) return { ok: false, error: "notAllowed" };
+
+  const { data: before } = await supabase
+    .from("profiles")
+    .select("avatar_path")
+    .eq("id", auth.claims.sub)
+    .single();
+  // The database refuses paths outside the user's own folder.
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_path: path })
+    .eq("id", auth.claims.sub);
+  if (error) return { ok: false, error: "generic" };
+
+  if (before?.avatar_path && before.avatar_path !== path) {
+    await supabase.storage.from("avatars").remove([before.avatar_path]);
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

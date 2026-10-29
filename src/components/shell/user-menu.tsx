@@ -36,7 +36,9 @@ export function UserMenu() {
     <MenuTrigger>
       <IconButton
         aria-label={t("label")}
-        icon={<Avatar name={user.fullName} decorative size="sm" />}
+        icon={
+          <Avatar name={user.fullName} src={user.avatarUrl ?? undefined} decorative size="sm" />
+        }
       />
       <Menu aria-label={t("label")} onAction={(key) => onAction(String(key))}>
         <MenuGroup>

@@ -2,6 +2,7 @@ import { requireSettingsSection } from "@/features/settings/require-section";
 import { notFound } from "next/navigation";
 import { MembersSettings } from "@/features/members/components/members-settings";
 import type { MemberRow, PendingInvitation, RoleOption } from "@/features/members/types";
+import { signedAvatarUrls } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function MembersSettingsPage({
@@ -44,6 +45,12 @@ export default async function MembersSettingsPage({
     ]);
 
   const userId = auth?.claims.sub;
+  const accountIds = (members ?? []).flatMap((m) => (m.user_id ? [m.user_id] : []));
+  const { data: profiles } = accountIds.length
+    ? await supabase.from("profiles").select("id, avatar_path").in("id", accountIds)
+    : { data: [] };
+  const avatarPathByUser = new Map((profiles ?? []).map((p) => [p.id, p.avatar_path]));
+  const avatarUrls = await signedAvatarUrls(supabase, [...avatarPathByUser.values()]);
   const memberRows: MemberRow[] = (members ?? []).map((m) => ({
     id: m.id,
     fullName: m.full_name,
@@ -52,6 +59,7 @@ export default async function MembersSettingsPage({
     isOwner: m.is_owner,
     isYou: m.user_id === userId,
     hasAccount: m.user_id !== null,
+    avatarUrl: (m.user_id && avatarUrls.get(avatarPathByUser.get(m.user_id) ?? "")) || null,
     roleIds: m.member_roles.map((mr) => mr.role_id),
   }));
   const roleOptions: RoleOption[] = (roles ?? []).map((r) => ({

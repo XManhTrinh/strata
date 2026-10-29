@@ -7,6 +7,7 @@ export type MemberRow = {
   isYou: boolean;
   /** Has signed in at least once (imported people may not have an account). */
   hasAccount: boolean;
+  avatarUrl: string | null;
   roleIds: string[];
 };
 

@@ -12,7 +12,7 @@ export type WorkspaceContextValue = {
   /** Permission key → reaches held, from `my_permissions`. For showing UI only: the database enforces. */
   permissions: Record<string, Reach[]>;
   workspaces: WorkspaceSummary[];
-  user: { id: string; fullName: string; email: string };
+  user: { id: string; fullName: string; email: string; avatarUrl: string | null };
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
