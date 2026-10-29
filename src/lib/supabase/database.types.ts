@@ -45,9 +45,52 @@ export type Database = {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: Database["public"]["Enums"]["reach"][];
       };
+      import_apply_row: {
+        Args: {
+          p_job: Omit<
+            Database["public"]["Tables"]["import_jobs"]["Row"],
+            Database["public"]["Tables"]["import_jobs"]["ComputedFields"]
+          >;
+          p_row: Omit<
+            Database["public"]["Tables"]["import_rows"]["Row"],
+            Database["public"]["Tables"]["import_rows"]["ComputedFields"]
+          >;
+        };
+        Returns: string;
+      };
+      import_key: { Args: { p_data: Json; p_key_field: string }; Returns: string };
+      import_row_differs: { Args: { p_row: Json; p_snapshot: Json }; Returns: boolean };
+      import_unit: {
+        Args: { p_level_ids: string[]; p_names: string[]; p_workspace_id: string };
+        Returns: string;
+      };
       is_member: { Args: { p_workspace_id: string }; Returns: boolean };
       is_owner: { Args: { p_workspace_id: string }; Returns: boolean };
       is_reserved_slug: { Args: { p_slug: string }; Returns: boolean };
+      load_import_job: {
+        Args: { p_job_id: string; p_statuses: Database["public"]["Enums"]["import_status"][] };
+        Returns: Database["public"]["Tables"]["import_jobs"]["Row"];
+        SetofOptions: {
+          from: "*";
+          to: "import_jobs";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      member_key: {
+        Args: {
+          p_key_field: string;
+          p_member: Omit<
+            Database["public"]["Tables"]["members"]["Row"],
+            Database["public"]["Tables"]["members"]["ComputedFields"]
+          >;
+        };
+        Returns: string;
+      };
+      member_snapshot: {
+        Args: { p_date: string; p_key_field: string; p_member_id: string };
+        Returns: Json;
+      };
       new_invitation_token: { Args: Record<PropertyKey, never>; Returns: string };
       notify: {
         Args: {
@@ -67,8 +110,35 @@ export type Database = {
         Returns: boolean;
       };
       rebuild_reporting_closure: { Args: { p_workspace_id: string }; Returns: undefined };
+      set_assignment_from: {
+        Args: { p_date: string; p_member_id: string; p_patch: Json };
+        Returns: undefined;
+      };
+      set_compensation_from: {
+        Args: {
+          p_currency: string;
+          p_date: string;
+          p_day_rate: number;
+          p_member_id: string;
+          p_salary: number;
+        };
+        Returns: undefined;
+      };
+      set_field_value_from: {
+        Args: {
+          p_date: string;
+          p_field: Omit<
+            Database["public"]["Tables"]["custom_fields"]["Row"],
+            Database["public"]["Tables"]["custom_fields"]["ComputedFields"]
+          >;
+          p_member_id: string;
+          p_value: Json;
+        };
+        Returns: undefined;
+      };
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
       unit_label: { Args: { p_id: string }; Returns: string };
+      unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
     };
     Enums: {
       [_ in never]: never;
@@ -351,6 +421,147 @@ export type Database = {
           sort_order?: number;
         };
         Relationships: [];
+      };
+      import_jobs: {
+        Row: {
+          applied_at: string | null;
+          counts: NonNullable<Json>;
+          created_at: string;
+          created_by: string | null;
+          cursor: number;
+          effective_date: string;
+          error: string | null;
+          id: string;
+          key_field: string;
+          mark_leavers: boolean;
+          phase: string;
+          status: Database["public"]["Enums"]["import_status"];
+          unit_level_ids: string[];
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          applied_at?: string | null;
+          counts?: NonNullable<Json>;
+          created_at?: string;
+          created_by?: string | null;
+          cursor?: number;
+          effective_date?: string;
+          error?: string | null;
+          id?: string;
+          key_field: string;
+          mark_leavers?: boolean;
+          phase?: string;
+          status?: Database["public"]["Enums"]["import_status"];
+          unit_level_ids?: string[];
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          applied_at?: string | null;
+          counts?: NonNullable<Json>;
+          created_at?: string;
+          created_by?: string | null;
+          cursor?: number;
+          effective_date?: string;
+          error?: string | null;
+          id?: string;
+          key_field?: string;
+          mark_leavers?: boolean;
+          phase?: string;
+          status?: Database["public"]["Enums"]["import_status"];
+          unit_level_ids?: string[];
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      import_mappings: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          settings: NonNullable<Json>;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          settings?: NonNullable<Json>;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          settings?: NonNullable<Json>;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_mappings_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      import_rows: {
+        Row: {
+          data: NonNullable<Json>;
+          errors: string[];
+          job_id: string;
+          member_id: string | null;
+          row_number: number;
+          status: Database["public"]["Enums"]["import_row_status"];
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          data: NonNullable<Json>;
+          errors?: string[];
+          job_id: string;
+          member_id?: string | null;
+          row_number: number;
+          status?: Database["public"]["Enums"]["import_row_status"];
+          workspace_id: string;
+        };
+        Update: {
+          data?: NonNullable<Json>;
+          errors?: string[];
+          job_id?: string;
+          member_id?: string | null;
+          row_number?: number;
+          status?: Database["public"]["Enums"]["import_row_status"];
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_workspace_id_job_id_fkey";
+            columns: ["workspace_id", "job_id"];
+            isOneToOne: false;
+            referencedRelation: "import_jobs";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
       };
       invitations: {
         Row: {
@@ -1552,6 +1763,8 @@ export type Database = {
           workspace_name: string;
         }[];
       };
+      import_apply_chunk: { Args: { p_job_id: string; p_max_rows?: number }; Returns: Json };
+      import_preview: { Args: { p_job_id: string }; Returns: Json };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       my_permissions: {
@@ -1593,6 +1806,8 @@ export type Database = {
       cost_method: "annual_salary" | "day_rate";
       custom_field_type: "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
       email_delivery: "instant" | "daily" | "none";
+      import_row_status: "pending" | "new" | "changed" | "unchanged" | "error" | "applied";
+      import_status: "staging" | "previewed" | "applying" | "applied" | "cancelled";
       member_status: "active" | "invited" | "inactive";
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
       reach: "own" | "reports" | "team" | "team_and_below" | "units" | "workspace";
@@ -1714,6 +1929,8 @@ export const Constants = {
       cost_method: ["annual_salary", "day_rate"],
       custom_field_type: ["text", "number", "date", "single_choice", "multi_choice", "person"],
       email_delivery: ["instant", "daily", "none"],
+      import_row_status: ["pending", "new", "changed", "unchanged", "error", "applied"],
+      import_status: ["staging", "previewed", "applying", "applied", "cancelled"],
       member_status: ["active", "invited", "inactive"],
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
       reach: ["own", "reports", "team", "team_and_below", "units", "workspace"],

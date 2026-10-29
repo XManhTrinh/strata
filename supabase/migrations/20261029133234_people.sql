@@ -379,8 +379,8 @@ alter table public.member_field_values enable row level security;
 alter table public.reporting_closure enable row level security;
 alter table public.member_role_units enable row level security;
 
-grant execute on function app.assignment_on(uuid, date), app.granted_unit_paths(uuid, text)
-  to authenticated;
+-- app.assignment_on and app.granted_unit_paths run with elevated rights for the permission checks;
+-- they are not granted to users, who would otherwise read job records across workspaces by id.
 
 -- People can be added and edited by those with people.edit over them (adding needs workspace reach).
 grant insert (workspace_id, full_name, email, person_key, country, time_zone, start_date, end_date)

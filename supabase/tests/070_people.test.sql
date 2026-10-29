@@ -2,7 +2,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(20);
+select plan(21);
 
 create temporary table people (name text primary key, user_id uuid, member_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -183,6 +183,12 @@ select public.set_feature((select ws from ctx), 'people', false, true);
 select tests.authenticate_as((select user_id from people where name = 'mia'));
 select is_empty($$ select 1 from public.member_compensation $$, 'with People off, pay is not readable');
 select is_empty($$ select 1 from public.member_assignments $$, 'with People off, job records are not readable');
+
+select tests.authenticate_as((select user_id from people where name = 'sam'));
+select throws_ok(
+  $$ select app.assignment_on(pg_temp.member('mia'), current_date) $$,
+  '42501', null, 'users cannot call the job-record helper directly'
+);
 
 select * from finish();
 rollback;
