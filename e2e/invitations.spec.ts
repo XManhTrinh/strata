@@ -44,6 +44,14 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   await invitee.getByRole("button", { name: "Accept and join" }).click();
   await expect(invitee.getByRole("heading", { name: "Welcome, Ben Ionescu" })).toBeVisible();
 
+  // The owner's open page hears about it live, through Realtime.
+  await expect(owner.getByRole("button", { name: "Notifications, 1 unread" })).toBeVisible();
+  await owner.getByRole("button", { name: "Notifications, 1 unread" }).click();
+  await expect(owner.getByText("Ben Ionescu joined the workspace")).toBeVisible();
+  await owner.getByRole("button", { name: "Mark all as read" }).click();
+  await expect(owner.getByRole("button", { name: "Notifications", exact: true })).toBeVisible();
+  await owner.keyboard.press("Escape");
+
   await owner.reload();
   await expect(owner.getByRole("list", { name: "Members" }).getByText("Ben Ionescu")).toBeVisible();
   await expect(owner.getByText("No pending invitations.")).toBeVisible();

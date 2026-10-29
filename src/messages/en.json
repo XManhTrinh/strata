@@ -502,5 +502,68 @@
     },
     "fields": "Changed: {fields}",
     "older": "Older entries"
+  },
+  "account": {
+    "title": "Account",
+    "back": "Back to Strata",
+    "sections": {
+      "profile": {
+        "name": "Profile",
+        "description": "Your name and time zone"
+      },
+      "notifications": {
+        "name": "Notifications",
+        "description": "What you get by email"
+      }
+    },
+    "profile": {
+      "title": "Profile",
+      "fullName": "Full name",
+      "timeZone": "Time zone",
+      "save": "Save",
+      "saved": "Profile saved"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "intro": "You always see notifications in Strata. Choose which ones also come by email.",
+      "emailNotice": "Emails start once Strata's email sending is set up.",
+      "categories": {
+        "invitation": "Invitations",
+        "access": "Roles and access",
+        "time": "Time off",
+        "planning": "Planning",
+        "import": "Imports",
+        "system": "Strata announcements"
+      },
+      "delivery": {
+        "instant": "Email straight away",
+        "daily": "Daily summary",
+        "none": "No email"
+      },
+      "deliveryLabel": "Email for {category}",
+      "saved": "Saved"
+    }
+  },
+  "notifications": {
+    "label": "Notifications",
+    "labelUnread": "Notifications, {count} unread",
+    "title": "Notifications",
+    "close": "Close",
+    "markAllRead": "Mark all as read",
+    "empty": "You're all caught up.",
+    "kinds": {
+      "unknown": "Something changed",
+      "role": {
+        "assigned": "You were given the {role} role",
+        "removed": "The {role} role was removed from you"
+      },
+      "ownership": {
+        "received": "You're now an owner of this workspace"
+      },
+      "invitation": {
+        "received": "You're invited to join {workspace}",
+        "accepted": "{name} joined the workspace"
+      }
+    }
   }
 }

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { TopAppBar } from "@windmorph/react";
+import { NotificationBell } from "@/features/notifications/notification-bell";
 import { UserMenu } from "./user-menu";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
@@ -14,6 +15,7 @@ export function PageHeader({ title, actions }: { title: ReactNode; actions?: Rea
       actions={
         <>
           {actions}
+          <NotificationBell />
           <WorkspaceSwitcher />
           <UserMenu />
         </>
