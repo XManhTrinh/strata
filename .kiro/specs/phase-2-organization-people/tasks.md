@@ -61,10 +61,10 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [x] 7.4 Specific-units picker in role assignment (granted through `set_role_units`, only
         within the assigner's own reach)
 
-- [ ] 8. Org chart
-  - [ ] 8.1 Reporting chart and grouped hierarchy view (xyflow + ELK in a web worker), expanded on
+- [x] 8. Org chart
+  - [x] 8.1 Reporting chart and grouped hierarchy view (xyflow + ELK in a web worker), expanded on
         demand, "as of" a date
-  - [ ] 8.2 Person view on phones
+  - [x] 8.2 Person view on phones
 
 - [ ] 9. Import screens
   - [ ] 9.1 Upload (CSV, Excel), map columns (saved per workspace), choose key and levels

@@ -16,6 +16,7 @@ export function IsoDateField({
   supportingText,
   errorMessage,
   required,
+  onChange,
 }: {
   name: string;
   label: string;
@@ -26,6 +27,8 @@ export function IsoDateField({
   supportingText?: string;
   errorMessage?: string;
   required?: boolean;
+  /** Called with the ISO date (or null) when a date is committed. */
+  onChange?: (value: string | null) => void;
 }) {
   const [value, setValue] = useState<CalendarDate | null>(
     defaultValue ? parseDate(defaultValue) : null
@@ -36,7 +39,10 @@ export function IsoDateField({
         className="w-full"
         label={label}
         value={value}
-        onChange={setValue}
+        onChange={(next) => {
+          setValue(next);
+          onChange?.(next?.toString() ?? null);
+        }}
         min={min ? parseDate(min) : undefined}
         supportingText={supportingText}
         invalid={Boolean(errorMessage)}

@@ -20,6 +20,7 @@ export function PersonPicker({
   defaultValue,
   exclude,
   errorMessage,
+  onSelect,
 }: {
   name: string;
   label: string;
@@ -27,6 +28,8 @@ export function PersonPicker({
   /** A person who can't be chosen, such as the one being edited. */
   exclude?: string;
   errorMessage?: string;
+  /** Called when a person is chosen, e.g. to go to them. */
+  onSelect?: (person: { id: string; name: string }) => void;
 }) {
   const { workspace } = useWorkspace();
   const tc = useTranslations("common");
@@ -65,6 +68,7 @@ export function PersonPicker({
           const person = items.find((p) => p.id === key) ?? null;
           setSelected(person && { id: person.id, name: person.name });
           if (person) setInput(person.name);
+          if (person) onSelect?.(person);
         }}
         loading={loading}
         clearable
