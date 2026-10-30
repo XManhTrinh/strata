@@ -2,7 +2,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(12);
+select plan(14);
 
 create temporary table people (name text primary key, user_id uuid, member_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -105,6 +105,30 @@ insert into public.member_role_units (member_role_id, workspace_id, org_unit_id)
 select mr.id, mr.workspace_id, pg_temp.unit('Squad B') from public.member_roles mr where mr.member_id = pg_temp.member('mia');
 select tests.authenticate_as((select user_id from people where name = 'mia'));
 select is(pg_temp.seen(), array['Leo', 'Tom', 'Una'], 'units reach sees the granted units');
+select tests.clear_authentication();
+
+-- Export follows people.export reach, which can be narrower than what one views.
+insert into public.roles (workspace_id, name) select ws, 'Views all, exports reports' from ctx;
+insert into public.role_permissions (workspace_id, role_id, permission_key, reach)
+select (select ws from ctx), r.id, p.k, p.reach::public.reach
+from public.roles r, (values ('people.view', 'workspace'), ('people.export', 'reports')) as p (k, reach)
+where r.workspace_id = (select ws from ctx) and r.name = 'Views all, exports reports';
+update public.member_assignments set org_unit_id = pg_temp.unit('Squad A') where member_id = pg_temp.member('mia');
+select pg_temp.as_mia_with('Views all, exports reports');
+select tests.authenticate_as((select user_id from people where name = 'mia'));
+select is(
+  (select array_agg(full_name order by full_name)
+   from public.people_directory((select ws from ctx), p_status => 'all', p_for_export => true)),
+  array['Sam', 'Tom'], 'an export holds only the people within export reach'
+);
+select tests.clear_authentication();
+
+select pg_temp.as_mia_with('Own');
+select tests.authenticate_as((select user_id from people where name = 'mia'));
+select is(
+  (select count(*)::int from public.people_directory((select ws from ctx), p_for_export => true)),
+  0, 'no export permission, no export'
+);
 select tests.clear_authentication();
 
 -- The owner sees everyone; search, filters, status, sort and paging.

@@ -861,7 +861,8 @@
         "leavers": "Leavers",
         "all": "Everyone"
       }
-    }
+    },
+    "export": "Export"
   },
   "person": {
     "back": "Back to people",

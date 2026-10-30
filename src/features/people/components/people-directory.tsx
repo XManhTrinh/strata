@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
+import { Button } from "@windmorph/react";
 import { Avatar } from "@windmorph/react-pro";
 import { EmptyState } from "@windmorph/react-pro";
 import {
@@ -12,7 +13,7 @@ import {
   initialTableState,
 } from "@/components/ui/data-table";
 import { Icon } from "@/components/ui/icon";
-import { useWorkspace } from "@/features/workspaces/workspace-context";
+import { useCan, useWorkspace } from "@/features/workspaces/workspace-context";
 import { useDataTableLabels } from "@/hooks/use-data-table-labels";
 import { ViewsMenu } from "@/features/table-views/components/views-menu";
 import type { TableView } from "@/features/table-views/types";
@@ -54,6 +55,7 @@ export function PeopleDirectory({
   const router = useRouter();
   const pathname = usePathname();
   const { workspace } = useWorkspace();
+  const canExport = useCan("people.export");
   const [pending, startTransition] = useTransition();
   const [filters, setFilters] = useState(params);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -215,6 +217,22 @@ export function PeopleDirectory({
             }
           />
           <DirectoryFilters params={filters} options={options} onChange={onFilterChange} />
+          {canExport && (
+            <Button
+              variant="text"
+              leadingIcon={<Icon name="download" />}
+              // A file download, not a page: the browser stays on the directory.
+              onPress={() => {
+                const search = directorySearch({ ...filters, search: state.search, page: 0 });
+                const cols = state.columnOrder.filter((id) => !state.hidden.includes(id));
+                window.location.assign(
+                  `${pathname}/export${search}${search ? "&" : "?"}cols=${cols.join(",")}`
+                );
+              }}
+            >
+              {t("export")}
+            </Button>
+          )}
         </>
       }
       empty={

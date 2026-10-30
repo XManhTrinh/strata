@@ -1878,6 +1878,7 @@ export type Database = {
         Args: {
           p_descending?: boolean;
           p_employment_type_id?: string;
+          p_for_export?: boolean;
           p_limit?: number;
           p_offset?: number;
           p_position_id?: string;
