@@ -70,9 +70,9 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [x] 9.1 Upload (CSV, Excel), map columns (saved per workspace), choose key and levels
   - [x] 9.2 Preview with counts and errors; apply with progress; resume an unfinished import
 
-- [ ] 10. Load and end to end
+- [x] 10. Load and end to end
   - [x] 10.1 100k-member seed generator and load checks for the directory, reach and import
     - [x] `pnpm db:load` (seed and checks); every check within target (results in the design)
     - [x] Nightly in CI (`.github/workflows/nightly.yml`; a check over its target fails the run)
-  - [ ] 10.2 Playwright: structure, people, profile history, org chart, import and re-import, at
+  - [x] 10.2 Playwright: structure, people, profile history, org chart, import and re-import, at
         three widths

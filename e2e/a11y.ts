@@ -12,5 +12,9 @@ export async function expectNoA11yViolations(page: Page): Promise<void> {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
-  expect(results.violations).toEqual([]);
+  // Rule, element and reason for each violation, so a failure says what to fix.
+  const found = results.violations.flatMap((v) =>
+    v.nodes.map((n) => `${v.id}: ${n.target.join(" ")} — ${n.failureSummary ?? v.help}`)
+  );
+  expect(found, "accessibility violations").toEqual([]);
 }

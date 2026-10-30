@@ -501,3 +501,91 @@ $$;
 grant execute on function public.import_stage_rows(uuid, integer, jsonb) to authenticated;
 drop policy "Importers stage rows" on public.import_rows;
 revoke insert on public.import_rows from authenticated;
+
+-- Leavers never get a last day before their start date (it broke a same-day re-import).
+create or replace function public.import_apply_chunk(p_job_id uuid, p_max_rows integer default 2000)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_job public.import_jobs := app.load_import_job(p_job_id, array['previewed', 'applying']::public.import_status[]);
+  v_row public.import_rows;
+  v_processed integer := 0;
+  v_manager uuid;
+begin
+  perform set_config('app.defer_reporting_closure', 'on', true);
+  update public.import_jobs set status = 'applying' where id = p_job_id;
+
+  if v_job.phase = 'people' then
+    for v_row in
+      select * from public.import_rows
+      where job_id = p_job_id and row_number > v_job.cursor and status in ('new', 'changed')
+      order by row_number limit p_max_rows
+    loop
+      update public.import_rows set member_id = app.import_apply_row(v_job, v_row) where job_id = p_job_id and row_number = v_row.row_number;
+      v_job.cursor := v_row.row_number;
+      v_processed := v_processed + 1;
+    end loop;
+    if v_processed < p_max_rows then
+      v_job.phase := 'managers';
+      v_job.cursor := 0;
+    end if;
+
+  elsif v_job.phase = 'managers' then
+    for v_row in
+      select * from public.import_rows
+      where job_id = p_job_id and row_number > v_job.cursor and status in ('new', 'changed')
+        and data ? 'manager_key'
+      order by row_number limit p_max_rows
+    loop
+      select m.id into v_manager from public.members m
+      where m.workspace_id = v_job.workspace_id
+        and app.member_key(m, v_job.key_field) = case v_job.key_field
+          when 'email' then lower(btrim(v_row.data ->> 'manager_key')) else btrim(v_row.data ->> 'manager_key') end;
+      if v_manager is distinct from v_row.member_id then
+        perform app.set_assignment_from(v_row.member_id, v_job.effective_date,
+          jsonb_build_object('manager_member_id', v_manager));
+      end if;
+      v_job.cursor := v_row.row_number;
+      v_processed := v_processed + 1;
+    end loop;
+    if v_processed < p_max_rows then
+      v_job.phase := 'leavers';
+      v_job.cursor := 0;
+    end if;
+
+  elsif v_job.phase = 'leavers' then
+    if v_job.mark_leavers then
+      update public.members m
+      -- The day before the import takes effect, but never before they started (someone who
+      -- joined in an earlier import today and is missing now leaves on their first day).
+      set end_date = greatest(v_job.effective_date - 1, coalesce(m.start_date, v_job.effective_date - 1)),
+          status = case
+            when greatest(v_job.effective_date - 1, coalesce(m.start_date, v_job.effective_date - 1)) < current_date
+              then 'inactive' else m.status end
+      where m.workspace_id = v_job.workspace_id and m.status = 'active' and not m.is_owner
+        and (m.end_date is null or m.end_date >= v_job.effective_date)
+        and app.member_key(m, v_job.key_field) is not null
+        and not exists (
+          select 1 from public.import_rows x
+          where x.job_id = p_job_id and app.import_key(x.data, v_job.key_field) = app.member_key(m, v_job.key_field)
+        );
+    end if;
+    v_job.phase := 'finish';
+
+  elsif v_job.phase = 'finish' then
+    perform set_config('app.defer_reporting_closure', 'off', true);
+    perform app.rebuild_reporting_closure(v_job.workspace_id);
+    delete from public.import_rows where job_id = p_job_id;
+    update public.import_jobs set status = 'applied', applied_at = now() where id = p_job_id;
+    perform app.notify(v_job.created_by, v_job.workspace_id, 'import', 'import.finished', v_job.counts);
+    v_job.phase := 'done';
+  end if;
+
+  update public.import_jobs set phase = v_job.phase, cursor = v_job.cursor where id = p_job_id;
+  return jsonb_build_object('phase', v_job.phase, 'processed', v_processed, 'done', v_job.phase = 'done');
+end;
+$$;
+

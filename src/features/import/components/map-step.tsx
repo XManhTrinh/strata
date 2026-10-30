@@ -166,20 +166,16 @@ export function MapStep({
           defaultValue={options.effectiveDate}
           onChange={(date) => date && onOptions({ ...options, effectiveDate: date })}
         />
-        <div className="medium:col-span-2 flex items-start justify-between gap-4">
-          <div className="flex flex-col">
-            <span id="mark-leavers" className="text-body-large text-on-surface">
-              {t("map.markLeavers")}
-            </span>
-            <span className="text-body-small text-on-surface-variant">
-              {t("map.markLeaversHelp")}
-            </span>
-          </div>
+        <div className="medium:col-span-2 flex flex-col gap-1">
           <Switch
-            aria-labelledby="mark-leavers"
             checked={options.markLeavers}
             onCheckedChange={(on) => onOptions({ ...options, markLeavers: on })}
-          />
+          >
+            {t("map.markLeavers")}
+          </Switch>
+          <span className="text-body-small text-on-surface-variant">
+            {t("map.markLeaversHelp")}
+          </span>
         </div>
       </section>
 

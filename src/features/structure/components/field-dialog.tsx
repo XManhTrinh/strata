@@ -91,18 +91,14 @@ export function FieldDialog({ field, onClose }: { field?: CustomField; onClose: 
             ))}
           </Select>
           {FLAGS.map((flag) => (
-            <div key={flag} className="flex items-start justify-between gap-4">
-              <div className="flex flex-col">
-                <span id={`flag-${flag}`} className="text-body-large text-on-surface">
-                  {t(flag)}
-                </span>
-                <span className="text-body-small text-on-surface-variant">{t(`${flag}Help`)}</span>
-              </div>
+            <div key={flag} className="flex flex-col gap-1">
               <Switch
-                aria-labelledby={`flag-${flag}`}
                 checked={flags[flag]}
                 onCheckedChange={(on) => setFlags({ ...flags, [flag]: on })}
-              />
+              >
+                {t(flag)}
+              </Switch>
+              <span className="text-body-small text-on-surface-variant">{t(`${flag}Help`)}</span>
               <input type="hidden" name={flag} value={String(flags[flag])} />
             </div>
           ))}

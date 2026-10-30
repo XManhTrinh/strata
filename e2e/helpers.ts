@@ -27,3 +27,18 @@ export async function createWorkspace(page: Page, template: string, name: string
   await page.getByRole("button", { name: "Create workspace" }).click();
   await expect(page.getByRole("heading", { name: /^Welcome, / })).toBeVisible();
 }
+
+/**
+ * Chooses a file in a file trigger, again if needed: before the page's script loads, a file chosen
+ * this way isn't read yet (a person can't choose one that fast).
+ */
+export async function chooseFile(
+  page: Page,
+  file: Parameters<Page["setInputFiles"]>[1],
+  readText: string | RegExp
+): Promise<void> {
+  await expect(async () => {
+    await page.locator('input[type="file"]').setInputFiles(file);
+    await expect(page.getByText(readText)).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+}

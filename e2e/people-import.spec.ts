@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { chooseFile, completeSignUp, createWorkspace, uniqueId } from "./helpers";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "imports need a larger screen");
 
@@ -33,12 +33,11 @@ test("an importer maps, previews and applies a people file", async ({ page }, te
   await expect(page).toHaveURL(/\/people\/import$/);
 
   // The file is read in the browser.
-  await page.locator('input[type="file"]').setInputFiles({
-    name: "people.csv",
-    mimeType: "text/csv",
-    buffer: Buffer.from(CSV),
-  });
-  await expect(page.getByText("people.csv: 3 rows, 5 columns")).toBeVisible();
+  await chooseFile(
+    page,
+    { name: "people.csv", mimeType: "text/csv", buffer: Buffer.from(CSV) },
+    "people.csv: 3 rows, 5 columns"
+  );
   await page.getByRole("button", { name: "Next: columns" }).click();
 
   // Columns were guessed from the headers; the Team column feeds the Team level.
