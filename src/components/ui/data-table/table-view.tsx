@@ -140,7 +140,7 @@ export function TableView<Row>({
             return (
               <Row
                 id={id}
-                href={rowHref?.(row)}
+                href={rowHref?.(row) || undefined}
                 className={cn(
                   "border-outline-variant outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
                   "hover:bg-on-surface/8 data-[selected]:bg-secondary-container data-[selected]:text-on-secondary-container",

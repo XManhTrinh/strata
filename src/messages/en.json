@@ -1656,7 +1656,8 @@
       "label": "Planning",
       "scenarios": "Scenarios",
       "compare": "Compare",
-      "rate-cards": "Rate cards"
+      "rate-cards": "Rate cards",
+      "totals": "Totals"
     }
   },
   "scenarios": {
@@ -1791,5 +1792,33 @@
     "personDialog": "Add a person to a team",
     "personHelp": "They appear in the grid; their time is saved when you save your changes.",
     "personAdded": "{name} added to the grid"
+  },
+  "totals": {
+    "title": "Totals",
+    "export": "Export CSV",
+    "scenario": "Scenario",
+    "groupBy": "Group by",
+    "byTeam": "Team",
+    "measure": "Show",
+    "from": "From",
+    "to": "To",
+    "measures": {
+      "fte": "FTE",
+      "headcount": "Headcount",
+      "cost": "Cost"
+    },
+    "team": "Team",
+    "group": "Group",
+    "noValue": "(none)",
+    "average": "Average a month",
+    "total": "Total",
+    "allTeams": "All teams",
+    "trail": "Teams",
+    "introTeams": "{measure} by team, each including the teams under it. Open a team to see the teams in it.",
+    "introField": "{measure} split by the field's value.",
+    "empty": "Nothing planned in these months.",
+    "tableLabel": "{scenario} totals",
+    "noScenarioTitle": "No scenarios yet",
+    "noScenario": "Create a scenario to see its totals."
   }
 }

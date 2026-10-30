@@ -17,7 +17,7 @@ export async function planningAccess(slug: string) {
   });
   const held = new Set((permissions ?? []).map((p) => p.permission_key));
   const tabs: PlanningTab[] = [
-    ...(held.has("planning.view") ? (["scenarios", "compare"] as const) : []),
+    ...(held.has("planning.view") ? (["scenarios", "totals", "compare"] as const) : []),
     ...(held.has("rate_cards.view") ? (["rate-cards"] as const) : []),
   ];
   if (tabs.length === 0) notFound();

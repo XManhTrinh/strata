@@ -32,7 +32,7 @@ export type DataTableProps<Row> = {
   /** Page-specific filters, shown next to the search. */
   filters?: ReactNode;
   onRowAction?: (row: Row) => void;
-  /** Each row as a link (works before the page's script loads, opens in a new tab). */
+  /** Each row as a link (works before the page's script loads, opens in a new tab); "" for none. */
   rowHref?: (row: Row) => string;
   loading?: boolean;
   error?: string;
