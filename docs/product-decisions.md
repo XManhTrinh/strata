@@ -268,6 +268,17 @@ All configured per workspace.
 | Custom working week, per workspace or per person (e.g. Sun–Thu, part-time Mon–Wed)                                                           | v1      |
 | Leave in hours                                                                                                                               | Later   |
 
+### Allowances and calendars (decided 2026-10-30)
+
+- **Part-time allowances are pro-rata by work schedule** when the policy says so (3 of 5 days gets
+  15 of 25); admins can still adjust any balance with a reason.
+- **Each allowance policy sets its leave year** (start month, January by default), so annual leave
+  can run April to March while another type runs January to December.
+- **Only events repeat:** types with no allowance and no approval can recur (e.g. a weekly team
+  meeting); leave is booked one request at a time.
+- **Holiday calendars are copied per workspace** from the holiday library and edited freely there;
+  edits never affect other workspaces, and regeneration keeps edited days.
+
 ### Approval
 
 - **v1: approver per leave type.** Each leave type sets its approver: line manager, team lead, a
