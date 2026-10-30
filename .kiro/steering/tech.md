@@ -34,10 +34,10 @@ The stack decision, with the reasons, is in:
   exports. Remove a package in the same change that stops using it.
 - Renovate keeps dependencies current with grouped weekly pull requests.
 - Deliberate exceptions:
-  - **TypeScript:** type checking (`pnpm typecheck`) uses **TypeScript 7** (`typescript-native`,
-    the native compiler). The `typescript` package stays on **6.x** because typescript-eslint,
-    Next.js and editors need its JavaScript API, which TypeScript 7 doesn't have yet. Remove the
-    6.x copy once typescript-eslint supports 7.
+  - **TypeScript stays on 6.x**, type checking included. TypeScript 7 (native) failed with
+    "union type too complex" on next-intl's typed messages (756 keys, 2026-10-30) where 6.x passes,
+    and typescript-eslint, Next.js and editors need the 6.x JavaScript API anyway. Move to 7 when
+    it checks this code base cleanly and typescript-eslint supports it.
   - **`@types/node` follows the Node LTS major we run on** (Node 24), not newer types.
 - Runtime: **Node 24 LTS** (`.nvmrc`; the newest line Vercel offers. Move .nvmrc, `engines` and `@types/node` to 26 together once Vercel supports it), **pnpm** pinned in `packageManager` (pnpm switches to it
   automatically).

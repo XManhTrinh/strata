@@ -29,18 +29,18 @@ Fixed constraints from the product owner: **Next.js**, **Supabase** as the backe
 
 ### Application
 
-| Concern             | Choice                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework           | Next.js 16 App Router, React 19, TypeScript strict                                                                                                      |
-| Runtime and tooling | Node 24 LTS (newest on Vercel), pnpm 12 (pinned in `packageManager`), TypeScript 7 for type checking with TypeScript 6 kept for tools that need its API |
-| Repo shape          | A single Next.js app with `supabase/` alongside it. No Turborepo, no internal packages. (Revisit only if a second app appears.)                         |
-| Reads               | React Server Components using the server Supabase client                                                                                                |
-| Writes              | Server Actions (or route handlers where an HTTP endpoint is needed)                                                                                     |
-| Client server-state | TanStack Query, only for highly interactive screens (capacity grid, live lists)                                                                         |
-| Client UI state     | React state and context; no state library unless a real need appears                                                                                    |
-| Dependencies        | Latest stable versions at scaffold time; only what is used (`knip` in CI); Renovate for weekly updates                                                  |
-| Validation          | zod, one schema per form/action, shared by the form and the Server Action (see Forms below)                                                             |
-| Session             | `@supabase/ssr` in `proxy.ts`, verifying the token server-side (`getClaims()` / `getUser()`, never `getSession()` for auth decisions)                   |
+| Concern             | Choice                                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Framework           | Next.js 16 App Router, React 19, TypeScript strict                                                                                                                                   |
+| Runtime and tooling | Node 24 LTS (newest on Vercel), pnpm 12 (pinned in `packageManager`), TypeScript 6 (TypeScript 7 failed on next-intl's typed messages; revisit when it checks the code base cleanly) |
+| Repo shape          | A single Next.js app with `supabase/` alongside it. No Turborepo, no internal packages. (Revisit only if a second app appears.)                                                      |
+| Reads               | React Server Components using the server Supabase client                                                                                                                             |
+| Writes              | Server Actions (or route handlers where an HTTP endpoint is needed)                                                                                                                  |
+| Client server-state | TanStack Query, only for highly interactive screens (capacity grid, live lists)                                                                                                      |
+| Client UI state     | React state and context; no state library unless a real need appears                                                                                                                 |
+| Dependencies        | Latest stable versions at scaffold time; only what is used (`knip` in CI); Renovate for weekly updates                                                                               |
+| Validation          | zod, one schema per form/action, shared by the form and the Server Action (see Forms below)                                                                                          |
+| Session             | `@supabase/ssr` in `proxy.ts`, verifying the token server-side (`getClaims()` / `getUser()`, never `getSession()` for auth decisions)                                                |
 
 ### Backend: Supabase
 
