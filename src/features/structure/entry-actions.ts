@@ -13,8 +13,15 @@ const ordered = z.enum([
   "employment_types",
   "custom_fields",
   "custom_field_options",
+  "time_types",
 ]);
-const archivable = z.enum([...ordered.options, "positions"]);
+const archivable = z.enum([
+  ...ordered.options,
+  "positions",
+  "allowance_policies",
+  "work_schedules",
+  "holiday_calendars",
+]);
 export type OrderedTable = z.infer<typeof ordered>;
 
 function revalidateStructure() {

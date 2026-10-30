@@ -104,7 +104,33 @@
     "viewNameTaken": "There is already a view with this name.",
     "unitOutsideReach": "You can only grant units your own access covers.",
     "roleHasNoUnitReach": "This role doesn't work on specific units.",
-    "jobUnchanged": "Nothing changed: the job record on that date already says this."
+    "jobUnchanged": "Nothing changed: the job record on that date already says this.",
+    "timeTypeNameRequired": "Enter a name for the time type.",
+    "timeTypeNameTaken": "There is already a time type with this name.",
+    "timeTypeRulesInvalid": "These settings don't go together: approval needs an approver, and only types without allowance or approval can repeat.",
+    "timeTypeRequired": "Choose a time type.",
+    "policyNameRequired": "Enter a name for the policy.",
+    "policyNameTaken": "There is already a policy with this name.",
+    "scheduleNameRequired": "Enter a name for the schedule.",
+    "scheduleNameTaken": "There is already a schedule with this name.",
+    "scheduleDaysRequired": "Choose at least one working day.",
+    "calendarNameRequired": "Enter a name for the calendar.",
+    "calendarNameTaken": "There is already a calendar with this name.",
+    "holidayNameRequired": "Enter a name for the holiday.",
+    "holidayDateTaken": "This calendar already has a holiday on that date.",
+    "adjustmentReasonRequired": "Give a reason for the adjustment.",
+    "adjustmentInvalid": "Enter a number of days other than 0.",
+    "bookingOnePerson": "Leave and requests are booked for one person at a time.",
+    "bookingNoRecurrence": "Only events can repeat.",
+    "bookingDaysOnly": "Leave is booked in whole or half days.",
+    "bookingTypeNotAllowed": "You can't book this type.",
+    "bookingForOthersNotAllowed": "You can't book this for that person.",
+    "bookingOverlaps": "This overlaps time off already booked.",
+    "noAllowancePolicy": "No allowance policy applies to this person for this type.",
+    "notEnoughAllowance": "Not enough allowance left.",
+    "bookingNotPending": "This request has already been decided or cancelled.",
+    "selfApproval": "You can't approve your own request.",
+    "bookingNotCancellable": "This booking can't be cancelled."
   },
   "auth": {
     "signIn": {
@@ -266,6 +292,18 @@
       "fields": {
         "name": "Custom fields",
         "description": "Extra details kept about people"
+      },
+      "time-types": {
+        "name": "Time types",
+        "description": "Leave, absences and events"
+      },
+      "allowances": {
+        "name": "Allowances",
+        "description": "Leave balances, accrual and carry-over"
+      },
+      "working-time": {
+        "name": "Working time",
+        "description": "Work schedules and public holidays"
       },
       "features": {
         "name": "Features",
@@ -1144,5 +1182,155 @@
       "runningPhase": "Applying: {phase}"
     },
     "stepLabel": "{number}. {name}"
+  },
+  "timeSettings": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "add": "Add",
+    "name": "Name",
+    "actions": "Actions for {name}",
+    "edit": "Edit",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archived": "Archived",
+    "default": "Default",
+    "makeDefault": "Make default",
+    "saved": "{name} saved",
+    "added": "{name} added",
+    "archivedDone": "{name} archived",
+    "restored": "{name} restored",
+    "defaultSet": "{name} is now the default",
+    "types": {
+      "title": "Time types",
+      "intro": "Everything people book: leave, absences, events. Each type sets whether it uses an allowance, needs approval and counts as away.",
+      "add": "Add time type",
+      "dialogAdd": "Add time type",
+      "dialogEdit": "Edit time type",
+      "color": "Colour",
+      "icon": "Icon",
+      "usesAllowance": "Uses an allowance",
+      "usesAllowanceHelp": "Deducts from a balance, such as 25 days of annual leave.",
+      "needsApproval": "Needs approval",
+      "needsApprovalHelp": "Goes to an approver before it counts.",
+      "isAway": "Person is away",
+      "isAwayHelp": "Shows them as unavailable in team views.",
+      "paid": "Paid",
+      "paidHelp": "For reports, and later payroll.",
+      "bookForOthers": "Can be booked for others",
+      "bookForOthersHelp": "Managers and admins can book it on someone's behalf.",
+      "allowsRecurrence": "Can repeat",
+      "allowsRecurrenceHelp": "For events only: no allowance and no approval.",
+      "visibility": "Who sees the details",
+      "visibilities": {
+        "everyone": "Everyone who can see the person",
+        "team": "Their team only",
+        "private": "Private (others see busy)"
+      },
+      "bookableBy": "Who can book it",
+      "bookables": {
+        "everyone": "Everyone",
+        "managers": "Managers and approvers",
+        "admins": "Admins only"
+      },
+      "approver": "Approver",
+      "approvers": {
+        "line_manager": "Line manager",
+        "team_lead": "Team lead",
+        "person": "A person",
+        "role": "A role",
+        "none": "No approval"
+      },
+      "approverPerson": "Approving person",
+      "approverRole": "Approving role",
+      "notifyRole": "Also tell",
+      "notifyNone": "No one",
+      "summaryAllowance": "Allowance",
+      "summaryApproval": "Approval by {approver}",
+      "summaryAway": "Away",
+      "summaryRepeats": "Can repeat",
+      "colors": {
+        "green": "Green",
+        "red": "Red",
+        "purple": "Purple",
+        "teal": "Teal",
+        "blue": "Blue",
+        "orange": "Orange",
+        "brown": "Brown",
+        "grey": "Grey"
+      },
+      "icons": {
+        "beach_access": "Beach",
+        "sick": "Sick",
+        "school": "Learning",
+        "home_work": "Home",
+        "groups": "Group",
+        "event": "Event",
+        "flight": "Travel",
+        "child_friendly": "Family",
+        "volunteer_activism": "Volunteering",
+        "work_off": "Off work"
+      }
+    },
+    "policies": {
+      "title": "Allowance policies",
+      "intro": "How many days each allowance type gives a year, when the year starts, and what carries over. People are on the default policy unless given another.",
+      "add": "Add policy",
+      "dialogAdd": "Add allowance policy",
+      "dialogEdit": "Edit allowance policy",
+      "timeType": "Time type",
+      "daysPerYear": "Days a year",
+      "accrual": "Given",
+      "accruals": {
+        "upfront": "All at the start of the year",
+        "monthly": "A twelfth each month"
+      },
+      "yearStart": "Leave year starts in",
+      "carryOverMax": "Days that carry over",
+      "carryOverMaxHelp": "Empty: all of them. 0: none.",
+      "carryOverExpires": "Carried days expire after (months)",
+      "carryOverExpiresHelp": "Empty: they don't expire.",
+      "prorate": "Pro-rata for part-time schedules",
+      "prorateHelp": "Someone working 3 days a week gets 3/5 of the days.",
+      "summary": "{days} days a year · {accrual} · from {month}",
+      "noAllowanceTypes": "Add a time type that uses an allowance first.",
+      "empty": "No policies yet."
+    },
+    "schedules": {
+      "title": "Work schedules",
+      "intro": "Which days people work. Leave counts only working days. People use the default unless their job record says otherwise.",
+      "add": "Add schedule",
+      "dialogAdd": "Add work schedule",
+      "dialogEdit": "Edit work schedule",
+      "days": "Working days"
+    },
+    "calendars": {
+      "title": "Public holiday calendars",
+      "intro": "Holidays aren't counted as leave. Generated calendars come from a maintained holiday list; you can add, change or remove days, and your changes are kept.",
+      "add": "Add calendar",
+      "dialogAdd": "Add holiday calendar",
+      "dialogEdit": "Rename holiday calendar",
+      "country": "Country",
+      "region": "Region (optional)",
+      "regionAll": "Whole country",
+      "custom": "Custom (add days by hand)",
+      "reaches": "Holidays until {year}",
+      "reachesNone": "No holidays yet",
+      "soon": "Ends soon: generate the next year.",
+      "holidays": "Holidays in {year}",
+      "year": "Year",
+      "generate": "Generate {year}",
+      "generated": "{year} generated",
+      "addHoliday": "Add holiday",
+      "editHoliday": "Edit holiday",
+      "date": "Date",
+      "holidayName": "Name",
+      "half": "Half day",
+      "deleteHoliday": "Remove {name}",
+      "removed": "{name} removed",
+      "noHolidays": "No holidays this year.",
+      "edited": "Edited",
+      "halfDay": "Half day",
+      "holidaysOf": "{calendar}: holidays in {year}"
+    }
   }
 }

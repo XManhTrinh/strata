@@ -9,6 +9,25 @@ export function uniqueId(projectName: string): string {
   return `${Date.now()}${Math.random().toString(36).slice(2, 6)}-${projectName}`;
 }
 
+/** The app's own address in emails (its NEXT_PUBLIC_SITE_URL), and where the tests run it. */
+const SITE = "http://localhost:3000";
+const TEST_SERVER = `http://localhost:${process.env.E2E_PORT ?? 3000}`;
+
+/**
+ * Opens a link from an email. Emails point at the app's site address; when the tests run their own
+ * server on another port (E2E_PORT), the link's destination is moved there.
+ */
+export async function followEmailLink(page: Page, link: string): Promise<void> {
+  if (TEST_SERVER === SITE) {
+    await page.goto(link);
+    return;
+  }
+  // Redirects during a navigation can't be rerouted, so read where the link sends us first.
+  const response = await page.request.get(link, { maxRedirects: 0 });
+  const location = response.headers()["location"];
+  await page.goto(location ? location.replace(SITE, TEST_SERVER) : link);
+}
+
 /** Signs up from the current sign-up form and follows the confirmation email. */
 export async function completeSignUp(page: Page, fullName: string, email: string): Promise<void> {
   await page.getByLabel("Full name").fill(fullName);
@@ -16,7 +35,7 @@ export async function completeSignUp(page: Page, fullName: string, email: string
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByText("Check your email")).toBeVisible();
-  await page.goto(await latestLinkFor(email));
+  await followEmailLink(page, await latestLinkFor(email));
 }
 
 /** Creates a workspace from the onboarding form and waits for its home page. */

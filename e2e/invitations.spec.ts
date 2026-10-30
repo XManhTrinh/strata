@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, followEmailLink } from "./helpers";
 import { latestLinkFor } from "./mailpit";
 
 // Workspace settings ask for a larger screen on phones.
@@ -32,7 +32,7 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   ).toBeVisible();
 
   const invitee = await (await browser.newContext()).newPage();
-  await invitee.goto(await latestLinkFor(inviteeEmail));
+  await followEmailLink(invitee, await latestLinkFor(inviteeEmail));
   await expect(invitee.getByRole("heading", { name: "You're invited" })).toBeVisible();
   await expect(
     invitee.getByText(`Ana Pop invited ${inviteeEmail} to join Acme ${id} as Member.`)

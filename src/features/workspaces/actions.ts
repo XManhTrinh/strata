@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { type FormState, fieldErrorsFrom } from "@/lib/form-state";
+import { generateHolidays } from "@/features/time/holidays";
 import { createClient } from "@/lib/supabase/server";
 import { createWorkspaceSchema } from "./schemas";
 
@@ -34,6 +35,19 @@ export async function createWorkspace(
       return { status: "error", fieldErrors: { timeZone: "timeZoneRequired" } };
     }
     return { status: "error", error: "generic" };
+  }
+
+  // The default holiday calendar gets this year and the next two (best effort: settings can
+  // generate them later).
+  const { data: calendar } = await supabase
+    .from("holiday_calendars")
+    .select("id, workspace_id, country, region")
+    .eq("workspace_id", data.id)
+    .eq("is_default", true)
+    .maybeSingle();
+  if (calendar) {
+    const year = new Date().getFullYear();
+    await generateHolidays(supabase, calendar, [year, year + 1, year + 2]).catch(() => 0);
   }
 
   redirect(`/w/${data.slug}`);

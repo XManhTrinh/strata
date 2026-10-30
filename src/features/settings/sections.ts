@@ -1,5 +1,15 @@
 export type SettingsSectionKey =
-  "general" | "members" | "roles" | "hierarchy" | "jobs" | "fields" | "features" | "audit";
+  | "general"
+  | "members"
+  | "roles"
+  | "hierarchy"
+  | "jobs"
+  | "fields"
+  | "time-types"
+  | "allowances"
+  | "working-time"
+  | "features"
+  | "audit";
 
 type SettingsSection = { key: SettingsSectionKey; icon: string; permissions: string[] };
 
@@ -15,6 +25,9 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   { key: "hierarchy", icon: "account_tree", permissions: ["people.manage_structure"] },
   { key: "jobs", icon: "work", permissions: ["people.manage_structure"] },
   { key: "fields", icon: "dynamic_form", permissions: ["people.manage_structure"] },
+  { key: "time-types", icon: "event_available", permissions: ["time.manage_settings"] },
+  { key: "allowances", icon: "account_balance_wallet", permissions: ["time.manage_settings"] },
+  { key: "working-time", icon: "calendar_month", permissions: ["time.manage_settings"] },
   { key: "features", icon: "toggle_on", permissions: ["workspace.manage_features"] },
   { key: "audit", icon: "history", permissions: ["workspace.view_audit"] },
 ];
