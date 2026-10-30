@@ -49,7 +49,7 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [x] 6.3 Custom fields and their options (Settings > Custom fields; the key is fixed and the
         type locks once people have values)
 
-- [ ] 7. People
+- [x] 7. People
   - [x] 7.1 Directory: DataTable in server mode with search, filters, saved views, export
     - [x] `people_directory` RPC (reach worked out once per call, search, unit subtree, position,
           employment type, leavers, sort, paging); URL-kept state; phone list with filters
@@ -58,7 +58,8 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [x] 7.2 Profile: details, current job, history timeline, future-dated changes, pay (with
         permission), custom fields
   - [x] 7.3 Add person, edit, set an end date
-  - [ ] 7.4 Specific-units picker in role assignment
+  - [x] 7.4 Specific-units picker in role assignment (granted through `set_role_units`, only
+        within the assigner's own reach)
 
 - [ ] 8. Org chart
   - [ ] 8.1 Reporting chart and grouped hierarchy view (xyflow + ELK in a web worker), expanded on

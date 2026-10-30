@@ -34,6 +34,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      covers_unit: {
+        Args: { p_permission_key: string; p_unit_id: string; p_workspace_id: string };
+        Returns: boolean;
+      };
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
@@ -1917,6 +1921,7 @@ export type Database = {
       };
       resend_invitation: { Args: { p_invitation_id: string }; Returns: string };
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
+      roles_with_unit_reach: { Args: { p_workspace_id: string }; Returns: string[] };
       set_feature: {
         Args: {
           p_enabled: boolean;
@@ -1936,6 +1941,10 @@ export type Database = {
           p_status: Database["public"]["Enums"]["member_status"];
           p_workspace_id: string;
         };
+        Returns: undefined;
+      };
+      set_role_units: {
+        Args: { p_member_role_id: string; p_unit_ids: string[] };
         Returns: undefined;
       };
       transfer_ownership: {

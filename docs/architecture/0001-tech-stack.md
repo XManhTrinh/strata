@@ -86,7 +86,15 @@ Every library above is used for logic only; everything visible is a Windmorph co
 with Windmorph tokens. No other component library, CSS-in-JS, or chart library with its own look.
 
 Gaps in Windmorph that must be built: data table/grid, tree select, calendar month grid,
-colour/icon picker, breadcrumbs. Where to build them (windmorph-pro or the app) is an open question.
+colour/icon picker, breadcrumbs. They are built in Strata first (`src/components/ui`, with a full
+API and no Strata imports), then moved to windmorph-pro.
+
+Windmorph issues found while building, to fix upstream:
+
+- `Autocomplete` with `selectionMode="multiple"`: text left in the input after a pick clears the
+  whole selection on blur. Strata clears the input on each pick (`role-units-dialog.tsx`).
+- `IconButton` defaults to `filled`; Material 3 uses standard icon buttons for menus, back arrows
+  and row actions, so Strata passes `variant="standard"` everywhere.
 
 ### Quality and delivery
 

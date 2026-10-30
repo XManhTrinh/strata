@@ -14,7 +14,8 @@ export type InviteState = FormState<"emails" | "roleId"> & { results?: InviteRes
 
 type ActionResult = { ok: true } | { ok: false; error: ErrorKey };
 
-function errorKeyFor(error: { code?: string; message: string }): ErrorKey {
+function errorKeyFor(error: { code?: string; message: string; hint?: string | null }): ErrorKey {
+  if (error.hint === "unitOutsideReach" || error.hint === "roleHasNoUnitReach") return error.hint;
   if (error.code === "42501") return "notAllowed";
   if (error.message.includes("already a member")) return "alreadyMember";
   if (error.message.includes("open invitation")) return "alreadyInvited";
@@ -171,4 +172,15 @@ export async function leaveWorkspace(workspaceId: string): Promise<ActionResult>
   if (error) return { ok: false, error: error.code === "23514" ? "lastOwner" : errorKeyFor(error) };
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/** The units a role assignment covers, for roles that act on specific units. */
+export async function setRoleUnits(assignmentId: string, unitIds: string[]): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_role_units", {
+    p_member_role_id: assignmentId,
+    p_unit_ids: unitIds,
+  });
+  revalidatePath("/w/[workspace]/settings/members", "page");
+  return error ? { ok: false, error: errorKeyFor(error) } : { ok: true };
 }

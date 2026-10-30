@@ -30,10 +30,12 @@ export function MembersSettings({
   members,
   roles,
   invitations,
+  units,
 }: {
   members: MemberRow[];
   roles: RoleOption[];
   invitations: PendingInvitation[];
+  units: { id: string; label: string }[];
 }) {
   const t = useTranslations("members");
   const te = useTranslations("errors");
@@ -184,7 +186,13 @@ export function MembersSettings({
 
       {canInvite && <InviteDialog roles={roles} open={inviteOpen} onOpenChange={setInviteOpen} />}
       {rolesFor && (
-        <MemberRolesDialog member={rolesFor} roles={roles} onClose={() => setRolesFor(null)} />
+        <MemberRolesDialog
+          // The fresh row, so roles assigned in the dialog can take units straight away.
+          member={members.find((m) => m.id === rolesFor.id) ?? rolesFor}
+          roles={roles}
+          units={units}
+          onClose={() => setRolesFor(null)}
+        />
       )}
       {makingOwner && <MakeOwnerDialog member={makingOwner} onClose={() => setMakingOwner(null)} />}
       {leaving && <LeaveWorkspaceDialog onClose={() => setLeaving(false)} />}

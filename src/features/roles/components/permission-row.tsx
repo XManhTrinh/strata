@@ -6,8 +6,16 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type Reach = Database["public"]["Enums"]["reach"];
 
-// "Specific units" arrives with the hierarchy in Phase 2.
-const REACH_OPTIONS = ["none", "own", "reports", "team", "team_and_below", "workspace"] as const;
+// "Specific units" are chosen per person when the role is assigned (Settings > Members).
+const REACH_OPTIONS = [
+  "none",
+  "own",
+  "reports",
+  "team",
+  "team_and_below",
+  "units",
+  "workspace",
+] as const;
 
 export type PermissionDef = { key: string; featureKey: string; isScoped: boolean };
 

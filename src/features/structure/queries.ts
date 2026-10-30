@@ -1,5 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { buildTree } from "./hierarchy";
+import type { OrgUnitNode } from "./types";
 import type {
   CareerLevel,
   CustomField,
@@ -125,4 +127,19 @@ export async function listCustomFields(workspaceId: string): Promise<CustomField
       .filter((o) => o.field_id === f.id)
       .map((o) => ({ id: o.id, name: o.label, archived: o.archived_at !== null })),
   }));
+}
+
+/** Active units as choices, root first, each labelled with its path ("Acme › Engineering"). */
+export async function unitChoices(workspaceId: string): Promise<{ id: string; label: string }[]> {
+  const { units } = await listHierarchy(workspaceId);
+  const choices: { id: string; label: string }[] = [];
+  const walk = (nodes: OrgUnitNode[], path: string[]) => {
+    for (const node of nodes) {
+      const names = [...path, node.name];
+      choices.push({ id: node.id, label: names.join(" › ") });
+      walk(node.children, names);
+    }
+  };
+  walk(buildTree(units, false), []);
+  return choices;
 }

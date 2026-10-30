@@ -101,7 +101,9 @@
     "payRequired": "Enter a salary or a day rate.",
     "amountInvalid": "Enter an amount of 0 or more.",
     "viewNameRequired": "Enter a name for the view.",
-    "viewNameTaken": "There is already a view with this name."
+    "viewNameTaken": "There is already a view with this name.",
+    "unitOutsideReach": "You can only grant units your own access covers.",
+    "roleHasNoUnitReach": "This role doesn't work on specific units."
   },
   "auth": {
     "signIn": {
@@ -365,7 +367,15 @@
     "ownerAdded": "{name} is now an owner",
     "leave": "Leave workspace",
     "leaveTitle": "Leave this workspace?",
-    "leaveBody": "You'll lose access straight away. An admin can invite you back later."
+    "leaveBody": "You'll lose access straight away. An admin can invite you back later.",
+    "units": "Units: {units}",
+    "noUnits": "No units yet: this role gives no access until you choose some.",
+    "chooseUnits": "Choose units",
+    "unitsTitle": "Units for {role}",
+    "unitsBody": "{name} gets this role's access in these units and everything under them.",
+    "unitsLabel": "Units",
+    "unitsSaved": "Units saved",
+    "save": "Save"
   },
   "permissions": {
     "members": {
