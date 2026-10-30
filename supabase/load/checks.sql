@@ -67,6 +67,14 @@ select load_checks.time('owner: a squad''s people',
   format($q$select count(*) from public.org_chart(%L, p_unit_id => %L)$q$, :'ws', :'squad'));
 select load_checks.time('owner: unit headcount',
   format($q$select count(*) from public.unit_headcount(%L)$q$, :'ws'));
+select load_checks.time('owner: calendar, one week, whole workspace',
+  format($q$select count(*) from public.calendar_entries(%L, current_date, current_date + 6)$q$, :'ws'));
+select load_checks.time('owner: calendar, one month, one squad',
+  format($q$select count(*) from public.calendar_entries(%L, date_trunc('month', current_date)::date,
+    (date_trunc('month', current_date) + interval '1 month - 1 day')::date,
+    (select array_agg(a.member_id) from public.member_assignments a where a.org_unit_id = %L and a.valid_to is null))$q$, :'ws', :'squad'));
+select load_checks.time('owner: a person''s balances',
+  format($q$select count(*) from public.allowance_balances(%L)$q$, :'tribe_lead'));
 select load_checks.time('owner: members table, 50 by name (RLS)',
   format($q$select count(*) from (select id from public.members where workspace_id = %L order by full_name limit 50) x$q$, :'ws'));
 reset role;
@@ -84,6 +92,9 @@ reset role;
 
 select set_config('request.jwt.claims', json_build_object('sub', :'below_id', 'role', 'authenticated')::text, false);
 set role authenticated;
+select load_checks.time('team and below (~800): calendar, one month',
+  format($q$select count(*) from public.calendar_entries(%L, date_trunc('month', current_date)::date,
+    (date_trunc('month', current_date) + interval '1 month - 1 day')::date)$q$, :'ws'));
 select load_checks.time('team and below (~800): directory, first page',
   format($q$select count(*) from public.people_directory(%L)$q$, :'ws'));
 select load_checks.time('team and below (~800): org chart from self',
@@ -95,6 +106,33 @@ set role authenticated;
 select load_checks.time('granted unit (~4k): directory, first page',
   format($q$select count(*) from public.people_directory(%L)$q$, :'ws'));
 reset role;
+
+-- A squad lead's approvals, and one booking (rolled back) ------------------------------------------------
+select m.user_id as lead_user, m.id as lead from public.members m where m.workspace_id = :'ws' and m.person_key = 'E-000500' \gset
+begin;
+insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, created_at, updated_at)
+values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'lead@load.test', now(), '{}', now(), now())
+returning id as lead_user \gset
+update public.members set user_id = :'lead_user' where id = :'lead';
+insert into public.member_roles (workspace_id, member_id, role_id)
+select :'ws', :'lead', id from public.roles where workspace_id = :'ws' and name = 'Manager';
+select set_config('request.jwt.claims', json_build_object('sub', :'lead_user', 'role', 'authenticated')::text, true);
+set local role authenticated;
+select count(*) as lead_sees from public.my_pending_approvals(:'ws');
+select load_checks.time('squad lead: approvals waiting',
+  format($q$select count(*) from public.my_pending_approvals(%L)$q$, :'ws'));
+select clock_timestamp() as t0 \gset
+select public.book_time(:'ws', (select id from public.time_types where workspace_id = :'ws' and name = 'Annual leave'),
+  array[:'lead'::uuid], current_date + 60, current_date + 61);
+insert into load_checks.results (label, ms, target_ms)
+select 'squad lead: book leave', round((extract(epoch from clock_timestamp() - :'t0'::timestamptz) * 1000)::numeric), 300;
+reset role;
+select label, ms, target_ms, case when ms <= target_ms then 'ok' else 'SLOW' end as result
+from load_checks.results where label like 'squad lead:%' order by ord;
+select coalesce(string_agg(label, ', '), '') as slow_lead
+from load_checks.results where label like 'squad lead:%' and ms > target_ms \gset
+rollback;
+select set_config('load_checks.slow_lead', :'slow_lead', false);
 
 -- Re-import of all 100k (rolled back) -------------------------------------------------------------------
 begin;
@@ -144,7 +182,8 @@ declare
   v_slow text := (
     select string_agg(label, ', ')
     from (select label from load_checks.results where ms > target_ms
-          union all select nullif(current_setting('load_checks.slow_imports', true), '')) s
+          union all select nullif(current_setting('load_checks.slow_imports', true), '')
+          union all select nullif(current_setting('load_checks.slow_lead', true), '')) s
   );
 begin
   if v_slow is not null then

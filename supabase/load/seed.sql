@@ -13,7 +13,24 @@ set client_min_messages = warning;
 begin;
 
 -- Users -------------------------------------------------------------------------------------------
-delete from public.workspaces where slug = 'load-100k';
+-- Guards (the Admin role, the root unit) refuse deletes, so user triggers are off while the old
+-- load workspace goes; foreign-key cascades are internal triggers and still run.
+do $$
+declare t regclass;
+begin
+  for t in select c.oid from pg_class c where c.relnamespace = 'public'::regnamespace and c.relkind = 'r' loop
+    execute format('alter table %s disable trigger user', t);
+  end loop;
+  -- Time rows point at members without cascading (members are never deleted), so they go first.
+  delete from public.allowance_ledger l using public.workspaces w where w.id = l.workspace_id and w.slug = 'load-100k';
+  delete from public.bookings b using public.workspaces w where w.id = b.workspace_id and w.slug = 'load-100k';
+  delete from public.time_types x using public.workspaces w where w.id = x.workspace_id and w.slug = 'load-100k';
+  delete from public.workspaces where slug = 'load-100k';
+  for t in select c.oid from pg_class c where c.relnamespace = 'public'::regnamespace and c.relkind = 'r' loop
+    execute format('alter table %s enable trigger user', t);
+  end loop;
+end;
+$$;
 delete from auth.users where email like '%@load.test';
 
 create temporary table load_users (name text primary key, id uuid not null default gen_random_uuid());
@@ -132,7 +149,7 @@ insert into public.roles (workspace_id, name) select ws, r from ctx, (values ('L
 insert into public.role_permissions (workspace_id, role_id, permission_key, reach)
 select c.ws, r.id, k, (case r.name when 'Load reports' then 'reports' when 'Load below' then 'team_and_below' else 'units' end)::public.reach
 from ctx c join public.roles r on r.workspace_id = c.ws and r.name like 'Load %'
-cross join (values ('people.view'), ('org_chart.view'), ('people.export')) as p (k);
+cross join (values ('people.view'), ('org_chart.view'), ('people.export'), ('time.view')) as p (k);
 insert into public.member_roles (workspace_id, member_id, role_id)
 select c.ws, m.id, r.id
 from ctx c join public.members m on m.workspace_id = c.ws
@@ -144,6 +161,37 @@ insert into public.member_role_units (member_role_id, workspace_id, org_unit_id)
 select mr.id, mr.workspace_id, (select id from units where n = 6)
 from public.member_roles mr join public.roles r on r.id = mr.role_id where r.name = 'Load units';
 
+-- Time off: two approved leave bookings each across the year (2-5 days), and a pending request
+-- for each person in squad 500, waiting for their squad lead.
+create temporary table leave_type as
+select id from public.time_types where workspace_id = (select ws from ctx) and name = 'Annual leave';
+
+create temporary table new_bookings as
+select gen_random_uuid() as id, p.id as member_id, k,
+  (date_trunc('year', current_date)::date + ((p.n * 7 + k * 173) % 340)) as start_date,
+  2 + (p.n + k) % 4 as days
+from people p cross join generate_series(1, 2) k;
+
+insert into public.bookings (id, workspace_id, time_type_id, created_by, start_date, end_date, status)
+select b.id, c.ws, (select id from leave_type), b.member_id, b.start_date, b.start_date + b.days - 1, 'approved'
+from new_bookings b cross join ctx c;
+insert into public.booking_attendees (booking_id, workspace_id, member_id, working_days)
+select b.id, c.ws, b.member_id, b.days from new_bookings b cross join ctx c;
+insert into public.allowance_ledger (workspace_id, member_id, time_type_id, leave_year, kind, days, booking_id)
+select c.ws, b.member_id, (select id from leave_type), date_trunc('year', current_date)::date, 'usage', -b.days, b.id
+from new_bookings b cross join ctx c;
+
+create temporary table pending_bookings as
+select gen_random_uuid() as id, pl.member_id, pl.n
+from placement pl where pl.unit_n = 500 and pl.n > 1155;
+insert into public.bookings (id, workspace_id, time_type_id, created_by, start_date, end_date, status)
+select b.id, c.ws, (select id from leave_type), b.member_id, current_date + 30, current_date + 31, 'pending'
+from pending_bookings b cross join ctx c;
+insert into public.booking_attendees (booking_id, workspace_id, member_id, working_days)
+select b.id, c.ws, b.member_id, 2 from pending_bookings b cross join ctx c;
+insert into public.booking_approvals (workspace_id, booking_id, approver_member_id)
+select c.ws, b.id, (select id from people where n = 500) from pending_bookings b cross join ctx c;
+
 -- Reporting lines, once, with fresh statistics so the rebuild plans for 100k people, not none.
 analyze public.members, public.member_assignments, public.reporting_closure;
 select set_config('app.defer_reporting_closure', 'off', true);
@@ -151,9 +199,10 @@ select app.rebuild_reporting_closure((select ws from ctx));
 
 commit;
 
-analyze public.members, public.member_assignments, public.member_compensation, public.member_field_values, public.org_units, public.reporting_closure, public.member_roles, public.role_permissions;
+analyze public.members, public.member_assignments, public.member_compensation, public.member_field_values, public.org_units, public.reporting_closure, public.member_roles, public.role_permissions, public.bookings, public.booking_attendees, public.booking_approvals, public.allowance_ledger;
 
 select
   (select count(*) from public.members m join public.workspaces w on w.id = m.workspace_id where w.slug = 'load-100k') as members,
   (select count(*) from public.org_units u join public.workspaces w on w.id = u.workspace_id where w.slug = 'load-100k') as units,
-  (select count(*) from public.reporting_closure c join public.workspaces w on w.id = c.workspace_id where w.slug = 'load-100k') as reporting_lines;
+  (select count(*) from public.reporting_closure c join public.workspaces w on w.id = c.workspace_id where w.slug = 'load-100k') as reporting_lines,
+  (select count(*) from public.bookings b join public.workspaces w on w.id = b.workspace_id where w.slug = 'load-100k') as bookings;
