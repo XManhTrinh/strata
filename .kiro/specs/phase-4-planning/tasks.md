@@ -6,7 +6,7 @@ Design and decisions: `design.md` (approved 2026-10-30).
 
 - [x] 1. Planning database: settings, scenarios, planned roles, allocations, `planning.view_cost`;
       create, copy, lifecycle, live, save allocations (reach, locks, over-allocation, audit), fill
-- [ ] 2. Rate cards database: sets, groups, cards, conditions, dated rates; SQL engine
+- [x] 2. Rate cards database: sets, groups, cards, conditions, dated rates; SQL engine
       (`match_rate_card`, `apply_rate_cards`) and cost snapshots; totals with roll-up and split
 - [ ] 3. Planning settings and rate card screens (condition builder, dated rates, preview)
 - [ ] 4. Scenarios: list, create, copy, compare side by side, lifecycle, live

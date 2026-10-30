@@ -61,6 +61,14 @@ export type Database = {
         Args: { p_member_ids: string[]; p_role_ids: string[]; p_scenario_id: string };
         Returns: Json;
       };
+      condition_matches: {
+        Args: {
+          p_actual: string;
+          p_expected: string;
+          p_operator: Database["public"]["Enums"]["rate_operator"];
+        };
+        Returns: boolean;
+      };
       covers_unit: {
         Args: { p_permission_key: string; p_unit_id: string; p_workspace_id: string };
         Returns: boolean;
@@ -123,6 +131,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      matching_rate_card: { Args: { p_attributes: Json; p_workspace_id: string }; Returns: string };
       member_key: {
         Args: {
           p_key_field: string;
@@ -132,6 +141,15 @@ export type Database = {
           >;
         };
         Returns: string;
+      };
+      member_month_attributes: {
+        Args: { p_member_id: string; p_month: string };
+        Returns: {
+          annual_salary: number;
+          attributes: Json;
+          cost_method: Database["public"]["Enums"]["cost_method"];
+          salary_currency: string;
+        }[];
       };
       member_snapshot: {
         Args: { p_date: string; p_key_field: string; p_member_id: string };
@@ -164,6 +182,7 @@ export type Database = {
         Args: { p_member_ids: string[]; p_role_ids: string[]; p_scenario_id: string };
         Returns: Json;
       };
+      planned_role_attributes: { Args: { p_planned_role_id: string }; Returns: Json };
       reach_covers: {
         Args: {
           p_held: Database["public"]["Enums"]["reach"][];
@@ -776,6 +795,75 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      cost_snapshots: {
+        Row: {
+          currency: string | null;
+          id: number;
+          member_id: string | null;
+          monthly_cost: number;
+          period_start: string;
+          planned_role_id: string | null;
+          rate_card_id: string | null;
+          scenario_id: string;
+          source: Database["public"]["Enums"]["cost_source"];
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          currency?: string | null;
+          id?: never;
+          member_id?: string | null;
+          monthly_cost?: number;
+          period_start: string;
+          planned_role_id?: string | null;
+          rate_card_id?: string | null;
+          scenario_id: string;
+          source: Database["public"]["Enums"]["cost_source"];
+          workspace_id: string;
+        };
+        Update: {
+          currency?: string | null;
+          id?: never;
+          member_id?: string | null;
+          monthly_cost?: number;
+          period_start?: string;
+          planned_role_id?: string | null;
+          rate_card_id?: string | null;
+          scenario_id?: string;
+          source?: Database["public"]["Enums"]["cost_source"];
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cost_snapshots_scenario_id_planned_role_id_fkey";
+            columns: ["scenario_id", "planned_role_id"];
+            isOneToOne: false;
+            referencedRelation: "planned_roles";
+            referencedColumns: ["scenario_id", "id"];
+          },
+          {
+            foreignKeyName: "cost_snapshots_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "cost_snapshots_workspace_id_rate_card_id_fkey";
+            columns: ["workspace_id", "rate_card_id"];
+            isOneToOne: false;
+            referencedRelation: "rate_cards";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "cost_snapshots_workspace_id_scenario_id_fkey";
+            columns: ["workspace_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
           },
         ];
       };
@@ -2178,6 +2266,230 @@ export type Database = {
           },
         ];
       };
+      rate_card_conditions: {
+        Row: {
+          card_id: string;
+          created_at: string;
+          field: string;
+          id: string;
+          operator: Database["public"]["Enums"]["rate_operator"];
+          sort_order: number;
+          updated_at: string;
+          value: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          card_id: string;
+          created_at?: string;
+          field: string;
+          id?: string;
+          operator: Database["public"]["Enums"]["rate_operator"];
+          sort_order?: number;
+          updated_at?: string;
+          value: string;
+          workspace_id: string;
+        };
+        Update: {
+          card_id?: string;
+          created_at?: string;
+          field?: string;
+          id?: string;
+          operator?: Database["public"]["Enums"]["rate_operator"];
+          sort_order?: number;
+          updated_at?: string;
+          value?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_card_conditions_workspace_id_card_id_fkey";
+            columns: ["workspace_id", "card_id"];
+            isOneToOne: false;
+            referencedRelation: "rate_cards";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      rate_card_groups: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          set_id: string | null;
+          sort_order: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          set_id?: string | null;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          set_id?: string | null;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_card_groups_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rate_card_groups_workspace_id_set_id_fkey";
+            columns: ["workspace_id", "set_id"];
+            isOneToOne: false;
+            referencedRelation: "rate_card_sets";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      rate_card_rates: {
+        Row: {
+          card_id: string;
+          created_at: string;
+          currency: string;
+          day_rate: number;
+          id: string;
+          updated_at: string;
+          valid_from: string;
+          working_days: number;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          card_id: string;
+          created_at?: string;
+          currency: string;
+          day_rate: number;
+          id?: string;
+          updated_at?: string;
+          valid_from: string;
+          working_days: number;
+          workspace_id: string;
+        };
+        Update: {
+          card_id?: string;
+          created_at?: string;
+          currency?: string;
+          day_rate?: number;
+          id?: string;
+          updated_at?: string;
+          valid_from?: string;
+          working_days?: number;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_card_rates_workspace_id_card_id_fkey";
+            columns: ["workspace_id", "card_id"];
+            isOneToOne: false;
+            referencedRelation: "rate_cards";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      rate_card_sets: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          sort_order: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          sort_order?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_card_sets_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      rate_cards: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          group_id: string | null;
+          id: string;
+          is_default: boolean;
+          name: string;
+          priority: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          group_id?: string | null;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          priority?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          group_id?: string | null;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          priority?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rate_cards_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rate_cards_workspace_id_group_id_fkey";
+            columns: ["workspace_id", "group_id"];
+            isOneToOne: false;
+            referencedRelation: "rate_card_groups";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       reporting_closure: {
         Row: {
           depth: number;
@@ -2922,6 +3234,7 @@ export type Database = {
           used: number;
         }[];
       };
+      apply_rate_cards: { Args: { p_scenario_id: string }; Returns: Json };
       assign_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
@@ -2988,6 +3301,25 @@ export type Database = {
         }[];
       };
       cancel_booking: { Args: { p_booking_id: string; p_reason?: string }; Returns: undefined };
+      capacity_totals: {
+        Args: {
+          p_field_id?: string;
+          p_from: string;
+          p_group_by?: string;
+          p_parent_unit_id?: string;
+          p_scenario_id: string;
+          p_to: string;
+        };
+        Returns: {
+          cost: number;
+          currency: string;
+          fte: number;
+          group_id: string;
+          group_label: string;
+          headcount: number;
+          period_start: string;
+        }[];
+      };
       change_job: {
         Args: {
           p_career_level_id?: string;
@@ -3182,6 +3514,21 @@ export type Database = {
         };
         Returns: number;
       };
+      rate_card_preview: {
+        Args: {
+          p_member_id: string;
+          p_month: string;
+          p_planned_role_id: string;
+          p_workspace_id: string;
+        };
+        Returns: {
+          currency: string;
+          monthly_cost: number;
+          rate_card_id: string;
+          rate_card_name: string;
+          source: Database["public"]["Enums"]["cost_source"];
+        }[];
+      };
       remove_job_change: { Args: { p_assignment_id: string }; Returns: undefined };
       remove_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
@@ -3245,6 +3592,7 @@ export type Database = {
       approval_decision: "pending" | "approved" | "rejected";
       booking_status: "pending" | "approved" | "rejected" | "cancelled";
       cost_method: "annual_salary" | "day_rate";
+      cost_source: "rate_card" | "salary" | "none";
       custom_field_type: "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
       email_delivery: "instant" | "daily" | "none";
       feed_scope: "me" | "team" | "workspace";
@@ -3256,6 +3604,14 @@ export type Database = {
       planning_basis: "person" | "position";
       planning_period: "month" | "quarter";
       planning_unit: "fte" | "percent";
+      rate_operator:
+        | "equals"
+        | "not_equals"
+        | "starts_with"
+        | "starts_with_any"
+        | "ends_with"
+        | "contains"
+        | "in";
       reach: "own" | "reports" | "team" | "team_and_below" | "units" | "workspace";
       scenario_status: "draft" | "submitted" | "approved";
       time_approver: "line_manager" | "team_lead" | "person" | "role" | "none";
@@ -3389,6 +3745,7 @@ export const Constants = {
       approval_decision: ["pending", "approved", "rejected"],
       booking_status: ["pending", "approved", "rejected", "cancelled"],
       cost_method: ["annual_salary", "day_rate"],
+      cost_source: ["rate_card", "salary", "none"],
       custom_field_type: ["text", "number", "date", "single_choice", "multi_choice", "person"],
       email_delivery: ["instant", "daily", "none"],
       feed_scope: ["me", "team", "workspace"],
@@ -3400,6 +3757,15 @@ export const Constants = {
       planning_basis: ["person", "position"],
       planning_period: ["month", "quarter"],
       planning_unit: ["fte", "percent"],
+      rate_operator: [
+        "equals",
+        "not_equals",
+        "starts_with",
+        "starts_with_any",
+        "ends_with",
+        "contains",
+        "in",
+      ],
       reach: ["own", "reports", "team", "team_and_below", "units", "workspace"],
       scenario_status: ["draft", "submitted", "approved"],
       time_approver: ["line_manager", "team_lead", "person", "role", "none"],
