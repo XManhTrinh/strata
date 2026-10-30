@@ -11,27 +11,41 @@ import { addPerson } from "../actions";
 import type { JobChoices } from "../types";
 import { JobFields } from "./job-fields";
 
-/** "Add person" for people who may add anyone (people.edit across the workspace). */
+/** "Import" for importers and "Add person" for people who may add anyone (people.edit across the workspace). */
 export function AddPerson({ choices }: { choices: JobChoices }) {
   const t = useTranslations("person");
+  const ti = useTranslations("import");
   const { workspace, permissions } = useWorkspace();
   const [open, setOpen] = useState(false);
-  if (!permissions["people.edit"]?.includes("workspace")) return null;
+  const canImport = (permissions["people.import"]?.length ?? 0) > 0;
+  if (!permissions["people.edit"]?.includes("workspace") && !canImport) return null;
 
   return (
-    <>
-      <Button
-        variant="filled"
-        leadingIcon={<Icon name="person_add" />}
-        onPress={() => setOpen(true)}
-      >
-        {t("add.button")}
-      </Button>
+    <div className="flex gap-2">
+      {canImport && (
+        <Button
+          variant="tonal"
+          leadingIcon={<Icon name="upload_file" />}
+          href={`/w/${workspace.slug}/people/import`}
+        >
+          {ti("button")}
+        </Button>
+      )}
+      {permissions["people.edit"]?.includes("workspace") && (
+        <Button
+          variant="filled"
+          leadingIcon={<Icon name="person_add" />}
+          onPress={() => setOpen(true)}
+        >
+          {t("add.button")}
+        </Button>
+      )}
       {open && (
         <FormDialog
           title={t("add.title")}
           submitLabel={t("add.save")}
           action={addPerson.bind(null, workspace.id, workspace.slug)}
+          // Saving opens the new person's profile, so no snackbar is needed.
           done={() => ""}
           onClose={() => setOpen(false)}
         >
@@ -69,19 +83,13 @@ export function AddPerson({ choices }: { choices: JobChoices }) {
               />
               <JobFields
                 choices={choices}
-                current={
-                  choices.units[0]
-                    ? ({ unitId: choices.units[0].id } as Parameters<
-                        typeof JobFields
-                      >[0]["current"])
-                    : undefined
-                }
+                defaultUnitId={choices.units[0]?.id}
                 fieldError={fieldError}
               />
             </>
           )}
         </FormDialog>
       )}
-    </>
+    </div>
   );
 }

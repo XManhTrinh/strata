@@ -66,9 +66,9 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
         demand, "as of" a date
   - [x] 8.2 Person view on phones
 
-- [ ] 9. Import screens
-  - [ ] 9.1 Upload (CSV, Excel), map columns (saved per workspace), choose key and levels
-  - [ ] 9.2 Preview with counts and errors; apply with progress; resume an unfinished import
+- [x] 9. Import screens
+  - [x] 9.1 Upload (CSV, Excel), map columns (saved per workspace), choose key and levels
+  - [x] 9.2 Preview with counts and errors; apply with progress; resume an unfinished import
 
 - [ ] 10. Load and end to end
   - [ ] 10.1 100k-member seed generator and load checks for the directory, reach and import

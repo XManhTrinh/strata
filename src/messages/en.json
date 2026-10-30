@@ -1021,5 +1021,121 @@
     "unitPeople": "People in {unit}",
     "unitCount": "{direct, plural, =0 {No one directly} one {# person} other {# people}} · {total} with sub-units",
     "chooseUnit": "Choose a unit to see its people."
+  },
+  "import": {
+    "title": "Import people",
+    "button": "Import",
+    "intro": "Bring people in from your HR system or a spreadsheet, and run it again whenever things change: new people are added, changes are dated, and people missing from the file can be marked as leaving. The file stays on your device; only the mapped columns are sent.",
+    "largerScreen": "Imports need a larger screen",
+    "largerScreenBody": "Open Strata on a tablet or computer to import people.",
+    "steps": {
+      "file": "File",
+      "map": "Columns",
+      "preview": "Preview",
+      "apply": "Apply"
+    },
+    "unfinished": {
+      "title": "Unfinished imports",
+      "started": "Started {date}",
+      "resume": "Resume",
+      "cancel": "Cancel",
+      "cancelled": "Import cancelled"
+    },
+    "file": {
+      "choose": "Choose a file",
+      "help": "CSV or Excel (.xlsx), with a header row. The first sheet of a workbook is used.",
+      "unreadable": "That file couldn't be read. Save it as CSV or .xlsx with a header row and try again.",
+      "summary": "{name}: {rows, plural, one {# row} other {# rows}}, {columns, plural, one {# column} other {# columns}}",
+      "another": "Choose another file",
+      "next": "Next: columns"
+    },
+    "map": {
+      "savedMappings": "Saved mapping",
+      "noSaved": "None",
+      "key": "Match people by",
+      "keyHelp": "Re-imports match people on this, so it must be unique and stable.",
+      "keys": {
+        "person_key": "Person key (employee ID)",
+        "email": "Email"
+      },
+      "notInFile": "Not in the file",
+      "fieldsTitle": "Details",
+      "unitsTitle": "Hierarchy",
+      "unitsHelp": "One column per level, top first. Missing units are created.",
+      "noLevels": "Add hierarchy levels in Settings > Hierarchy to import units.",
+      "customTitle": "Custom fields",
+      "dateFormat": "Dates in the file",
+      "dateFormats": {
+        "iso": "Year-month-day (2026-03-31)",
+        "dmy": "Day/month/year (31/03/2026)",
+        "mdy": "Month/day/year (03/31/2026)"
+      },
+      "effectiveDate": "Changes take effect on",
+      "markLeavers": "Mark people missing from the file as leaving",
+      "markLeaversHelp": "Their last day is the day before. Use this only when the file lists everyone.",
+      "keyMissing": "Choose the column for {field}: it's how people are matched.",
+      "saveAs": "Save mapping as",
+      "save": "Save mapping",
+      "saved": "Mapping saved",
+      "back": "Back",
+      "next": "Next: preview",
+      "staging": "Sending rows: {sent} of {total}"
+    },
+    "fields": {
+      "person_key": "Person key",
+      "email": "Email",
+      "full_name": "Full name",
+      "start_date": "Start date",
+      "end_date": "End date",
+      "country": "Country (ISO code)",
+      "manager_key": "Manager's key",
+      "position": "Position",
+      "career_level": "Career level",
+      "employment_type": "Employment type",
+      "annual_salary": "Annual salary",
+      "day_rate": "Day rate",
+      "currency": "Currency"
+    },
+    "preview": {
+      "title": "What will happen",
+      "new": "New people",
+      "changed": "Changed",
+      "unchanged": "Unchanged",
+      "leaving": "Leaving",
+      "errors": "With errors (skipped)",
+      "errorsTitle": "Rows with errors",
+      "row": "Row",
+      "key": "Key",
+      "problems": "Problems",
+      "leavingWarning": "{count, plural, one {# person} other {# people}} not in the file will be marked as leaving.",
+      "apply": "Apply import",
+      "cancel": "Cancel import",
+      "nothing": "Nothing to change."
+    },
+    "rowErrors": {
+      "missingKey": "No key",
+      "emailInvalid": "Email isn't valid",
+      "nameRequired": "New people need a name",
+      "unknownEmploymentType": "Unknown employment type",
+      "payNotAllowed": "You can't import pay",
+      "duplicateKey": "Key appears more than once"
+    },
+    "apply": {
+      "running": "Applying",
+      "phases": {
+        "people": "People",
+        "managers": "Managers",
+        "leavers": "Leavers",
+        "finish": "Finishing",
+        "done": "Done"
+      },
+      "done": "Import applied",
+      "doneBody": "{new} added, {changed} changed, {leaving} marked as leaving.",
+      "failed": "The import stopped: {error}. Resume it to carry on from where it stopped.",
+      "toPeople": "Go to people",
+      "another": "Import another file",
+      "runningPhase": "Applying: {phase}"
+    },
+    "stepLabel": "{number}. {name}"
   }
 }
