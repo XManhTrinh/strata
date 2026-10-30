@@ -5,7 +5,8 @@ const PASSWORD = "secret123";
 
 /** A unique id per test run and Playwright project, for emails and workspace names. */
 export function uniqueId(projectName: string): string {
-  return `${Date.now()}-${projectName}`;
+  // Tests start in the same millisecond, so add a random part.
+  return `${Date.now()}${Math.random().toString(36).slice(2, 6)}-${projectName}`;
 }
 
 /** Signs up from the current sign-up form and follows the confirmation email. */
