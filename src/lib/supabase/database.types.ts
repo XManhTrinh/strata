@@ -2719,6 +2719,23 @@ export type Database = {
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       my_access_to_member: { Args: { p_member_id: string }; Returns: string[] };
+      my_pending_approvals: {
+        Args: { p_workspace_id: string };
+        Returns: {
+          booking_id: string;
+          color: string;
+          end_date: string;
+          end_half: string;
+          member_id: string;
+          member_name: string;
+          notes: string;
+          requested_at: string;
+          start_date: string;
+          start_half: string;
+          time_type_name: string;
+          working_days: number;
+        }[];
+      };
       my_permissions: {
         Args: { p_workspace_id: string };
         Returns: {
@@ -2779,6 +2796,16 @@ export type Database = {
           unit_id: string;
           unit_name: string;
         }[];
+      };
+      preview_working_days: {
+        Args: {
+          p_end: string;
+          p_end_half: string;
+          p_member_id: string;
+          p_start: string;
+          p_start_half: string;
+        };
+        Returns: number;
       };
       remove_job_change: { Args: { p_assignment_id: string }; Returns: undefined };
       remove_role: {

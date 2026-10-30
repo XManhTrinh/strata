@@ -67,3 +67,70 @@ export type Holiday = {
 };
 
 export type RoleChoice = { id: string; name: string };
+
+export type Balance = {
+  timeTypeId: string;
+  name: string;
+  leaveYear: string;
+  entitled: number;
+  carriedOver: number;
+  adjusted: number;
+  used: number;
+  requested: number;
+  expired: number;
+  available: number;
+};
+
+export type MyBooking = {
+  id: string;
+  typeName: string;
+  color: string;
+  icon: string;
+  startDate: string;
+  endDate: string;
+  startHalf: string;
+  endHalf: string;
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  workingDays: number;
+  title: string | null;
+};
+
+export type BookableType = {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  usesAllowance: boolean;
+  needsApproval: boolean;
+  bookForOthers: boolean;
+};
+
+export type PendingApproval = {
+  bookingId: string;
+  memberName: string;
+  typeName: string;
+  color: string;
+  startDate: string;
+  endDate: string;
+  startHalf: string;
+  endHalf: string;
+  workingDays: number;
+  notes: string | null;
+};
+
+export type CalendarEntry = {
+  bookingId: string;
+  memberId: string;
+  memberName: string;
+  typeName: string | null;
+  color: string;
+  icon: string;
+  isAway: boolean;
+  startDate: string;
+  endDate: string;
+  startHalf: string;
+  endHalf: string;
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  title: string | null;
+  masked: boolean;
+};

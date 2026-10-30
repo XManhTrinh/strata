@@ -213,6 +213,7 @@
       "home": "Home",
       "people": "People",
       "orgChart": "Org chart",
+      "timeOff": "Time off",
       "settings": "Settings"
     },
     "switcher": {
@@ -1331,6 +1332,82 @@
       "edited": "Edited",
       "halfDay": "Half day",
       "holidaysOf": "{calendar}: holidays in {year}"
+    }
+  },
+  "timeOff": {
+    "title": "Time off",
+    "tabs": {
+      "mine": "My time off",
+      "approvals": "Approvals",
+      "calendar": "Calendar"
+    },
+    "approvalsCount": "Approvals ({count})",
+    "book": "Book time off",
+    "bookTitle": "Book time off",
+    "type": "Type",
+    "from": "From",
+    "to": "To",
+    "startAfternoon": "Start in the afternoon",
+    "endMorning": "End at midday",
+    "titleField": "Title (optional)",
+    "notes": "Note (optional)",
+    "days": "{days, plural, =0 {No working days} one {# working day} other {# working days}}",
+    "daysLeft": "{available} days left after this",
+    "booked": "Booked",
+    "requested": "Requested: waiting for approval",
+    "balances": {
+      "title": "Balances",
+      "available": "{days} days left",
+      "entitled": "Allowance",
+      "carried": "Carried over",
+      "adjusted": "Adjusted",
+      "used": "Taken",
+      "requested": "Requested",
+      "expired": "Expired",
+      "year": "Leave year from {date}",
+      "none": "No allowance types yet."
+    },
+    "mine": {
+      "title": "My bookings",
+      "empty": "Nothing booked.",
+      "cancel": "Cancel",
+      "cancelled": "Cancelled",
+      "actions": "Actions for {name}"
+    },
+    "status": {
+      "pending": "Waiting",
+      "approved": "Approved",
+      "rejected": "Declined",
+      "cancelled": "Cancelled"
+    },
+    "approvals": {
+      "empty": "No requests are waiting for you.",
+      "approve": "Approve",
+      "reject": "Decline",
+      "approved": "Approved",
+      "rejected": "Declined",
+      "rejectTitle": "Decline this request?",
+      "comment": "Reason (optional)",
+      "for": "{name}: {type}"
+    },
+    "calendar": {
+      "previous": "Previous month",
+      "next": "Next month",
+      "today": "This month",
+      "empty": "Nobody is away this month.",
+      "busy": "Busy",
+      "person": "Person",
+      "away": "{name}, {type}, {dates}",
+      "label": "Who's away in {month}"
+    },
+    "range": {
+      "oneDay": "{date}",
+      "halfDay": "{date}, {half}",
+      "span": "{from} – {to}"
+    },
+    "halves": {
+      "morning": "morning",
+      "afternoon": "afternoon"
     }
   }
 }

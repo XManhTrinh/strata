@@ -89,7 +89,7 @@ select is_empty(
   format($$ select 1 from public.import_rows where job_id = %L $$, (select id from jobs where n = 1)),
   'imported rows are deleted once applied'
 );
-select is((select kind from public.notifications where kind like 'import.%'), 'import.finished',
+select is((select kind from public.notifications where kind like 'import.%' and workspace_id = (select ws from ctx)), 'import.finished',
   'the importer is notified');
 
 -- Re-import a week later ---------------------------------------------------------------------------------

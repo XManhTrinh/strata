@@ -2,7 +2,7 @@ import { visibleSections } from "@/features/settings/sections";
 import type { WorkspaceContextValue } from "@/features/workspaces/workspace-context";
 
 export type Destination = {
-  key: "home" | "people" | "orgChart" | "settings";
+  key: "home" | "people" | "orgChart" | "timeOff" | "settings";
   href: string;
   icon: string;
 };
@@ -13,6 +13,9 @@ export function destinationsFor({ workspace, permissions }: WorkspaceContextValu
   const destinations: Destination[] = [{ key: "home", href: base, icon: "home" }];
   if ((permissions["people.view"]?.length ?? 0) > 0) {
     destinations.push({ key: "people", href: `${base}/people`, icon: "group" });
+  }
+  if ((permissions["time.view"]?.length ?? 0) > 0 || (permissions["time.book"]?.length ?? 0) > 0) {
+    destinations.push({ key: "timeOff", href: `${base}/time-off`, icon: "event_available" });
   }
   if ((permissions["org_chart.view"]?.length ?? 0) > 0) {
     destinations.push({ key: "orgChart", href: `${base}/org-chart`, icon: "account_tree" });

@@ -3,7 +3,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(20);
+select plan(22);
 
 create temporary table people (name text primary key, user_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -68,6 +68,14 @@ select throws_ok(
 select pg_temp.as_user('una');
 select throws_ok(format($$ select public.decide_booking(%L::uuid, true) $$, :'leave_1'), '42501', null, 'nor someone who isn''t the approver');
 select pg_temp.as_user('mia');
+select is(
+  (select array_agg(member_name) from public.my_pending_approvals((select ws from ctx))), array['Bob'],
+  'the manager sees the request waiting for her'
+);
+select is(
+  public.preview_working_days(pg_temp.m('bob'), '2027-03-01', 'full', '2027-03-05', 'morning'), 4.5,
+  'a working-days preview for Mon to Friday morning'
+);
 select lives_ok(format($$ select public.decide_booking(%L::uuid, true, 'Enjoy') $$, :'leave_1'), 'the manager approves');
 select is((select status::text from public.bookings where id = :'leave_1'), 'approved', 'and the leave is approved');
 

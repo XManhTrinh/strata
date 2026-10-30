@@ -48,37 +48,37 @@ select app.settle_allowance(pg_temp.m(n), (select leave from ctx), '2026-08-01')
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2026-09-01');
 select is(
   (select array_agg(m.full_name || ':' || l.days order by m.full_name) from public.allowance_ledger l
-   join public.members m on m.id = l.member_id where l.kind = 'grant'),
+   join public.members m on m.id = l.member_id where l.kind = 'grant' and l.workspace_id = (select ws from ctx)),
   array['Fay:20.00', 'Jo:10.00', 'Pat:12.00'],
   'full-timers get the policy, part-timers pro-rata, joiners for the months left — once'
 );
 
 -- Monthly accrual ---------------------------------------------------------------------------------------
 update public.allowance_policies set accrual = 'monthly' where id = (select policy from ctx);
-delete from public.allowance_ledger;
+delete from public.allowance_ledger where workspace_id = (select ws from ctx);
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2026-03-15');
 select is(
-  (select count(*)::int || ':' || sum(days) from public.allowance_ledger where kind = 'accrual'),
+  (select count(*)::int || ':' || sum(days) from public.allowance_ledger where workspace_id = (select ws from ctx) and kind = 'accrual'),
   '3:5.01', 'monthly accrual adds a twelfth each month so far'
 );
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2026-03-20');
-select is((select count(*)::int from public.allowance_ledger where kind = 'accrual'), 3, 'and never twice for a month');
+select is((select count(*)::int from public.allowance_ledger where workspace_id = (select ws from ctx) and kind = 'accrual'), 3, 'and never twice for a month');
 
 -- Carry-over and expiry -----------------------------------------------------------------------------------
 update public.allowance_policies set accrual = 'upfront', carry_over_max = 5, carry_over_expires_months = 3
 where id = (select policy from ctx);
-delete from public.allowance_ledger;
+delete from public.allowance_ledger where workspace_id = (select ws from ctx);
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2025-06-01');
 -- Fay used 12 of her 20 days in 2025 (an adjustment stands in for bookings here).
 insert into public.allowance_ledger (workspace_id, member_id, time_type_id, leave_year, kind, days, reason)
 select ws, pg_temp.m('Fay'), leave, '2025-01-01', 'adjustment', -12, 'Used' from ctx;
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2026-01-10');
 select is(
-  (select days from public.allowance_ledger where kind = 'carry_over'), 5.00, '8 days left, 5 carried over (the cap)'
+  (select days from public.allowance_ledger where workspace_id = (select ws from ctx) and kind = 'carry_over'), 5.00, '8 days left, 5 carried over (the cap)'
 );
 select app.settle_allowance(pg_temp.m('Fay'), (select leave from ctx), '2026-04-02');
 select is(
-  (select days from public.allowance_ledger where kind = 'expiry'), -5.00, 'carried days unused after 3 months expire'
+  (select days from public.allowance_ledger where workspace_id = (select ws from ctx) and kind = 'expiry'), -5.00, 'carried days unused after 3 months expire'
 );
 
 -- Balances and adjustments ------------------------------------------------------------------------------------
