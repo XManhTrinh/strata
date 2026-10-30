@@ -87,6 +87,26 @@ test("people book time off, see their balance, cancel, and see who's away", asyn
   await expect(list.getByRole("listitem").filter({ hasText: "Repeats" })).toHaveCount(3);
   await expectNoA11yViolations(page);
 
+  // A private feed link for calendar apps shows the bookings until it's removed.
+  await page.goto(`${timeOff}?tab=mine`);
+  await page.getByRole("button", { name: "Create link" }).click();
+  const feedUrl = await page
+    .getByRole("textbox", { name: "Subscribe in your calendar" })
+    .inputValue();
+  // The link uses the app's address; the tests may run their own server on another port.
+  const feed = feedUrl.replace(/^https?:\/\/[^/]+/, new URL(page.url()).origin);
+  const ics = await page.request.get(feed);
+  expect(ics.headers()["content-type"]).toContain("text/calendar");
+  expect(await ics.text()).toContain("SUMMARY:Ana Pop: Sick leave");
+  await page.reload();
+  await page
+    .getByRole("list", { name: "Your links" })
+    .getByRole("button", { name: "Remove link" })
+    .click();
+  await page.getByRole("menuitem", { name: "Remove link" }).click();
+  await expect(page.getByText("Link removed")).toBeVisible();
+  expect(await (await page.request.get(feed)).text()).not.toContain("BEGIN:VEVENT");
+
   // The owner approves others' requests, never their own: nothing waits here.
   await page.goto(`${page.url().split("?")[0]}?tab=approvals`);
   await expect(page.getByText("No requests are waiting for you.")).toBeVisible();

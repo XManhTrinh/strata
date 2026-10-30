@@ -8,6 +8,7 @@ import {
   calendarEntries,
   myBalances,
   myBookings,
+  myFeeds,
   myMemberId,
   pendingApprovals,
 } from "@/features/time/time-off-queries";
@@ -55,12 +56,13 @@ export default async function TimeOffRoute({
     : new Date().toISOString().slice(0, 10);
   const range = viewRange(view, date, workspace.week_start);
 
-  const [types, balances, bookings, approvals, entries, t] = await Promise.all([
+  const [types, balances, bookings, approvals, entries, feeds, t] = await Promise.all([
     bookableTypes(workspace.id),
     myBalances(memberId),
     tab === "mine" ? myBookings(workspace.id, memberId) : [],
     canApprove ? pendingApprovals(workspace.id) : [],
     tab === "calendar" ? calendarEntries(workspace.id, range.from, range.to) : [],
+    tab === "mine" ? myFeeds(workspace.id) : [],
     getTranslations("timeOff"),
   ]);
 
@@ -82,6 +84,7 @@ export default async function TimeOffRoute({
           approvals={approvals}
           canApprove={canApprove}
           entries={entries}
+          feeds={feeds}
         />
       </div>
     </>

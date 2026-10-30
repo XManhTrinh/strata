@@ -1440,6 +1440,27 @@
       "week": "Week",
       "list": "List"
     },
-    "repeating": "Repeats"
+    "repeating": "Repeats",
+    "feed": {
+      "title": "Subscribe in your calendar",
+      "intro": "Add time off to Google Calendar, Outlook or Apple Calendar with a private link. Anyone with the link sees what you see, so keep it to yourself and remove it if it's shared.",
+      "scope": "Show",
+      "scopes": {
+        "me": "My time off",
+        "team": "My team",
+        "workspace": "Everyone I can see"
+      },
+      "create": "Create link",
+      "created": "Copy this link now: it won't be shown again.",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "revoke": "Remove link",
+      "revoked": "Link removed",
+      "lastUsed": "Last used {date}",
+      "neverUsed": "Not used yet",
+      "calendarName": "Strata time off",
+      "halfDay": "half day",
+      "links": "Your links"
+    }
   }
 }

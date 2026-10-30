@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { errorKey } from "@/features/structure/errors";
 import type { ErrorKey, FormState } from "@/lib/form-state";
+import { getPublicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { repeatRule } from "./recurrence";
 
@@ -141,4 +142,32 @@ export async function adjustAllowance(
   if (error) return { status: "error", error: errorKey(error, "generic") };
   revalidateTime();
   return { status: "success" };
+}
+
+/** Creates a calendar feed link and returns its address (shown once). */
+export async function createFeed(
+  workspaceId: string,
+  scope: "me" | "team" | "workspace"
+): Promise<{ ok: true; url: string } | { ok: false; error: ErrorKey }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("create_feed_token", {
+    p_workspace_id: z.uuid().parse(workspaceId),
+    p_scope: z.enum(["me", "team", "workspace"]).parse(scope),
+  });
+  revalidateTime();
+  if (error || !data) return { ok: false, error: error ? errorKey(error, "generic") : "generic" };
+  return {
+    ok: true,
+    url: new URL(`/api/calendar/${data}.ics`, getPublicEnv().NEXT_PUBLIC_SITE_URL).toString(),
+  };
+}
+
+export async function revokeFeed(feedId: string): Promise<Result> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("calendar_feed_tokens")
+    .delete()
+    .eq("id", z.uuid().parse(feedId));
+  revalidateTime();
+  return error ? { ok: false, error: errorKey(error, "generic") } : { ok: true };
 }

@@ -2631,6 +2631,25 @@ export type Database = {
           working_days: number;
         }[];
       };
+      calendar_feed: {
+        Args: { p_token: string };
+        Returns: {
+          booking_id: string;
+          end_date: string;
+          end_half: string;
+          ends_at: string;
+          masked: boolean;
+          member_name: string;
+          recurrence_rule: string;
+          start_date: string;
+          start_half: string;
+          starts_at: string;
+          status: Database["public"]["Enums"]["booking_status"];
+          time_type_name: string;
+          title: string;
+          updated_at: string;
+        }[];
+      };
       cancel_booking: { Args: { p_booking_id: string; p_reason?: string }; Returns: undefined };
       change_job: {
         Args: {
@@ -2653,6 +2672,10 @@ export type Database = {
           p_valid_from: string;
         };
         Returns: undefined;
+      };
+      create_feed_token: {
+        Args: { p_scope: Database["public"]["Enums"]["feed_scope"]; p_workspace_id: string };
+        Returns: string;
       };
       create_invitation: {
         Args: { p_email: string; p_role_id: string; p_workspace_id: string };

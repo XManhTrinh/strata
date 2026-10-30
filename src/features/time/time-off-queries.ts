@@ -151,3 +151,27 @@ export async function calendarEntries(
     }))
   );
 }
+
+export type FeedLink = {
+  id: string;
+  scope: "me" | "team" | "workspace";
+  createdAt: string;
+  lastUsedAt: string | null;
+};
+
+/** The caller's own feed links in a workspace (RLS shows only theirs). */
+export async function myFeeds(workspaceId: string): Promise<FeedLink[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("calendar_feed_tokens")
+    .select("id, scope, created_at, last_used_at")
+    .eq("workspace_id", workspaceId)
+    .is("revoked_at", null)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((f) => ({
+    id: f.id,
+    scope: f.scope,
+    createdAt: f.created_at,
+    lastUsedAt: f.last_used_at,
+  }));
+}

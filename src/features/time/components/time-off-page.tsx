@@ -8,7 +8,9 @@ import { Icon } from "@/components/ui/icon";
 import { type CalendarView, shiftDate, viewRange } from "../calendar-range";
 import type { Balance, BookableType, CalendarEntry, MyBooking, PendingApproval } from "../types";
 import { ApprovalsList } from "./approvals-list";
+import type { FeedLink } from "../time-off-queries";
 import { BookDialog } from "./book-dialog";
+import { FeedLinks } from "./feed-links";
 import { MyTimeOff } from "./my-time-off";
 import { TeamCalendar } from "./team-calendar";
 
@@ -29,6 +31,7 @@ export function TimeOffPage(props: {
   approvals: PendingApproval[];
   canApprove: boolean;
   entries: CalendarEntry[];
+  feeds: FeedLink[];
 }) {
   const t = useTranslations("timeOff");
   const router = useRouter();
@@ -76,7 +79,12 @@ export function TimeOffPage(props: {
         )}
       </div>
 
-      {props.tab === "mine" && <MyTimeOff balances={props.balances} bookings={props.bookings} />}
+      {props.tab === "mine" && (
+        <>
+          <MyTimeOff balances={props.balances} bookings={props.bookings} />
+          <FeedLinks feeds={props.feeds} />
+        </>
+      )}
       {props.tab === "approvals" && <ApprovalsList approvals={props.approvals} />}
       {props.tab === "calendar" && (
         <>
