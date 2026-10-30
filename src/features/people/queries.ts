@@ -1,6 +1,7 @@
 import "server-only";
 import { buildTree } from "@/features/structure/hierarchy";
 import type { OrgUnitNode } from "@/features/structure/types";
+import { myBalances, myBookings } from "@/features/time/time-off-queries";
 import { signedAvatarUrls } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
 import type { DirectoryParams } from "./directory-params";
@@ -225,6 +226,12 @@ export async function personProfile(
       })),
     access: accessKeys,
     currency: workspace.data?.currency ?? "EUR",
+    timeOff: accessKeys.includes("time.view")
+      ? {
+          balances: await myBalances(member.id),
+          bookings: await myBookings(workspaceId, member.id),
+        }
+      : null,
   };
 }
 

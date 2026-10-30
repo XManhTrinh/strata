@@ -6,6 +6,8 @@ import { Select, SelectItem, Switch, TextField } from "@windmorph/react";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Icon } from "@/components/ui/icon";
 import { IsoDateField } from "@/components/ui/iso-date-field";
+import { PeoplePicker } from "@/features/people/components/people-picker";
+import { PersonPicker } from "@/features/people/components/person-picker";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { bookTime, previewWorkingDays } from "../time-off-actions";
 import type { Balance, BookableType } from "../types";
@@ -13,11 +15,16 @@ import type { Balance, BookableType } from "../types";
 /** Books time for the signed-in person, showing the working days and what's left as they choose. */
 export function BookDialog({
   memberId,
+  myName,
+  canBookForOthers,
   types,
   balances,
   onClose,
 }: {
   memberId: string;
+  myName: string;
+  /** Holds time.book_for_others (the database checks for whom). */
+  canBookForOthers: boolean;
   types: BookableType[];
   balances: Balance[];
   onClose: () => void;
@@ -58,7 +65,26 @@ export function BookDialog({
     >
       {(fieldError) => (
         <>
-          <input type="hidden" name="memberId" value={memberId} />
+          {/* Leave and requests are for one person; events can be for several. */}
+          {!canBookForOthers || !type?.bookForOthers ? (
+            <input type="hidden" name="memberIds" value={memberId} />
+          ) : type.usesAllowance || type.needsApproval ? (
+            <PersonPicker
+              key={type.id}
+              name="memberIds"
+              label={t("who")}
+              defaultValue={{ id: memberId, name: myName }}
+              errorMessage={fieldError("memberIds")}
+            />
+          ) : (
+            <PeoplePicker
+              key={type.id}
+              name="memberIds"
+              label={t("whoPeople")}
+              defaultValue={[{ id: memberId, name: myName }]}
+              errorMessage={fieldError("memberIds")}
+            />
+          )}
           <Select
             className="w-full"
             name="timeTypeId"

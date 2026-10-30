@@ -1,3 +1,5 @@
+import type { Balance, MyBooking } from "@/features/time/types";
+
 export type DirectoryPerson = {
   id: string;
   fullName: string;
@@ -73,8 +75,17 @@ export type PersonProfile = {
   /** Null when the caller can't see pay. */
   pay: PayRecord[] | null;
   fields: FieldValue[];
-  access: ("people.edit" | "people.view_compensation" | "people.edit_compensation")[];
+  access: (
+    | "people.edit"
+    | "people.view_compensation"
+    | "people.edit_compensation"
+    | "time.view"
+    | "time.book_for_others"
+    | "time.adjust_allowance"
+  )[];
   currency: string;
+  /** Null when the caller can't see this person's time (or time is off). */
+  timeOff: { balances: Balance[]; bookings: MyBooking[] } | null;
 };
 
 export type JobChoices = {

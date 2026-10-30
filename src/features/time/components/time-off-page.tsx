@@ -17,6 +17,8 @@ export function TimeOffPage(props: {
   tab: TimeOffTab;
   month: string;
   memberId: string;
+  myName: string;
+  canBookForOthers: boolean;
   types: BookableType[];
   balances: Balance[];
   bookings: MyBooking[];
@@ -82,6 +84,8 @@ export function TimeOffPage(props: {
       {booking && (
         <BookDialog
           memberId={props.memberId}
+          myName={props.myName}
+          canBookForOthers={props.canBookForOthers}
           types={props.types}
           balances={props.balances}
           onClose={() => setBooking(false)}

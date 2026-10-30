@@ -10,6 +10,7 @@ import { useRunAction } from "@/features/structure/use-run-action";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { setEndDate } from "../actions";
 import type { FieldValue, JobChoices, PersonProfile } from "../types";
+import { PersonTimeOff } from "@/features/time/components/person-time-off";
 import { JobHistory } from "./job-history";
 import { DetailsDialog, JobDialog, PayDialog } from "./person-dialogs";
 import { PersonOverview } from "./person-overview";
@@ -118,6 +119,18 @@ export function PersonProfileView({
             <JobHistory jobs={person.jobs} canEdit={canEdit} />
           </div>
         </Tab>
+        {person.timeOff && (
+          <Tab key="time-off" title={t("tabs.timeOff")}>
+            <div className="pt-4">
+              <PersonTimeOff
+                memberId={person.id}
+                balances={person.timeOff.balances}
+                bookings={person.timeOff.bookings}
+                canAdjust={person.access.includes("time.adjust_allowance")}
+              />
+            </div>
+          </Tab>
+        )}
         {person.pay && (
           <Tab key="pay" title={t("tabs.pay")}>
             <div className="flex flex-col gap-2 pt-4">

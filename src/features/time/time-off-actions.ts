@@ -10,7 +10,7 @@ type Result = { ok: true } | { ok: false; error: ErrorKey };
 
 const bookingSchema = z.object({
   timeTypeId: z.uuid({ error: "timeTypeRequired" }),
-  memberId: z.uuid(),
+  memberIds: z.array(z.uuid()).min(1, { error: "bookingWhoRequired" }),
   startDate: z.iso.date({ error: "dateRequired" }),
   endDate: z.iso.date({ error: "dateRequired" }),
   startHalf: z.enum(["full", "afternoon"]).default("full"),
@@ -28,7 +28,10 @@ export async function bookTime(
   _previous: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const parsed = bookingSchema.safeParse(Object.fromEntries(formData));
+  const parsed = bookingSchema.safeParse({
+    ...Object.fromEntries(formData),
+    memberIds: formData.getAll("memberIds"),
+  });
   if (!parsed.success) {
     const field = String(parsed.error.issues[0]?.path[0] ?? "");
     return {
@@ -43,7 +46,7 @@ export async function bookTime(
   const { error } = await supabase.rpc("book_time", {
     p_workspace_id: workspaceId,
     p_time_type_id: b.timeTypeId,
-    p_member_ids: [b.memberId],
+    p_member_ids: b.memberIds,
     p_start_date: b.startDate,
     p_end_date: b.endDate,
     p_start_half: b.startHalf,
@@ -98,4 +101,40 @@ export async function previewWorkingDays(
     p_end_half: endHalf,
   });
   return data === null || data === undefined ? null : Number(data);
+}
+
+const adjustmentSchema = z.object({
+  timeTypeId: z.uuid({ error: "timeTypeRequired" }),
+  days: z.coerce
+    .number({ error: "adjustmentInvalid" })
+    .refine((n) => n !== 0 && Math.abs(n) <= 366, {
+      error: "adjustmentInvalid",
+    }),
+  reason: z.string().trim().min(1, { error: "adjustmentReasonRequired" }).max(500),
+});
+
+/** Adds or removes days from a person's balance, with the reason kept in the ledger. */
+export async function adjustAllowance(
+  memberId: string,
+  _previous: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const parsed = adjustmentSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    const field = String(parsed.error.issues[0]?.path[0] ?? "");
+    return {
+      status: "error",
+      fieldErrors: { [field]: (parsed.error.issues[0]?.message ?? "generic") as ErrorKey },
+    };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("adjust_allowance", {
+    p_member_id: z.uuid().parse(memberId),
+    p_time_type_id: parsed.data.timeTypeId,
+    p_days: parsed.data.days,
+    p_reason: parsed.data.reason,
+  });
+  if (error) return { status: "error", error: errorKey(error, "generic") };
+  revalidateTime();
+  return { status: "success" };
 }

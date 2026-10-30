@@ -36,6 +36,12 @@ export default async function TimeOffRoute({
   if (!memberId || !(held.has("time.view") || held.has("time.book"))) notFound();
 
   const canApprove = held.has("time.approve");
+  const { data: me } = await supabase
+    .from("members")
+    .select("full_name")
+    .eq("id", memberId)
+    .single();
+  const myName = me?.full_name ?? "";
   const tab: TimeOffTab =
     query.tab === "calendar"
       ? "calendar"
@@ -65,6 +71,8 @@ export default async function TimeOffRoute({
           tab={tab}
           month={month}
           memberId={memberId}
+          myName={myName}
+          canBookForOthers={held.has("time.book_for_others")}
           types={types}
           balances={balances}
           bookings={bookings}

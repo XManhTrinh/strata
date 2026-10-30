@@ -71,3 +71,18 @@ grant execute on function
   public.my_pending_approvals(uuid),
   public.preview_working_days(uuid, date, text, date, text)
 to authenticated;
+
+-- What the caller may do to one person now includes their time.
+create or replace function public.my_access_to_member(p_member_id uuid)
+returns text[]
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(array_agg(k order by k), '{}')
+  from public.members m,
+    unnest(array['people.edit', 'people.view_compensation', 'people.edit_compensation',
+                 'time.view', 'time.book_for_others', 'time.adjust_allowance']) as k
+  where m.id = p_member_id and app.can(m.workspace_id, k, m.id);
+$$;

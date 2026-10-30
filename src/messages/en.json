@@ -130,7 +130,8 @@
     "notEnoughAllowance": "Not enough allowance left.",
     "bookingNotPending": "This request has already been decided or cancelled.",
     "selfApproval": "You can't approve your own request.",
-    "bookingNotCancellable": "This booking can't be cancelled."
+    "bookingNotCancellable": "This booking can't be cancelled.",
+    "bookingWhoRequired": "Choose who this is for."
   },
   "auth": {
     "signIn": {
@@ -929,7 +930,8 @@
     "tabs": {
       "overview": "Overview",
       "history": "History",
-      "pay": "Pay"
+      "pay": "Pay",
+      "timeOff": "Time off"
     },
     "noJob": "No job record",
     "since": "Since {date}",
@@ -1408,6 +1410,14 @@
     "halves": {
       "morning": "morning",
       "afternoon": "afternoon"
-    }
+    },
+    "who": "Who",
+    "whoPeople": "Who's going",
+    "forSomeone": "Booked for them",
+    "adjust": "Adjust balance",
+    "adjustTitle": "Adjust a balance",
+    "adjustDays": "Days to add (negative to remove)",
+    "adjustReason": "Reason",
+    "adjusted": "Balance adjusted"
   }
 }

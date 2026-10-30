@@ -111,7 +111,8 @@ select is(
 );
 
 select is(public.my_access_to_member(pg_temp.person('Dan')),
-  array['people.edit', 'people.edit_compensation', 'people.view_compensation'], 'the owner may do everything');
+  array['people.edit', 'people.edit_compensation', 'people.view_compensation',
+        'time.adjust_allowance', 'time.book_for_others', 'time.view'], 'the owner may do everything');
 
 -- Bob, a plain member, sees people but changes nothing.
 select tests.clear_authentication();
@@ -121,7 +122,8 @@ insert into public.member_roles (workspace_id, member_id, role_id)
 select (select ws from ctx), pg_temp.person('Bob'), id from public.roles where workspace_id = (select ws from ctx) and name = 'Member';
 select tests.authenticate_as((select user_id from people where name = 'bob'));
 
-select is(public.my_access_to_member(pg_temp.person('Dan')), '{}'::text[], 'a plain member may change nothing');
+select is(public.my_access_to_member(pg_temp.person('Dan')), array['time.view'],
+  'a plain member may change nothing (and sees their unit''s time off)');
 select throws_ok(
   $$ select public.change_job(pg_temp.person('Dan'), current_date, (select root from ctx), null, null, null, null) $$,
   '42501', null, 'nor change jobs'
