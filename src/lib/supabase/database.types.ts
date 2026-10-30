@@ -57,6 +57,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      check_over_allocation: {
+        Args: { p_member_ids: string[]; p_role_ids: string[]; p_scenario_id: string };
+        Returns: Json;
+      };
       covers_unit: {
         Args: { p_permission_key: string; p_unit_id: string; p_workspace_id: string };
         Returns: boolean;
@@ -68,6 +72,7 @@ export type Database = {
       };
       feature_on: { Args: { p_feature_key: string; p_workspace_id: string }; Returns: boolean };
       field_is_sensitive: { Args: { p_field_id: string }; Returns: boolean };
+      first_open_month: { Args: { p_scenario_id: string }; Returns: string };
       granted_unit_paths: {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: unknown[];
@@ -139,6 +144,7 @@ export type Database = {
           snapshot: Json;
         }[];
       };
+      month_start: { Args: { p_date: string }; Returns: string };
       new_invitation_token: { Args: Record<PropertyKey, never>; Returns: string };
       notify: {
         Args: {
@@ -154,6 +160,10 @@ export type Database = {
         Args: { p_kind: string; p_member_ids: string[]; p_payload: Json; p_workspace_id: string };
         Returns: undefined;
       };
+      over_allocations: {
+        Args: { p_member_ids: string[]; p_role_ids: string[]; p_scenario_id: string };
+        Returns: Json;
+      };
       reach_covers: {
         Args: {
           p_held: Database["public"]["Enums"]["reach"][];
@@ -167,6 +177,7 @@ export type Database = {
         Args: { p_member_id: string; p_permission_key: string };
         Returns: string;
       };
+      require_planning_editor: { Args: { p_workspace_id: string }; Returns: undefined };
       set_assignment_from: {
         Args: { p_date: string; p_member_id: string; p_patch: Json };
         Returns: undefined;
@@ -251,6 +262,69 @@ export type Database = {
   };
   public: {
     Tables: {
+      allocations: {
+        Row: {
+          fte: number;
+          id: number;
+          member_id: string | null;
+          org_unit_id: string;
+          period_start: string;
+          planned_role_id: string | null;
+          scenario_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          fte: number;
+          id?: never;
+          member_id?: string | null;
+          org_unit_id: string;
+          period_start: string;
+          planned_role_id?: string | null;
+          scenario_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          fte?: number;
+          id?: never;
+          member_id?: string | null;
+          org_unit_id?: string;
+          period_start?: string;
+          planned_role_id?: string | null;
+          scenario_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "allocations_scenario_id_planned_role_id_fkey";
+            columns: ["scenario_id", "planned_role_id"];
+            isOneToOne: false;
+            referencedRelation: "planned_roles";
+            referencedColumns: ["scenario_id", "id"];
+          },
+          {
+            foreignKeyName: "allocations_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "allocations_workspace_id_org_unit_id_fkey";
+            columns: ["workspace_id", "org_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "allocations_workspace_id_scenario_id_fkey";
+            columns: ["workspace_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       allowance_ledger: {
         Row: {
           booking_id: string | null;
@@ -1824,6 +1898,169 @@ export type Database = {
           },
         ];
       };
+      planned_roles: {
+        Row: {
+          career_level_id: string | null;
+          created_at: string;
+          employment_type_id: string | null;
+          end_date: string | null;
+          field_values: NonNullable<Json>;
+          filled_by: string | null;
+          filled_on: string | null;
+          fte: number;
+          id: string;
+          notes: string | null;
+          org_unit_id: string;
+          position_id: string | null;
+          scenario_id: string;
+          start_date: string;
+          title: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          career_level_id?: string | null;
+          created_at?: string;
+          employment_type_id?: string | null;
+          end_date?: string | null;
+          field_values?: NonNullable<Json>;
+          filled_by?: string | null;
+          filled_on?: string | null;
+          fte?: number;
+          id?: string;
+          notes?: string | null;
+          org_unit_id: string;
+          position_id?: string | null;
+          scenario_id: string;
+          start_date: string;
+          title: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          career_level_id?: string | null;
+          created_at?: string;
+          employment_type_id?: string | null;
+          end_date?: string | null;
+          field_values?: NonNullable<Json>;
+          filled_by?: string | null;
+          filled_on?: string | null;
+          fte?: number;
+          id?: string;
+          notes?: string | null;
+          org_unit_id?: string;
+          position_id?: string | null;
+          scenario_id?: string;
+          start_date?: string;
+          title?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "planned_roles_workspace_id_career_level_id_fkey";
+            columns: ["workspace_id", "career_level_id"];
+            isOneToOne: false;
+            referencedRelation: "career_levels";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_employment_type_id_fkey";
+            columns: ["workspace_id", "employment_type_id"];
+            isOneToOne: false;
+            referencedRelation: "employment_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_filled_by_fkey";
+            columns: ["workspace_id", "filled_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_org_unit_id_fkey";
+            columns: ["workspace_id", "org_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_position_id_fkey";
+            columns: ["workspace_id", "position_id"];
+            isOneToOne: false;
+            referencedRelation: "positions";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planned_roles_workspace_id_scenario_id_fkey";
+            columns: ["workspace_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      planning_settings: {
+        Row: {
+          basis: Database["public"]["Enums"]["planning_basis"];
+          cost_split_field_id: string | null;
+          display_unit: Database["public"]["Enums"]["planning_unit"];
+          horizon_years: number;
+          lifecycle: boolean;
+          over_allocation: Database["public"]["Enums"]["over_allocation_rule"];
+          period: Database["public"]["Enums"]["planning_period"];
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          basis?: Database["public"]["Enums"]["planning_basis"];
+          cost_split_field_id?: string | null;
+          display_unit?: Database["public"]["Enums"]["planning_unit"];
+          horizon_years?: number;
+          lifecycle?: boolean;
+          over_allocation?: Database["public"]["Enums"]["over_allocation_rule"];
+          period?: Database["public"]["Enums"]["planning_period"];
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          basis?: Database["public"]["Enums"]["planning_basis"];
+          cost_split_field_id?: string | null;
+          display_unit?: Database["public"]["Enums"]["planning_unit"];
+          horizon_years?: number;
+          lifecycle?: boolean;
+          over_allocation?: Database["public"]["Enums"]["over_allocation_rule"];
+          period?: Database["public"]["Enums"]["planning_period"];
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "planning_settings_workspace_id_cost_split_field_id_fkey";
+            columns: ["workspace_id", "cost_split_field_id"];
+            isOneToOne: false;
+            referencedRelation: "custom_fields";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planning_settings_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: true;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       platform_admins: {
         Row: {
           created_at: string;
@@ -2064,6 +2301,106 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      scenarios: {
+        Row: {
+          approved_at: string | null;
+          approved_by: string | null;
+          archived_at: string | null;
+          baseline_id: string | null;
+          costs_applied_at: string | null;
+          created_at: string;
+          created_by: string | null;
+          first_period: string;
+          id: string;
+          is_live: boolean;
+          last_period: string;
+          locked_through: string | null;
+          name: string;
+          status: Database["public"]["Enums"]["scenario_status"];
+          submitted_at: string | null;
+          submitted_by: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          archived_at?: string | null;
+          baseline_id?: string | null;
+          costs_applied_at?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          first_period: string;
+          id?: string;
+          is_live?: boolean;
+          last_period: string;
+          locked_through?: string | null;
+          name: string;
+          status?: Database["public"]["Enums"]["scenario_status"];
+          submitted_at?: string | null;
+          submitted_by?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          approved_at?: string | null;
+          approved_by?: string | null;
+          archived_at?: string | null;
+          baseline_id?: string | null;
+          costs_applied_at?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          first_period?: string;
+          id?: string;
+          is_live?: boolean;
+          last_period?: string;
+          locked_through?: string | null;
+          name?: string;
+          status?: Database["public"]["Enums"]["scenario_status"];
+          submitted_at?: string | null;
+          submitted_by?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_workspace_id_approved_by_fkey";
+            columns: ["workspace_id", "approved_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "scenarios_workspace_id_baseline_id_fkey";
+            columns: ["workspace_id", "baseline_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "scenarios_workspace_id_created_by_fkey";
+            columns: ["workspace_id", "created_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "scenarios_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "scenarios_workspace_id_submitted_by_fkey";
+            columns: ["workspace_id", "submitted_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
           },
         ];
       };
@@ -2673,6 +3010,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      copy_scenario: { Args: { p_name: string; p_scenario_id: string }; Returns: string };
       create_feed_token: {
         Args: { p_scope: Database["public"]["Enums"]["feed_scope"]; p_workspace_id: string };
         Returns: string;
@@ -2683,6 +3021,16 @@ export type Database = {
           invitation_id: string;
           token: string;
         }[];
+      };
+      create_scenario: {
+        Args: {
+          p_first_period: string;
+          p_from_people?: boolean;
+          p_last_period: string;
+          p_name: string;
+          p_workspace_id: string;
+        };
+        Returns: string;
       };
       create_workspace: {
         Args: {
@@ -2722,6 +3070,10 @@ export type Database = {
       decide_booking: {
         Args: { p_approve: boolean; p_booking_id: string; p_comment?: string };
         Returns: undefined;
+      };
+      fill_planned_role: {
+        Args: { p_from: string; p_member_id: string; p_planned_role_id: string };
+        Returns: Json;
       };
       get_invitation: {
         Args: { p_token: string };
@@ -2842,6 +3194,7 @@ export type Database = {
       resend_invitation: { Args: { p_invitation_id: string }; Returns: string };
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
       roles_with_unit_reach: { Args: { p_workspace_id: string }; Returns: string[] };
+      save_allocations: { Args: { p_changes: Json; p_scenario_id: string }; Returns: Json };
       set_feature: {
         Args: {
           p_enabled: boolean;
@@ -2855,6 +3208,7 @@ export type Database = {
         Args: { p_field_id: string; p_member_id: string; p_valid_from: string; p_value: Json };
         Returns: undefined;
       };
+      set_live_scenario: { Args: { p_scenario_id: string }; Returns: undefined };
       set_member_status: {
         Args: {
           p_member_id: string;
@@ -2865,6 +3219,10 @@ export type Database = {
       };
       set_role_units: {
         Args: { p_member_role_id: string; p_unit_ids: string[] };
+        Returns: undefined;
+      };
+      set_scenario_status: {
+        Args: { p_scenario_id: string; p_status: Database["public"]["Enums"]["scenario_status"] };
         Returns: undefined;
       };
       transfer_ownership: {
@@ -2894,7 +3252,12 @@ export type Database = {
       import_status: "staging" | "previewed" | "applying" | "applied" | "cancelled";
       member_status: "active" | "invited" | "inactive";
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
+      over_allocation_rule: "warn" | "block";
+      planning_basis: "person" | "position";
+      planning_period: "month" | "quarter";
+      planning_unit: "fte" | "percent";
       reach: "own" | "reports" | "team" | "team_and_below" | "units" | "workspace";
+      scenario_status: "draft" | "submitted" | "approved";
       time_approver: "line_manager" | "team_lead" | "person" | "role" | "none";
       time_bookable_by: "everyone" | "managers" | "admins";
       time_visibility: "everyone" | "team" | "private";
@@ -3033,7 +3396,12 @@ export const Constants = {
       import_status: ["staging", "previewed", "applying", "applied", "cancelled"],
       member_status: ["active", "invited", "inactive"],
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
+      over_allocation_rule: ["warn", "block"],
+      planning_basis: ["person", "position"],
+      planning_period: ["month", "quarter"],
+      planning_unit: ["fte", "percent"],
       reach: ["own", "reports", "team", "team_and_below", "units", "workspace"],
+      scenario_status: ["draft", "submitted", "approved"],
       time_approver: ["line_manager", "team_lead", "person", "role", "none"],
       time_bookable_by: ["everyone", "managers", "admins"],
       time_visibility: ["everyone", "team", "private"],

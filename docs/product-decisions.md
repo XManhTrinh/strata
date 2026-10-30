@@ -311,6 +311,13 @@ Workspace settings, so each organization plans its own way:
 
 All plan changes go to the audit log.
 
+- **Cost is its own permission.** Seeing costs needs "View plan costs" (scoped like the others),
+  separate from seeing FTE, because a cost under annual salary reveals pay.
+- **Planned roles belong to a scenario**; the org chart shows the live scenario's open roles.
+  Filling one moves its allocations from that date onto the person.
+- **Allocations are stored by month**; quarterly workspaces edit a quarter at a time.
+- **By position** means planning seats as planned roles that people fill, on the same tables.
+
 ## 12. Personal data (GDPR)
 
 - **v1: export.** A person or an admin can download everything Strata holds about a person.
