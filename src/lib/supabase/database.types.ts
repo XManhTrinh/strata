@@ -9,6 +9,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      allowance_policy_on: {
+        Args: { p_date: string; p_member_id: string; p_time_type_id: string };
+        Returns: Database["public"]["Tables"]["allowance_policies"]["Row"];
+        SetofOptions: {
+          from: "*";
+          to: "allowance_policies";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       assignment_on: {
         Args: { p_date: string; p_member_id: string };
         Returns: Database["public"]["Tables"]["member_assignments"]["Row"];
@@ -20,6 +30,19 @@ export type Database = {
         };
       };
       avatar_owner: { Args: { p_name: string }; Returns: string };
+      booking_days: {
+        Args: {
+          p_end: string;
+          p_end_half: string;
+          p_member_id: string;
+          p_start: string;
+          p_start_half: string;
+        };
+        Returns: {
+          day: string;
+          days: number;
+        }[];
+      };
       can: {
         Args: { p_permission_key: string; p_target_member_id: string; p_workspace_id: string };
         Returns: boolean;
@@ -48,6 +71,10 @@ export type Database = {
       granted_unit_paths: {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: unknown[];
+      };
+      half_day_span: {
+        Args: { p_end: string; p_end_half: string; p_start: string; p_start_half: string };
+        Returns: unknown;
       };
       has_permission: {
         Args: { p_permission_key: string; p_workspace_id: string };
@@ -80,6 +107,7 @@ export type Database = {
       is_member: { Args: { p_workspace_id: string }; Returns: boolean };
       is_owner: { Args: { p_workspace_id: string }; Returns: boolean };
       is_reserved_slug: { Args: { p_slug: string }; Returns: boolean };
+      leave_year_start: { Args: { p_date: string; p_start_month: number }; Returns: string };
       load_import_job: {
         Args: { p_job_id: string; p_statuses: Database["public"]["Enums"]["import_status"][] };
         Returns: Database["public"]["Tables"]["import_jobs"]["Row"];
@@ -122,6 +150,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      notify_members: {
+        Args: { p_kind: string; p_member_ids: string[]; p_payload: Json; p_workspace_id: string };
+        Returns: undefined;
+      };
       reach_covers: {
         Args: {
           p_held: Database["public"]["Enums"]["reach"][];
@@ -130,6 +162,7 @@ export type Database = {
         Returns: boolean;
       };
       rebuild_reporting_closure: { Args: { p_workspace_id: string }; Returns: undefined };
+      refund_booking: { Args: { p_booking_id: string }; Returns: undefined };
       require_member_access: {
         Args: { p_member_id: string; p_permission_key: string };
         Returns: string;
@@ -160,8 +193,20 @@ export type Database = {
         };
         Returns: undefined;
       };
+      settle_all_allowances: { Args: { p_as_of: string }; Returns: undefined };
+      settle_allowance: {
+        Args: { p_as_of: string; p_member_id: string; p_time_type_id: string };
+        Returns: undefined;
+      };
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
       starter_leave_days: { Args: { p_country: string }; Returns: number };
+      time_setup_on: {
+        Args: { p_date: string; p_member_id: string };
+        Returns: {
+          calendar_id: string;
+          working_days: number[];
+        }[];
+      };
       unit_label: { Args: { p_id: string }; Returns: string };
       unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
       visible_members: {
@@ -170,9 +215,31 @@ export type Database = {
           member_id: string;
         }[];
       };
+      working_days: {
+        Args: {
+          p_end: string;
+          p_end_half: string;
+          p_member_id: string;
+          p_start: string;
+          p_start_half: string;
+        };
+        Returns: number;
+      };
+      workspace_approvers: { Args: { p_workspace_id: string }; Returns: string[] };
       would_report_to_self: {
         Args: { p_date: string; p_manager_id: string; p_member_id: string };
         Returns: boolean;
+      };
+      yearly_days: {
+        Args: {
+          p_member_id: string;
+          p_policy: Omit<
+            Database["public"]["Tables"]["allowance_policies"]["Row"],
+            Database["public"]["Tables"]["allowance_policies"]["ComputedFields"]
+          >;
+          p_year_start: string;
+        };
+        Returns: number;
       };
     };
     Enums: {
@@ -194,6 +261,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["allowance_entry"];
           leave_year: string;
           member_id: string;
+          period: string | null;
           reason: string | null;
           time_type_id: string;
           workspace_id: string;
@@ -208,6 +276,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["allowance_entry"];
           leave_year: string;
           member_id: string;
+          period?: string | null;
           reason?: string | null;
           time_type_id: string;
           workspace_id: string;
@@ -221,11 +290,19 @@ export type Database = {
           kind?: Database["public"]["Enums"]["allowance_entry"];
           leave_year?: string;
           member_id?: string;
+          period?: string | null;
           reason?: string | null;
           time_type_id?: string;
           workspace_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "allowance_ledger_workspace_id_booking_id_fkey";
+            columns: ["workspace_id", "booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["workspace_id", "id"];
+          },
           {
             foreignKeyName: "allowance_ledger_workspace_id_member_id_fkey";
             columns: ["workspace_id", "member_id"];
@@ -345,6 +422,246 @@ export type Database = {
           workspace_id?: string;
         };
         Relationships: [];
+      };
+      booking_approvals: {
+        Row: {
+          approver_member_id: string | null;
+          approver_role_id: string | null;
+          booking_id: string;
+          comment: string | null;
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          decision: Database["public"]["Enums"]["approval_decision"];
+          id: string;
+          step: number;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approver_member_id?: string | null;
+          approver_role_id?: string | null;
+          booking_id: string;
+          comment?: string | null;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          decision?: Database["public"]["Enums"]["approval_decision"];
+          id?: string;
+          step?: number;
+          workspace_id: string;
+        };
+        Update: {
+          approver_member_id?: string | null;
+          approver_role_id?: string | null;
+          booking_id?: string;
+          comment?: string | null;
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          decision?: Database["public"]["Enums"]["approval_decision"];
+          id?: string;
+          step?: number;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_approvals_workspace_id_approver_member_id_fkey";
+            columns: ["workspace_id", "approver_member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "booking_approvals_workspace_id_approver_role_id_fkey";
+            columns: ["workspace_id", "approver_role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "booking_approvals_workspace_id_booking_id_fkey";
+            columns: ["workspace_id", "booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "booking_approvals_workspace_id_decided_by_fkey";
+            columns: ["workspace_id", "decided_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      booking_attendees: {
+        Row: {
+          booking_id: string;
+          member_id: string;
+          working_days: number;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          member_id: string;
+          working_days?: number;
+          workspace_id: string;
+        };
+        Update: {
+          booking_id?: string;
+          member_id?: string;
+          working_days?: number;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_attendees_workspace_id_booking_id_fkey";
+            columns: ["workspace_id", "booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "booking_attendees_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      bookings: {
+        Row: {
+          cancel_reason: string | null;
+          cancelled_at: string | null;
+          created_at: string;
+          created_by: string;
+          end_date: string;
+          end_half: string;
+          ends_at: string | null;
+          id: string;
+          notes: string | null;
+          recurrence_rule: string | null;
+          start_date: string;
+          start_half: string;
+          starts_at: string | null;
+          status: Database["public"]["Enums"]["booking_status"];
+          time_type_id: string;
+          time_zone: string | null;
+          title: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          cancel_reason?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          created_by: string;
+          end_date: string;
+          end_half?: string;
+          ends_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          recurrence_rule?: string | null;
+          start_date: string;
+          start_half?: string;
+          starts_at?: string | null;
+          status: Database["public"]["Enums"]["booking_status"];
+          time_type_id: string;
+          time_zone?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          cancel_reason?: string | null;
+          cancelled_at?: string | null;
+          created_at?: string;
+          created_by?: string;
+          end_date?: string;
+          end_half?: string;
+          ends_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          recurrence_rule?: string | null;
+          start_date?: string;
+          start_half?: string;
+          starts_at?: string | null;
+          status?: Database["public"]["Enums"]["booking_status"];
+          time_type_id?: string;
+          time_zone?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bookings_workspace_id_created_by_fkey";
+            columns: ["workspace_id", "created_by"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "bookings_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bookings_workspace_id_time_type_id_fkey";
+            columns: ["workspace_id", "time_type_id"];
+            isOneToOne: false;
+            referencedRelation: "time_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      calendar_feed_tokens: {
+        Row: {
+          created_at: string;
+          id: string;
+          last_used_at: string | null;
+          revoked_at: string | null;
+          scope: Database["public"]["Enums"]["feed_scope"];
+          token_hash: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          scope: Database["public"]["Enums"]["feed_scope"];
+          token_hash: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          scope?: Database["public"]["Enums"]["feed_scope"];
+          token_hash?: string;
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "calendar_feed_tokens_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       career_levels: {
         Row: {
@@ -2243,10 +2560,78 @@ export type Database = {
         };
         Returns: string;
       };
+      adjust_allowance: {
+        Args: {
+          p_as_of?: string;
+          p_days: number;
+          p_member_id: string;
+          p_reason: string;
+          p_time_type_id: string;
+        };
+        Returns: undefined;
+      };
+      allowance_balances: {
+        Args: { p_as_of?: string; p_member_id: string };
+        Returns: {
+          adjusted: number;
+          available: number;
+          carried_over: number;
+          entitled: number;
+          expired: number;
+          leave_year: string;
+          requested: number;
+          time_type_id: string;
+          time_type_name: string;
+          used: number;
+        }[];
+      };
       assign_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
       };
+      book_time: {
+        Args: {
+          p_end_date: string;
+          p_end_half?: string;
+          p_ends_at?: string;
+          p_member_ids: string[];
+          p_notes?: string;
+          p_recurrence_rule?: string;
+          p_start_date: string;
+          p_start_half?: string;
+          p_starts_at?: string;
+          p_time_type_id: string;
+          p_time_zone?: string;
+          p_title?: string;
+          p_workspace_id: string;
+        };
+        Returns: string;
+      };
+      calendar_entries: {
+        Args: { p_from: string; p_member_ids?: string[]; p_to: string; p_workspace_id: string };
+        Returns: {
+          booking_id: string;
+          color: string;
+          end_date: string;
+          end_half: string;
+          ends_at: string;
+          icon: string;
+          is_away: boolean;
+          masked: boolean;
+          member_id: string;
+          member_name: string;
+          recurrence_rule: string;
+          start_date: string;
+          start_half: string;
+          starts_at: string;
+          status: Database["public"]["Enums"]["booking_status"];
+          time_type_id: string;
+          time_type_name: string;
+          title: string;
+          working_days: number;
+        }[];
+      };
+      cancel_booking: { Args: { p_booking_id: string; p_reason?: string }; Returns: undefined };
       change_job: {
         Args: {
           p_career_level_id?: string;
@@ -2310,6 +2695,10 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      decide_booking: {
+        Args: { p_approve: boolean; p_booking_id: string; p_comment?: string };
+        Returns: undefined;
       };
       get_invitation: {
         Args: { p_token: string };
@@ -2445,9 +2834,12 @@ export type Database = {
       allowance_accrual: "upfront" | "monthly";
       allowance_entry:
         "grant" | "accrual" | "adjustment" | "usage" | "refund" | "carry_over" | "expiry";
+      approval_decision: "pending" | "approved" | "rejected";
+      booking_status: "pending" | "approved" | "rejected" | "cancelled";
       cost_method: "annual_salary" | "day_rate";
       custom_field_type: "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
       email_delivery: "instant" | "daily" | "none";
+      feed_scope: "me" | "team" | "workspace";
       import_row_status: "pending" | "new" | "changed" | "unchanged" | "error" | "applied";
       import_status: "staging" | "previewed" | "applying" | "applied" | "cancelled";
       member_status: "active" | "invited" | "inactive";
@@ -2581,9 +2973,12 @@ export const Constants = {
         "carry_over",
         "expiry",
       ],
+      approval_decision: ["pending", "approved", "rejected"],
+      booking_status: ["pending", "approved", "rejected", "cancelled"],
       cost_method: ["annual_salary", "day_rate"],
       custom_field_type: ["text", "number", "date", "single_choice", "multi_choice", "person"],
       email_delivery: ["instant", "daily", "none"],
+      feed_scope: ["me", "team", "workspace"],
       import_row_status: ["pending", "new", "changed", "unchanged", "error", "applied"],
       import_status: ["staging", "previewed", "applying", "applied", "cancelled"],
       member_status: ["active", "invited", "inactive"],
