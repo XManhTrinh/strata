@@ -12,8 +12,8 @@ import { setEntryArchived } from "../entry-actions";
 import { savePosition } from "../job-actions";
 import type { CareerLevel, Position } from "../types";
 import { useRunAction } from "../use-run-action";
-import { FormDialog } from "./form-dialog";
-import { ItemMenu } from "./item-menu";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { ItemMenu } from "@/components/ui/item-menu";
 
 /** Positions in a searchable table; a row opens the position to edit. */
 export function PositionsSection({

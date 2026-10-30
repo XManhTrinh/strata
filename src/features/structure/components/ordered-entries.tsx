@@ -6,7 +6,7 @@ import { List, ListItem } from "@windmorph/react";
 import { Tag } from "@windmorph/react-pro";
 import { type OrderedTable, reorderEntries, setEntryArchived } from "../entry-actions";
 import { useRunAction } from "../use-run-action";
-import { ItemMenu, type ItemMenuAction } from "./item-menu";
+import { ItemMenu, type ItemMenuAction } from "@/components/ui/item-menu";
 
 type Entry = { id: string; name: string; archived: boolean };
 

@@ -7,7 +7,7 @@ import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { saveCareerLevel } from "../job-actions";
 import type { CareerLevel } from "../types";
-import { FormDialog } from "./form-dialog";
+import { FormDialog } from "@/components/ui/form-dialog";
 import { OrderedEntries } from "./ordered-entries";
 
 /** The career ladder, one list per track, junior first. */

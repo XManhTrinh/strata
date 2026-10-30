@@ -6,7 +6,7 @@ import { Select, SelectItem, Switch, TextField } from "@windmorph/react";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { saveCustomField } from "../field-actions";
 import type { CustomField, CustomFieldType } from "../types";
-import { FormDialog } from "./form-dialog";
+import { FormDialog } from "@/components/ui/form-dialog";
 
 const TYPES: CustomFieldType[] = [
   "text",

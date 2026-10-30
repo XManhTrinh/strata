@@ -15,7 +15,7 @@ import { idleFormState } from "@/lib/form-state";
 import { useFormAction } from "@/lib/use-form-action";
 import { saveFieldOption } from "../field-actions";
 import type { CustomField, FieldOption } from "../types";
-import { FormDialog } from "./form-dialog";
+import { FormDialog } from "@/components/ui/form-dialog";
 import { OrderedEntries } from "./ordered-entries";
 
 /** A choice field's options: add at the end, rename, reorder and archive. */

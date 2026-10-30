@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/shell/page-header";
+import { AddPerson } from "@/features/people/components/add-person";
 import { PeopleDirectory } from "@/features/people/components/people-directory";
 import { parseDirectoryParams } from "@/features/people/directory-params";
-import { directoryFilterOptions, peopleDirectory } from "@/features/people/queries";
+import { jobChoices, peopleDirectory } from "@/features/people/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PeoplePage({
@@ -23,17 +24,20 @@ export default async function PeoplePage({
   if (!workspace) notFound();
 
   const query = parseDirectoryParams(await searchParams);
-  const [{ people, total }, options, t] = await Promise.all([
+  const [{ people, total }, choices, t] = await Promise.all([
     peopleDirectory(workspace.id, query),
-    directoryFilterOptions(workspace.id),
+    jobChoices(workspace.id),
     getTranslations("people"),
   ]);
 
   return (
     <>
       <PageHeader title={t("title")} />
+      <div className="medium:px-6 flex justify-end px-4 pb-2">
+        <AddPerson choices={choices} />
+      </div>
       <div className="medium:px-6 px-4 pb-6">
-        <PeopleDirectory people={people} total={total} params={query} options={options} />
+        <PeopleDirectory people={people} total={total} params={query} options={choices} />
       </div>
     </>
   );

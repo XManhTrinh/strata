@@ -74,7 +74,8 @@ select is(
 );
 select is(
   (select array_agg(m.person_key || '>' || r.person_key || ':' || c.depth order by m.person_key, r.person_key)
-   from public.reporting_closure c join public.members m on m.id = c.manager_member_id join public.members r on r.id = c.member_id),
+   from public.reporting_closure c join public.members m on m.id = c.manager_member_id join public.members r on r.id = c.member_id
+   where c.workspace_id = (select ws from ctx)),
   array['E1>E2:1', 'E1>E3:2', 'E2>E3:1'], 'managers are matched by key and reporting lines rebuilt'
 );
 select is(

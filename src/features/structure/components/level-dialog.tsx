@@ -5,7 +5,7 @@ import { TextField } from "@windmorph/react";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { saveLevel } from "../actions";
 import type { OrgLevel } from "../types";
-import { FormDialog } from "./form-dialog";
+import { FormDialog } from "@/components/ui/form-dialog";
 
 /** Adds a level at the bottom, or renames `level`. */
 export function LevelDialog({ level, onClose }: { level?: OrgLevel; onClose: () => void }) {

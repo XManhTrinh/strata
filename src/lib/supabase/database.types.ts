@@ -25,6 +25,15 @@ export type Database = {
         Returns: boolean;
       };
       check_can_invite: { Args: { p_role_id: string; p_workspace_id: string }; Returns: undefined };
+      check_job_choices: {
+        Args: {
+          p_career_level_id: string;
+          p_employment_type_id: string;
+          p_org_unit_id: string;
+          p_position_id: string;
+        };
+        Returns: undefined;
+      };
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
@@ -110,6 +119,10 @@ export type Database = {
         Returns: boolean;
       };
       rebuild_reporting_closure: { Args: { p_workspace_id: string }; Returns: undefined };
+      require_member_access: {
+        Args: { p_member_id: string; p_permission_key: string };
+        Returns: string;
+      };
       set_assignment_from: {
         Args: { p_date: string; p_member_id: string; p_patch: Json };
         Returns: undefined;
@@ -139,6 +152,10 @@ export type Database = {
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
       unit_label: { Args: { p_id: string }; Returns: string };
       unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
+      would_report_to_self: {
+        Args: { p_date: string; p_manager_id: string; p_member_id: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;
@@ -1752,8 +1769,45 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      add_person: {
+        Args: {
+          p_career_level_id?: string;
+          p_email?: string;
+          p_employment_type_id?: string;
+          p_full_name: string;
+          p_manager_member_id?: string;
+          p_org_unit_id: string;
+          p_person_key?: string;
+          p_position_id?: string;
+          p_start_date?: string;
+          p_workspace_id: string;
+        };
+        Returns: string;
+      };
       assign_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
+        Returns: undefined;
+      };
+      change_job: {
+        Args: {
+          p_career_level_id?: string;
+          p_employment_type_id?: string;
+          p_manager_member_id?: string;
+          p_member_id: string;
+          p_org_unit_id: string;
+          p_position_id?: string;
+          p_valid_from: string;
+        };
+        Returns: undefined;
+      };
+      change_pay: {
+        Args: {
+          p_annual_salary?: number;
+          p_currency: string;
+          p_day_rate?: number;
+          p_member_id: string;
+          p_valid_from: string;
+        };
         Returns: undefined;
       };
       create_invitation: {
@@ -1812,6 +1866,7 @@ export type Database = {
       import_preview: { Args: { p_job_id: string }; Returns: Json };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
+      my_access_to_member: { Args: { p_member_id: string }; Returns: string[] };
       my_permissions: {
         Args: { p_workspace_id: string };
         Returns: {
@@ -1850,6 +1905,7 @@ export type Database = {
           unit_name: string;
         }[];
       };
+      remove_job_change: { Args: { p_assignment_id: string }; Returns: undefined };
       remove_role: {
         Args: { p_member_id: string; p_role_id: string; p_workspace_id: string };
         Returns: undefined;
@@ -1868,6 +1924,10 @@ export type Database = {
           p_workspace_id: string;
         };
         Returns: string[];
+      };
+      set_field_value: {
+        Args: { p_field_id: string; p_member_id: string; p_valid_from: string; p_value: Json };
+        Returns: undefined;
       };
       set_member_status: {
         Args: {

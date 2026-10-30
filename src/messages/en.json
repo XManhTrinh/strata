@@ -21,7 +21,8 @@
   "common": {
     "appName": "Strata",
     "or": "or",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "clearField": "Clear {field}"
   },
   "errors": {
     "required": "Required.",
@@ -87,7 +88,18 @@
     "fieldTypeLocked": "People already have values for this field, so its type can't change.",
     "fieldHasNoOptions": "Only choice fields have options.",
     "optionLabelRequired": "Enter a label for the option.",
-    "optionLabelTaken": "This field already has an option with this label."
+    "optionLabelTaken": "This field already has an option with this label.",
+    "personNameRequired": "Enter the person's name.",
+    "personKeyTaken": "Someone else already has this person key.",
+    "personEmailTaken": "Someone else in this workspace already has this email.",
+    "dateRequired": "Choose a date.",
+    "endBeforeStart": "The end date can't be before the start date.",
+    "unitRequired": "Choose a unit.",
+    "managerCycle": "That would make a reporting circle: this manager reports to the person, directly or through others.",
+    "archivedChoice": "Archived units, positions, levels and employment types can't be chosen.",
+    "firstJobStays": "The first job record stays. Change it instead.",
+    "payRequired": "Enter a salary or a day rate.",
+    "amountInvalid": "Enter an amount of 0 or more."
   },
   "auth": {
     "signIn": {
@@ -847,5 +859,93 @@
         "all": "Everyone"
       }
     }
+  },
+  "person": {
+    "back": "Back to people",
+    "tabs": {
+      "overview": "Overview",
+      "history": "History",
+      "pay": "Pay"
+    },
+    "noJob": "No job record",
+    "since": "Since {date}",
+    "starts": "Starts on {date}",
+    "leaves": "Leaves on {date}",
+    "left": "Left on {date}",
+    "noAccount": "No account",
+    "details": {
+      "title": "Details",
+      "edit": "Edit details",
+      "fullName": "Full name",
+      "email": "Email",
+      "personKey": "Person key",
+      "personKeyHelp": "Your HR system's id for this person; imports match on it.",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "none": "—",
+      "saved": "Details saved"
+    },
+    "jobRecord": {
+      "title": "Job",
+      "change": "Change job",
+      "changeTitle": "Change job",
+      "effective": "From",
+      "effectiveHelp": "Today, a past date to correct history, or a future date to schedule the change.",
+      "unit": "Unit",
+      "manager": "Manager",
+      "position": "Position",
+      "level": "Level",
+      "employmentType": "Employment type",
+      "none": "None",
+      "saved": "Job changed",
+      "scheduled": "Scheduled",
+      "current": "Current",
+      "remove": "Remove change",
+      "removed": "Change removed",
+      "removeTitle": "Remove this change?",
+      "removeBody": "The record before it carries on in its place.",
+      "until": "until {date}",
+      "fromTo": "{from} – {to}",
+      "fromOn": "From {from}"
+    },
+    "leaving": {
+      "set": "Set end date",
+      "change": "Change end date",
+      "title": "End date",
+      "body": "The day they leave. They stay in history and reports, and drop out of current lists after that day.",
+      "date": "Last day",
+      "remove": "Remove end date",
+      "saved": "End date saved",
+      "removed": "End date removed"
+    },
+    "pay": {
+      "title": "Pay",
+      "change": "Change pay",
+      "changeTitle": "Change pay",
+      "salary": "Annual salary",
+      "dayRate": "Day rate",
+      "currency": "Currency",
+      "none": "No pay recorded",
+      "saved": "Pay changed",
+      "annual": "{amount} a year",
+      "daily": "{amount} a day"
+    },
+    "fields": {
+      "title": "Custom fields",
+      "edit": "Edit {name}",
+      "none": "—",
+      "saved": "{name} saved",
+      "from": "From",
+      "value": "Value",
+      "clear": "Clear"
+    },
+    "add": {
+      "button": "Add person",
+      "title": "Add person",
+      "save": "Add"
+    },
+    "cancel": "Cancel",
+    "save": "Save",
+    "actions": "Actions"
   }
 }
