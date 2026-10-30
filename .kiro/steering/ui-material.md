@@ -53,6 +53,8 @@ fileMatchPattern: "src/**/*.tsx"
 - `IconButton` defaults to `filled` in Windmorph; pass `variant="standard"` for overflow menus,
   back arrows and row or toolbar actions (M3), and choose filled or tonal only for emphasis.
 - Database refusals carry the `errors.*` message key as their `hint`; actions show that key.
+- The one exception to Windmorph tokens: the "Sign in with Google" button uses Google's brand
+  colours, G mark and wording, as Google's branding guidelines require (`google-button.tsx`).
 - Motion from `motion/react`, M3 durations, always respecting reduced motion.
 
 ## Accessibility (WCAG 2.2 AA)

@@ -110,7 +110,6 @@
       "title": "Sign in to Strata",
       "subtitle": "Welcome back.",
       "submit": "Sign in",
-      "google": "Continue with Google",
       "forgot": "Forgot password?",
       "noAccount": "New to Strata?",
       "createAccount": "Create an account"
@@ -142,6 +141,10 @@
       "password": "Password",
       "newPassword": "New password",
       "passwordHint": "At least 8 characters, with a letter and a digit."
+    },
+    "google": {
+      "signIn": "Sign in with Google",
+      "signUp": "Sign up with Google"
     }
   },
   "onboarding": {
@@ -182,6 +185,7 @@
     "nav": {
       "home": "Home",
       "people": "People",
+      "orgChart": "Org chart",
       "settings": "Settings"
     },
     "switcher": {
@@ -986,5 +990,36 @@
     "deleted": "View deleted",
     "defaultSet": "Default view set",
     "defaultCleared": "No default view"
+  },
+  "orgChart": {
+    "title": "Org chart",
+    "chartLabel": "Reporting chart",
+    "loading": "Loading",
+    "managerHidden": "Reports to someone outside your view",
+    "centre": "Centre the chart on {name}",
+    "showReports": "Show {name}'s {count, plural, one {# report} other {# reports}}",
+    "hideReports": "Hide {name}'s reports",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit to screen",
+    "asOf": "As of",
+    "find": "Find a person",
+    "top": "Top of the organization",
+    "me": "Me",
+    "views": {
+      "label": "View",
+      "people": "Reporting lines",
+      "units": "Units"
+    },
+    "truncated": "Only part of the chart is shown. Choose a person to see their part.",
+    "empty": "No one to show on this date",
+    "emptyHint": "Try another date, or add people's managers in their job records.",
+    "manager": "Manager",
+    "reports": "Direct reports",
+    "noReports": "No direct reports",
+    "openProfile": "Open profile",
+    "unitPeople": "People in {unit}",
+    "unitCount": "{direct, plural, =0 {No one directly} one {# person} other {# people}} · {total} with sub-units",
+    "chooseUnit": "Choose a unit to see its people."
   }
 }

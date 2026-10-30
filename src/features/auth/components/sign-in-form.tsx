@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { Button, Divider, TextField } from "@windmorph/react";
 import { Link } from "@windmorph/react-pro";
 import { type ErrorKey, idleFormState } from "@/lib/form-state";
-import { signIn, signInWithGoogle } from "../actions";
+import { signIn } from "../actions";
 import { FormError } from "./form-error";
+import { GoogleButton } from "./google-button";
 
 export function SignInForm({ next, initialError }: { next: string; initialError?: ErrorKey }) {
   const t = useTranslations("auth");
@@ -60,12 +61,7 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
         <Divider className="flex-1" />
       </div>
 
-      <form action={signInWithGoogle}>
-        <input type="hidden" name="next" value={next} />
-        <Button type="submit" variant="outlined" className="w-full">
-          {t("signIn.google")}
-        </Button>
-      </form>
+      <GoogleButton next={next} mode="signIn" />
 
       <p className="text-body-medium text-on-surface-variant flex flex-wrap justify-center gap-x-1">
         <span>{t("signIn.noAccount")}</span>

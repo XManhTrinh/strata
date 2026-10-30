@@ -3,16 +3,18 @@
 import { useFormAction } from "@/lib/use-form-action";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, TextField } from "@windmorph/react";
+import { Button, Divider, TextField } from "@windmorph/react";
 import { EmptyState, Link } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
 import { idleFormState } from "@/lib/form-state";
 import { signUp } from "../actions";
 import { FormError } from "./form-error";
+import { GoogleButton } from "./google-button";
 
 export function SignUpForm({ next }: { next?: string }) {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
+  const tc = useTranslations("common");
   const [state, onSubmit, pending] = useFormAction(signUp, idleFormState);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,6 +81,14 @@ export function SignUpForm({ next }: { next?: string }) {
           {t("signUp.submit")}
         </Button>
       </form>
+
+      <div className="flex items-center gap-4">
+        <Divider className="flex-1" />
+        <span className="text-label-large text-on-surface-variant">{tc("or")}</span>
+        <Divider className="flex-1" />
+      </div>
+
+      <GoogleButton next={next ?? "/"} mode="signUp" />
 
       <p className="text-body-medium text-on-surface-variant flex flex-wrap justify-center gap-x-1">
         <span>{t("signUp.haveAccount")}</span>

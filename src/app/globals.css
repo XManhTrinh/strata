@@ -9,3 +9,49 @@ button,
 [role="button"] {
   cursor: pointer;
 }
+
+/* Google's sign-in button, in Google's brand colours (its guidelines require them). */
+.google-button {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid #747775;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.google-button:hover {
+  background: #f8f9fa;
+}
+.google-button:focus-visible {
+  outline: 2px solid #0b57d0;
+  outline-offset: 2px;
+}
+[data-mode="dark"] .google-button {
+  border-color: #8e918f;
+  background: #131314;
+  color: #e3e3e3;
+}
+[data-mode="dark"] .google-button:hover {
+  background: #1f1f20;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode="system"] .google-button {
+    border-color: #8e918f;
+    background: #131314;
+    color: #e3e3e3;
+  }
+  [data-mode="system"] .google-button:hover {
+    background: #1f1f20;
+  }
+}
