@@ -156,6 +156,12 @@ export type Database = {
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
       unit_label: { Args: { p_id: string }; Returns: string };
       unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
+      visible_members: {
+        Args: { p_permission_key: string; p_workspace_id: string };
+        Returns: {
+          member_id: string;
+        }[];
+      };
       would_report_to_self: {
         Args: { p_date: string; p_manager_id: string; p_member_id: string };
         Returns: boolean;
@@ -1878,6 +1884,28 @@ export type Database = {
           reaches: Database["public"]["Enums"]["reach"][];
         }[];
       };
+      org_chart: {
+        Args: {
+          p_as_of?: string;
+          p_depth?: number;
+          p_root_member_id?: string;
+          p_unit_id?: string;
+          p_workspace_id: string;
+        };
+        Returns: {
+          avatar_path: string;
+          depth: number;
+          direct_reports: number;
+          full_name: string;
+          manager_hidden: boolean;
+          manager_member_id: string;
+          member_id: string;
+          position_name: string;
+          truncated: boolean;
+          unit_id: string;
+          unit_name: string;
+        }[];
+      };
       people_directory: {
         Args: {
           p_descending?: boolean;
@@ -1950,6 +1978,14 @@ export type Database = {
       transfer_ownership: {
         Args: { p_keep_ownership?: boolean; p_member_id: string; p_workspace_id: string };
         Returns: undefined;
+      };
+      unit_headcount: {
+        Args: { p_as_of?: string; p_workspace_id: string };
+        Returns: {
+          direct: number;
+          total: number;
+          unit_id: string;
+        }[];
       };
     };
     Enums: {
