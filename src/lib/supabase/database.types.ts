@@ -161,6 +161,7 @@ export type Database = {
         Returns: undefined;
       };
       shares_workspace_with: { Args: { p_user_id: string }; Returns: boolean };
+      starter_leave_days: { Args: { p_country: string }; Returns: number };
       unit_label: { Args: { p_id: string }; Returns: string };
       unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
       visible_members: {
@@ -183,6 +184,131 @@ export type Database = {
   };
   public: {
     Tables: {
+      allowance_ledger: {
+        Row: {
+          booking_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          days: number;
+          id: number;
+          kind: Database["public"]["Enums"]["allowance_entry"];
+          leave_year: string;
+          member_id: string;
+          reason: string | null;
+          time_type_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          days: number;
+          id?: never;
+          kind: Database["public"]["Enums"]["allowance_entry"];
+          leave_year: string;
+          member_id: string;
+          reason?: string | null;
+          time_type_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          days?: number;
+          id?: never;
+          kind?: Database["public"]["Enums"]["allowance_entry"];
+          leave_year?: string;
+          member_id?: string;
+          reason?: string | null;
+          time_type_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "allowance_ledger_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "allowance_ledger_workspace_id_time_type_id_fkey";
+            columns: ["workspace_id", "time_type_id"];
+            isOneToOne: false;
+            referencedRelation: "time_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      allowance_policies: {
+        Row: {
+          accrual: Database["public"]["Enums"]["allowance_accrual"];
+          archived_at: string | null;
+          carry_over_expires_months: number | null;
+          carry_over_max: number | null;
+          created_at: string;
+          days_per_year: number;
+          id: string;
+          is_default: boolean;
+          name: string;
+          prorate_by_schedule: boolean;
+          time_type_id: string;
+          updated_at: string;
+          workspace_id: string;
+          year_start_month: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          accrual?: Database["public"]["Enums"]["allowance_accrual"];
+          archived_at?: string | null;
+          carry_over_expires_months?: number | null;
+          carry_over_max?: number | null;
+          created_at?: string;
+          days_per_year: number;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          prorate_by_schedule?: boolean;
+          time_type_id: string;
+          updated_at?: string;
+          workspace_id: string;
+          year_start_month?: number;
+        };
+        Update: {
+          accrual?: Database["public"]["Enums"]["allowance_accrual"];
+          archived_at?: string | null;
+          carry_over_expires_months?: number | null;
+          carry_over_max?: number | null;
+          created_at?: string;
+          days_per_year?: number;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          prorate_by_schedule?: boolean;
+          time_type_id?: string;
+          updated_at?: string;
+          workspace_id?: string;
+          year_start_month?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "allowance_policies_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "allowance_policies_workspace_id_time_type_id_fkey";
+            columns: ["workspace_id", "time_type_id"];
+            isOneToOne: false;
+            referencedRelation: "time_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -456,6 +582,99 @@ export type Database = {
         };
         Relationships: [];
       };
+      holiday_calendars: {
+        Row: {
+          archived_at: string | null;
+          country: string | null;
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          name: string;
+          region: string | null;
+          source: string;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          country?: string | null;
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          region?: string | null;
+          source?: string;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          country?: string | null;
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          region?: string | null;
+          source?: string;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "holiday_calendars_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      holidays: {
+        Row: {
+          calendar_id: string;
+          created_at: string;
+          date: string;
+          edited: boolean;
+          id: string;
+          name: string;
+          portion: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          calendar_id: string;
+          created_at?: string;
+          date: string;
+          edited?: boolean;
+          id?: string;
+          name: string;
+          portion?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          calendar_id?: string;
+          created_at?: string;
+          date?: string;
+          edited?: boolean;
+          id?: string;
+          name?: string;
+          portion?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "holidays_workspace_id_calendar_id_fkey";
+            columns: ["workspace_id", "calendar_id"];
+            isOneToOne: false;
+            referencedRelation: "holiday_calendars";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       import_jobs: {
         Row: {
           applied_at: string | null;
@@ -665,11 +884,68 @@ export type Database = {
           },
         ];
       };
+      member_allowance_policies: {
+        Row: {
+          created_at: string;
+          id: string;
+          member_id: string;
+          policy_id: string;
+          time_type_id: string;
+          valid_from: string;
+          valid_to: string | null;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          member_id: string;
+          policy_id: string;
+          time_type_id: string;
+          valid_from: string;
+          valid_to?: string | null;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          member_id?: string;
+          policy_id?: string;
+          time_type_id?: string;
+          valid_from?: string;
+          valid_to?: string | null;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_allowance_policies_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_allowance_policies_workspace_id_policy_id_fkey";
+            columns: ["workspace_id", "policy_id"];
+            isOneToOne: false;
+            referencedRelation: "allowance_policies";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_allowance_policies_workspace_id_time_type_id_fkey";
+            columns: ["workspace_id", "time_type_id"];
+            isOneToOne: false;
+            referencedRelation: "time_types";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       member_assignments: {
         Row: {
           career_level_id: string | null;
           created_at: string;
           employment_type_id: string | null;
+          holiday_calendar_id: string | null;
           id: string;
           manager_member_id: string | null;
           member_id: string;
@@ -678,6 +954,7 @@ export type Database = {
           updated_at: string;
           valid_from: string;
           valid_to: string | null;
+          work_schedule_id: string | null;
           workspace_id: string;
         };
         ComputedFields: never;
@@ -685,6 +962,7 @@ export type Database = {
           career_level_id?: string | null;
           created_at?: string;
           employment_type_id?: string | null;
+          holiday_calendar_id?: string | null;
           id?: string;
           manager_member_id?: string | null;
           member_id: string;
@@ -693,12 +971,14 @@ export type Database = {
           updated_at?: string;
           valid_from: string;
           valid_to?: string | null;
+          work_schedule_id?: string | null;
           workspace_id: string;
         };
         Update: {
           career_level_id?: string | null;
           created_at?: string;
           employment_type_id?: string | null;
+          holiday_calendar_id?: string | null;
           id?: string;
           manager_member_id?: string | null;
           member_id?: string;
@@ -707,6 +987,7 @@ export type Database = {
           updated_at?: string;
           valid_from?: string;
           valid_to?: string | null;
+          work_schedule_id?: string | null;
           workspace_id?: string;
         };
         Relationships: [
@@ -730,6 +1011,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "workspaces";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_holiday_calendar_id_fkey";
+            columns: ["workspace_id", "holiday_calendar_id"];
+            isOneToOne: false;
+            referencedRelation: "holiday_calendars";
+            referencedColumns: ["workspace_id", "id"];
           },
           {
             foreignKeyName: "member_assignments_workspace_id_manager_member_id_fkey";
@@ -757,6 +1045,13 @@ export type Database = {
             columns: ["workspace_id", "position_id"];
             isOneToOne: false;
             referencedRelation: "positions";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "member_assignments_workspace_id_work_schedule_id_fkey";
+            columns: ["workspace_id", "work_schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "work_schedules";
             referencedColumns: ["workspace_id", "id"];
           },
         ];
@@ -1648,6 +1943,153 @@ export type Database = {
           },
         ];
       };
+      time_types: {
+        Row: {
+          allows_recurrence: boolean;
+          approver: Database["public"]["Enums"]["time_approver"];
+          approver_member_id: string | null;
+          approver_role_id: string | null;
+          archived_at: string | null;
+          book_for_others: boolean;
+          bookable_by: Database["public"]["Enums"]["time_bookable_by"];
+          color: string;
+          created_at: string;
+          icon: string;
+          id: string;
+          is_away: boolean;
+          name: string;
+          needs_approval: boolean;
+          notify_role_id: string | null;
+          paid: boolean;
+          sort_order: number;
+          updated_at: string;
+          uses_allowance: boolean;
+          visibility: Database["public"]["Enums"]["time_visibility"];
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          allows_recurrence?: boolean;
+          approver?: Database["public"]["Enums"]["time_approver"];
+          approver_member_id?: string | null;
+          approver_role_id?: string | null;
+          archived_at?: string | null;
+          book_for_others?: boolean;
+          bookable_by?: Database["public"]["Enums"]["time_bookable_by"];
+          color?: string;
+          created_at?: string;
+          icon?: string;
+          id?: string;
+          is_away?: boolean;
+          name: string;
+          needs_approval?: boolean;
+          notify_role_id?: string | null;
+          paid?: boolean;
+          sort_order?: number;
+          updated_at?: string;
+          uses_allowance?: boolean;
+          visibility?: Database["public"]["Enums"]["time_visibility"];
+          workspace_id: string;
+        };
+        Update: {
+          allows_recurrence?: boolean;
+          approver?: Database["public"]["Enums"]["time_approver"];
+          approver_member_id?: string | null;
+          approver_role_id?: string | null;
+          archived_at?: string | null;
+          book_for_others?: boolean;
+          bookable_by?: Database["public"]["Enums"]["time_bookable_by"];
+          color?: string;
+          created_at?: string;
+          icon?: string;
+          id?: string;
+          is_away?: boolean;
+          name?: string;
+          needs_approval?: boolean;
+          notify_role_id?: string | null;
+          paid?: boolean;
+          sort_order?: number;
+          updated_at?: string;
+          uses_allowance?: boolean;
+          visibility?: Database["public"]["Enums"]["time_visibility"];
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "time_types_workspace_id_approver_member_id_fkey";
+            columns: ["workspace_id", "approver_member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "time_types_workspace_id_approver_role_id_fkey";
+            columns: ["workspace_id", "approver_role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "time_types_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "time_types_workspace_id_notify_role_id_fkey";
+            columns: ["workspace_id", "notify_role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      work_schedules: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          hours_per_day: number;
+          id: string;
+          is_default: boolean;
+          name: string;
+          updated_at: string;
+          working_days: number[];
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          hours_per_day?: number;
+          id?: string;
+          is_default?: boolean;
+          name: string;
+          updated_at?: string;
+          working_days: number[];
+          workspace_id: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          hours_per_day?: number;
+          id?: string;
+          is_default?: boolean;
+          name?: string;
+          updated_at?: string;
+          working_days?: number[];
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "work_schedules_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workspace_features: {
         Row: {
           enabled: boolean;
@@ -2000,6 +2442,9 @@ export type Database = {
       };
     };
     Enums: {
+      allowance_accrual: "upfront" | "monthly";
+      allowance_entry:
+        "grant" | "accrual" | "adjustment" | "usage" | "refund" | "carry_over" | "expiry";
       cost_method: "annual_salary" | "day_rate";
       custom_field_type: "text" | "number" | "date" | "single_choice" | "multi_choice" | "person";
       email_delivery: "instant" | "daily" | "none";
@@ -2008,6 +2453,9 @@ export type Database = {
       member_status: "active" | "invited" | "inactive";
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
       reach: "own" | "reports" | "team" | "team_and_below" | "units" | "workspace";
+      time_approver: "line_manager" | "team_lead" | "person" | "role" | "none";
+      time_bookable_by: "everyone" | "managers" | "admins";
+      time_visibility: "everyone" | "team" | "private";
       workspace_kind: "personal" | "team" | "company";
     };
     CompositeTypes: {
@@ -2123,6 +2571,16 @@ export const Constants = {
   },
   public: {
     Enums: {
+      allowance_accrual: ["upfront", "monthly"],
+      allowance_entry: [
+        "grant",
+        "accrual",
+        "adjustment",
+        "usage",
+        "refund",
+        "carry_over",
+        "expiry",
+      ],
       cost_method: ["annual_salary", "day_rate"],
       custom_field_type: ["text", "number", "date", "single_choice", "multi_choice", "person"],
       email_delivery: ["instant", "daily", "none"],
@@ -2131,6 +2589,9 @@ export const Constants = {
       member_status: ["active", "invited", "inactive"],
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
       reach: ["own", "reports", "team", "team_and_below", "units", "workspace"],
+      time_approver: ["line_manager", "team_lead", "person", "role", "none"],
+      time_bookable_by: ["everyone", "managers", "admins"],
+      time_visibility: ["everyone", "team", "private"],
       workspace_kind: ["personal", "team", "company"],
     },
   },

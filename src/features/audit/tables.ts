@@ -19,6 +19,12 @@ export const AUDIT_TABLES = [
   "member_field_values",
   "member_role_units",
   "import_jobs",
+  "work_schedules",
+  "holiday_calendars",
+  "holidays",
+  "time_types",
+  "allowance_policies",
+  "member_allowance_policies",
 ] as const;
 
 export type AuditTable = (typeof AUDIT_TABLES)[number];

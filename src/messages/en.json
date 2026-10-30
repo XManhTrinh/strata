@@ -598,7 +598,13 @@
       "custom_field_options": "a custom field option",
       "member_field_values": "a custom field value",
       "member_role_units": "a role's units",
-      "import_jobs": "an import"
+      "import_jobs": "an import",
+      "work_schedules": "a work schedule",
+      "holiday_calendars": "a holiday calendar",
+      "holidays": "a holiday",
+      "time_types": "a time type",
+      "allowance_policies": "an allowance policy",
+      "member_allowance_policies": "a person's allowance policy"
     },
     "fields": "Changed: {fields}",
     "older": "Older entries",
