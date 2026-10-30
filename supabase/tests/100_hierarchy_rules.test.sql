@@ -47,7 +47,8 @@ select throws_ok(
   '23514', null, 'a unit with live sub-units cannot be archived'
 );
 
--- Alice works in Platform until further notice.
+-- Alice works in Platform until further notice (instead of the root unit she started in).
+delete from public.member_assignments where workspace_id = (select id from ws);
 insert into public.member_assignments (workspace_id, member_id, valid_from, org_unit_id)
 select (select id from ws), m.id, current_date - 30, (select id from public.org_units where workspace_id = (select id from ws) and name = 'Platform')
 from public.members m where m.workspace_id = (select id from ws) and m.user_id = (select user_id from people where name = 'alice');

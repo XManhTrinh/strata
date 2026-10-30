@@ -43,7 +43,8 @@ insert into public.members (workspace_id, user_id, full_name, email)
 select (select ws from ctx), user_id, initcap(name), name || '@acme.test' from people where name <> 'alice';
 update people p set member_id = m.id from public.members m where m.user_id = p.user_id;
 
--- Job records today.
+-- Job records today, replacing the root-unit records people with accounts start with.
+delete from public.member_assignments where workspace_id = (select ws from ctx);
 insert into public.member_assignments (workspace_id, member_id, valid_from, org_unit_id, manager_member_id)
 select (select ws from ctx), pg_temp.member(n), current_date - 30, pg_temp.unit(u), pg_temp.member(mgr)
 from (values ('mia', 'Squad A', null), ('sam', 'Squad A', 'mia'), ('tom', 'Squad B', 'sam'),

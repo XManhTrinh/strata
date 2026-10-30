@@ -4,6 +4,7 @@ export type ColumnType = "text" | "number" | "currency" | "date" | "custom";
 
 export type ColumnDef<Row> = {
   id: string;
+  /** Shown above the column and in column settings; never empty (screen readers name it). */
   header: string;
   /** The value used for sorting, searching and default display. */
   accessor: (row: Row) => string | number | null;

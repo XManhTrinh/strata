@@ -80,7 +80,7 @@ export function PositionsSection({
     },
     {
       id: "actions",
-      header: "",
+      header: t("actionsColumn"),
       accessor: () => null,
       sortable: false,
       hideable: false,

@@ -791,7 +791,8 @@
       "day_rateHelp": "Costed as day rate × working days.",
       "dialogAdd": "Add employment type",
       "dialogEdit": "Edit employment type"
-    }
+    },
+    "actionsColumn": "Actions"
   },
   "fields": {
     "title": "Custom fields",

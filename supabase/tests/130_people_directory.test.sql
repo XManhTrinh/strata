@@ -49,6 +49,9 @@ update people p set member_id = m.id from public.members m
 where m.workspace_id = (select ws from ctx) and m.email = p.name || '@acme.test';
 
 -- Mia leads Squad A (Sam reports to her, Tom to Sam); Una is in Squad B; Leo left.
+-- These replace the root-unit records people with accounts start with.
+delete from public.member_assignments
+where workspace_id = (select ws from ctx) and member_id in (select member_id from people);
 insert into public.member_assignments (workspace_id, member_id, valid_from, org_unit_id, manager_member_id)
 select (select ws from ctx), pg_temp.member(n), current_date - 30, pg_temp.unit(u), pg_temp.member(mgr)
 from (values ('mia', 'Squad A', null), ('sam', 'Squad A', 'mia'), ('tom', 'Squad B', 'sam'),

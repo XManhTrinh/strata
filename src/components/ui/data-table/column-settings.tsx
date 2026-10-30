@@ -85,7 +85,7 @@ export function ColumnSettings<Row>({
           {(column) => (
             <GridListItem
               id={column.id}
-              textValue={column.header}
+              textValue={column.header || column.id}
               className="text-body-large data-[dragging]:opacity-50 data-[drop-target]:bg-secondary-container flex items-center gap-2 rounded-lg py-1 outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary"
             >
               <AriaButton
