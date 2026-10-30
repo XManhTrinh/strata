@@ -3219,6 +3219,28 @@ export type Database = {
         };
         Returns: undefined;
       };
+      allocation_grid: {
+        Args: {
+          p_from: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_scenario_id: string;
+          p_search?: string;
+          p_to: string;
+          p_unit_id?: string;
+        };
+        Returns: {
+          filled_on: string;
+          member_id: string;
+          months: Json;
+          name: string;
+          org_unit_id: string;
+          planned_role_id: string;
+          total_count: number;
+          totals: Json;
+          unit_name: string;
+        }[];
+      };
       allowance_balances: {
         Args: { p_as_of?: string; p_member_id: string };
         Returns: {
@@ -3448,6 +3470,16 @@ export type Database = {
         Returns: {
           permission_key: string;
           reaches: Database["public"]["Enums"]["reach"][];
+        }[];
+      };
+      open_roles: {
+        Args: { p_workspace_id: string };
+        Returns: {
+          fte: number;
+          org_unit_id: string;
+          planned_role_id: string;
+          start_date: string;
+          title: string;
         }[];
       };
       org_chart: {
