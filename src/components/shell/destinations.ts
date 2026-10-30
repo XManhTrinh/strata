@@ -20,7 +20,10 @@ export function destinationsFor({ workspace, permissions }: WorkspaceContextValu
   if ((permissions["org_chart.view"]?.length ?? 0) > 0) {
     destinations.push({ key: "orgChart", href: `${base}/org-chart`, icon: "account_tree" });
   }
-  if ((permissions["rate_cards.view"]?.length ?? 0) > 0) {
+  if (
+    (permissions["planning.view"]?.length ?? 0) > 0 ||
+    (permissions["rate_cards.view"]?.length ?? 0) > 0
+  ) {
     destinations.push({ key: "planning", href: `${base}/planning`, icon: "insights" });
   }
   if (visibleSections(permissions).length > 0) {

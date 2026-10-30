@@ -33,6 +33,10 @@ export function SettingsShell({ children }: { children: ReactNode }) {
         listLabel={t("title")}
         detailLabel={current ? t(`sections.${current}.name`) : t("title")}
         listAs="nav"
+        // With both panes showing, a long list scrolls on its own below the top app bar, so the
+        // page doesn't scroll under open menus.
+        stickyTop="4rem"
+        classNames={{ list: "expanded:max-h-[calc(100dvh-4rem)] expanded:overflow-y-auto" }}
         back={
           <IconButton
             variant="standard"

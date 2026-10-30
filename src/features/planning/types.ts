@@ -68,3 +68,29 @@ export type RateCardPreview = {
   monthlyCost: number | null;
   currency: string | null;
 };
+
+export type ScenarioStatus = Enums["scenario_status"];
+
+export type Scenario = {
+  id: string;
+  name: string;
+  /** First and last month planned (each the first of a month). */
+  firstPeriod: string;
+  lastPeriod: string;
+  status: ScenarioStatus;
+  isLive: boolean;
+  archived: boolean;
+  baselineName: string | null;
+  costsAppliedAt: string | null;
+};
+
+/** One group's FTE, headcount and cost in one month; cost is null when the caller can't see it. */
+export type TotalsRow = {
+  groupId: string | null;
+  groupLabel: string | null;
+  period: string;
+  fte: number;
+  headcount: number;
+  cost: number | null;
+  currency: string;
+};

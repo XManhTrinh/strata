@@ -140,7 +140,21 @@
     "rateCardNeedsConditions": "Add at least one condition, or make this the default card.",
     "unknownField": "One of the fields no longer exists.",
     "rateInvalid": "Each rate needs a month, a day rate of 0 or more, 1 to 31 working days and a 3-letter currency.",
-    "rateMonthTwice": "Each month can have only one rate."
+    "rateMonthTwice": "Each month can have only one rate.",
+    "scenarioNameRequired": "Enter a name for the scenario.",
+    "scenarioNameTaken": "A scenario already has this name.",
+    "scenarioPeriod": "Choose a last month after the first, up to six years on.",
+    "planningLifecycleOff": "Plans aren't submitted in this workspace.",
+    "scenarioIsLive": "This is the live plan. Make another plan live first.",
+    "scenarioStatusChanged": "This plan has moved on. Refresh to see where it is.",
+    "scenarioNotApproved": "Only an approved plan can be live.",
+    "scenarioLocked": "This plan is locked.",
+    "scenarioNotDeleted": "This plan can't be deleted: it's live, or approved and you can't approve plans.",
+    "periodLocked": "That month is locked.",
+    "invalidAllocation": "One of the changes isn't valid.",
+    "tooManyChanges": "Too many changes at once. Save in smaller steps.",
+    "overAllocated": "Someone would be over full time in a month.",
+    "roleFilled": "This role is already filled."
   },
   "auth": {
     "signIn": {
@@ -745,6 +759,11 @@
       },
       "import": {
         "finished": "Your people import is done"
+      },
+      "scenario": {
+        "submitted": "{by} submitted {scenario} for approval",
+        "approved": "{by} approved {scenario}",
+        "returned": "{by} returned {scenario} to draft"
       }
     }
   },
@@ -1623,5 +1642,86 @@
         "none": "nothing"
       }
     }
+  },
+  "planning": {
+    "title": "Planning",
+    "tabs": {
+      "label": "Planning",
+      "scenarios": "Scenarios",
+      "compare": "Compare",
+      "rate-cards": "Rate cards"
+    }
+  },
+  "scenarios": {
+    "title": "Scenarios",
+    "intro": "Each scenario is a plan of people's time by team and month. Copy one to try changes; make one the live plan.",
+    "introLifecycle": "Each scenario is a plan of people's time by team and month. Drafts are submitted for approval; an approved plan can be made live.",
+    "add": "New scenario",
+    "dialogAdd": "New scenario",
+    "create": "Create",
+    "created": "{name} created",
+    "dialogCopy": "Copy scenario",
+    "dialogRename": "Rename scenario",
+    "copyName": "Copy of {name}",
+    "copy": "Copy",
+    "copied": "{name} created",
+    "rename": "Rename",
+    "save": "Save",
+    "saved": "{name} saved",
+    "name": "Name",
+    "firstMonth": "First month",
+    "lastMonth": "Last month",
+    "monthsHelp": "Plans are by month; any day in a month means that month.",
+    "fromPeople": "Start from everyone's current team",
+    "fromPeopleHelp": "Everyone working each month starts at full time in their team. Turn off to start empty.",
+    "months": "{from} – {to}",
+    "copiedFrom": "Copied from {name}",
+    "costsApplied": "Costs applied {date}",
+    "costsNotApplied": "Costs not applied yet",
+    "live": "Live",
+    "archived": "Archived",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved"
+    },
+    "actions": "Actions for {name}",
+    "apply": "Apply rate cards",
+    "submit": "Submit for approval",
+    "approve": "Approve",
+    "return": "Return to draft",
+    "makeLive": "Make live",
+    "archive": "Archive",
+    "restore": "Restore",
+    "delete": "Delete",
+    "submitted": "{name} submitted",
+    "approved": "{name} approved",
+    "returned": "{name} returned to draft",
+    "madeLive": "{name} is the live plan",
+    "costsAppliedDone": "Costs applied to {name}",
+    "archivedDone": "{name} archived",
+    "restored": "{name} restored",
+    "deleted": "{name} deleted",
+    "emptyTitle": "No scenarios yet",
+    "emptyEditor": "Create a scenario to plan people's time and cost by team and month.",
+    "emptyViewer": "Plans you can see will appear here."
+  },
+  "compare": {
+    "title": "Compare scenarios",
+    "first": "First scenario",
+    "second": "Second scenario",
+    "over": "Average FTE a month and total cost over {count, plural, one {# month} other {# months}}, {from} – {to}.",
+    "noOverlap": "These scenarios don't plan any of the same months.",
+    "team": "Team",
+    "fte": "FTE",
+    "fteOf": "{name} FTE",
+    "fteChange": "FTE change",
+    "costOf": "{name} cost",
+    "costChange": "Cost change",
+    "summary": "Second scenario: {fte} FTE",
+    "summaryCost": "Second scenario: {fte} FTE, {cost}",
+    "tableLabel": "Scenarios compared by team",
+    "needTwoTitle": "Two scenarios needed",
+    "needTwo": "Create or copy a scenario to compare two plans."
   }
 }

@@ -355,7 +355,7 @@ begin
     raise exception 'Choose up to six years.' using errcode = 'check_violation', hint = 'scenarioPeriod';
   end if;
   if exists (select 1 from public.scenarios s where s.workspace_id = p_workspace_id and s.name = p_name::extensions.citext) then
-    raise exception 'A scenario has this name.' using errcode = 'unique_violation', hint = 'nameTaken';
+    raise exception 'A scenario has this name.' using errcode = 'unique_violation', hint = 'scenarioNameTaken';
   end if;
 
   insert into public.scenarios (workspace_id, name, first_period, last_period, created_by)
@@ -403,7 +403,7 @@ begin
   end if;
   perform app.require_planning_editor(v_from.workspace_id);
   if exists (select 1 from public.scenarios s where s.workspace_id = v_from.workspace_id and s.name = p_name::extensions.citext) then
-    raise exception 'A scenario has this name.' using errcode = 'unique_violation', hint = 'nameTaken';
+    raise exception 'A scenario has this name.' using errcode = 'unique_violation', hint = 'scenarioNameTaken';
   end if;
 
   insert into public.scenarios (workspace_id, name, first_period, last_period, baseline_id, created_by)

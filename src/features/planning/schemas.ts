@@ -77,3 +77,19 @@ export const rateCardGroupSchema = z.object({
   name: z.string().trim().min(1, { error: "rateCardGroupNameRequired" }).max(80),
   setId: optionalId,
 });
+
+export const scenarioSchema = z
+  .object({
+    name: z.string().trim().min(1, { error: "scenarioNameRequired" }).max(100),
+    firstPeriod: z.iso.date({ error: "dateRequired" }),
+    lastPeriod: z.iso.date({ error: "dateRequired" }),
+    fromPeople: flag,
+  })
+  .refine((s) => s.lastPeriod >= s.firstPeriod, {
+    path: ["lastPeriod"],
+    error: "scenarioPeriod",
+  });
+
+export const scenarioNameSchema = z.object({
+  name: z.string().trim().min(1, { error: "scenarioNameRequired" }).max(100),
+});

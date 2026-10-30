@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
+import { planningAccess } from "@/features/planning/access";
 
-/** Planning opens on its first screen. */
+/** Planning opens on the first screen the user can use. */
 export default async function PlanningRoute({
   params,
 }: {
   params: Promise<{ workspace: string }>;
 }) {
   const { workspace } = await params;
-  redirect(`/w/${workspace}/planning/rate-cards`);
+  const { tabs } = await planningAccess(workspace);
+  redirect(`/w/${workspace}/planning/${tabs[0]}`);
 }

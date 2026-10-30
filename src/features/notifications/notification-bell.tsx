@@ -28,6 +28,9 @@ const KINDS = [
   "time.rejected",
   "time.cancelled",
   "import.finished",
+  "scenario.submitted",
+  "scenario.approved",
+  "scenario.returned",
 ];
 
 /** The bell: unread count, a side sheet with recent notifications, live updates via Realtime. */
@@ -97,6 +100,7 @@ export function NotificationBell() {
       name: payload.member_name ?? "",
       by: payload.by_name ?? "",
       type: payload.time_type ?? "",
+      scenario: payload.scenario_name ?? "",
       dates,
     });
   }
