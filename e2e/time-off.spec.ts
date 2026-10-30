@@ -56,13 +56,35 @@ test("people book time off, see their balance, cancel, and see who's away", asyn
   await dialog.getByRole("button", { name: "Book time off" }).click();
   await expect(page.getByText("Booked", { exact: true })).toBeVisible();
 
-  await page.goto(`${page.url().split("?")[0]}?tab=calendar&month=${monday.slice(0, 7)}`);
+  // A weekly team meeting for three weeks.
+  await page.getByRole("button", { name: "Book time off" }).click();
+  await dialog.getByRole("button", { name: /Type$/ }).click();
+  await page.getByRole("option", { name: "Team event" }).click();
+  await fillDate(page, "From", nextMonday(2));
+  await fillDate(page, "To", nextMonday(2));
+  await dialog.getByLabel("Title (optional)").fill("Team sync");
+  await dialog.getByRole("button", { name: /Repeats$/ }).click();
+  await page.getByRole("option", { name: "Every week" }).click();
+  await fillDate(page, "Until", nextMonday(16));
+  await dialog.getByRole("button", { name: "Book time off" }).click();
+  await expect(page.getByText("Booked", { exact: true })).toBeVisible();
+
+  const timeOff = page.url().split("?")[0];
+  await page.goto(`${timeOff}?tab=calendar&view=month&date=${monday}`);
   if (phone) {
     await expect(page.getByRole("list", { name: /Who's away/ })).toContainText("Ana Pop");
   } else {
     await expect(page.getByRole("table", { name: /Who's away/ })).toContainText("Ana Pop");
     await expect(page.getByRole("cell", { name: /Ana Pop, Sick leave/ })).toHaveCount(1);
   }
+  await expectNoA11yViolations(page);
+
+  // The week view shows that week; the list shows each meeting of the next four weeks.
+  await page.goto(`${timeOff}?tab=calendar&view=week&date=${monday}`);
+  await expect(page.getByRole("heading", { name: /^Week of / })).toBeVisible();
+  await page.goto(`${timeOff}?tab=calendar&view=list&date=${monday}`);
+  const list = page.getByRole("list", { name: /Who's away/ });
+  await expect(list.getByRole("listitem").filter({ hasText: "Repeats" })).toHaveCount(3);
   await expectNoA11yViolations(page);
 
   // The owner approves others' requests, never their own: nothing waits here.

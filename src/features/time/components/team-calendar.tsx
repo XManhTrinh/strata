@@ -3,44 +3,49 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { IconButton, List, ListItem } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
+import { type CalendarView, daysBetween } from "../calendar-range";
 import type { CalendarEntry } from "../types";
 import { useBookingDates } from "./date-range";
 
-/** Days of a month as ISO dates. */
-function monthDays(month: string): string[] {
-  const [y, m] = month.split("-").map(Number) as [number, number];
-  const count = new Date(Date.UTC(y, m, 0)).getUTCDate();
-  return Array.from({ length: count }, (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`);
-}
-
 /**
- * Who's away in a month: one row per person, one column per day (a table, so screen readers can
- * move by row and column). Phones get the same bookings as a list.
+ * Who's away: in a month or week, one row per person and one column per day (a table, so screen
+ * readers move by row and column); in the list view, and always on phones, bookings in order.
  */
 export function TeamCalendar({
-  month,
+  view,
+  from,
+  to,
   entries,
-  hrefFor,
+  previousHref,
+  nextHref,
 }: {
-  month: string;
+  view: CalendarView;
+  from: string;
+  to: string;
   entries: CalendarEntry[];
-  /** The page for another month (YYYY-MM). */
-  hrefFor: (month: string) => string;
+  previousHref: string;
+  nextHref: string;
 }) {
   const t = useTranslations("timeOff");
   const format = useFormatter();
   const dates = useBookingDates();
-  const days = monthDays(month);
-  const [y, m] = month.split("-").map(Number) as [number, number];
-  const shift = (by: number) => {
-    const d = new Date(Date.UTC(y, m - 1 + by, 1));
-    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-  };
-  const monthName = format.dateTime(new Date(Date.UTC(y, m - 1, 1)), {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  const days = daysBetween(from, to);
+  const day = (iso: string) =>
+    format.dateTime(new Date(iso), { dateStyle: "medium", timeZone: "UTC" });
+  const monthName =
+    view === "month"
+      ? format.dateTime(new Date(from), { month: "long", year: "numeric", timeZone: "UTC" })
+      : view === "week"
+        ? t("calendar.weekOf", { date: day(from) })
+        : t("calendar.listFrom", { date: day(from) });
+  const arrow = (direction: "previous" | "next") =>
+    t(
+      view === "month"
+        ? `calendar.${direction}`
+        : view === "week"
+          ? `calendar.${direction}Week`
+          : `calendar.${direction}List`
+    );
   const people = [...new Map(entries.map((e) => [e.memberId, e.memberName])).entries()].sort(
     (a, b) => a[1].localeCompare(b[1])
   );
@@ -54,8 +59,8 @@ export function TeamCalendar({
       <div className="flex items-center gap-2">
         <IconButton
           variant="standard"
-          href={hrefFor(shift(-1))}
-          aria-label={t("calendar.previous")}
+          href={previousHref}
+          aria-label={arrow("previous")}
           icon={<Icon name="chevron_left" />}
         />
         <h2 id="calendar-title" className="text-title-large text-on-surface min-w-48 text-center">
@@ -63,19 +68,21 @@ export function TeamCalendar({
         </h2>
         <IconButton
           variant="standard"
-          href={hrefFor(shift(1))}
-          aria-label={t("calendar.next")}
+          href={nextHref}
+          aria-label={arrow("next")}
           icon={<Icon name="chevron_right" />}
         />
       </div>
 
       {people.length === 0 ? (
-        <p className="text-body-medium text-on-surface-variant">{t("calendar.empty")}</p>
+        <p className="text-body-medium text-on-surface-variant">
+          {t(view === "list" ? "calendar.listEmpty" : "calendar.empty")}
+        </p>
       ) : (
         <>
           {/* Scrolls sideways on narrower screens, so keyboard users can focus it to scroll. */}
           <div
-            className="medium:block focus-visible:ring-secondary hidden overflow-x-auto rounded-md outline-none focus-visible:ring-2"
+            className={`focus-visible:ring-secondary hidden overflow-x-auto rounded-md outline-none focus-visible:ring-2 ${view === "list" ? "" : "medium:block"}`}
             role="region"
             aria-label={t("calendar.label", { month: monthName })}
             // A scrolling region must take focus (WCAG 2.1.1), which this rule doesn't know.
@@ -159,7 +166,10 @@ export function TeamCalendar({
               </tbody>
             </table>
           </div>
-          <List aria-label={t("calendar.label", { month: monthName })} className="medium:hidden">
+          <List
+            aria-label={t("calendar.label", { month: monthName })}
+            className={view === "list" ? "" : "medium:hidden"}
+          >
             {entries.map((e) => (
               <ListItem
                 key={`${e.bookingId}-${e.memberId}`}
@@ -169,7 +179,9 @@ export function TeamCalendar({
                     <Icon name={e.icon} />
                   </span>
                 }
-                supportingText={`${label(e)} · ${dates(e)}`}
+                supportingText={[label(e), dates(e), e.repeats && t("repeating")]
+                  .filter(Boolean)
+                  .join(" · ")}
               >
                 {e.memberName}
               </ListItem>

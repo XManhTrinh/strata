@@ -1400,7 +1400,14 @@
       "busy": "Busy",
       "person": "Person",
       "away": "{name}, {type}, {dates}",
-      "label": "Who's away in {month}"
+      "label": "Who's away in {month}",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "previousList": "Earlier",
+      "nextList": "Later",
+      "weekOf": "Week of {date}",
+      "listFrom": "From {date}",
+      "listEmpty": "Nothing booked in these four weeks."
     },
     "range": {
       "oneDay": "{date}",
@@ -1418,6 +1425,21 @@
     "adjustTitle": "Adjust a balance",
     "adjustDays": "Days to add (negative to remove)",
     "adjustReason": "Reason",
-    "adjusted": "Balance adjusted"
+    "adjusted": "Balance adjusted",
+    "repeat": "Repeats",
+    "repeatUntil": "Until",
+    "repeats": {
+      "none": "Doesn't repeat",
+      "weekly": "Every week",
+      "fortnightly": "Every 2 weeks",
+      "monthly": "Every month"
+    },
+    "views": {
+      "label": "View",
+      "month": "Month",
+      "week": "Week",
+      "list": "List"
+    },
+    "repeating": "Repeats"
   }
 }

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { errorKey } from "@/features/structure/errors";
 import type { ErrorKey, FormState } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
+import { repeatRule } from "./recurrence";
 
 type Result = { ok: true } | { ok: false; error: ErrorKey };
 
@@ -17,6 +18,8 @@ const bookingSchema = z.object({
   endHalf: z.enum(["full", "morning"]).default("full"),
   title: z.string().trim().max(200).default(""),
   notes: z.string().trim().max(2000).default(""),
+  repeat: z.enum(["none", "weekly", "fortnightly", "monthly"]).default("none"),
+  repeatUntil: z.union([z.iso.date(), z.literal("")]).default(""),
 });
 
 function revalidateTime() {
@@ -53,6 +56,7 @@ export async function bookTime(
     p_end_half: b.endHalf,
     p_title: b.title || undefined,
     p_notes: b.notes || undefined,
+    p_recurrence_rule: repeatRule(b.repeat, b.repeatUntil || null) ?? undefined,
   });
   if (error) return { status: "error", error: errorKey(error, "generic") };
   revalidateTime();

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/shell/page-header";
+import { type CalendarView, viewRange } from "@/features/time/calendar-range";
 import { TimeOffPage, type TimeOffTab } from "@/features/time/components/time-off-page";
 import {
   bookableTypes,
@@ -17,14 +18,14 @@ export default async function TimeOffRoute({
   searchParams,
 }: {
   params: Promise<{ workspace: string }>;
-  searchParams: Promise<{ tab?: string; month?: string }>;
+  searchParams: Promise<{ tab?: string; view?: string; date?: string }>;
 }) {
   const { workspace: slug } = await params;
   const query = await searchParams;
   const supabase = await createClient();
   const { data: workspace } = await supabase
     .from("workspaces")
-    .select("id")
+    .select("id, week_start")
     .eq("slug", slug)
     .maybeSingle();
   if (!workspace) notFound();
@@ -48,18 +49,18 @@ export default async function TimeOffRoute({
       : query.tab === "approvals" && canApprove
         ? "approvals"
         : "mine";
-  const month = /^\d{4}-\d{2}$/.test(query.month ?? "")
-    ? query.month!
-    : new Date().toISOString().slice(0, 7);
-  const [y, m] = month.split("-").map(Number) as [number, number];
-  const lastDay = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+  const view: CalendarView = query.view === "week" || query.view === "list" ? query.view : "month";
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(query.date ?? "")
+    ? query.date!
+    : new Date().toISOString().slice(0, 10);
+  const range = viewRange(view, date, workspace.week_start);
 
   const [types, balances, bookings, approvals, entries, t] = await Promise.all([
     bookableTypes(workspace.id),
     myBalances(memberId),
     tab === "mine" ? myBookings(workspace.id, memberId) : [],
     canApprove ? pendingApprovals(workspace.id) : [],
-    tab === "calendar" ? calendarEntries(workspace.id, `${month}-01`, lastDay) : [],
+    tab === "calendar" ? calendarEntries(workspace.id, range.from, range.to) : [],
     getTranslations("timeOff"),
   ]);
 
@@ -69,7 +70,9 @@ export default async function TimeOffRoute({
       <div className="medium:px-6 px-4 pb-6">
         <TimeOffPage
           tab={tab}
-          month={month}
+          view={view}
+          date={date}
+          weekStart={workspace.week_start}
           memberId={memberId}
           myName={myName}
           canBookForOthers={held.has("time.book_for_others")}

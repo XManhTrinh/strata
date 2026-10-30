@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { occurrences } from "./recurrence";
 import type { Balance, BookableType, CalendarEntry, MyBooking, PendingApproval } from "./types";
 
 /** The caller's member id in a workspace, or null. */
@@ -69,7 +70,9 @@ export async function bookableTypes(workspaceId: string): Promise<BookableType[]
   const [{ data: types }, { data: permissions }] = await Promise.all([
     supabase
       .from("time_types")
-      .select("id, name, color, icon, uses_allowance, needs_approval, book_for_others, bookable_by")
+      .select(
+        "id, name, color, icon, uses_allowance, needs_approval, book_for_others, bookable_by, allows_recurrence"
+      )
       .eq("workspace_id", workspaceId)
       .is("archived_at", null)
       .order("sort_order"),
@@ -91,6 +94,7 @@ export async function bookableTypes(workspaceId: string): Promise<BookableType[]
       usesAllowance: t.uses_allowance,
       needsApproval: t.needs_approval,
       bookForOthers: t.book_for_others,
+      allowsRecurrence: t.allows_recurrence,
     }));
 }
 
@@ -122,20 +126,28 @@ export async function calendarEntries(
     p_from: from,
     p_to: to,
   });
-  return (data ?? []).map((e) => ({
-    bookingId: e.booking_id,
-    memberId: e.member_id,
-    memberName: e.member_name,
-    typeName: e.time_type_name,
-    color: e.color,
-    icon: e.icon,
-    isAway: e.is_away,
-    startDate: e.start_date,
-    endDate: e.end_date,
-    startHalf: e.start_half,
-    endHalf: e.end_half,
-    status: e.status,
-    title: e.title,
-    masked: e.masked,
-  }));
+  // Repeating events come once with their rule; each occurrence in the range becomes an entry.
+  return (data ?? []).flatMap((e) =>
+    occurrences(
+      { startDate: e.start_date, endDate: e.end_date, recurrenceRule: e.recurrence_rule },
+      from,
+      to
+    ).map((o) => ({
+      bookingId: e.booking_id,
+      memberId: e.member_id,
+      memberName: e.member_name,
+      typeName: e.time_type_name,
+      color: e.color,
+      icon: e.icon,
+      isAway: e.is_away,
+      startDate: o.startDate,
+      endDate: o.endDate,
+      startHalf: e.start_half,
+      endHalf: e.end_half,
+      status: e.status,
+      title: e.title,
+      masked: e.masked,
+      repeats: e.recurrence_rule !== null,
+    }))
+  );
 }

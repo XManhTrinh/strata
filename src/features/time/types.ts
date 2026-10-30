@@ -103,6 +103,7 @@ export type BookableType = {
   usesAllowance: boolean;
   needsApproval: boolean;
   bookForOthers: boolean;
+  allowsRecurrence: boolean;
 };
 
 export type PendingApproval = {
@@ -133,4 +134,6 @@ export type CalendarEntry = {
   status: "pending" | "approved" | "rejected" | "cancelled";
   title: string | null;
   masked: boolean;
+  /** One occurrence of a repeating event. */
+  repeats: boolean;
 };

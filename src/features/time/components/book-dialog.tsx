@@ -38,6 +38,7 @@ export function BookDialog({
   const [startAfternoon, setStartAfternoon] = useState(false);
   const [endMorning, setEndMorning] = useState(false);
   const [days, setDays] = useState<number | null>(null);
+  const [repeat, setRepeat] = useState("none");
   const type = types.find((x) => x.id === typeId);
   const balance = balances.find((b) => b.timeTypeId === typeId);
   const startHalf = startAfternoon ? "afternoon" : "full";
@@ -137,6 +138,29 @@ export function BookDialog({
           )}
           {!type?.usesAllowance && (
             <TextField className="w-full" name="title" label={t("titleField")} />
+          )}
+          {type?.allowsRecurrence && (
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                className="w-full"
+                name="repeat"
+                label={t("repeat")}
+                value={repeat}
+                onChange={(key) => key != null && setRepeat(String(key))}
+              >
+                {(["none", "weekly", "fortnightly", "monthly"] as const).map((r) => (
+                  <SelectItem key={r}>{t(`repeats.${r}`)}</SelectItem>
+                ))}
+              </Select>
+              {repeat !== "none" && (
+                <IsoDateField
+                  name="repeatUntil"
+                  label={t("repeatUntil")}
+                  defaultValue={null}
+                  min={start}
+                />
+              )}
+            </div>
           )}
           <TextField className="w-full" name="notes" label={t("notes")} multiline rows={2} />
         </>
