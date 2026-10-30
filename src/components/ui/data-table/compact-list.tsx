@@ -12,12 +12,14 @@ export function CompactList<Row>({
   getRowId,
   toItem,
   onRowAction,
+  rowHref,
 }: {
   ariaLabel: string;
   rows: Row[];
   getRowId: (row: Row) => string;
   toItem: (row: Row) => CompactItem;
   onRowAction?: (row: Row) => void;
+  rowHref?: (row: Row) => string;
 }) {
   const byId = new Map(rows.map((row) => [getRowId(row), row]));
   return (
@@ -34,6 +36,7 @@ export function CompactList<Row>({
         return (
           <ListItem
             key={getRowId(row)}
+            href={rowHref?.(row)}
             textValue={item.headline}
             supportingText={item.supporting}
             leading={item.leading}

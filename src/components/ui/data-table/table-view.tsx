@@ -28,6 +28,7 @@ type Props<Row> = {
   onSelectionChange: (ids: string[], wholePage: boolean) => void;
   onResize: (widths: Record<string, number>) => void;
   onRowAction?: (row: Row) => void;
+  rowHref?: (row: Row) => string;
   labels: DataTableLabels;
 };
 
@@ -50,6 +51,7 @@ export function TableView<Row>({
   onSelectionChange,
   onResize,
   onRowAction,
+  rowHref,
   labels,
 }: Props<Row>) {
   const selectedKeys: Selection = new Set(state.selection.ids);
@@ -138,10 +140,11 @@ export function TableView<Row>({
             return (
               <Row
                 id={id}
+                href={rowHref?.(row)}
                 className={cn(
                   "border-outline-variant outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
                   "hover:bg-on-surface/8 data-[selected]:bg-secondary-container data-[selected]:text-on-secondary-container",
-                  onRowAction && "cursor-pointer"
+                  (onRowAction || rowHref) && "cursor-pointer"
                 )}
               >
                 {selectable && (
@@ -160,7 +163,20 @@ export function TableView<Row>({
                         "text-end tabular-nums"
                     )}
                   >
-                    {display(column, row)}
+                    {rowHref && column.isRowHeader ? (
+                      // A real link, so a click works before the script loads; once it has, the
+                      // row navigates (client-side) and this link stays out of the way.
+                      <a
+                        href={rowHref(row)}
+                        tabIndex={-1}
+                        className="text-inherit no-underline"
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        {display(column, row)}
+                      </a>
+                    ) : (
+                      display(column, row)
+                    )}
                   </Cell>
                 ))}
               </Row>

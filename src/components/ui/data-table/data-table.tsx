@@ -32,6 +32,8 @@ export type DataTableProps<Row> = {
   /** Page-specific filters, shown next to the search. */
   filters?: ReactNode;
   onRowAction?: (row: Row) => void;
+  /** Each row as a link (works before the page's script loads, opens in a new tab). */
+  rowHref?: (row: Row) => string;
   loading?: boolean;
   error?: string;
   onRetry?: () => void;
@@ -102,6 +104,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
         getRowId={getRowId}
         toItem={props.compactItem}
         onRowAction={props.onRowAction}
+        rowHref={props.rowHref}
       />
     );
   } else {
@@ -117,6 +120,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
         onSelectionChange={(ids) => update({ selection: { ids, allMatching: false } })}
         onResize={(widths) => update({ widths: { ...state.widths, ...widths } })}
         onRowAction={props.onRowAction}
+        rowHref={props.rowHref}
         labels={labels}
       />
     );

@@ -159,7 +159,7 @@ export function PeopleDirectory({
       state={state}
       onStateChange={onStateChange}
       loading={pending}
-      onRowAction={(p) => router.push(`/w/${workspace.slug}/people/${p.id}`)}
+      rowHref={(p) => `/w/${workspace.slug}/people/${p.id}`}
       filters={<DirectoryFilters params={filters} options={options} onChange={onFilterChange} />}
       empty={
         <EmptyState

@@ -13,19 +13,21 @@ test("the people directory searches, filters and opens on every screen", async (
 
   await page.getByRole("link", { name: "People" }).first().click();
   await expect(page).toHaveURL(/\/people$/);
-  // A table from 600px, a list on phones: both are grids named People.
-  const table = page.getByRole("grid", { name: "People" });
-  await expect(table.getByRole("row", { name: /Ana Pop/ })).toBeVisible();
+  // A table from 600px, a list of links on phones.
+  const phone = (viewport?.width ?? 0) < 600;
+  const table = page.getByRole(phone ? "list" : "grid", { name: "People" });
+  const ana = table.getByRole(phone ? "link" : "row", { name: /Ana Pop/ });
+  await expect(ana).toBeVisible();
 
   // Search waits for a pause, then lives in the URL.
   await page.getByRole("searchbox", { name: "Search" }).fill("nobody-here");
   await expect(page).toHaveURL(/q=nobody-here/);
   await expect(page.getByText("No one matches")).toBeVisible();
   await page.getByRole("searchbox", { name: "Search" }).fill("");
-  await expect(table.getByRole("row", { name: /Ana Pop/ })).toBeVisible();
+  await expect(ana).toBeVisible();
 
   // Status filter (behind the Filters button on phones): the owner hasn't left.
-  if ((viewport?.width ?? 0) < 600) await page.getByRole("button", { name: "Filters" }).click();
+  if (phone) await page.getByRole("button", { name: "Filters" }).click();
   await page.getByRole("button", { name: /Status$/ }).click();
   await page.getByRole("option", { name: "Leavers" }).click();
   await expect(page).toHaveURL(/status=leavers/);
@@ -34,6 +36,6 @@ test("the people directory searches, filters and opens on every screen", async (
 
   // Opening a person.
   await page.goto(page.url().replace(/\?.*$/, ""));
-  await table.getByRole("row", { name: /Ana Pop/ }).click();
+  await ana.click();
   await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}$/);
 });
