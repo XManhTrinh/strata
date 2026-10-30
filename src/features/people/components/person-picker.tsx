@@ -21,6 +21,7 @@ export function PersonPicker({
   exclude,
   errorMessage,
   onSelect,
+  variant,
 }: {
   name: string;
   label: string;
@@ -30,6 +31,8 @@ export function PersonPicker({
   errorMessage?: string;
   /** Called when a person is chosen, e.g. to go to them. */
   onSelect?: (person: { id: string; name: string }) => void;
+  /** Outlined beside other outlined fields, such as a date field. */
+  variant?: "filled" | "outlined";
 }) {
   const { workspace } = useWorkspace();
   const tc = useTranslations("common");
@@ -59,6 +62,7 @@ export function PersonPicker({
     <>
       <Autocomplete
         className="w-full"
+        variant={variant}
         label={label}
         items={items}
         inputValue={input}

@@ -83,6 +83,7 @@ export function OrgChartPage({
           <>
             <div className="medium:w-64 w-full">
               <PersonPicker
+                variant="outlined"
                 name="find"
                 label={t("find")}
                 defaultValue={null}

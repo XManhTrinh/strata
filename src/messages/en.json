@@ -103,7 +103,8 @@
     "viewNameRequired": "Enter a name for the view.",
     "viewNameTaken": "There is already a view with this name.",
     "unitOutsideReach": "You can only grant units your own access covers.",
-    "roleHasNoUnitReach": "This role doesn't work on specific units."
+    "roleHasNoUnitReach": "This role doesn't work on specific units.",
+    "jobUnchanged": "Nothing changed: the job record on that date already says this."
   },
   "auth": {
     "signIn": {

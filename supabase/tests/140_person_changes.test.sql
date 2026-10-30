@@ -2,7 +2,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(16);
+select plan(17);
 
 create temporary table people (name text primary key, user_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -54,6 +54,11 @@ select is(pg_temp.jobs('Dan'), array['-100..30:Acme:Carol', '30..:Old team:Carol
 select public.change_job(pg_temp.person('Dan'), current_date + 10, (select root from ctx), null, null, null, null);
 select is(pg_temp.jobs('Dan'), array['-100..10:Acme:Carol', '10..30:Acme:-', '30..:Old team:Carol'],
   'a change before a scheduled one stops where it starts');
+
+select is(
+  public.change_job(pg_temp.person('Dan'), current_date, (select root from ctx), pg_temp.person('Carol'), null, null, null),
+  false, 'saving the record in force again changes nothing'
+);
 
 select public.remove_job_change((select id from public.member_assignments
   where member_id = pg_temp.person('Dan') and valid_from = current_date + 10));

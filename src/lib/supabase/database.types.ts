@@ -1815,7 +1815,7 @@ export type Database = {
           p_position_id?: string;
           p_valid_from: string;
         };
-        Returns: undefined;
+        Returns: boolean;
       };
       change_pay: {
         Args: {

@@ -120,7 +120,7 @@ export async function changeJob(
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error) };
   const j = parsed.data;
   const supabase = await createClient();
-  const { error } = await supabase.rpc("change_job", {
+  const { data: changed, error } = await supabase.rpc("change_job", {
     p_member_id: memberId,
     p_valid_from: j.validFrom,
     p_org_unit_id: j.unitId,
@@ -135,6 +135,7 @@ export async function changeJob(
       ? { status: "error", fieldErrors: { managerId: key } }
       : { status: "error", error: key };
   }
+  if (changed === false) return { status: "error", error: "jobUnchanged" };
   revalidatePeople();
   return { status: "success" };
 }

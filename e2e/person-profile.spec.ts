@@ -33,6 +33,13 @@ test("an owner adds a person and changes their job, pay and end date", async ({
   await expect(page.getByRole("list", { name: "Job" })).toContainText("Ana Pop");
   await expectNoA11yViolations(page);
 
+  // Saving the job as it is changes nothing, and says so.
+  await page.getByRole("button", { name: "Change job" }).click();
+  const same = page.getByRole("dialog", { name: "Change job" });
+  await same.getByRole("button", { name: "Save" }).click();
+  await expect(same.getByText(/^Nothing changed/)).toBeVisible();
+  await same.getByRole("button", { name: "Cancel" }).click();
+
   // A move scheduled next year shows in the history.
   const nextYear = `${new Date().getUTCFullYear() + 1}-03-01`;
   await page.getByRole("button", { name: "Change job" }).click();
