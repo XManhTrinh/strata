@@ -63,6 +63,6 @@ test("the org chart shows reporting lines, dates and units", async ({
   // Units: everyone is in the root unit.
   await page.goto(`${base}/org-chart?view=units`);
   await expect(page.getByRole("treegrid", { name: "Units" })).toContainText("3 people");
-  await page.getByRole("link", { name: `People in Acme ${id}` }).click();
+  await page.getByRole("link", { name: new RegExp(` in Acme ${id}$`) }).click();
   await expect(page.getByRole("list", { name: `People in Acme ${id}` })).toContainText("Cy Radu");
 });

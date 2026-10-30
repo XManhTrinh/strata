@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Button, List, ListItem } from "@windmorph/react";
 import { Avatar } from "@windmorph/react-pro";
+import { Icon } from "@/components/ui/icon";
 import { TreeView } from "@/components/ui/tree-view";
 import { buildTree } from "@/features/structure/hierarchy";
 import type { OrgLevel, OrgUnit } from "@/features/structure/types";
-import type { ChartPerson, UnitCount } from "../types";
+import type { ChartPerson, OpenRole, UnitCount } from "../types";
 
 /** The unit tree with headcounts on the date; a unit's people beside it. */
 export function UnitsView({
@@ -16,6 +17,7 @@ export function UnitsView({
   counts,
   selectedUnitId,
   people,
+  openRoles,
   unitHref,
   profileHref,
 }: {
@@ -24,12 +26,16 @@ export function UnitsView({
   counts: UnitCount[];
   selectedUnitId: string | null;
   people: ChartPerson[];
+  openRoles: OpenRole[];
   unitHref: (unitId: string) => string;
   profileHref: (person: ChartPerson) => string;
 }) {
   const t = useTranslations("orgChart");
   const tree = buildTree(units, false);
+  const format = useFormatter();
   const count = new Map(counts.map((c) => [c.id, c]));
+  const open = new Map<string, OpenRole[]>();
+  for (const role of openRoles) open.set(role.unitId, [...(open.get(role.unitId) ?? []), role]);
   const level = new Map(levels.map((l) => [l.id, l.name]));
   const [expanded, setExpanded] = useState<Set<string | number>>(
     () => new Set(tree.map((n) => n.id))
@@ -56,6 +62,7 @@ export function UnitsView({
                   {[
                     unit.levelId && level.get(unit.levelId),
                     t("unitCount", { direct: c?.direct ?? 0, total: c?.total ?? 0 }),
+                    open.has(unit.id) && t("openRoles", { count: open.get(unit.id)!.length }),
                   ]
                     .filter(Boolean)
                     .join(" · ")}
@@ -64,7 +71,8 @@ export function UnitsView({
               <Button
                 variant={unit.id === selectedUnitId ? "tonal" : "text"}
                 href={unitHref(unit.id)}
-                aria-label={t("unitPeople", { unit: unit.name })}
+                // The name includes the count shown, so speech and sight match.
+                aria-label={t("unitPeopleButton", { count: c?.direct ?? 0, unit: unit.name })}
               >
                 {c?.direct ?? 0}
               </Button>
@@ -93,6 +101,31 @@ export function UnitsView({
                 </ListItem>
               ))}
             </List>
+            {open.has(selected.id) && (
+              <>
+                <h3 className="text-title-small text-on-surface-variant px-4 pt-2">
+                  {t("openRolesIn", { unit: selected.name })}
+                </h3>
+                <List aria-label={t("openRolesIn", { unit: selected.name })}>
+                  {open.get(selected.id)!.map((role) => (
+                    <ListItem
+                      key={role.id}
+                      textValue={role.title}
+                      leading={<Icon name="person_search" />}
+                      supportingText={t("openRoleDetail", {
+                        date: format.dateTime(new Date(`${role.startDate}T00:00:00Z`), {
+                          dateStyle: "medium",
+                          timeZone: "UTC",
+                        }),
+                        fte: role.fte,
+                      })}
+                    >
+                      {role.title}
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            )}
           </>
         ) : (
           <p className="text-body-medium text-on-surface-variant px-4">{t("chooseUnit")}</p>

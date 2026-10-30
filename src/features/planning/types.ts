@@ -82,6 +82,8 @@ export type Scenario = {
   archived: boolean;
   baselineName: string | null;
   costsAppliedAt: string | null;
+  /** Months up to and including this one are locked. */
+  lockedThrough: string | null;
 };
 
 /** One group's FTE, headcount and cost in one month; cost is null when the caller can't see it. */
@@ -93,4 +95,39 @@ export type TotalsRow = {
   headcount: number;
   cost: number | null;
   currency: string;
+};
+
+/** One person or planned role in one team, with FTE by month (first-of-month keys). */
+export type AllocationRow = {
+  key: string;
+  memberId: string | null;
+  plannedRoleId: string | null;
+  name: string;
+  unitId: string;
+  unitName: string;
+  filledOn: string | null;
+  months: Record<string, number>;
+  /** Their FTE across all teams by month, to show who is over or under full time. */
+  totals: Record<string, number>;
+};
+
+export type AllocationChange = {
+  memberId: string | null;
+  plannedRoleId: string | null;
+  unitId: string;
+  period: string;
+  fte: number;
+};
+
+export type PlannedRole = {
+  id: string;
+  title: string;
+  unitId: string;
+  positionId: string | null;
+  careerLevelId: string | null;
+  employmentTypeId: string | null;
+  startDate: string;
+  endDate: string | null;
+  fte: number;
+  filledOn: string | null;
 };

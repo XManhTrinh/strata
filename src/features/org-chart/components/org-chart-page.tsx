@@ -9,7 +9,7 @@ import { IsoDateField } from "@/components/ui/iso-date-field";
 import { PersonPicker } from "@/features/people/components/person-picker";
 import type { OrgLevel, OrgUnit } from "@/features/structure/types";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
-import type { ChartPerson, ChartSlice, UnitCount } from "../types";
+import type { ChartPerson, ChartSlice, OpenRole, UnitCount } from "../types";
 import { ChartCanvas } from "./chart-canvas";
 import { PersonView } from "./person-view";
 import { UnitsView } from "./units-view";
@@ -32,6 +32,7 @@ export function OrgChartPage({
   levels,
   counts,
   unitPeople,
+  openRoles,
 }: {
   query: ChartQuery;
   today: string;
@@ -41,6 +42,8 @@ export function OrgChartPage({
   levels: OrgLevel[];
   counts: UnitCount[];
   unitPeople: ChartPerson[];
+  /** The live plan's vacancies, for those who see plans. */
+  openRoles: OpenRole[];
 }) {
   const t = useTranslations("orgChart");
   const router = useRouter();
@@ -121,6 +124,7 @@ export function OrgChartPage({
           counts={counts}
           selectedUnitId={query.unitId}
           people={unitPeople}
+          openRoles={openRoles}
           unitHref={(unitId) => href({ unitId })}
           profileHref={profileHref}
         />

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/shell/page-header";
 import { loadChart, loadUnitCounts } from "@/features/org-chart/actions";
 import { type ChartQuery, OrgChartPage } from "@/features/org-chart/components/org-chart-page";
+import { listOpenRoles } from "@/features/planning/queries";
 import { listHierarchy } from "@/features/structure/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,7 +50,8 @@ export default async function OrgChartRoute({
     unitId: UUID.test(get("unit") ?? "") ? get("unit")! : null,
   };
 
-  const [slice, hierarchy, counts, unitPeople, t] = await Promise.all([
+  const seesPlans = permissions.some((p) => p.permission_key === "planning.view");
+  const [slice, hierarchy, counts, unitPeople, openRoles, t] = await Promise.all([
     query.view === "people"
       ? loadChart(workspace.id, { rootId: query.personId, asOf: query.asOf, depth: 2 })
       : { people: [], truncated: false },
@@ -58,6 +60,7 @@ export default async function OrgChartRoute({
     query.view === "units" && query.unitId
       ? loadChart(workspace.id, { unitId: query.unitId, asOf: query.asOf }).then((s) => s.people)
       : [],
+    query.view === "units" && seesPlans ? listOpenRoles(workspace.id) : [],
     getTranslations("orgChart"),
   ]);
 
@@ -74,6 +77,7 @@ export default async function OrgChartRoute({
           levels={hierarchy.levels}
           counts={counts}
           unitPeople={unitPeople}
+          openRoles={openRoles}
         />
       </div>
     </>

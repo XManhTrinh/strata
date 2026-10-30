@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { Button, List, ListItem, Switch, TextField } from "@windmorph/react";
 import { EmptyState, Tag } from "@windmorph/react-pro";
@@ -45,6 +46,7 @@ export function ScenariosPage({
   const format = useFormatter();
   const { workspace, permissions } = useWorkspace();
   const [run, pending] = useRunAction();
+  const router = useRouter();
   const [editing, setEditing] = useState<Editing | null>(null);
   const [fromPeople, setFromPeople] = useState(true);
   const canEdit = (permissions["planning.edit"] ?? []).includes("workspace");
@@ -121,7 +123,12 @@ export function ScenariosPage({
           description={canEdit ? t("emptyEditor") : t("emptyViewer")}
         />
       ) : (
-        <List aria-label={t("title")} aria-busy={pending || undefined}>
+        <List
+          aria-label={t("title")}
+          aria-busy={pending || undefined}
+          // Rows open their scenario; their menus stay separate buttons.
+          onAction={(key) => router.push(`/w/${workspace.slug}/planning/scenarios/${String(key)}`)}
+        >
           {scenarios.map((s) => (
             <ListItem
               key={s.id}

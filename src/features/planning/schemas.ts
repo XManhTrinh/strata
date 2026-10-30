@@ -93,3 +93,30 @@ export const scenarioSchema = z
 export const scenarioNameSchema = z.object({
   name: z.string().trim().min(1, { error: "scenarioNameRequired" }).max(100),
 });
+
+export const plannedRoleSchema = z
+  .object({
+    name: z.string().trim().min(1, { error: "plannedRoleTitleRequired" }).max(120),
+    unitId: z.uuid({ error: "unitRequired" }),
+    positionId: optionalId,
+    careerLevelId: optionalId,
+    employmentTypeId: optionalId,
+    startDate: z.iso.date({ error: "dateRequired" }),
+    endDate: z
+      .union([z.iso.date(), z.literal("")])
+      .default("")
+      .transform((v) => v || null),
+    fte: z.coerce
+      .number({ error: "fteInvalid" })
+      .gt(0, { error: "fteInvalid" })
+      .max(1, { error: "fteInvalid" }),
+  })
+  .refine((r) => !r.endDate || r.endDate >= r.startDate, {
+    path: ["endDate"],
+    error: "endBeforeStart",
+  });
+
+export const fillRoleSchema = z.object({
+  memberId: z.uuid({ error: "personRequired" }),
+  from: z.iso.date({ error: "dateRequired" }),
+});

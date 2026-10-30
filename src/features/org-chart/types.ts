@@ -15,3 +15,12 @@ export type ChartPerson = {
 export type ChartSlice = { people: ChartPerson[]; truncated: boolean };
 
 export type UnitCount = { id: string; direct: number; total: number };
+
+/** A vacancy in the live plan. */
+export type OpenRole = {
+  id: string;
+  unitId: string;
+  title: string;
+  startDate: string;
+  fte: number;
+};

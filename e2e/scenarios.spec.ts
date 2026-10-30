@@ -19,8 +19,9 @@ test("a planner creates and copies scenarios, takes one through approval, and co
   await create.getByLabel("Name").fill("Plan A");
   await expectNoA11yViolations(page);
   await create.getByRole("button", { name: "Create" }).click();
-  const list = page.getByRole("list", { name: "Scenarios" });
-  await expect(list.getByRole("listitem")).toContainText("Plan A");
+  // Rows open their scenario, so the list is a grid of rows.
+  const list = page.getByRole("grid", { name: "Scenarios" });
+  await expect(list.getByRole("row")).toContainText("Plan A");
   await expect(list).toContainText("Costs not applied yet");
 
   const actions = (name: string) => page.getByRole("button", { name: `Actions for ${name}` });
@@ -44,7 +45,7 @@ test("a planner creates and copies scenarios, takes one through approval, and co
   await choose("Plan A", "Submit for approval", "Plan A submitted");
   await choose("Plan A", "Approve", "Plan A approved");
   await choose("Plan A", "Make live", "Plan A is the live plan");
-  await expect(list.getByRole("listitem").first()).toContainText("Live");
+  await expect(list.getByRole("row").first()).toContainText("Live");
   await actions("Plan A").click();
   await expect(page.getByRole("menuitem", { name: "Delete" })).toHaveCount(0);
   await page.keyboard.press("Escape");

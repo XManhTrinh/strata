@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { OpenRole } from "@/features/org-chart/types";
 import type {
   FieldChoice,
   PlanningSettings,
@@ -95,4 +96,17 @@ export async function listRateCards(workspaceId: string): Promise<{
         })),
     })),
   };
+}
+
+/** The live plan's open roles the caller may see, for the org chart. */
+export async function listOpenRoles(workspaceId: string): Promise<OpenRole[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("open_roles", { p_workspace_id: workspaceId });
+  return (data ?? []).map((r) => ({
+    id: r.planned_role_id,
+    unitId: r.org_unit_id,
+    title: r.title,
+    startDate: r.start_date,
+    fte: Number(r.fte),
+  }));
 }
