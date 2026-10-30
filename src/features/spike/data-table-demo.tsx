@@ -22,8 +22,8 @@ const COLUMNS: ColumnDef<SpikePerson>[] = [
 ];
 
 /** Development-only demo of DataTable in client mode, used by the component's end-to-end test. */
-export function DataTableDemo() {
-  const people = useMemo(() => generatePeople(300), []);
+export function DataTableDemo({ count }: { count: number }) {
+  const people = useMemo(() => generatePeople(count), [count]);
   const labels = useDataTableLabels();
   return (
     <main className="p-4">

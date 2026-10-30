@@ -1,0 +1,66 @@
+name: Nightly load checks
+
+# The 100,000-person load checks and the DataTable benchmark: too slow for every push, so they run
+# nightly and on request. A check slower than its target fails the run.
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  WINDMORPH_PRO_TOKEN: ${{ secrets.WINDMORPH_PRO_TOKEN }}
+
+jobs:
+  load:
+    name: 100k load checks and DataTable benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: rebuild
+      - name: Allow installing Windmorph Pro
+        run: git config --global url."https://x-access-token:${WINDMORPH_PRO_TOKEN}@github.com/XManhTrinh/windmorph-pro".insteadOf "https://github.com/XManhTrinh/windmorph-pro"
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start --exclude studio,imgproxy,logflare,vector,supavisor,edge-runtime
+      - name: Export local Supabase settings
+        run: |
+          status="$(supabase status -o json)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r '.API_URL' <<<"$status")"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(jq -r '.PUBLISHABLE_KEY // .ANON_KEY' <<<"$status")"
+            echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
+            echo "SMTP_URL=smtp://127.0.0.1:54325"
+            echo "EMAIL_FROM=Strata <no-reply@strata.local>"
+          } >> "$GITHUB_ENV"
+      - name: Seed 100,000 people and run the load checks
+        run: |
+          set -o pipefail
+          pnpm db:load 2>&1 | tee load-results.txt
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - name: DataTable benchmark
+        run: pnpm exec playwright test e2e/perf/data-table.spec.ts --project=desktop
+        env:
+          CI: "true"
+          PERF: "1"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: load-results
+          path: |
+            load-results.txt
+            playwright-report
+          retention-days: 30

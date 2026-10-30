@@ -128,8 +128,27 @@ reset role;
 select label, ms, target_ms, case when ms <= target_ms then 'ok' else 'SLOW' end as result
 from load_checks.results where label like 'import:%' order by ord;
 select :'preview_import_preview' as preview_counts;
+-- Kept past the rollback for the final verdict.
+select coalesce(string_agg(label, ', '), '') as slow_imports
+from load_checks.results where label like 'import:%' and ms > target_ms \gset
 rollback;
+select set_config('load_checks.slow_imports', :'slow_imports', false);
 
 -- Report ---------------------------------------------------------------------------------------------------
 select label, ms, target_ms, case when ms <= target_ms then 'ok' else 'SLOW' end as result
 from load_checks.results order by ord;
+
+-- Fail the run (and the nightly job) when anything misses its target.
+do $$
+declare
+  v_slow text := (
+    select string_agg(label, ', ')
+    from (select label from load_checks.results where ms > target_ms
+          union all select nullif(current_setting('load_checks.slow_imports', true), '')) s
+  );
+begin
+  if v_slow is not null then
+    raise exception 'Load checks slower than target: %', v_slow;
+  end if;
+end;
+$$;
