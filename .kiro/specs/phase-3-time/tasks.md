@@ -24,6 +24,7 @@ Design and decisions: `design.md` (approved 2026-10-30).
   - [x] 5.5 Week and list views; recurring events (expanded with `rrule`)
   - [x] 5.6 Balances and adjustments on the person's profile
 - [x] 6. Calendar feed: revocable links, iCalendar output for me, my team, the workspace
-- [ ] 7. Notification emails for requests, decisions and reminders
+- [-] 7. Notification emails for requests, decisions and reminders: moved to Phase 5
+  (requirement 10; draft design in its `design.md`)
 - [x] 8. Load checks for bookings and the calendar at 100k people
   - [x] e2e: a report asks, the manager approves, books a team event and adjusts a balance

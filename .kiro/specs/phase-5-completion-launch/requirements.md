@@ -23,3 +23,5 @@ size), `docs/rebuild-plan.md` (sections 4 and 6).
 7. **Legal:** data processing agreement, sub-processor list, privacy policy, terms.
 8. **Documentation:** user help for each module, admin guide for workspace setup and import.
 9. **Launch:** production deploy, demo workspaces removed, launch checklist complete.
+10. **Notification emails** (moved from Phase 3): every bell notification by email per the
+    person's category choice (instant or daily summary), reminders for approvals left waiting.

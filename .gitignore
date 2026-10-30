@@ -24,3 +24,4 @@ supabase/.temp
 # OS and tools
 .DS_Store
 .agents
+logs

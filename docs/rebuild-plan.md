@@ -289,7 +289,7 @@ builder, the engine and the apply job, cost totals by team and by custom field.
 
 ### Phase 5: Completion and launch
 
-Role dashboards, GDPR export/erase/retention jobs, load tests at 100k members, accessibility
+Role dashboards, notification emails, GDPR export/erase/retention jobs, load tests at 100k members, accessibility
 audit (WCAG 2.2 AA), security review of every policy, backups and point-in-time recovery,
 data processing agreement and sub-processor list, user documentation, production launch.
 
