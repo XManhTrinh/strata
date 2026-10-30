@@ -37,8 +37,11 @@ export async function chooseFile(
   file: Parameters<Page["setInputFiles"]>[1],
   readText: string | RegExp
 ): Promise<void> {
+  const input = page.locator('input[type="file"]');
   await expect(async () => {
-    await page.locator('input[type="file"]').setInputFiles(file);
+    // Choosing the same file again fires no change, so clear the input first.
+    await input.setInputFiles([]);
+    await input.setInputFiles(file);
     await expect(page.getByText(readText)).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 20_000 });
 }
