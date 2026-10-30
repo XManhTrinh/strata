@@ -43,8 +43,7 @@ insert into public.import_jobs (workspace_id, created_by, key_field, unit_level_
 select ws, auth.uid(), 'person_key', pg_temp.levels() from ctx;
 insert into jobs select 1, id from public.import_jobs order by created_at desc limit 1;
 
-insert into public.import_rows (job_id, workspace_id, row_number, data)
-select (select id from jobs where n = 1), (select ws from ctx), r.n, r.d::jsonb
+select public.import_stage_rows((select id from jobs where n = 1), 1, jsonb_agg(r.d::jsonb order by r.n))
 from (values
   (1, '{"person_key":"E1","full_name":"Mia","email":"mia@acme.test","unit_path":["Engineering","Squad A"],"position":"Lead","employment_type":"Employee","annual_salary":60000}'),
   (2, '{"person_key":"E2","full_name":"Sam","unit_path":["Engineering","Squad A"],"manager_key":"E1","employment_type":"Contractor","day_rate":500}'),
@@ -101,8 +100,7 @@ insert into public.import_jobs (workspace_id, created_by, key_field, unit_level_
 select ws, auth.uid(), 'person_key', pg_temp.levels(), current_date + 7 from ctx;
 insert into jobs select 2, id from public.import_jobs where status = 'staging';
 
-insert into public.import_rows (job_id, workspace_id, row_number, data)
-select (select id from jobs where n = 2), (select ws from ctx), r.n, r.d::jsonb
+select public.import_stage_rows((select id from jobs where n = 2), 1, jsonb_agg(r.d::jsonb order by r.n))
 from (values
   (1, '{"person_key":"E1","full_name":"Mia","unit_path":["Engineering","Squad A"],"position":"Lead"}'),
   (2, '{"person_key":"E2","full_name":"Sam","unit_path":["Engineering","Squad B"],"manager_key":"E1"}'),

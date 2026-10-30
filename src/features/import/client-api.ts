@@ -35,22 +35,19 @@ export async function startImport(
   return data.id;
 }
 
-/** Sends the mapped rows in batches, reporting how many have gone. */
+/** Sends the mapped rows in batches (one permission check per batch), reporting how many have gone. */
 export async function stageRows(
-  workspaceId: string,
   jobId: string,
   rows: Record<string, unknown>[],
   onProgress: (sent: number) => void
 ): Promise<void> {
   const supabase = getBrowserClient();
   for (let start = 0; start < rows.length; start += BATCH) {
-    const batch = rows.slice(start, start + BATCH).map((data, i) => ({
-      job_id: jobId,
-      workspace_id: workspaceId,
-      row_number: start + i + 1,
-      data: data as NonNullable<Json>,
-    }));
-    const { error } = await supabase.from("import_rows").insert(batch);
+    const { error } = await supabase.rpc("import_stage_rows", {
+      p_job_id: jobId,
+      p_first_row: start + 1,
+      p_rows: rows.slice(start, start + BATCH) as NonNullable<Json>,
+    });
     if (error) throw new Error(error.message);
     onProgress(Math.min(start + BATCH, rows.length));
   }

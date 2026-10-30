@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "db:test": "supabase test db",
+    "db:load": "docker exec -i supabase_db_strata psql -U postgres -q < supabase/load/seed.sql && docker exec -i supabase_db_strata psql -U postgres -q < supabase/load/checks.sql",
     "db:types": "supabase gen types typescript --local --schema public --schema app > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts",
     "check": "pnpm lint && pnpm typecheck && pnpm knip && pnpm format:check && pnpm test"
   },

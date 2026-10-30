@@ -104,6 +104,13 @@ export type Database = {
         Args: { p_date: string; p_key_field: string; p_member_id: string };
         Returns: Json;
       };
+      member_snapshots: {
+        Args: { p_date: string; p_key_field: string; p_workspace_id: string };
+        Returns: {
+          member_id: string;
+          snapshot: Json;
+        }[];
+      };
       new_invitation_token: { Args: Record<PropertyKey, never>; Returns: string };
       notify: {
         Args: {
@@ -1874,6 +1881,10 @@ export type Database = {
       };
       import_apply_chunk: { Args: { p_job_id: string; p_max_rows?: number }; Returns: Json };
       import_preview: { Args: { p_job_id: string }; Returns: Json };
+      import_stage_rows: {
+        Args: { p_first_row: number; p_job_id: string; p_rows: Json };
+        Returns: number;
+      };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       my_access_to_member: { Args: { p_member_id: string }; Returns: string[] };

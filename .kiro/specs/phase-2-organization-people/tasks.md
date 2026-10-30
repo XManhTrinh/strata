@@ -72,5 +72,7 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
 
 - [ ] 10. Load and end to end
   - [ ] 10.1 100k-member seed generator and load checks for the directory, reach and import
+    - [x] `pnpm db:load` (seed and checks); every check within target (results in the design)
+    - [ ] Nightly in CI
   - [ ] 10.2 Playwright: structure, people, profile history, org chart, import and re-import, at
         three widths

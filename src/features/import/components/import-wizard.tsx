@@ -74,7 +74,7 @@ export function ImportWizard({
     try {
       const rows = file.records.map((record) => toImportRow(record, mapping));
       const id = await startImport(workspace.id, mapping, options);
-      await stageRows(workspace.id, id, rows, (sent) =>
+      await stageRows(id, rows, (sent) =>
         setProgress(t("map.staging", { sent, total: rows.length }))
       );
       await preview(id, mapping.keyField);
