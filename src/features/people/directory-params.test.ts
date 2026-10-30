@@ -3,6 +3,7 @@ import {
   DEFAULT_DIRECTORY_PARAMS,
   directorySearch,
   parseDirectoryParams,
+  parseDirectoryView,
 } from "./directory-params";
 
 const UNIT = "0b0f8f3e-2c4b-4a7e-9d61-3f1c2a9b8e70";
@@ -32,5 +33,28 @@ describe("directory params", () => {
     );
     expect(parseDirectoryParams(Object.fromEntries(new URLSearchParams(search)))).toEqual(params);
     expect(directorySearch(DEFAULT_DIRECTORY_PARAMS)).toBe("");
+  });
+});
+
+const { page: _page, ...withoutPage } = DEFAULT_DIRECTORY_PARAMS;
+
+describe("saved directory views", () => {
+  it("keeps what's valid and drops the rest", () => {
+    expect(
+      parseDirectoryView({
+        params: { search: "ana", status: "all", sort: "bogus", size: 25, descending: true },
+        columns: { columnOrder: ["name", 3], hidden: ["email"], widths: { name: 300, unit: -1 } },
+      })
+    ).toEqual({
+      params: {
+        ...withoutPage,
+        search: "ana",
+        status: "all",
+        size: 25,
+        descending: true,
+      },
+      columns: { columnOrder: ["name"], hidden: ["email"], widths: { name: 300 } },
+    });
+    expect(parseDirectoryView(null).columns).toEqual({ columnOrder: [], hidden: [], widths: {} });
   });
 });

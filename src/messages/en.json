@@ -99,7 +99,9 @@
     "archivedChoice": "Archived units, positions, levels and employment types can't be chosen.",
     "firstJobStays": "The first job record stays. Change it instead.",
     "payRequired": "Enter a salary or a day rate.",
-    "amountInvalid": "Enter an amount of 0 or more."
+    "amountInvalid": "Enter an amount of 0 or more.",
+    "viewNameRequired": "Enter a name for the view.",
+    "viewNameTaken": "There is already a view with this name."
   },
   "auth": {
     "signIn": {
@@ -948,5 +950,30 @@
     "cancel": "Cancel",
     "save": "Save",
     "actions": "Actions"
+  },
+  "views": {
+    "button": "Views",
+    "current": "View: {name}",
+    "edited": "{name} (edited)",
+    "allPeople": "Everyone",
+    "mine": "My views",
+    "shared": "Shared views",
+    "default": "Default",
+    "saveNew": "Save as new view",
+    "update": "Save changes to {name}",
+    "makeDefault": "Make {name} my default",
+    "makeSharedDefault": "Make {name} the default for everyone",
+    "unsetDefault": "Stop opening {name} by default",
+    "delete": "Delete {name}",
+    "dialogTitle": "Save view",
+    "name": "Name",
+    "share": "Share with the workspace",
+    "shareHelp": "Everyone sees it; only people who manage settings can change it.",
+    "setDefault": "Open this view by default",
+    "save": "Save",
+    "updated": "View saved",
+    "deleted": "View deleted",
+    "defaultSet": "Default view set",
+    "defaultCleared": "No default view"
   }
 }

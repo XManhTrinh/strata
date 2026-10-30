@@ -38,7 +38,7 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
     - [x] Columns, sort, resize, selection with a bulk bar, search, filters slot, pagination,
           client and server mode, loading/error/empty states, column settings (show, hide, drag
           or button reorder), phone list; e2e and axe at three widths
-    - [ ] Multi-sort, pinned columns, column filters, saved views (with the people directory)
+    - [ ] Multi-sort, pinned columns, column filters (saved views are done, in the directory)
   - [ ] 5.3 Benchmarks in CI
 
 - [x] 6. Structure settings
@@ -53,7 +53,8 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [ ] 7.1 Directory: DataTable in server mode with search, filters, saved views, export
     - [x] `people_directory` RPC (reach worked out once per call, search, unit subtree, position,
           employment type, leavers, sort, paging); URL-kept state; phone list with filters
-    - [ ] Saved views, export
+    - [x] Saved views (personal and shared, a default each, URL-kept; "edited" until saved)
+    - [ ] Export
   - [x] 7.2 Profile: details, current job, history timeline, future-dated changes, pay (with
         permission), custom fields
   - [x] 7.3 Add person, edit, set an end date

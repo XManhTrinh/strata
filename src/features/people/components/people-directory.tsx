@@ -14,11 +14,15 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { useDataTableLabels } from "@/hooks/use-data-table-labels";
+import { ViewsMenu } from "@/features/table-views/components/views-menu";
+import type { TableView } from "@/features/table-views/types";
 import {
   DIRECTORY_SORTS,
   type DirectoryParams,
   type DirectorySort,
+  type DirectoryView,
   directorySearch,
+  parseDirectoryView,
 } from "../directory-params";
 import type { DirectoryFilterOptions, DirectoryPerson } from "../types";
 import { DirectoryFilters } from "./directory-filters";
@@ -34,11 +38,15 @@ export function PeopleDirectory({
   total,
   params,
   options,
+  views,
+  viewId,
 }: {
   people: DirectoryPerson[];
   total: number;
   params: DirectoryParams;
   options: DirectoryFilterOptions;
+  views: TableView[];
+  viewId: string | null;
 }) {
   const t = useTranslations("people");
   const format = useFormatter();
@@ -107,18 +115,45 @@ export function PeopleDirectory({
     },
   ];
 
+  const openView = views.find((v) => v.id === viewId);
+  const saved = openView ? parseDirectoryView(openView.state) : null;
+  const known = new Set(columns.map((c) => c.id));
+
   const [state, setState] = useState<TableState>(() =>
     initialTableState(columns, {
+      ...(saved && {
+        columnOrder: [
+          ...saved.columns.columnOrder.filter((id) => known.has(id)),
+          ...columns.map((c) => c.id).filter((id) => !saved.columns.columnOrder.includes(id)),
+        ],
+        hidden: saved.columns.hidden.filter((id) => known.has(id)),
+        widths: saved.columns.widths,
+      }),
       search: params.search,
       sort: { column: params.sort, direction: params.descending ? "descending" : "ascending" },
       page: { index: params.page, size: params.size },
     })
   );
 
+  /** Keeps the open view in the URL while its filters change. */
+  const withView = (search: string, id: string | null) =>
+    id ? `${search}${search ? "&" : "?"}view=${id}` : search;
+
   function navigate(next: DirectoryParams) {
     setFilters(next);
-    startTransition(() => router.replace(`${pathname}${directorySearch(next)}`, { scroll: false }));
+    startTransition(() =>
+      router.replace(`${pathname}${withView(directorySearch(next), viewId)}`, { scroll: false })
+    );
   }
+
+  // What would be saved now, and whether it differs from the open view.
+  const { page: _page, ...currentParams } = { ...filters, search: state.search };
+  const current: DirectoryView = {
+    params: currentParams,
+    columns: { columnOrder: state.columnOrder, hidden: state.hidden, widths: state.widths },
+  };
+  const dirty =
+    saved !== null && JSON.stringify(saved) !== JSON.stringify(parseDirectoryView(current));
 
   useEffect(() => () => clearTimeout(searchTimer.current), []);
 
@@ -160,7 +195,28 @@ export function PeopleDirectory({
       onStateChange={onStateChange}
       loading={pending}
       rowHref={(p) => `/w/${workspace.slug}/people/${p.id}`}
-      filters={<DirectoryFilters params={filters} options={options} onChange={onFilterChange} />}
+      filters={
+        <>
+          <ViewsMenu
+            tableKey="people"
+            views={views}
+            currentId={viewId}
+            dirty={dirty}
+            state={current}
+            query={directorySearch({ ...filters, search: state.search, page: 0 })}
+            hrefFor={(view) =>
+              view
+                ? `${pathname}${withView(
+                    directorySearch({ ...parseDirectoryView(view.state).params, page: 0 }),
+                    view.id
+                  )}`
+                : // "Everyone": the plain table, without opening the default view again.
+                  `${pathname}?status=current`
+            }
+          />
+          <DirectoryFilters params={filters} options={options} onChange={onFilterChange} />
+        </>
+      }
       empty={
         <EmptyState
           titleAs="h2"

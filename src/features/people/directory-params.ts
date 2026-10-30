@@ -81,3 +81,39 @@ export function directorySearch(params: DirectoryParams): string {
   const text = query.toString();
   return text ? `?${text}` : "";
 }
+
+/** A saved directory view: what's searched and filtered, and how the columns are laid out. */
+export type DirectoryView = {
+  params: Omit<DirectoryParams, "page">;
+  columns: { columnOrder: string[]; hidden: string[]; widths: Record<string, number> };
+};
+
+/** Reads a saved view's state, keeping only what's valid (views outlive column changes). */
+export function parseDirectoryView(state: unknown): DirectoryView {
+  const value = (state ?? {}) as Partial<Record<string, unknown>>;
+  const params = (value.params ?? {}) as Record<string, unknown>;
+  const columns = (value.columns ?? {}) as Record<string, unknown>;
+  const text = (v: unknown) => (typeof v === "string" ? v : undefined);
+  const parsed = parseDirectoryParams({
+    q: text(params.search),
+    unit: text(params.unitId),
+    position: text(params.positionId),
+    type: text(params.employmentTypeId),
+    status: text(params.status),
+    sort: text(params.sort),
+    desc: params.descending === true ? "1" : undefined,
+    size: typeof params.size === "number" ? String(params.size) : undefined,
+  });
+  const strings = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  const widths = Object.fromEntries(
+    Object.entries((columns.widths ?? {}) as Record<string, unknown>).filter(
+      (entry): entry is [string, number] => typeof entry[1] === "number" && entry[1] > 0
+    )
+  );
+  const { page: _page, ...rest } = parsed;
+  return {
+    params: rest,
+    columns: { columnOrder: strings(columns.columnOrder), hidden: strings(columns.hidden), widths },
+  };
+}
