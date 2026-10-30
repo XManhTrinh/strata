@@ -34,7 +34,8 @@ fileMatchPattern: "src/**/*.tsx"
 ## Layout and devices
 
 - One shell with **adaptive navigation**: NavigationBar on phone (< 600px), a collapsed
-  NavigationRail (icons with labels) from 600px, desktop included. **One top app bar per page**, owned
+  NavigationRail (icons with labels) from 600px, desktop included. The rail sits on `surface-container`,
+  the page on `surface`. **One top app bar per page**, owned
   by the shell's page header.
 - Use **canonical layouts**: list-detail (`ListDetailLayout`) for people, approvals, rate cards and
   settings; supporting pane for time off; full-width for calendar, capacity grid and org chart.

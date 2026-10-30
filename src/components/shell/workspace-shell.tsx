@@ -32,7 +32,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       <NavigationRail
         aria-label={t("navigation")}
         expanded={false}
-        className="medium:flex sticky top-0 hidden h-dvh shrink-0"
+        className="medium:flex bg-surface-container sticky top-0 hidden h-dvh shrink-0"
       >
         {destinations.map((destination) => {
           const current = isCurrent(destination, pathname);
