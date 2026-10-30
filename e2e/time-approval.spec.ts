@@ -67,8 +67,11 @@ test("a manager approves a report's leave, books a team event and adjusts a bala
   await book.getByRole("button", { name: "Book time off" }).click();
   await expect(ben.getByRole("list", { name: "My bookings" })).toContainText("Waiting");
 
-  // Ana approves it.
+  // Ana hears about it, and approves it.
   await ana.goto(`${base}/time-off?tab=approvals`);
+  await ana.getByRole("button", { name: /^Notifications, \d+ unread$/ }).click();
+  await expect(ana.getByText(/^Ben Ionescu asked for Annual leave, /)).toBeVisible();
+  await ana.keyboard.press("Escape");
   const approvals = ana.getByRole("list", { name: "Approvals" });
   await expect(approvals).toContainText("Ben Ionescu: Annual leave");
   await expectNoA11yViolations(ana);
@@ -76,6 +79,9 @@ test("a manager approves a report's leave, books a team event and adjusts a bala
   await expect(ana.getByText("No requests are waiting for you.")).toBeVisible();
   await ben.reload();
   await expect(ben.getByRole("list", { name: "My bookings" })).toContainText("Approved");
+  await ben.getByRole("button", { name: /^Notifications, \d+ unread$/ }).click();
+  await expect(ben.getByText(/^Your Annual leave for .+ was approved$/)).toBeVisible();
+  await ben.keyboard.press("Escape");
 
   // A team event for both of them, booked by Ana.
   await ana.goto(`${base}/time-off`);

@@ -161,8 +161,11 @@ begin
     end loop;
   end if;
 
+  -- Names go in the payload so a notification reads on its own.
   v_payload := jsonb_build_object('booking_id', v_booking, 'time_type', v_type.name,
-    'start_date', p_start_date, 'end_date', p_end_date);
+    'start_date', p_start_date, 'end_date', p_end_date,
+    'member_name', (select full_name from public.members where id = v_members[1]),
+    'by_name', (select full_name from public.members where id = v_me));
 
   -- Approval: routed by the type's rule; with no one else to route to, workspace approvers decide.
   if v_status = 'pending' then
@@ -265,7 +268,9 @@ begin
   perform app.notify_members(array[v_attendee], v_booking.workspace_id,
     case when p_approve then 'time.approved' else 'time.rejected' end,
     jsonb_build_object('booking_id', p_booking_id, 'start_date', v_booking.start_date,
-      'end_date', v_booking.end_date, 'comment', nullif(btrim(p_comment), '')));
+      'end_date', v_booking.end_date, 'comment', nullif(btrim(p_comment), ''),
+      'time_type', (select t.name from public.time_types t where t.id = v_booking.time_type_id),
+      'by_name', (select full_name from public.members where id = v_me)));
 end;
 $$;
 
@@ -301,7 +306,9 @@ begin
   perform app.refund_booking(p_booking_id);
   perform app.notify_members((select array_agg(a) from unnest(v_attendees) a where a <> v_me),
     v_booking.workspace_id, 'time.cancelled',
-    jsonb_build_object('booking_id', p_booking_id, 'start_date', v_booking.start_date, 'end_date', v_booking.end_date));
+    jsonb_build_object('booking_id', p_booking_id, 'start_date', v_booking.start_date, 'end_date', v_booking.end_date,
+      'time_type', (select t.name from public.time_types t where t.id = v_booking.time_type_id),
+      'by_name', (select full_name from public.members where id = v_me)));
 end;
 $$;
 

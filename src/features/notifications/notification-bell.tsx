@@ -21,6 +21,13 @@ const KINDS = [
   "ownership.received",
   "invitation.received",
   "invitation.accepted",
+  "time.requested",
+  "time.booked_for_you",
+  "time.booked",
+  "time.approved",
+  "time.rejected",
+  "time.cancelled",
+  "import.finished",
 ];
 
 /** The bell: unread count, a side sheet with recent notifications, live updates via Realtime. */
@@ -76,10 +83,21 @@ export function NotificationBell() {
   function text(n: Notification): string {
     const payload = (n.payload ?? {}) as Record<string, string>;
     const kind = KINDS.includes(n.kind) ? n.kind : "unknown";
+    const day = (iso: string | undefined) =>
+      iso
+        ? format.dateTime(new Date(iso), { day: "numeric", month: "short", timeZone: "UTC" })
+        : "";
+    const dates =
+      payload.start_date === payload.end_date
+        ? day(payload.start_date)
+        : `${day(payload.start_date)} – ${day(payload.end_date)}`;
     return t(`kinds.${kind}` as Parameters<typeof t>[0], {
       role: payload.role_name ?? "",
       workspace: payload.workspace_name ?? "",
       name: payload.member_name ?? "",
+      by: payload.by_name ?? "",
+      type: payload.time_type ?? "",
+      dates,
     });
   }
 

@@ -720,6 +720,17 @@
       "invitation": {
         "received": "You're invited to join {workspace}",
         "accepted": "{name} joined the workspace"
+      },
+      "time": {
+        "requested": "{name} asked for {type}, {dates}",
+        "booked_for_you": "{by} booked {type} for you, {dates}",
+        "booked": "{name}: {type}, {dates}",
+        "approved": "Your {type} for {dates} was approved",
+        "rejected": "Your {type} for {dates} was declined",
+        "cancelled": "{by} cancelled your {type} for {dates}"
+      },
+      "import": {
+        "finished": "Your people import is done"
       }
     }
   },
