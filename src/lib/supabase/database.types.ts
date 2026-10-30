@@ -3516,9 +3516,9 @@ export type Database = {
       };
       rate_card_preview: {
         Args: {
-          p_member_id: string;
+          p_member_id?: string;
           p_month: string;
-          p_planned_role_id: string;
+          p_planned_role_id?: string;
           p_workspace_id: string;
         };
         Returns: {
@@ -3542,6 +3542,19 @@ export type Database = {
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
       roles_with_unit_reach: { Args: { p_workspace_id: string }; Returns: string[] };
       save_allocations: { Args: { p_changes: Json; p_scenario_id: string }; Returns: Json };
+      save_rate_card: {
+        Args: {
+          p_card_id?: string;
+          p_conditions: Json;
+          p_group_id?: string;
+          p_is_default: boolean;
+          p_name: string;
+          p_priority: number;
+          p_rates: Json;
+          p_workspace_id: string;
+        };
+        Returns: string;
+      };
       set_feature: {
         Args: {
           p_enabled: boolean;

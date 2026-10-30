@@ -8,6 +8,7 @@ export type SettingsSectionKey =
   | "time-types"
   | "allowances"
   | "working-time"
+  | "planning"
   | "features"
   | "audit";
 
@@ -28,6 +29,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   { key: "time-types", icon: "event_available", permissions: ["time.manage_settings"] },
   { key: "allowances", icon: "account_balance_wallet", permissions: ["time.manage_settings"] },
   { key: "working-time", icon: "calendar_month", permissions: ["time.manage_settings"] },
+  { key: "planning", icon: "insights", permissions: ["planning.manage_settings"] },
   { key: "features", icon: "toggle_on", permissions: ["workspace.manage_features"] },
   { key: "audit", icon: "history", permissions: ["workspace.view_audit"] },
 ];

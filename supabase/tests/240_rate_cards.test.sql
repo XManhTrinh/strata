@@ -4,7 +4,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(29);
+select plan(35);
 
 -- The operators ------------------------------------------------------------------------------------------
 select ok(app.condition_matches(' Contractor ', 'equals', 'contractor'), 'equals ignores case and spaces');
@@ -116,9 +116,9 @@ select is((select monthly_cost from public.cost_snapshots s join public.planned_
   where r.title = 'Contractor seat' and s.period_start = (select this_month from ctx)), 10000.00, 'planned roles are matched too');
 select is((select costs_applied_at is not null from public.scenarios where id = :'plan'), true, 'the scenario records when costs were applied');
 
-select is((select rate_card_name || ' ' || monthly_cost from public.rate_card_preview((select ws from ctx), pg_temp.m('bob'), null, current_date)),
+select is((select rate_card_name || ' ' || monthly_cost from public.rate_card_preview((select ws from ctx), current_date, pg_temp.m('bob'))),
   'Squad bands 6000.00', 'the preview shows which card someone gets');
-select is((select monthly_cost from public.rate_card_preview((select ws from ctx), pg_temp.m('mia'), null, current_date)),
+select is((select monthly_cost from public.rate_card_preview((select ws from ctx), current_date, pg_temp.m('mia'))),
   7500.00, 'and salary-based cost to those who see pay');
 
 -- Totals -------------------------------------------------------------------------------------------------------
@@ -147,6 +147,25 @@ select throws_ok(format($$ select * from public.capacity_totals(%L, current_date
 select pg_temp.as_user('fin');
 select public.set_scenario_status(:'plan', 'submitted');
 select throws_ok(format($$ select public.apply_rate_cards(%L) $$, :'plan'), '23514', null, 'a submitted plan''s costs are locked');
+
+-- Saving a card in one go ------------------------------------------------------------------------------
+select public.save_rate_card((select ws from ctx), ' Leads ', 30, false,
+  '[{"field": "custom:band", "operator": "starts_with", "value": " L "}, {"field": "country", "operator": "equals", "value": "GB"}]',
+  format('[{"valid_from": "%s", "day_rate": 700, "working_days": 21, "currency": "gbp"}]', (select this_month from ctx) + 14)::jsonb) as leads \gset
+select is((select string_agg(field || ' ' || operator || ' ' || value, ', ' order by sort_order) from public.rate_card_conditions where card_id = :'leads'),
+  'custom:band starts_with L, country equals GB', 'a card is saved with its conditions in order');
+select is((select valid_from || ' ' || currency from public.rate_card_rates where card_id = :'leads'),
+  (select this_month from ctx) || ' GBP', 'and its rates by month');
+select lives_ok(format($$ select public.save_rate_card((select ws from ctx), 'Leads', 30, false,
+  '[{"field": "country", "operator": "equals", "value": "GB"}]', '[]', %L) $$, :'leads'), 'saving again replaces them');
+select is((select count(*)::integer from public.rate_card_conditions where card_id = :'leads')
+  + (select count(*)::integer from public.rate_card_rates where card_id = :'leads'), 1, 'so one condition and no rates remain');
+select throws_ok($$ select public.save_rate_card((select ws from ctx), 'Nothing', 1, false, '[]', '[]') $$,
+  '23514', null, 'a card that is not a default needs conditions');
+select throws_ok($$ select public.save_rate_card((select ws from ctx), 'Twice', 1, true, '[]',
+  '[{"valid_from": "2027-01-01", "day_rate": 1, "working_days": 1, "currency": "GBP"},
+    {"valid_from": "2027-01-20", "day_rate": 2, "working_days": 1, "currency": "GBP"}]') $$,
+  '23514', null, 'and one rate a month');
 
 select * from finish();
 rollback;

@@ -302,7 +302,12 @@ $$;
 
 -- Which card a person or planned role would get in a month, for the rate card screen. The cost is
 -- the card's rate; salary-based cost is shown only to those who see the person's pay.
-create function public.rate_card_preview(p_workspace_id uuid, p_member_id uuid, p_planned_role_id uuid, p_month date)
+create function public.rate_card_preview(
+  p_workspace_id uuid,
+  p_month date,
+  p_member_id uuid default null,
+  p_planned_role_id uuid default null
+)
 returns table (rate_card_id uuid, rate_card_name text, source public.cost_source, monthly_cost numeric, currency char(3))
 language plpgsql
 stable
@@ -465,9 +470,76 @@ begin
 end;
 $$;
 
+-- Saves a card with its conditions and rates in one go, as the signed-in user (the policies below
+-- decide who may). Rates are by month, one per month.
+create function public.save_rate_card(
+  p_workspace_id uuid,
+  p_name text,
+  p_priority integer,
+  p_is_default boolean,
+  -- [{field, operator, value}]
+  p_conditions jsonb,
+  -- [{valid_from, day_rate, working_days, currency}]
+  p_rates jsonb,
+  -- A new card when null.
+  p_card_id uuid default null,
+  p_group_id uuid default null
+)
+returns uuid
+language plpgsql
+set search_path = ''
+as $$
+declare
+  v_id uuid := p_card_id;
+begin
+  if not p_is_default and jsonb_array_length(coalesce(p_conditions, '[]')) = 0 then
+    raise exception 'A card needs conditions unless it is a default.' using errcode = 'check_violation', hint = 'rateCardNeedsConditions';
+  end if;
+  if exists (
+    select 1 from jsonb_to_recordset(coalesce(p_conditions, '[]')) as c (field text)
+    where c.field like 'custom:%' and not exists (
+      select 1 from public.custom_fields f
+      where f.workspace_id = p_workspace_id and 'custom:' || f.key = c.field)
+  ) then
+    raise exception 'That field does not exist.' using errcode = 'check_violation', hint = 'unknownField';
+  end if;
+  if exists (
+    select 1 from jsonb_to_recordset(coalesce(p_rates, '[]')) as r (valid_from date)
+    group by app.month_start(r.valid_from) having count(*) > 1
+  ) then
+    raise exception 'One rate per month.' using errcode = 'check_violation', hint = 'rateMonthTwice';
+  end if;
+
+  if v_id is null then
+    insert into public.rate_cards (workspace_id, name, group_id, priority, is_default)
+    values (p_workspace_id, btrim(p_name), p_group_id, p_priority, p_is_default)
+    returning id into v_id;
+  else
+    update public.rate_cards
+    set name = btrim(p_name), group_id = p_group_id, priority = p_priority, is_default = p_is_default
+    where id = v_id and workspace_id = p_workspace_id;
+    if not found then
+      raise exception 'Not allowed.' using errcode = 'insufficient_privilege', hint = 'notAllowed';
+    end if;
+    delete from public.rate_card_conditions where card_id = v_id;
+    delete from public.rate_card_rates where card_id = v_id;
+  end if;
+
+  insert into public.rate_card_conditions (workspace_id, card_id, field, operator, value, sort_order)
+  select p_workspace_id, v_id, c.field, c.operator, btrim(c.value), c.n * 10
+  from rows from (jsonb_to_recordset(coalesce(p_conditions, '[]')) as (field text, operator public.rate_operator, value text))
+    with ordinality as c (field, operator, value, n);
+  insert into public.rate_card_rates (workspace_id, card_id, valid_from, day_rate, working_days, currency)
+  select p_workspace_id, v_id, app.month_start(r.valid_from), r.day_rate, r.working_days, upper(r.currency)
+  from jsonb_to_recordset(coalesce(p_rates, '[]')) as r (valid_from date, day_rate numeric, working_days numeric, currency text);
+  return v_id;
+end;
+$$;
+
 grant execute on function
   public.apply_rate_cards(uuid),
-  public.rate_card_preview(uuid, uuid, uuid, date),
+  public.save_rate_card(uuid, text, integer, boolean, jsonb, jsonb, uuid, uuid),
+  public.rate_card_preview(uuid, date, uuid, uuid),
   public.capacity_totals(uuid, date, date, text, uuid, uuid)
 to authenticated;
 

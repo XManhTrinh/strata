@@ -131,7 +131,16 @@
     "bookingNotPending": "This request has already been decided or cancelled.",
     "selfApproval": "You can't approve your own request.",
     "bookingNotCancellable": "This booking can't be cancelled.",
-    "bookingWhoRequired": "Choose who this is for."
+    "bookingWhoRequired": "Choose who this is for.",
+    "rateCardNameRequired": "Enter a name for the rate card.",
+    "rateCardSetNameRequired": "Enter a name for the set.",
+    "rateCardSetNameTaken": "A set already has this name.",
+    "rateCardGroupNameRequired": "Enter a name for the group.",
+    "conditionValueRequired": "Every condition needs a value.",
+    "rateCardNeedsConditions": "Add at least one condition, or make this the default card.",
+    "unknownField": "One of the fields no longer exists.",
+    "rateInvalid": "Each rate needs a month, a day rate of 0 or more, 1 to 31 working days and a 3-letter currency.",
+    "rateMonthTwice": "Each month can have only one rate."
   },
   "auth": {
     "signIn": {
@@ -215,7 +224,8 @@
       "people": "People",
       "orgChart": "Org chart",
       "timeOff": "Time off",
-      "settings": "Settings"
+      "settings": "Settings",
+      "planning": "Planning"
     },
     "switcher": {
       "label": "Switch workspace",
@@ -306,6 +316,10 @@
       "working-time": {
         "name": "Working time",
         "description": "Work schedules and public holidays"
+      },
+      "planning": {
+        "name": "Planning",
+        "description": "Periods, horizon and plan rules"
       },
       "features": {
         "name": "Features",
@@ -1472,6 +1486,142 @@
       "calendarName": "Strata time off",
       "halfDay": "half day",
       "links": "Your links"
+    }
+  },
+  "planningSettings": {
+    "title": "Planning",
+    "intro": "How capacity and cost plans work in this workspace.",
+    "period": {
+      "label": "Planning period",
+      "month": "Monthly",
+      "quarter": "Quarterly"
+    },
+    "horizonYears": {
+      "label": "Plan ahead",
+      "option": "{years, plural, one {# year} other {# years}}"
+    },
+    "displayUnit": {
+      "label": "Show time as",
+      "fte": "FTE (0 to 1)",
+      "percent": "Percentage"
+    },
+    "overAllocation": {
+      "label": "Someone over full time",
+      "warn": "Warn",
+      "block": "Don't allow",
+      "help": "When a person's time across teams adds up to more than 1 FTE in a month."
+    },
+    "basis": {
+      "label": "Plan by",
+      "person": "Person, with planned roles for vacancies",
+      "position": "Position: seats that people fill",
+      "help": "Planning by position plans every seat as a planned role and fills it with a person."
+    },
+    "costSplitFieldId": {
+      "label": "Split cost by",
+      "none": "Don't split",
+      "help": "A custom field, such as Capex or Opex, that splits cost totals."
+    },
+    "lifecycle": {
+      "label": "Submit and approve plans",
+      "help": "Plans go from draft to submitted to approved. Approved plans and past months can't be changed."
+    },
+    "save": "Save",
+    "saved": "Planning settings saved"
+  },
+  "rateCards": {
+    "title": "Rate cards",
+    "intro": "Cards are tried in priority order, lowest first. The first card whose conditions all match someone sets their cost; anyone left uses the default card. Sets and groups only organise this page.",
+    "add": "Add card",
+    "addSet": "Add set",
+    "addGroup": "Add group",
+    "dialogAdd": "Add rate card",
+    "dialogEdit": "Edit rate card",
+    "setDialogAdd": "Add set",
+    "setDialogEdit": "Rename set",
+    "groupDialogAdd": "Add group",
+    "groupDialogEdit": "Edit group",
+    "save": "Save",
+    "saved": "{name} saved",
+    "added": "{name} added",
+    "name": "Name",
+    "group": "Group",
+    "noGroup": "No group",
+    "groupInSet": "{group} ({set})",
+    "set": "Set",
+    "noSet": "No set",
+    "priority": "Priority",
+    "priorityHelp": "Lower numbers are tried first.",
+    "priorityShort": "Priority {priority}",
+    "isDefault": "Default card for everyone no other card matches",
+    "default": "Default",
+    "archived": "Archived",
+    "conditions": "Who it applies to",
+    "conditionsHelp": "All conditions must match. Values ignore capitals and extra spaces.",
+    "defaultHelp": "A default card applies to anyone no other card matches.",
+    "field": "Field",
+    "operator": "Test",
+    "value": "Value",
+    "listHelp": "Separate values with commas.",
+    "addCondition": "Add condition",
+    "removeCondition": "Remove condition {n}",
+    "rates": "Rates",
+    "ratesHelp": "A rate applies from its month until the next rate. Monthly cost is the day rate times the working days.",
+    "from": "From",
+    "dayRate": "Day rate",
+    "workingDays": "Working days",
+    "currency": "Currency",
+    "monthly": "{amount} a month at full time",
+    "addRate": "Add rate",
+    "removeRate": "Remove rate {n}",
+    "fields": {
+      "unit": "Unit",
+      "unit_code": "Unit code",
+      "position": "Position",
+      "career_level": "Career level",
+      "employment_type": "Employment type",
+      "country": "Country"
+    },
+    "operators": {
+      "equals": "is",
+      "not_equals": "is not",
+      "starts_with": "starts with",
+      "starts_with_any": "starts with any of",
+      "ends_with": "ends with",
+      "contains": "contains",
+      "in": "is one of"
+    },
+    "and": " and ",
+    "everyoneElse": "Everyone else",
+    "rateNow": "{amount} × {days} days",
+    "noRateNow": "No rate this month",
+    "noCards": "No cards yet.",
+    "noGroups": "No groups in this set yet.",
+    "notInSet": "Not in a set",
+    "notInGroup": "Not in a group",
+    "actions": "Actions for {name}",
+    "edit": "Edit",
+    "rename": "Rename",
+    "delete": "Delete",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archivedDone": "{name} archived",
+    "restored": "{name} restored",
+    "deleted": "{name} deleted",
+    "preview": {
+      "title": "Who gets which card",
+      "intro": "Choose a person to see the card they match and what a month of their time costs.",
+      "person": "Person",
+      "month": "Month",
+      "none": "Nothing to show for this person.",
+      "noCard": "No card matches",
+      "noCost": "No cost: no rate this month and no salary to use.",
+      "cost": "{amount} a month, from {source}",
+      "sources": {
+        "rate_card": "the card's rate",
+        "salary": "their salary",
+        "none": "nothing"
+      }
     }
   }
 }
