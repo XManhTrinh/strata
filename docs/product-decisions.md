@@ -367,6 +367,7 @@ tablet (600–1199px), desktop (≥ 1200px).
 | Admin (roles, hierarchy, settings)      | "Open on a larger screen"                               | Full                    | Full                  |
 
 - "Open on a larger screen" shows a short summary and a clear message, never a squeezed layout.
-- Navigation adapts: bottom bar on phone, rail on tablet, expanded rail on desktop.
+- Navigation adapts: bottom bar on phone, collapsed rail (icons with labels) from tablet up, so
+  wide screens keep their width for tables and charts.
 - **No native app planned.** If approval push notifications matter later, the web app becomes
   installable with web push.

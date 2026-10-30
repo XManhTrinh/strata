@@ -208,8 +208,8 @@ UI can expose another workspace's data.
 
 #### Acceptance Criteria
 
-1. THE Shell SHALL use a NavigationBar below 600px, a NavigationRail from 600px to 1199px and an
-   expanded rail from 1200px.
+1. THE Shell SHALL use a NavigationBar below 600px, and a collapsed NavigationRail (icons with
+   labels) from 600px.
 2. THE Shell SHALL show only modules whose Feature is on and for which the Member has a view
    Permission.
 3. EACH page SHALL have one top app bar provided by the Shell's page header.

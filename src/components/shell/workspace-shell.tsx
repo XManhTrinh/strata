@@ -12,19 +12,18 @@ import {
 import { SkipLink } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { destinationsFor, isCurrent } from "./destinations";
 
 /**
- * Material 3 adaptive navigation: a navigation bar on phones (< 600px), a rail on tablets and
- * an expanded rail on large screens (≥ 1200px). Pages render their own PageHeader.
+ * Material 3 adaptive navigation: a navigation bar on phones (< 600px) and a collapsed rail
+ * (icons with labels) from 600px, leaving the width to the content. Pages render their own
+ * PageHeader.
  */
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const t = useTranslations("shell");
   const pathname = usePathname();
   const context = useWorkspace();
   const destinations = destinationsFor(context);
-  const large = useMediaQuery("(min-width: 1200px)");
 
   return (
     <div className="bg-surface text-on-surface flex min-h-dvh">
@@ -32,7 +31,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
 
       <NavigationRail
         aria-label={t("navigation")}
-        expanded={large}
+        expanded={false}
         className="medium:flex sticky top-0 hidden h-dvh shrink-0"
       >
         {destinations.map((destination) => {
