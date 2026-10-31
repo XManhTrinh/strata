@@ -103,35 +103,46 @@ export function TableView<Row>({
               <SelectionCheckbox aria-label={labels.selectAll} />
             </Column>
           )}
-          {columns.map((column) => (
-            <Column
-              key={column.id}
-              id={column.id}
-              isRowHeader={column.isRowHeader}
-              allowsSorting={column.sortable !== false}
-              defaultWidth={state.widths[column.id] ?? column.width ?? 180}
-              minWidth={column.minWidth ?? 80}
-              className="border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset"
-            >
-              {({ sortDirection, allowsSorting }) => (
-                <div
-                  className={cn("flex items-center gap-1", column.align === "end" && "justify-end")}
-                >
-                  <span className="truncate">{column.header}</span>
-                  {allowsSorting && (
-                    <Icon
-                      name={sortDirection === "descending" ? "arrow_downward" : "arrow_upward"}
-                      size={18}
-                      className={cn(
-                        sortDirection ? "text-on-surface" : "opacity-0 group-hover:opacity-60"
-                      )}
-                    />
-                  )}
-                  <ColumnResizer className="bg-outline-variant hover:bg-primary data-[resizing]:bg-primary absolute end-0 top-3 bottom-3 w-0.5 cursor-col-resize outline-none" />
-                </div>
-              )}
-            </Column>
-          ))}
+          {columns.map((column, index) => {
+            // The last column fills the rest of the row (at least its own width), so the table
+            // spans the page; with nothing after it, it has no resize handle or separator.
+            const last = index === columns.length - 1;
+            const width = state.widths[column.id] ?? column.width ?? 180;
+            return (
+              <Column
+                key={column.id}
+                id={column.id}
+                isRowHeader={column.isRowHeader}
+                allowsSorting={column.sortable !== false}
+                defaultWidth={last ? "1fr" : width}
+                minWidth={last ? Math.max(width, column.minWidth ?? 80) : (column.minWidth ?? 80)}
+                className="border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset"
+              >
+                {({ sortDirection, allowsSorting }) => (
+                  <div
+                    className={cn(
+                      "flex items-center gap-1",
+                      column.align === "end" && "justify-end"
+                    )}
+                  >
+                    <span className="truncate">{column.header}</span>
+                    {allowsSorting && (
+                      <Icon
+                        name={sortDirection === "descending" ? "arrow_downward" : "arrow_upward"}
+                        size={18}
+                        className={cn(
+                          sortDirection ? "text-on-surface" : "opacity-0 group-hover:opacity-60"
+                        )}
+                      />
+                    )}
+                    {!last && (
+                      <ColumnResizer className="bg-outline-variant hover:bg-primary data-[resizing]:bg-primary absolute end-0 top-3 bottom-3 w-0.5 cursor-col-resize outline-none" />
+                    )}
+                  </div>
+                )}
+              </Column>
+            );
+          })}
         </TableHeader>
         {/* React Aria caches rendered rows per item; re-render them when the columns change. */}
         <TableBody items={rows} dependencies={[columns, selectable]}>
