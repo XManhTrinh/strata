@@ -3,7 +3,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(12);
+select plan(13);
 
 create temporary table people (name text primary key, user_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -75,6 +75,13 @@ select is((select string_agg(name, ', ') from public.allocation_grid(:'plan', (s
   'Engineer', 'search by name');
 select is((select count(*)::integer from public.allocation_grid(:'plan', (select this_month from ctx), (select last_month from ctx), null, '', 2, 4)),
   1, 'pages by limit and offset');
+
+select public.save_allocations(:'plan', jsonb_build_array(
+  jsonb_build_object('member_id', pg_temp.m('bob'), 'org_unit_id', pg_temp.squad(), 'period', (select this_month from ctx), 'fte', 0)));
+select is((select count(*)::integer from public.allocation_grid(:'plan', (select this_month from ctx), (select last_month from ctx), pg_temp.squad())),
+  1, 'a row goes once its last month there is removed');
+select public.save_allocations(:'plan', jsonb_build_array(
+  jsonb_build_object('member_id', pg_temp.m('bob'), 'org_unit_id', pg_temp.squad(), 'period', (select this_month from ctx), 'fte', 0.5)));
 
 -- Reach: Una sees the squad.
 select pg_temp.as_user('una');

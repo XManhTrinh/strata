@@ -41,6 +41,15 @@ select u.id as units_id from auth.users u where u.email = 'units@load.test' \gse
 select m.id as tribe_lead from public.members m where m.workspace_id = :'ws' and m.person_key = 'E-000031' \gset
 select u.id as squad from public.org_units u where u.workspace_id = :'ws' and u.code = 'U00500' \gset
 select u.id as division from public.org_units u where u.workspace_id = :'ws' and u.code = 'U00001' \gset
+select s.id as plan from public.scenarios s where s.workspace_id = :'ws' and s.name = 'Load plan' \gset
+select f.id as site_field from public.custom_fields f where f.workspace_id = :'ws' and f.key = 'site' \gset
+select date_trunc('month', current_date)::date as plan_from,
+  (date_trunc('month', current_date) + interval '11 months')::date as plan_to \gset
+-- Fifty people's next month in their squad, set to what they have (so repeating it changes nothing).
+select jsonb_agg(jsonb_build_object('member_id', a.member_id, 'org_unit_id', a.org_unit_id,
+    'period', a.period_start, 'fte', a.fte)) as plan_changes
+from (select * from public.allocations where scenario_id = :'plan' and org_unit_id = :'squad'
+      and period_start = (:'plan_from'::date + interval '1 month')::date limit 50) a \gset
 
 -- As the owner (whole workspace) ---------------------------------------------------------------------
 select set_config('request.jwt.claims', json_build_object('sub', :'owner_id', 'role', 'authenticated')::text, false);
@@ -77,6 +86,20 @@ select load_checks.time('owner: a person''s balances',
   format($q$select count(*) from public.allowance_balances(%L)$q$, :'tribe_lead'));
 select load_checks.time('owner: members table, 50 by name (RLS)',
   format($q$select count(*) from (select id from public.members where workspace_id = %L order by full_name limit 50) x$q$, :'ws'));
+select load_checks.time('owner: plan grid, first page, whole workspace',
+  format($q$select count(*) from public.allocation_grid(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'));
+select load_checks.time('owner: plan grid, one squad',
+  format($q$select count(*) from public.allocation_grid(%L, %L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to', :'squad'));
+select load_checks.time('owner: plan grid, search by name',
+  format($q$select count(*) from public.allocation_grid(%L, %L, %L, null, 'Person 0999')$q$, :'plan', :'plan_from', :'plan_to'));
+select load_checks.time('owner: save 50 plan changes',
+  format($q$select public.save_allocations(%L, %L)$q$, :'plan', :'plan_changes'));
+select load_checks.time('owner: plan totals by team, 12 months',
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 2000);
+select load_checks.time('owner: plan totals by a custom field, 12 months',
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'field', null, %L)$q$, :'plan', :'plan_from', :'plan_to', :'site_field'), 2000);
+select load_checks.time('owner: plan totals in a division, 12 months',
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'unit', %L)$q$, :'plan', :'plan_from', :'plan_to', :'division'), 2000);
 reset role;
 
 -- Narrower reaches ------------------------------------------------------------------------------------
@@ -99,6 +122,10 @@ select load_checks.time('team and below (~800): directory, first page',
   format($q$select count(*) from public.people_directory(%L)$q$, :'ws'));
 select load_checks.time('team and below (~800): org chart from self',
   format($q$select count(*) from public.org_chart(%L, %L)$q$, :'ws', :'tribe_lead'));
+select load_checks.time('team and below (~800): plan grid, first page',
+  format($q$select count(*) from public.allocation_grid(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'));
+select load_checks.time('team and below (~800): plan totals, 12 months',
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 2000);
 reset role;
 
 select set_config('request.jwt.claims', json_build_object('sub', :'units_id', 'role', 'authenticated')::text, false);
@@ -173,6 +200,8 @@ rollback;
 select set_config('load_checks.slow_imports', :'slow_imports', false);
 
 -- Report ---------------------------------------------------------------------------------------------------
+-- The seed's batch jobs (building a plan, applying rate cards), timed once while seeding.
+insert into load_checks.results (label, ms, target_ms) select label, ms, target_ms from load_seed.timings;
 select label, ms, target_ms, case when ms <= target_ms then 'ok' else 'SLOW' end as result
 from load_checks.results order by ord;
 

@@ -22,6 +22,7 @@ begin
     execute format('alter table %s disable trigger user', t);
   end loop;
   -- Time rows point at members without cascading (members are never deleted), so they go first.
+  delete from public.scenarios x using public.workspaces w where w.id = x.workspace_id and w.slug = 'load-100k';
   delete from public.allowance_ledger l using public.workspaces w where w.id = l.workspace_id and w.slug = 'load-100k';
   delete from public.bookings b using public.workspaces w where w.id = b.workspace_id and w.slug = 'load-100k';
   delete from public.time_types x using public.workspaces w where w.id = x.workspace_id and w.slug = 'load-100k';
@@ -149,7 +150,7 @@ insert into public.roles (workspace_id, name) select ws, r from ctx, (values ('L
 insert into public.role_permissions (workspace_id, role_id, permission_key, reach)
 select c.ws, r.id, k, (case r.name when 'Load reports' then 'reports' when 'Load below' then 'team_and_below' else 'units' end)::public.reach
 from ctx c join public.roles r on r.workspace_id = c.ws and r.name like 'Load %'
-cross join (values ('people.view'), ('org_chart.view'), ('people.export'), ('time.view')) as p (k);
+cross join (values ('people.view'), ('org_chart.view'), ('people.export'), ('time.view'), ('planning.view')) as p (k);
 insert into public.member_roles (workspace_id, member_id, role_id)
 select c.ws, m.id, r.id
 from ctx c join public.members m on m.workspace_id = c.ws
@@ -198,6 +199,53 @@ select set_config('app.defer_reporting_closure', 'off', true);
 select app.rebuild_reporting_closure((select ws from ctx));
 
 commit;
+
+-- Planning: rate cards on career level, employment type and a custom field (the rest fall back
+-- to salary), and a 24-month plan from people with costs applied, as the owner. Both are batch
+-- jobs, timed here once.
+begin;
+insert into public.rate_cards (workspace_id, name, priority, is_default)
+select ws, n, p, d from ctx, (values ('Contractors', 10, false), ('Juniors', 20, false), ('Seniors', 30, false),
+  ('Band 3', 40, false), ('Everyone else', 99, true)) v (n, p, d);
+insert into public.rate_card_conditions (workspace_id, card_id, field, operator, value)
+select c.ws, r.id, v.f, v.o::public.rate_operator, v.val
+from ctx c join public.rate_cards r on r.workspace_id = c.ws
+join (values ('Contractors', 'employment_type', 'equals', 'Contractor'), ('Juniors', 'career_level', 'in', 'L1, L2, L3'),
+  ('Seniors', 'career_level', 'starts_with_any', 'L7, L8'), ('Band 3', 'custom:band', 'equals', 'Band 3')) v (n, f, o, val) on v.n = r.name;
+insert into public.rate_card_rates (workspace_id, card_id, valid_from, day_rate, working_days, currency)
+select c.ws, r.id, date_trunc('month', current_date)::date, v.rate, 20, 'GBP'
+from ctx c join public.rate_cards r on r.workspace_id = c.ws
+join (values ('Contractors', 650), ('Juniors', 250), ('Seniors', 550), ('Band 3', 400)) v (n, rate) on v.n = r.name;
+commit;
+
+analyze public.members, public.member_assignments, public.member_compensation, public.member_field_values;
+
+-- Kept for checks.sql, which adds them to its verdict.
+create schema if not exists load_seed;
+drop table if exists load_seed.timings;
+create table load_seed.timings (label text, ms numeric, target_ms numeric);
+grant select on ctx, load_users to authenticated;
+select set_config('request.jwt.claims',
+  json_build_object('sub', (select id from load_users where name = 'owner'), 'role', 'authenticated')::text, false);
+set role authenticated;
+select clock_timestamp() as started \gset
+select public.create_scenario((select ws from ctx), 'Load plan', date_trunc('month', current_date)::date,
+  (date_trunc('month', current_date) + interval '23 months')::date) as load_plan \gset
+select round((extract(epoch from clock_timestamp() - :'started'::timestamptz) * 1000)::numeric) as create_ms \gset
+reset role;
+analyze public.allocations;
+set role authenticated;
+select clock_timestamp() as started \gset
+select public.apply_rate_cards(:'load_plan') as applied \gset
+select round((extract(epoch from clock_timestamp() - :'started'::timestamptz) * 1000)::numeric) as apply_ms \gset
+reset role;
+select set_config('request.jwt.claims', '', false);
+insert into load_seed.timings values
+  ('owner: plan from 100k people, 24 months', :'create_ms', 60000),
+  ('owner: apply rate cards to the plan', :'apply_ms', 120000);
+analyze public.cost_snapshots, public.scenarios, public.planned_roles;
+select label, ms, target_ms, case when ms <= target_ms then 'ok' else 'SLOW' end as result from load_seed.timings;
+select :'applied' as applied;
 
 analyze public.members, public.member_assignments, public.member_compensation, public.member_field_values, public.org_units, public.reporting_closure, public.member_roles, public.role_permissions, public.bookings, public.booking_attendees, public.booking_approvals, public.allowance_ledger;
 

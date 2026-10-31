@@ -281,6 +281,63 @@ export type Database = {
   };
   public: {
     Tables: {
+      allocation_rows: {
+        Row: {
+          id: number;
+          member_id: string | null;
+          org_unit_id: string;
+          planned_role_id: string | null;
+          scenario_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: never;
+          member_id?: string | null;
+          org_unit_id: string;
+          planned_role_id?: string | null;
+          scenario_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          id?: never;
+          member_id?: string | null;
+          org_unit_id?: string;
+          planned_role_id?: string | null;
+          scenario_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "allocation_rows_scenario_id_planned_role_id_fkey";
+            columns: ["scenario_id", "planned_role_id"];
+            isOneToOne: false;
+            referencedRelation: "planned_roles";
+            referencedColumns: ["scenario_id", "id"];
+          },
+          {
+            foreignKeyName: "allocation_rows_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "allocation_rows_workspace_id_org_unit_id_fkey";
+            columns: ["workspace_id", "org_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "org_units";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "allocation_rows_workspace_id_scenario_id_fkey";
+            columns: ["workspace_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       allocations: {
         Row: {
           fte: number;
