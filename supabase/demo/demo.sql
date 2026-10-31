@@ -80,6 +80,20 @@ create function pg_temp.monday(p_date date) returns date language sql immutable 
   $$ select p_date + ((8 - extract(isodow from p_date)::integer) % 7) $$;
 grant execute on function pg_temp.monday(date) to authenticated;
 
+-- Runs a scenario's plan job (building, copying or costing) to the end, a chunk at a time.
+create function pg_temp.finish_job(p_scenario_id uuid) returns void language plpgsql as $$
+declare
+  v_job uuid;
+begin
+  loop
+    select id into v_job from public.planning_jobs where scenario_id = p_scenario_id and done_at is null;
+    exit when v_job is null;
+    perform public.run_planning_job(v_job);
+  end loop;
+end;
+$$;
+grant execute on function pg_temp.finish_job(uuid) to authenticated;
+
 -- Bookings for people without accounts, written directly: the booking, its attendee with
 -- working days, approval rows, and allowance usage for leave. Each row of `demo_bookings`.
 create temporary table demo_bookings (
@@ -382,6 +396,7 @@ where r.workspace_id = :'co_ws';
 set role authenticated;
 select public.create_scenario(:'co_ws', 'FY plan', date_trunc('month', current_date)::date,
   (date_trunc('year', current_date + 366) + interval '11 months')::date) as co_plan \gset
+select pg_temp.finish_job(:'co_plan');
 reset role;
 insert into public.planned_roles (workspace_id, scenario_id, title, org_unit_id, position_id, career_level_id, employment_type_id, start_date, fte)
 select :'co_ws'::uuid, :'co_plan', r.title, u.id,
@@ -396,10 +411,12 @@ from (values ('Senior Software Engineer', 'ENG-PRD-WEB', 'Senior Software Engine
 join public.org_units u on u.workspace_id = :'co_ws' and u.code = r.unit;
 set role authenticated;
 select public.apply_rate_cards(:'co_plan');
+select pg_temp.finish_job(:'co_plan');
 select public.set_scenario_status(:'co_plan', 'submitted');
 select public.set_scenario_status(:'co_plan', 'approved');
 select public.set_live_scenario(:'co_plan');
 select public.copy_scenario(:'co_plan', 'FY plan: growth') as co_growth \gset
+select pg_temp.finish_job(:'co_growth');
 reset role;
 insert into public.planned_roles (workspace_id, scenario_id, title, org_unit_id, position_id, career_level_id, employment_type_id, start_date, fte)
 select :'co_ws'::uuid, :'co_growth', r.title, u.id,
@@ -413,6 +430,7 @@ from (values ('Mobile Engineer', 'ENG-PRD-MOB', 'Mobile Engineer', 'IC3', 4), ('
 join public.org_units u on u.workspace_id = :'co_ws' and u.code = r.unit;
 set role authenticated;
 select public.apply_rate_cards(:'co_growth');
+select pg_temp.finish_job(:'co_growth');
 reset role;
 -- COMPANY-Corp: about 10k people in 4 divisions, 16 departments and 80 teams -----------------
 select w.id as corp_ws, (select id from public.members where workspace_id = w.id and is_owner) as corp_me,
@@ -576,6 +594,7 @@ analyze public.members, public.member_assignments, public.member_compensation, p
 set role authenticated;
 select public.create_scenario(:'corp_ws', '12-month plan', date_trunc('month', current_date)::date,
   (date_trunc('month', current_date) + interval '11 months')::date) as corp_plan \gset
+select pg_temp.finish_job(:'corp_plan');
 reset role;
 insert into public.planned_roles (workspace_id, scenario_id, title, org_unit_id, position_id, career_level_id, employment_type_id, start_date)
 select :'corp_ws', :'corp_plan', 'Senior Engineer', o.id,
@@ -587,6 +606,7 @@ from corp_units u join public.org_units o on o.workspace_id = :'corp_ws' and o.c
 where u.level = 'Team' and u.code like 'C1-%' and u.n % 2 = 0;
 set role authenticated;
 select public.apply_rate_cards(:'corp_plan');
+select pg_temp.finish_job(:'corp_plan');
 select public.set_scenario_status(:'corp_plan', 'submitted');
 select public.set_scenario_status(:'corp_plan', 'approved');
 select public.set_live_scenario(:'corp_plan');

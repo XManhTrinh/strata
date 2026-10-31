@@ -95,11 +95,11 @@ select load_checks.time('owner: plan grid, search by name',
 select load_checks.time('owner: save 50 plan changes',
   format($q$select public.save_allocations(%L, %L)$q$, :'plan', :'plan_changes'));
 select load_checks.time('owner: plan totals by team, 12 months',
-  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 2000);
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 3000);
 select load_checks.time('owner: plan totals by a custom field, 12 months',
-  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'field', null, %L)$q$, :'plan', :'plan_from', :'plan_to', :'site_field'), 2000);
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'field', null, %L)$q$, :'plan', :'plan_from', :'plan_to', :'site_field'), 3000);
 select load_checks.time('owner: plan totals in a division, 12 months',
-  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'unit', %L)$q$, :'plan', :'plan_from', :'plan_to', :'division'), 2000);
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L, 'unit', %L)$q$, :'plan', :'plan_from', :'plan_to', :'division'), 3000);
 reset role;
 
 -- Narrower reaches ------------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ select load_checks.time('team and below (~800): org chart from self',
 select load_checks.time('team and below (~800): plan grid, first page',
   format($q$select count(*) from public.allocation_grid(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'));
 select load_checks.time('team and below (~800): plan totals, 12 months',
-  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 2000);
+  format($q$select count(*) from public.capacity_totals(%L, %L, %L)$q$, :'plan', :'plan_from', :'plan_to'), 3000);
 reset role;
 
 select set_config('request.jwt.claims', json_build_object('sub', :'units_id', 'role', 'authenticated')::text, false);

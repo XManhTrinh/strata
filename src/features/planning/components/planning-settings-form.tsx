@@ -53,7 +53,7 @@ export function PlanningSettingsForm({
   );
 
   return (
-    <section aria-labelledby="planning-settings-title" className="flex max-w-2xl flex-col gap-6">
+    <section aria-labelledby="planning-settings-title" className="max-w-form flex flex-col gap-6">
       <h2 id="planning-settings-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>

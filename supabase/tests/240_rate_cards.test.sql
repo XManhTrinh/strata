@@ -4,7 +4,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(35);
+select plan(36);
 
 -- The operators ------------------------------------------------------------------------------------------
 select ok(app.condition_matches(' Contractor ', 'equals', 'contractor'), 'equals ignores case and spaces');
@@ -97,7 +97,9 @@ insert into public.planned_roles (workspace_id, scenario_id, title, org_unit_id,
 values ((select ws from ctx), :'plan', 'Contractor seat', pg_temp.squad(), pg_temp.et('Contractor'), current_date);
 
 -- Applying ---------------------------------------------------------------------------------------------------
-select is(public.apply_rate_cards(:'plan') ->> 'snapshots', '36', 'apply costs five people and a role over six months');
+select is(public.apply_rate_cards(:'plan') ->> 'done', 'true', 'applying a small plan finishes in its first chunk');
+select is((select count(*)::integer from public.cost_snapshots where scenario_id = :'plan'), 36,
+  'and costs five people and a role over six months');
 create function pg_temp.cost(p_member uuid, p_month date) returns text language sql as $$
   select source::text || ' ' || monthly_cost::text || coalesce(' ' || (select name from public.rate_cards where id = rate_card_id), '')
   from public.cost_snapshots where scenario_id = (select id from public.scenarios where name = 'Plan') and member_id = p_member and period_start = p_month

@@ -13,4 +13,4 @@ Design and decisions: `design.md` (approved 2026-10-30).
 - [x] 5. Allocation grid: virtualized, desktop edit, read-only elsewhere, over/under highlighting;
       planned roles and filling; open roles on the org chart
 - [x] 6. Totals: FTE, headcount and cost by team and by custom field; exports
-- [ ] 7. Load checks for allocations, apply and totals at 100k people
+- [x] 7. Load checks for allocations, apply and totals at 100k people

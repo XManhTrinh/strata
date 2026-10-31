@@ -13,6 +13,17 @@ export async function listScenarios(workspaceId: string): Promise<Scenario[]> {
     .eq("workspace_id", workspaceId)
     .order("is_live", { ascending: false })
     .order("name");
+  const { data: jobs } = await supabase
+    .from("planning_jobs")
+    .select("id, scenario_id, kind, processed, total")
+    .eq("workspace_id", workspaceId)
+    .is("done_at", null);
+  const running = new Map(
+    (jobs ?? []).map((j) => [
+      j.scenario_id,
+      { id: j.id, kind: j.kind, processed: j.processed, total: j.total },
+    ])
+  );
   const names = new Map((data ?? []).map((s) => [s.id, s.name]));
   return (data ?? [])
     .map((s) => ({
@@ -26,6 +37,7 @@ export async function listScenarios(workspaceId: string): Promise<Scenario[]> {
       baselineName: (s.baseline_id && names.get(s.baseline_id)) || null,
       costsAppliedAt: s.costs_applied_at,
       lockedThrough: s.locked_through,
+      job: running.get(s.id) ?? null,
     }))
     .sort((a, b) => Number(a.archived) - Number(b.archived));
 }

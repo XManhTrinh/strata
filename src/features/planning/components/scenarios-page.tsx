@@ -22,6 +22,7 @@ import {
   setScenarioStatus,
 } from "../scenario-actions";
 import type { Scenario } from "../types";
+import { usePlanningJobs } from "../use-planning-jobs";
 
 type Editing = { kind: "new" } | { kind: "copy" | "rename"; scenario: Scenario };
 
@@ -53,6 +54,10 @@ export function ScenariosPage({
   const canApprove = (permissions["planning.approve"]?.length ?? 0) > 0;
   const canApply = (permissions["rate_cards.apply"]?.length ?? 0) > 0;
   const thisMonth = `${new Date().toISOString().slice(0, 7)}-01`;
+  const progress = usePlanningJobs(
+    scenarios.flatMap((s) => (s.job ? [s.job] : [])),
+    (job) => (job.kind === "apply" ? canApply : canEdit)
+  );
 
   const month = (iso: string) =>
     format.dateTime(new Date(`${iso}T00:00:00Z`), {
@@ -62,6 +67,13 @@ export function ScenariosPage({
     });
   const summary = (s: Scenario) =>
     [
+      s.job &&
+        t(`jobs.${s.job.kind}`, {
+          percent: Math.round(
+            (100 * (progress.get(s.job.id)?.processed ?? 0)) /
+              Math.max(1, progress.get(s.job.id)?.total ?? 1)
+          ),
+        }),
       t("months", { from: month(s.firstPeriod), to: month(s.lastPeriod) }),
       s.baselineName && t("copiedFrom", { name: s.baselineName }),
       s.costsAppliedAt

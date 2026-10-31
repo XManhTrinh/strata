@@ -84,6 +84,15 @@ export type Scenario = {
   costsAppliedAt: string | null;
   /** Months up to and including this one are locked. */
   lockedThrough: string | null;
+  /** Building, copying or costing still under way. */
+  job: PlanningJob | null;
+};
+
+export type PlanningJob = {
+  id: string;
+  kind: Enums["planning_job_kind"];
+  processed: number;
+  total: number;
 };
 
 /** One group's FTE, headcount and cost in one month; cost is null when the caller can't see it. */
