@@ -1,6 +1,6 @@
 import { type Page, expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, followEmailLink, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, followEmailLink, uniqueId, openRow } from "./helpers";
 import { latestLinkFor } from "./mailpit";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "managing people needs a larger screen");
@@ -45,10 +45,11 @@ test("a manager approves a report's leave, books a team event and adjusts a bala
 
   // Ana becomes Ben's line manager.
   await ana.goto(`${base}/people`);
-  await ana
-    .getByRole("grid", { name: "People" })
-    .getByRole("row", { name: /Ben Ionescu/ })
-    .click();
+  await openRow(
+    ana,
+    ana.getByRole("grid", { name: "People" }).getByRole("row", { name: /Ben Ionescu/ }),
+    /\/people\/[0-9a-f-]{36}$/
+  );
   await ana.getByRole("button", { name: "Change job" }).click();
   const job = ana.getByRole("dialog", { name: "Change job" });
   await job.getByRole("combobox", { name: "Manager" }).fill("Ana");

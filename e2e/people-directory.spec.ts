@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, openRow } from "./helpers";
 
 test("the people directory searches, filters and opens on every screen", async ({
   page,
@@ -36,6 +36,5 @@ test("the people directory searches, filters and opens on every screen", async (
 
   // Opening a person.
   await page.goto(page.url().replace(/\?.*$/, ""));
-  await ana.click();
-  await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}$/);
+  await openRow(page, ana, /\/people\/[0-9a-f-]{36}$/);
 });

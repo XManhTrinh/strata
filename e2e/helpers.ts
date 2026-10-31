@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 import { latestLinkFor } from "./mailpit";
 
 const PASSWORD = "secret123";
@@ -83,4 +83,15 @@ export async function openPlanning(page: Page, name: string): Promise<void> {
     .or(page.getByRole("tab", { name }))
     .first()
     .click();
+}
+
+/**
+ * Opens a table row, again if needed: before the page's script loads, a click on a row isn't
+ * handled yet (slow machines, such as CI, show it).
+ */
+export async function openRow(page: Page, row: Locator, url: RegExp): Promise<void> {
+  await expect(async () => {
+    await row.click();
+    await expect(page).toHaveURL(url, { timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
 }
