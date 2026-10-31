@@ -14,6 +14,8 @@ import type { Balance, BookableType } from "../types";
 
 /** Books time for the signed-in person, showing the working days and what's left as they choose. */
 export function BookDialog({
+  initialStart,
+  initialEnd,
   memberId,
   myName,
   canBookForOthers,
@@ -21,6 +23,9 @@ export function BookDialog({
   balances,
   onClose,
 }: {
+  /** Days chosen on the calendar. */
+  initialStart?: string;
+  initialEnd?: string;
   memberId: string;
   myName: string;
   /** Holds time.book_for_others (the database checks for whom). */
@@ -33,8 +38,8 @@ export function BookDialog({
   const { workspace } = useWorkspace();
   const today = new Date().toISOString().slice(0, 10);
   const [typeId, setTypeId] = useState(types[0]?.id ?? "");
-  const [start, setStart] = useState(today);
-  const [end, setEnd] = useState(today);
+  const [start, setStart] = useState(initialStart ?? today);
+  const [end, setEnd] = useState(initialEnd ?? initialStart ?? today);
   const [startAfternoon, setStartAfternoon] = useState(false);
   const [endMorning, setEndMorning] = useState(false);
   const [days, setDays] = useState<number | null>(null);

@@ -6,25 +6,35 @@ import { Icon } from "@/components/ui/icon";
 import { type CalendarView, daysBetween } from "../calendar-range";
 import type { CalendarEntry } from "../types";
 import { useBookingDates } from "./date-range";
+import { MonthCalendar } from "./month-calendar";
 
 /**
- * Who's away: in a month or week, one row per person and one column per day (a table, so screen
+ * Who's away: as a month calendar of bars (booking by choosing days); in a month or week, one row per person and one column per day (a table, so screen
  * readers move by row and column); in the list view, and always on phones, bookings in order.
  */
 export function TeamCalendar({
   view,
+  date,
   from,
   to,
   entries,
   previousHref,
   nextHref,
+  onBook,
+  teamHref,
 }: {
   view: CalendarView;
+  /** The date the view is around. */
+  date: string;
   from: string;
   to: string;
   entries: CalendarEntry[];
   previousHref: string;
   nextHref: string;
+  /** Books chosen days from the calendar, when the user may book. */
+  onBook?: (start: string, end: string) => void;
+  /** The team view of a day. */
+  teamHref: (day: string) => string;
 }) {
   const t = useTranslations("timeOff");
   const format = useFormatter();
@@ -33,14 +43,18 @@ export function TeamCalendar({
   const day = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: "medium", timeZone: "UTC" });
   const monthName =
-    view === "month"
-      ? format.dateTime(new Date(from), { month: "long", year: "numeric", timeZone: "UTC" })
+    view === "month" || view === "calendar"
+      ? format.dateTime(new Date(view === "calendar" ? date : from), {
+          month: "long",
+          year: "numeric",
+          timeZone: "UTC",
+        })
       : view === "week"
         ? t("calendar.weekOf", { date: day(from) })
         : t("calendar.listFrom", { date: day(from) });
   const arrow = (direction: "previous" | "next") =>
     t(
-      view === "month"
+      view === "month" || view === "calendar"
         ? `calendar.${direction}`
         : view === "week"
           ? `calendar.${direction}Week`
@@ -74,7 +88,39 @@ export function TeamCalendar({
         />
       </div>
 
-      {people.length === 0 ? (
+      {view === "calendar" ? (
+        <>
+          <div className="medium:block hidden">
+            <MonthCalendar
+              from={from}
+              to={to}
+              month={date}
+              entries={entries}
+              onBook={onBook}
+              teamHref={teamHref}
+            />
+          </div>
+          {/* Phones list the month's bookings. */}
+          <List aria-label={t("calendar.label", { month: monthName })} className="medium:hidden">
+            {entries.map((e) => (
+              <ListItem
+                key={`${e.bookingId}-${e.memberId}-${e.startDate}`}
+                textValue={`${e.memberName} ${label(e)}`}
+                leading={
+                  <span style={{ color: e.color }}>
+                    <Icon name={e.icon} />
+                  </span>
+                }
+                supportingText={[label(e), dates(e), e.repeats && t("repeating")]
+                  .filter(Boolean)
+                  .join(" · ")}
+              >
+                {e.memberName}
+              </ListItem>
+            ))}
+          </List>
+        </>
+      ) : people.length === 0 ? (
         <p className="text-body-medium text-on-surface-variant">
           {t(view === "list" ? "calendar.listEmpty" : "calendar.empty")}
         </p>

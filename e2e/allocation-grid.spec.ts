@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, openPlanning } from "./helpers";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 1200, "plans are edited on desktop");
 
@@ -63,7 +63,7 @@ test("a planner edits time in the grid, adds a planned role and fills it", async
     .getByRole("button", { name: "Add", exact: true })
     .click();
   await expect(grid.getByRole("rowheader", { name: /Designer/ })).toContainText("Open role");
-  await page.getByRole("link", { name: "Scenarios" }).click();
+  await openPlanning(page, "Scenarios");
   for (const [action, done] of [
     ["Submit for approval", "Plan submitted"],
     ["Approve", "Plan approved"],

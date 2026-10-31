@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, openPlanning } from "./helpers";
 
 test("a planner creates and copies scenarios, takes one through approval, and compares them", async ({
   page,
@@ -52,13 +52,13 @@ test("a planner creates and copies scenarios, takes one through approval, and co
   await expectNoA11yViolations(page);
 
   // Side by side: the copy has the same people.
-  await page.getByRole("tab", { name: "Compare" }).click();
+  await openPlanning(page, "Compare");
   await expect(page.getByRole("heading", { name: "Compare scenarios" })).toBeVisible();
   await expect(page.getByText(/^Second scenario: 0 FTE/)).toBeVisible();
   await expectNoA11yViolations(page);
 
   // Totals open on the live plan, and export as CSV.
-  await page.getByRole("tab", { name: "Totals" }).click();
+  await openPlanning(page, "Totals");
   // A table, or a list on phones.
   const totals = page.getByLabel("Plan A totals");
   await expect(totals).toContainText(`Acme ${id}`);

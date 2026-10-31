@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, openPlanning } from "./helpers";
 
 test.skip(
   ({ viewport }) => (viewport?.width ?? 0) < 600,
@@ -30,7 +30,7 @@ test("finance sets planning rules and rate cards, and previews who gets which ca
 
   // A set with a group, from the Planning destination.
   await page.getByRole("link", { name: "Planning" }).first().click();
-  await page.getByRole("tab", { name: "Rate cards" }).click();
+  await openPlanning(page, "Rate cards");
   await expect(page.getByRole("heading", { name: "Rate cards", level: 2 })).toBeVisible();
   await page.getByRole("button", { name: "Add set" }).click();
   await page.getByRole("dialog", { name: "Add set" }).getByLabel("Name").fill("Digital");

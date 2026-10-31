@@ -21,4 +21,18 @@ describe("calendar ranges", () => {
       "2026-12-02",
     ]);
   });
+
+  it("shows whole weeks for the calendar of a month", () => {
+    // November 2026 starts on a Sunday and ends on a Monday; weeks start on Monday.
+    expect(viewRange("calendar", "2026-11-15", 1)).toEqual({
+      from: "2026-10-26",
+      to: "2026-12-06",
+    });
+    // Weeks starting on Sunday.
+    expect(viewRange("calendar", "2026-11-15", 7)).toEqual({
+      from: "2026-11-01",
+      to: "2026-12-05",
+    });
+    expect(shiftDate("calendar", "2026-11-15", 1)).toBe("2026-12-01");
+  });
 });

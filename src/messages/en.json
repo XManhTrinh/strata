@@ -349,7 +349,7 @@
     },
     "back": "Back to settings",
     "chooseTitle": "Choose a section",
-    "chooseBody": "Pick a settings section from the list.",
+    "chooseBody": "Pick a settings section from the list beside the navigation.",
     "largerScreenTitle": "Open on a larger screen",
     "largerScreenBody": "Workspace settings need more room. Open Strata on a tablet or computer to make changes here.",
     "general": {
@@ -1458,7 +1458,16 @@
       "nextList": "Later",
       "weekOf": "Week of {date}",
       "listFrom": "From {date}",
-      "listEmpty": "Nothing booked in these four weeks."
+      "listEmpty": "Nothing booked in these four weeks.",
+      "bookHint": "Choose a day, or drag across days, to book time.",
+      "calendarHint": "Bookings by day.",
+      "showWeekends": "Show weekends",
+      "hideWeekends": "Hide weekends",
+      "week": "Week of {date}",
+      "bookDay": "Book time on {date}",
+      "pending": "waiting for approval",
+      "more": "+{count} more",
+      "bar": "{name} · {type}"
     },
     "range": {
       "oneDay": "{date}",
@@ -1487,7 +1496,8 @@
     },
     "views": {
       "label": "View",
-      "month": "Month",
+      "calendar": "Calendar",
+      "month": "Team",
       "week": "Week",
       "list": "List"
     },

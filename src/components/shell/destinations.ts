@@ -1,3 +1,4 @@
+import { planningTabs } from "@/features/planning/tabs";
 import { visibleSections } from "@/features/settings/sections";
 import type { WorkspaceContextValue } from "@/features/workspaces/workspace-context";
 
@@ -37,4 +38,28 @@ export function isCurrent(destination: Destination, pathname: string): boolean {
   return destination.key === "home"
     ? pathname === destination.href
     : pathname === destination.href || pathname.startsWith(`${destination.href}/`);
+}
+
+/** A page under a destination, shown in the rail's panel: its address and translation key. */
+export type SubPage = { href: string; label: string };
+
+/** The pages under Settings and Planning (translation keys in `settings` and `planning`). */
+export function subPagesFor(
+  destination: Destination,
+  { workspace, permissions }: WorkspaceContextValue
+): SubPage[] {
+  const base = `/w/${workspace.slug}`;
+  if (destination.key === "settings") {
+    return visibleSections(permissions).map((s) => ({
+      href: `${base}/settings/${s.key}`,
+      label: `sections.${s.key}.name`,
+    }));
+  }
+  if (destination.key === "planning") {
+    return planningTabs((key) => (permissions[key]?.length ?? 0) > 0).map((tab) => ({
+      href: `${base}/planning/${tab}`,
+      label: `tabs.${tab}`,
+    }));
+  }
+  return [];
 }

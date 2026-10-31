@@ -64,3 +64,23 @@ export async function chooseFile(
     await expect(page.getByText(readText)).toBeVisible({ timeout: 2000 });
   }).toPass({ timeout: 20_000 });
 }
+
+/**
+ * A settings section's link: in the navigation rail's panel from 600px, or in the page's list
+ * on phones (each hidden at the other size).
+ */
+export function settingsSection(page: Page, name: string) {
+  return page
+    .getByRole("navigation", { name: "Settings" })
+    .getByRole("link", { name: new RegExp(`^${name}`) });
+}
+
+/** Opens a Planning screen: from the rail's panel, or its tab on phones. */
+export async function openPlanning(page: Page, name: string): Promise<void> {
+  await page
+    .getByRole("navigation", { name: "Planning" })
+    .getByRole("link", { name })
+    .or(page.getByRole("tab", { name }))
+    .first()
+    .click();
+}

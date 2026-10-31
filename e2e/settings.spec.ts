@@ -1,16 +1,16 @@
 import { type Page, expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, settingsSection } from "./helpers";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "settings need a larger screen");
 
 /** Opens a settings section; below 840px the list and detail show one at a time (Material 3). */
 async function openSection(page: Page, name: string) {
-  const row = page.getByRole("row", { name: new RegExp(`^${name}`) });
+  const link = settingsSection(page, name);
   const back = page.getByRole("link", { name: "Back to settings" });
-  await expect(row.or(back).first()).toBeVisible();
-  if (!(await row.isVisible())) await back.click();
-  await row.click();
+  await expect(link.or(back).first()).toBeVisible();
+  if (!(await link.isVisible())) await back.click();
+  await link.click();
 }
 
 test("an owner manages general settings, features, roles and sees the audit log", async ({

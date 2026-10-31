@@ -36,7 +36,8 @@ export function TimeOffPage(props: {
   const t = useTranslations("timeOff");
   const router = useRouter();
   const pathname = usePathname();
-  const [booking, setBooking] = useState(false);
+  // The dialog is open, with the days chosen on the calendar when there are some.
+  const [booking, setBooking] = useState<{ start?: string; end?: string } | null>(null);
   const href = (tab: TimeOffTab, view = props.view, date = props.date) =>
     `${pathname}?tab=${tab}${tab === "calendar" ? `&view=${view}&date=${date}` : ""}`;
   const range = viewRange(props.view, props.date, props.weekStart);
@@ -69,11 +70,7 @@ export function TimeOffPage(props: {
           ]}
         </Tabs>
         {props.types.length > 0 && (
-          <Button
-            variant="filled"
-            leadingIcon={<Icon name="add" />}
-            onPress={() => setBooking(true)}
-          >
+          <Button variant="filled" leadingIcon={<Icon name="add" />} onPress={() => setBooking({})}>
             {t("book")}
           </Button>
         )}
@@ -94,12 +91,15 @@ export function TimeOffPage(props: {
             value={props.view}
             onChange={(key) => key != null && router.push(href("calendar", key as CalendarView))}
           >
-            {(["month", "week", "list"] as const).map((v) => (
+            {(["calendar", "month", "week", "list"] as const).map((v) => (
               <SelectItem key={v}>{t(`views.${v}`)}</SelectItem>
             ))}
           </Select>
           <TeamCalendar
             view={props.view}
+            date={props.date}
+            onBook={props.types.length > 0 ? (start, end) => setBooking({ start, end }) : undefined}
+            teamHref={(day) => href("calendar", "month", day)}
             from={range.from}
             to={range.to}
             entries={props.entries}
@@ -111,12 +111,14 @@ export function TimeOffPage(props: {
 
       {booking && (
         <BookDialog
+          initialStart={booking.start}
+          initialEnd={booking.end}
           memberId={props.memberId}
           myName={props.myName}
           canBookForOthers={props.canBookForOthers}
           types={props.types}
           balances={props.balances}
-          onClose={() => setBooking(false)}
+          onClose={() => setBooking(null)}
         />
       )}
     </div>

@@ -3,10 +3,9 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tab, Tabs } from "@windmorph/react";
+import type { PlanningTab } from "../tabs";
 
-export type PlanningTab = "scenarios" | "totals" | "compare" | "rate-cards";
-
-/** The Planning screens the user can open, as tabs that change the address. */
+/** The Planning screens as tabs on phones; from 600px the rail's panel lists them instead. */
 export function PlanningTabs({ base, tabs }: { base: string; tabs: PlanningTab[] }) {
   const t = useTranslations("planning.tabs");
   const router = useRouter();
@@ -14,6 +13,7 @@ export function PlanningTabs({ base, tabs }: { base: string; tabs: PlanningTab[]
   const current = tabs.find((tab) => pathname.startsWith(`${base}/${tab}`)) ?? tabs[0];
   return (
     <Tabs
+      className="medium:hidden"
       variant="secondary"
       align="start"
       aria-label={t("label")}

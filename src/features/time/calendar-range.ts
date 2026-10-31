@@ -1,6 +1,7 @@
 /** Dates for the calendar views: which days a view shows around a date, and where its arrows go. */
 
-export type CalendarView = "month" | "week" | "list";
+/** `calendar` is the month as weeks × days; `month` is the team's people × days. */
+export type CalendarView = "calendar" | "month" | "week" | "list";
 
 const DAY = 86_400_000;
 const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
@@ -13,11 +14,18 @@ export function viewRange(
   date: string,
   weekStart: number
 ): { from: string; to: string } {
-  if (view === "month") {
+  if (view === "month" || view === "calendar") {
     const d = toDate(date);
     const from = toIso(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)));
     const to = toIso(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)));
-    return { from, to };
+    if (view === "month") return { from, to };
+    // Whole weeks: from the week the month starts in to the week it ends in.
+    const startDay = toDate(from).getUTCDay() || 7;
+    const endDay = toDate(to).getUTCDay() || 7;
+    return {
+      from: addDays(from, -((startDay - weekStart + 7) % 7)),
+      to: addDays(to, (weekStart + 6 - endDay + 7) % 7),
+    };
   }
   if (view === "week") {
     const isoDay = toDate(date).getUTCDay() || 7;
@@ -29,7 +37,7 @@ export function viewRange(
 
 /** The date the previous or next arrow opens. */
 export function shiftDate(view: CalendarView, date: string, by: -1 | 1): string {
-  if (view === "month") {
+  if (view === "month" || view === "calendar") {
     const d = toDate(date);
     return toIso(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + by, 1)));
   }

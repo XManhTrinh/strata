@@ -1,7 +1,7 @@
 import "server-only";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { PlanningTab } from "./components/planning-tabs";
+import { planningTabs } from "./tabs";
 
 /** The workspace and what the user may do in Planning; "not found" without any of it. */
 export async function planningAccess(slug: string) {
@@ -16,10 +16,7 @@ export async function planningAccess(slug: string) {
     p_workspace_id: workspace.id,
   });
   const held = new Set((permissions ?? []).map((p) => p.permission_key));
-  const tabs: PlanningTab[] = [
-    ...(held.has("planning.view") ? (["scenarios", "totals", "compare"] as const) : []),
-    ...(held.has("rate_cards.view") ? (["rate-cards"] as const) : []),
-  ];
+  const tabs = planningTabs((key) => held.has(key));
   if (tabs.length === 0) notFound();
   return { workspace, held, tabs };
 }

@@ -50,7 +50,10 @@ export default async function TimeOffRoute({
       : query.tab === "approvals" && canApprove
         ? "approvals"
         : "mine";
-  const view: CalendarView = query.view === "week" || query.view === "list" ? query.view : "month";
+  const view: CalendarView =
+    query.view === "month" || query.view === "week" || query.view === "list"
+      ? query.view
+      : "calendar";
   const date = /^\d{4}-\d{2}-\d{2}$/.test(query.date ?? "")
     ? query.date!
     : new Date().toISOString().slice(0, 10);

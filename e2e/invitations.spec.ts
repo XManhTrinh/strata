@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId, followEmailLink } from "./helpers";
+import {
+  completeSignUp,
+  createWorkspace,
+  uniqueId,
+  followEmailLink,
+  settingsSection,
+} from "./helpers";
 import { latestLinkFor } from "./mailpit";
 
 // Workspace settings ask for a larger screen on phones.
@@ -19,7 +25,7 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   await createWorkspace(owner, "Company", `Acme ${id}`);
 
   await owner.getByRole("link", { name: "Settings" }).first().click();
-  await owner.getByRole("row", { name: /^Members/ }).click();
+  await settingsSection(owner, "Members").click();
   await expect(owner.getByRole("heading", { name: "Members" })).toBeVisible();
   await expectNoA11yViolations(owner);
 
@@ -58,11 +64,11 @@ test("an owner invites someone, who signs up from the email and joins", async ({
 
   // Ben is a Member: settings show only what that role allows, and nothing else opens.
   await invitee.getByRole("link", { name: "Settings" }).first().click();
-  await expect(invitee.getByRole("row", { name: /^Members/ })).toBeVisible();
+  await expect(settingsSection(invitee, "Members")).toBeVisible();
   for (const hidden of ["General", "Roles", "Features", "Audit log"]) {
-    await expect(invitee.getByRole("row", { name: new RegExp(`^${hidden}`) })).toHaveCount(0);
+    await expect(settingsSection(invitee, hidden)).toHaveCount(0);
   }
-  await invitee.getByRole("row", { name: /^Members/ }).click();
+  await settingsSection(invitee, "Members").click();
   await expect(invitee.getByRole("heading", { name: "Members" })).toBeVisible();
   await expect(invitee.getByRole("button", { name: "Invite people" })).toHaveCount(0);
   await invitee.goto(invitee.url().replace(/\/members$/, "/general"));
