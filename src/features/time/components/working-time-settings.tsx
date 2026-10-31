@@ -15,7 +15,7 @@ export function WorkingTimeSettings(props: {
 }) {
   const t = useTranslations("settings.sections.working-time");
   return (
-    <section aria-labelledby="working-time-title" className="flex max-w-3xl flex-col gap-8">
+    <section aria-labelledby="working-time-title" className="max-w-form flex flex-col gap-8">
       <h2 id="working-time-title" className="text-headline-small text-on-surface">
         {t("name")}
       </h2>

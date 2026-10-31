@@ -17,7 +17,7 @@ export function JobsSettings({
 }) {
   const t = useTranslations("jobs");
   return (
-    <section aria-labelledby="jobs-title" className="flex max-w-4xl flex-col gap-8">
+    <section aria-labelledby="jobs-title" className="max-w-form flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <h2 id="jobs-title" className="text-headline-small text-on-surface">
           {t("title")}

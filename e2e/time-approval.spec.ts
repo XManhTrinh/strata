@@ -58,7 +58,7 @@ test("a manager approves a report's leave, books a team event and adjusts a bala
   const profile = ana.url();
 
   // Ben asks for two days of annual leave.
-  await ben.goto(`${base}/time-off`);
+  await ben.goto(`${base}/time-off?tab=mine`);
   await ben.getByRole("button", { name: "Book time off" }).click();
   const book = ben.getByRole("dialog", { name: "Book time off" });
   await fillDate(ben, "From", nextMonday());

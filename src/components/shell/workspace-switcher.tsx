@@ -25,7 +25,16 @@ export function WorkspaceSwitcher() {
             <MenuItem
               key={w.slug}
               textValue={w.name}
-              leadingIcon={<Icon name={w.id === workspace.id ? "check" : "workspaces"} />}
+              leadingIcon={
+                w.id === workspace.id ? (
+                  <Icon name="check" />
+                ) : w.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed link
+                  <img src={w.logoUrl} alt="" className="size-6 rounded-md object-cover" />
+                ) : (
+                  <Icon name="workspaces" />
+                )
+              }
             >
               {w.name}
             </MenuItem>

@@ -23,7 +23,7 @@ export function ProfileForm({ initial }: { initial: { fullName: string; timeZone
   }, [state, snackbar, t]);
 
   return (
-    <section aria-labelledby="profile-title" className="flex max-w-xl flex-col gap-6">
+    <section aria-labelledby="profile-title" className="max-w-form flex flex-col gap-6">
       <h2 id="profile-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>

@@ -44,12 +44,13 @@ export default async function TimeOffRoute({
     .eq("id", memberId)
     .single();
   const myName = me?.full_name ?? "";
+  // Who's away comes first: it's what people check most, and booking starts there too.
   const tab: TimeOffTab =
-    query.tab === "calendar"
-      ? "calendar"
+    query.tab === "mine"
+      ? "mine"
       : query.tab === "approvals" && canApprove
         ? "approvals"
-        : "mine";
+        : "calendar";
   const view: CalendarView =
     query.view === "month" || query.view === "week" || query.view === "list"
       ? query.view

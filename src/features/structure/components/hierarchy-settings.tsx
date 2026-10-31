@@ -8,7 +8,7 @@ import { UnitsSection } from "./units-section";
 export function HierarchySettings({ levels, units }: { levels: OrgLevel[]; units: OrgUnit[] }) {
   const t = useTranslations("hierarchy");
   return (
-    <section aria-labelledby="hierarchy-title" className="flex max-w-3xl flex-col gap-8">
+    <section aria-labelledby="hierarchy-title" className="max-w-form flex flex-col gap-8">
       <div className="flex flex-col gap-2">
         <h2 id="hierarchy-title" className="text-headline-small text-on-surface">
           {t("title")}

@@ -30,7 +30,7 @@ export function CustomFieldsSettings({ fields }: { fields: CustomField[] }) {
       .join(" · ");
 
   return (
-    <section aria-labelledby="fields-title" className="flex max-w-3xl flex-col gap-4">
+    <section aria-labelledby="fields-title" className="max-w-form flex flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h2 id="fields-title" className="text-headline-small text-on-surface">
           {t("title")}

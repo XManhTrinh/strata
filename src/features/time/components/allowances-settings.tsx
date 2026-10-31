@@ -39,7 +39,7 @@ export function AllowancesSettings({
   }
 
   return (
-    <section aria-labelledby="allowances-title" className="flex max-w-3xl flex-col gap-4">
+    <section aria-labelledby="allowances-title" className="max-w-form flex flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h2 id="allowances-title" className="text-headline-small text-on-surface">
           {t("policies.title")}

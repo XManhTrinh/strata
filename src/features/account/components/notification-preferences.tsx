@@ -40,7 +40,7 @@ export function NotificationPreferences({
   }
 
   return (
-    <section aria-labelledby="notifications-title" className="flex max-w-2xl flex-col gap-4">
+    <section aria-labelledby="notifications-title" className="max-w-form flex flex-col gap-4">
       <h2 id="notifications-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>

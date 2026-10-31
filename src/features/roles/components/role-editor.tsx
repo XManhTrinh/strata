@@ -67,12 +67,15 @@ export function RoleEditor({
   }
 
   return (
-    <section aria-labelledby="role-title" className="flex max-w-3xl flex-col gap-6">
-      <header className="flex flex-wrap items-center gap-3">
+    <section aria-labelledby="role-title" className="max-w-form flex flex-col gap-6">
+      {/* The role's name and actions stay in view below the top app bar while its permissions scroll. */}
+      <header className="bg-surface sticky top-16 z-10 flex flex-wrap items-center gap-3 py-2">
         <IconButton
           variant="standard"
           href={`/w/${workspace.slug}/settings/roles`}
           aria-label={t("back")}
+          // The roles are beside it from 1200px.
+          className="large:hidden"
           icon={<Icon name="arrow_back" />}
         />
         <h2 id="role-title" className="text-headline-small text-on-surface flex-1">

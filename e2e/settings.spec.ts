@@ -1,6 +1,10 @@
 import { type Page, expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId, settingsSection } from "./helpers";
+import { completeSignUp, createWorkspace, uniqueId, settingsSection, chooseFile } from "./helpers";
+
+/** A 64 × 64 blue square, for the logo. */
+const LOGO_PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAT0lEQVR42u3PQQkAAAgEsItjJhMbywi+hcEKLNXzWgQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQELgtZCaEttSk+KwAAAABJRU5ErkJggg==";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "settings need a larger screen");
 
@@ -26,6 +30,23 @@ test("an owner manages general settings, features, roles and sees the audit log"
   await openSection(page, "General");
   await expect(page.getByRole("heading", { name: "General" })).toBeVisible();
   await expectNoA11yViolations(page);
+  // A logo, cropped to a square, shows at the top of the navigation.
+  await chooseFile(
+    page,
+    { name: "logo.png", mimeType: "image/png", buffer: Buffer.from(LOGO_PNG, "base64") },
+    "Adjust the logo"
+  );
+  await page
+    .getByRole("dialog", { name: "Adjust the logo" })
+    .getByRole("button", { name: "Save" })
+    .click();
+  await expect(page.getByText("Logo saved")).toBeVisible();
+  const railLogo = page.locator('img[src*="/storage/v1/object/sign/workspace-logos/"]');
+  await expect(railLogo.first()).toBeAttached();
+  await page.getByRole("button", { name: "Remove", exact: true }).click();
+  await expect(page.getByText("Logo removed")).toBeVisible();
+  await expect(railLogo).toHaveCount(0);
+
   await page.getByLabel("Workspace name").fill(`Acme Group ${id}`);
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByText("Settings saved")).toBeVisible();
@@ -45,9 +66,14 @@ test("an owner manages general settings, features, roles and sees the audit log"
   // Roles: Admin is fixed; a new role gets a permission.
   await openSection(page, "Roles");
   await expect(page.getByRole("heading", { name: "Roles" })).toBeVisible();
-  await page.getByRole("link", { name: "Admin" }).click();
+  await page
+    .getByRole("grid", { name: "Roles" })
+    .getByRole("row", { name: /^Admin/ })
+    .click();
   await expect(page.getByText("The Admin role has every permission")).toBeVisible();
-  await page.getByRole("link", { name: "Back to roles" }).click();
+  // From 1200px the roles stay beside the open role; narrower, it goes back to them.
+  const backToRoles = page.getByRole("link", { name: "Back to roles" });
+  if (await backToRoles.isVisible()) await backToRoles.click();
 
   await page.getByRole("button", { name: "New role" }).click();
   await page.getByLabel("Role name").fill("Team lead");

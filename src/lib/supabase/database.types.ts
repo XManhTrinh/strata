@@ -19,6 +19,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      apply_rate_cards_to: {
+        Args: { p_from: string; p_members: string[]; p_roles: boolean; p_scenario_id: string };
+        Returns: undefined;
+      };
       assignment_on: {
         Args: { p_date: string; p_member_id: string };
         Returns: Database["public"]["Tables"]["member_assignments"]["Row"];
@@ -131,6 +135,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      logo_workspace: { Args: { p_name: string }; Returns: string };
       matching_rate_card: { Args: { p_attributes: Json; p_workspace_id: string }; Returns: string };
       member_key: {
         Args: {
@@ -183,6 +188,8 @@ export type Database = {
         Returns: Json;
       };
       planned_role_attributes: { Args: { p_planned_role_id: string }; Returns: Json };
+      planning_chunk_size: { Args: Record<PropertyKey, never>; Returns: number };
+      planning_job_status: { Args: { p_job_id: string }; Returns: Json };
       reach_covers: {
         Args: {
           p_held: Database["public"]["Enums"]["reach"][];
@@ -197,6 +204,15 @@ export type Database = {
         Returns: string;
       };
       require_planning_editor: { Args: { p_workspace_id: string }; Returns: undefined };
+      run_planning_chunk: {
+        Args: {
+          p_job: Omit<
+            Database["public"]["Tables"]["planning_jobs"]["Row"],
+            Database["public"]["Tables"]["planning_jobs"]["ComputedFields"]
+          >;
+        };
+        Returns: number;
+      };
       set_assignment_from: {
         Args: { p_date: string; p_member_id: string; p_patch: Json };
         Returns: undefined;
@@ -2154,6 +2170,77 @@ export type Database = {
           },
         ];
       };
+      planning_jobs: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          cursor: string | null;
+          done_at: string | null;
+          from_month: string | null;
+          id: string;
+          kind: Database["public"]["Enums"]["planning_job_kind"];
+          processed: number;
+          scenario_id: string;
+          source_scenario_id: string | null;
+          total: number;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          cursor?: string | null;
+          done_at?: string | null;
+          from_month?: string | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["planning_job_kind"];
+          processed?: number;
+          scenario_id: string;
+          source_scenario_id?: string | null;
+          total?: number;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          cursor?: string | null;
+          done_at?: string | null;
+          from_month?: string | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["planning_job_kind"];
+          processed?: number;
+          scenario_id?: string;
+          source_scenario_id?: string | null;
+          total?: number;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "planning_jobs_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "planning_jobs_workspace_id_scenario_id_fkey";
+            columns: ["workspace_id", "scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+          {
+            foreignKeyName: "planning_jobs_workspace_id_source_scenario_id_fkey";
+            columns: ["workspace_id", "source_scenario_id"];
+            isOneToOne: false;
+            referencedRelation: "scenarios";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       planning_settings: {
         Row: {
           basis: Database["public"]["Enums"]["planning_basis"];
@@ -3185,6 +3272,7 @@ export type Database = {
           fiscal_year_start_month: number;
           id: string;
           kind: Database["public"]["Enums"]["workspace_kind"];
+          logo_path: string | null;
           name: string;
           plan_key: string;
           slug: string;
@@ -3203,6 +3291,7 @@ export type Database = {
           fiscal_year_start_month?: number;
           id?: string;
           kind: Database["public"]["Enums"]["workspace_kind"];
+          logo_path?: string | null;
           name: string;
           plan_key?: string;
           slug: string;
@@ -3220,6 +3309,7 @@ export type Database = {
           fiscal_year_start_month?: number;
           id?: string;
           kind?: Database["public"]["Enums"]["workspace_kind"];
+          logo_path?: string | null;
           name?: string;
           plan_key?: string;
           slug?: string;
@@ -3463,6 +3553,7 @@ export type Database = {
           fiscal_year_start_month: number;
           id: string;
           kind: Database["public"]["Enums"]["workspace_kind"];
+          logo_path: string | null;
           name: string;
           plan_key: string;
           slug: string;
@@ -3630,6 +3721,7 @@ export type Database = {
       resend_invitation: { Args: { p_invitation_id: string }; Returns: string };
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
       roles_with_unit_reach: { Args: { p_workspace_id: string }; Returns: string[] };
+      run_planning_job: { Args: { p_job_id: string }; Returns: Json };
       save_allocations: { Args: { p_changes: Json; p_scenario_id: string }; Returns: Json };
       save_rate_card: {
         Args: {
@@ -3704,6 +3796,7 @@ export type Database = {
       notification_category: "invitation" | "access" | "time" | "planning" | "import" | "system";
       over_allocation_rule: "warn" | "block";
       planning_basis: "person" | "position";
+      planning_job_kind: "build" | "copy" | "apply";
       planning_period: "month" | "quarter";
       planning_unit: "fte" | "percent";
       rate_operator:
@@ -3857,6 +3950,7 @@ export const Constants = {
       notification_category: ["invitation", "access", "time", "planning", "import", "system"],
       over_allocation_rule: ["warn", "block"],
       planning_basis: ["person", "position"],
+      planning_job_kind: ["build", "copy", "apply"],
       planning_period: ["month", "quarter"],
       planning_unit: ["fte", "percent"],
       rate_operator: [

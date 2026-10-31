@@ -37,10 +37,17 @@ fileMatchPattern: "src/**/*.tsx"
   NavigationRail (icons with labels) from 600px, desktop included. The rail sits on `surface-container`,
   the page on `surface`. **One top app bar per page**, owned
   by the shell's page header.
-- Use **canonical layouts**: list-detail (`ListDetailLayout`) for people, approvals, rate cards and
-  settings; supporting pane for time off; full-width for calendar, capacity grid and org chart.
+- Destinations with pages under them (Settings, Planning) list those pages in a **panel beside
+  the rail**, pinned on their pages and previewed on hover or focus elsewhere (as Windmorph's
+  site); phones keep the bottom bar, with Settings' list and Planning's tabs in the page.
+- Use **canonical layouts**: list-detail for a list and its open item (roles side by side from
+  1200px); supporting pane for time off; full-width for calendar, capacity grid and org chart.
 - Each screen follows the device table in `docs/product-decisions.md` (Devices). Screens that are
   desktop/tablet only show a summary and an "open on a larger screen" message on phones.
+- Width: forms and settings sections use `max-w-form` (840px) aligned to the start, so labels and
+  their controls stay close; tables, grids and calendars use the full width. In list-detail
+  layouts (e.g. roles from 1200px) the detail pane takes the rest of the row and its form keeps
+  `max-w-form`, beside the list rather than centred.
 
 ## Behaviour
 
@@ -56,6 +63,11 @@ fileMatchPattern: "src/**/*.tsx"
 - The one exception to Windmorph tokens: the "Sign in with Google" button uses Google's brand
   colours, G mark and wording, as Google's branding guidelines require (`google-button.tsx`).
 - Motion from `motion/react`, M3 durations, always respecting reduced motion.
+- Cursors: anything that acts on a click shows `cursor-pointer` (sortable column headers, rows
+  that open something, custom buttons and chips); disabled controls show the default arrow, as
+  Windmorph's do (`data-disabled:cursor-default`), not `not-allowed`; resizing shows
+  `cursor-col-resize` and dragging `cursor-grab`. Windmorph components set their own; markup
+  of our own must add them.
 
 ## Accessibility (WCAG 2.2 AA)
 

@@ -15,11 +15,12 @@ import { IconButton, LinearProgressIndicator } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { loadChart } from "../actions";
-import { layoutTree } from "../layout";
+import { CARD_HEIGHT, CARD_WIDTH, layoutTree, teamSize } from "../layout";
 import type { ChartPerson, ChartSlice } from "../types";
 import { PersonNode, type PersonNodeData } from "./person-node";
+import { TeamNode, type TeamNodeData } from "./team-node";
 
-const NODE_TYPES = { person: PersonNode };
+const NODE_TYPES = { person: PersonNode, team: TeamNode };
 
 /** Everyone under a person on the chart, so collapsing removes the whole branch. */
 function descendants(people: Map<string, ChartPerson>, id: string): Set<string> {
@@ -51,7 +52,7 @@ function Canvas({
   const { workspace } = useWorkspace();
   const flow = useReactFlow();
   const [people, setPeople] = useState(() => new Map(slice.people.map((p) => [p.id, p])));
-  const [nodes, setNodes] = useState<Node<PersonNodeData>[]>([]);
+  const [nodes, setNodes] = useState<Node<PersonNodeData | TeamNodeData>[]>([]);
   const [pending, startTransition] = useTransition();
 
   const open = useMemo(() => {
@@ -60,19 +61,32 @@ function Canvas({
     return ids;
   }, [people]);
 
-  const edges: Edge[] = useMemo(
-    () =>
-      [...people.values()]
-        .filter((p) => p.managerId && people.has(p.managerId))
-        .map((p) => ({
-          id: `${p.managerId}>${p.id}`,
-          source: p.managerId!,
-          target: p.id,
-          type: "smoothstep",
-          style: { stroke: "var(--md-sys-color-outline)" },
-        })),
-    [people]
-  );
+  // A manager's reports with none shown below them share a team box (two or more of them).
+  const teams = useMemo(() => {
+    const byManager = new Map<string, string[]>();
+    for (const p of people.values()) {
+      if (!p.managerId || !people.has(p.managerId) || open.has(p.id)) continue;
+      byManager.set(p.managerId, [...(byManager.get(p.managerId) ?? []), p.id]);
+    }
+    return new Map([...byManager].filter(([, ids]) => ids.length > 1));
+  }, [people, open]);
+  const inTeam = useMemo(() => new Set([...teams.values()].flat()), [teams]);
+
+  const edges: Edge[] = useMemo(() => {
+    const line = (source: string, target: string): Edge => ({
+      id: `${source}>${target}`,
+      source,
+      target,
+      type: "smoothstep",
+      style: { stroke: "var(--md-sys-color-outline)" },
+    });
+    return [
+      ...[...people.values()]
+        .filter((p) => p.managerId && people.has(p.managerId) && !inTeam.has(p.id))
+        .map((p) => line(p.managerId!, p.id)),
+      ...[...teams.keys()].map((manager) => line(manager, `team:${manager}`)),
+    ];
+  }, [people, teams, inTeam]);
 
   function toggle(person: ChartPerson) {
     if (open.has(person.id)) {
@@ -93,37 +107,62 @@ function Canvas({
   // Lay out whenever people come or go; the worker keeps the page responsive.
   useEffect(() => {
     let cancelled = false;
-    void layoutTree([...people.keys()], edges).then((positions) => {
+    const cardData = (person: ChartPerson): PersonNodeData => ({
+      person,
+      open: open.has(person.id),
+      start: person.id === startId,
+      profileHref: `/w/${workspace.slug}/people/${person.id}`,
+      onToggle: toggle,
+      onFocus,
+    });
+    const single = [...people.values()].filter((p) => !inTeam.has(p.id));
+    void layoutTree(
+      [
+        ...single.map((p) => ({ id: p.id, width: CARD_WIDTH, height: CARD_HEIGHT })),
+        ...[...teams].map(([manager, ids]) => ({ id: `team:${manager}`, ...teamSize(ids.length) })),
+      ],
+      edges
+    ).then((positions) => {
       if (cancelled) return;
-      setNodes(
-        [...people.values()].map((person) => ({
+      setNodes([
+        ...single.map((person) => ({
           id: person.id,
           type: "person",
           position: positions.get(person.id) ?? { x: 0, y: 0 },
           draggable: false,
+          data: cardData(person),
+        })),
+        ...[...teams].map(([manager, ids]) => ({
+          id: `team:${manager}`,
+          type: "team",
+          position: positions.get(`team:${manager}`) ?? { x: 0, y: 0 },
+          draggable: false,
           data: {
-            person,
-            open: open.has(person.id),
-            start: person.id === startId,
-            profileHref: `/w/${workspace.slug}/people/${person.id}`,
-            onToggle: toggle,
-            onFocus,
+            members: ids
+              .map((id) => people.get(id)!)
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(cardData),
           },
-        }))
-      );
+        })),
+      ]);
     });
     return () => {
       cancelled = true;
     };
     // toggle and onFocus read current state through the people map.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [people, edges, open, startId]);
+  }, [people, edges, open, teams, inTeam, startId]);
 
   // Centre on the start person once the first layout lands.
   const centred = useRef(false);
   useEffect(() => {
     if (centred.current || nodes.length === 0) return;
-    const start = nodes.find((n) => n.id === startId);
+    const start =
+      nodes.find((n) => n.id === startId) ??
+      nodes.find(
+        (n) =>
+          n.type === "team" && (n.data as TeamNodeData).members.some((m) => m.person.id === startId)
+      );
     if (start) void flow.setCenter(start.position.x + 120, start.position.y + 120, { zoom: 0.9 });
     else void flow.fitView({ padding: 0.2 });
     centred.current = true;

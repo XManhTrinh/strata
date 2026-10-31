@@ -19,18 +19,21 @@ export type PersonNodeData = {
   onFocus: (person: ChartPerson) => void;
 };
 
-/** One person on the chart: photo, name, position and unit, with their reports to open. */
-function PersonNodeView({ data }: NodeProps & { data: PersonNodeData }) {
+/**
+ * One person: photo, name, position and unit, with their reports to open. On the chart as its own
+ * node (with handles for the lines) or inside a team box.
+ */
+export function PersonCard({ data, handles = false }: { data: PersonNodeData; handles?: boolean }) {
   const t = useTranslations("orgChart");
   const { person, open, start } = data;
   return (
     <div
       style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
-      className={`bg-surface-container-low text-on-surface flex items-center gap-3 rounded-xl border px-3 ${
+      className={`bg-surface-container-low text-on-surface relative flex items-center gap-3 rounded-xl border px-3 ${
         start ? "border-primary border-2" : "border-outline-variant"
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!invisible" />
+      {handles && <Handle type="target" position={Position.Top} className="!invisible" />}
       {person.managerHidden && (
         <span
           className="text-on-surface-variant absolute -top-6 left-1/2 -translate-x-1/2"
@@ -68,14 +71,18 @@ function PersonNodeView({ data }: NodeProps & { data: PersonNodeData }) {
             name: person.name,
             count: person.directReports,
           })}
-          className="nodrag bg-secondary-container text-on-secondary-container text-label-medium absolute -bottom-3 left-1/2 flex h-6 min-w-10 -translate-x-1/2 items-center justify-center rounded-full px-2"
+          className="nodrag bg-secondary-container text-on-secondary-container text-label-medium absolute -bottom-3 left-1/2 flex h-6 min-w-10 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full px-2"
         >
           {open ? <Icon name="expand_less" size={18} /> : person.directReports}
         </button>
       )}
-      <Handle type="source" position={Position.Bottom} className="!invisible" />
+      {handles && <Handle type="source" position={Position.Bottom} className="!invisible" />}
     </div>
   );
+}
+
+function PersonNodeView({ data }: NodeProps & { data: PersonNodeData }) {
+  return <PersonCard data={data} handles />;
 }
 
 export const PersonNode = memo(PersonNodeView);

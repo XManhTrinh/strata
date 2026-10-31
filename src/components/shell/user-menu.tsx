@@ -58,7 +58,17 @@ export function UserMenu() {
               onAction={(key) => setMode(key as (typeof MODES)[number])}
             >
               {MODES.map((m) => (
-                <MenuItem key={m} leadingIcon={<Icon name={mode === m ? "check" : "blank"} />}>
+                <MenuItem
+                  key={m}
+                  leadingIcon={
+                    mode === m ? (
+                      <Icon name="check" />
+                    ) : (
+                      // An empty space as wide as an icon, so the labels line up with the tick.
+                      <span aria-hidden className="inline-block size-6" />
+                    )
+                  }
+                >
                   {t(m)}
                 </MenuItem>
               ))}

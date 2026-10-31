@@ -10,6 +10,7 @@ import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { idleFormState } from "@/lib/form-state";
 import { useSnackbar } from "@/lib/snackbar";
 import { updateWorkspaceSettings } from "../actions";
+import { LogoEditor } from "./logo-editor";
 
 export type GeneralSettingsValues = RegionValues & { name: string; slug: string };
 
@@ -40,10 +41,11 @@ export function GeneralSettingsForm({
     setValues((current) => ({ ...current, [field]: next }));
 
   return (
-    <section aria-labelledby="general-title" className="flex max-w-2xl flex-col gap-6">
+    <section aria-labelledby="general-title" className="max-w-form flex flex-col gap-6">
       <h2 id="general-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>
+      <LogoEditor />
       <FormError error={state.error} />
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
         <TextField

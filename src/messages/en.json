@@ -157,7 +157,10 @@
     "roleFilled": "This role is already filled.",
     "plannedRoleTitleRequired": "Enter a title for the role.",
     "fteInvalid": "Enter an FTE above 0 and up to 1.",
-    "personRequired": "Choose a person."
+    "personRequired": "Choose a person.",
+    "planningJobRunning": "This plan is still being built. Try again when it's done.",
+    "logoWrongType": "Choose a PNG, JPEG or WebP image.",
+    "logoTooLarge": "Choose an image under 10 MB."
   },
   "auth": {
     "signIn": {
@@ -356,7 +359,17 @@
       "title": "General",
       "save": "Save changes",
       "saved": "Settings saved",
-      "addressHint": "Changing the address breaks old links to this workspace."
+      "addressHint": "Changing the address breaks old links to this workspace.",
+      "logo": "Logo",
+      "addLogo": "Add logo",
+      "changeLogo": "Change logo",
+      "removeLogo": "Remove",
+      "logoHint": "Shown at the top of the navigation and in the workspace switcher. PNG, JPEG or WebP; you'll crop it to a square.",
+      "logoSaved": "Logo saved",
+      "logoRemoved": "Logo removed",
+      "logoCropTitle": "Adjust the logo",
+      "logoCropSave": "Save",
+      "logoCropCancel": "Cancel"
     },
     "features": {
       "title": "Features",
@@ -507,7 +520,11 @@
     "planning": {
       "view": {
         "name": "View plans",
-        "description": "See scenarios, allocations and costs."
+        "description": "See scenarios, allocations and planned roles."
+      },
+      "view_cost": {
+        "name": "View plan costs",
+        "description": "See costs in plans and their totals."
       },
       "edit": {
         "name": "Edit plans",
@@ -636,7 +653,9 @@
       "planning": "Capacity planning",
       "rate_cards": "Rate cards"
     },
-    "reachLabel": "Access for {permission}"
+    "reachLabel": "Access for {permission}",
+    "chooseTitle": "Choose a role",
+    "chooseBody": "Pick a role from the list to see and change what it can do."
   },
   "audit": {
     "title": "Audit log",
@@ -730,7 +749,8 @@
       },
       "deliveryLabel": "Email for {category}",
       "saved": "Saved"
-    }
+    },
+    "backToAccount": "Back to account"
   },
   "notifications": {
     "label": "Notifications",
@@ -1119,7 +1139,8 @@
     "openRoles": "{count, plural, one {# open role} other {# open roles}}",
     "openRolesIn": "Open roles in {unit}",
     "openRoleDetail": "From {date} · {fte} FTE",
-    "unitPeopleButton": "{count, plural, one {# person} other {# people}} in {unit}"
+    "unitPeopleButton": "{count, plural, one {# person} other {# people}} in {unit}",
+    "team": "{count, plural, one {# report} other {# reports}}"
   },
   "import": {
     "title": "Import people",
@@ -1522,7 +1543,8 @@
       "calendarName": "Strata time off",
       "halfDay": "half day",
       "links": "Your links"
-    }
+    },
+    "balanceLine": "{name}: {days} days left"
   },
   "planningSettings": {
     "title": "Planning",
@@ -1722,7 +1744,12 @@
     "deleted": "{name} deleted",
     "emptyTitle": "No scenarios yet",
     "emptyEditor": "Create a scenario to plan people's time and cost by team and month.",
-    "emptyViewer": "Plans you can see will appear here."
+    "emptyViewer": "Plans you can see will appear here.",
+    "jobs": {
+      "build": "Building from people: {percent}%",
+      "copy": "Copying: {percent}%",
+      "apply": "Applying rate cards: {percent}%"
+    }
   },
   "compare": {
     "title": "Compare scenarios",

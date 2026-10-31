@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Button, Select, SelectItem, Tab, Tabs } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { type CalendarView, shiftDate, viewRange } from "../calendar-range";
@@ -34,6 +34,7 @@ export function TimeOffPage(props: {
   feeds: FeedLink[];
 }) {
   const t = useTranslations("timeOff");
+  const format = useFormatter();
   const router = useRouter();
   const pathname = usePathname();
   // The dialog is open, with the days chosen on the calendar when there are some.
@@ -53,6 +54,7 @@ export function TimeOffPage(props: {
           onChange={(key) => router.push(href(key as TimeOffTab))}
         >
           {[
+            <Tab key="calendar" title={t("tabs.calendar")} />,
             <Tab key="mine" title={t("tabs.mine")} />,
             ...(props.canApprove
               ? [
@@ -66,14 +68,27 @@ export function TimeOffPage(props: {
                   />,
                 ]
               : []),
-            <Tab key="calendar" title={t("tabs.calendar")} />,
           ]}
         </Tabs>
-        {props.types.length > 0 && (
-          <Button variant="filled" leadingIcon={<Icon name="add" />} onPress={() => setBooking({})}>
-            {t("book")}
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-4">
+          {props.balances.length > 0 && (
+            // What My time off is mostly opened for, visible from every tab.
+            <p className="text-body-medium text-on-surface-variant">
+              {props.balances
+                .map((b) => t("balanceLine", { name: b.name, days: format.number(b.available) }))
+                .join(" · ")}
+            </p>
+          )}
+          {props.types.length > 0 && (
+            <Button
+              variant="filled"
+              leadingIcon={<Icon name="add" />}
+              onPress={() => setBooking({})}
+            >
+              {t("book")}
+            </Button>
+          )}
+        </div>
       </div>
 
       {props.tab === "mine" && (

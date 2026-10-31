@@ -10,6 +10,11 @@ button,
   cursor: pointer;
 }
 
+/* Forms and settings: a readable width, aligned to the start (tables and grids use the full width). */
+@utility max-w-form {
+  max-width: 52.5rem;
+}
+
 /* Google's sign-in button, in Google's brand colours (its guidelines require them). */
 .google-button {
   display: flex;

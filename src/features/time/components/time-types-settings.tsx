@@ -25,7 +25,7 @@ export function TimeTypesSettings({ types, roles }: { types: TimeType[]; roles: 
       .join(" · ");
 
   return (
-    <section aria-labelledby="time-types-title" className="flex max-w-3xl flex-col gap-4">
+    <section aria-labelledby="time-types-title" className="max-w-form flex flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h2 id="time-types-title" className="text-headline-small text-on-surface">
           {t("types.title")}

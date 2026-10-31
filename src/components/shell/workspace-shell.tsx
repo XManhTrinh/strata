@@ -16,7 +16,8 @@ import { RailPanel, type RailPanelGroup, useRailPanel } from "@/components/ui/ra
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { type Destination, destinationsFor, isCurrent, subPagesFor } from "./destinations";
 
-type PanelKey = "settings" | "planning";
+/** Settings, Planning, or a page group of its own such as Account. */
+type PanelKey = string;
 
 /** Up to two letters from the workspace's name, for its tile. */
 function initials(name: string): string {
@@ -30,9 +31,17 @@ function initials(name: string): string {
  * Material 3 adaptive navigation: a navigation bar on phones (< 600px) and a collapsed rail
  * (icons with labels) from 600px. Destinations with pages under them (Settings, Planning) open
  * a panel of those pages beside the rail: pinned while one of them is open, and previewed on
- * hover or focus from anywhere else. Pages render their own PageHeader.
+ * hover or focus from anywhere else. Pages outside the rail's destinations (Account) bring their
+ * own pinned panel. Pages render their own PageHeader.
  */
-export function WorkspaceShell({ children }: { children: ReactNode }) {
+export function WorkspaceShell({
+  children,
+  panel: ownPanel,
+}: {
+  children: ReactNode;
+  /** Pages of a group that isn't a destination, pinned beside the rail while one is open. */
+  panel?: RailPanelGroup & { key: string };
+}) {
   const t = useTranslations("shell");
   const ts = useTranslations("settings");
   const tp = useTranslations("planning");
@@ -41,7 +50,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   const destinations = destinationsFor(context);
   const panelId = useId();
 
-  const groups = new Map<PanelKey, RailPanelGroup & { destination: Destination }>();
+  const groups = new Map<PanelKey, RailPanelGroup & { destination?: Destination }>();
   for (const destination of destinations) {
     if (destination.key !== "settings" && destination.key !== "planning") continue;
     const tr = destination.key === "settings" ? ts : tp;
@@ -53,8 +62,14 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
     const name = t(`nav.${destination.key}`);
     groups.set(destination.key, { destination, heading: name, label: name, links });
   }
+  if (ownPanel) groups.set(ownPanel.key, ownPanel);
   const current =
-    [...groups.keys()].find((key) => isCurrent(groups.get(key)!.destination, pathname)) ?? null;
+    ownPanel?.key ??
+    [...groups.keys()].find((key) => {
+      const destination = groups.get(key)!.destination;
+      return destination ? isCurrent(destination, pathname) : false;
+    }) ??
+    null;
   const panel = useRailPanel<PanelKey>(current, pathname);
   const openGroup = panel.open ? (groups.get(panel.open) ?? null) : null;
 
@@ -82,15 +97,25 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
             >
               {/* Named by hidden text, not a label, so the initials shown don't contradict it. */}
               <span className="sr-only">{t("nav.home")}</span>
-              <span aria-hidden>{initials(context.workspace.name)}</span>
+              {context.workspace.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed link
+                <img
+                  src={context.workspace.logoUrl}
+                  alt=""
+                  // The tile's own size: the file is larger (256px, for sharp high-density screens).
+                  className="rounded-corner-large size-14 object-cover"
+                />
+              ) : (
+                <span aria-hidden>{initials(context.workspace.name)}</span>
+              )}
             </Link>
           }
         >
           {destinations
             .filter((destination) => destination.key !== "home")
             .map((destination) => {
-              const group = groups.get(destination.key as PanelKey);
-              const key = destination.key as PanelKey;
+              const group = groups.get(destination.key);
+              const key = destination.key;
               return (
                 <NavigationRailItem
                   key={destination.key}

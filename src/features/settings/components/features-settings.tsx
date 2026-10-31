@@ -58,7 +58,7 @@ export function FeaturesSettings({ features }: { features: FeatureRow[] }) {
   }
 
   return (
-    <section aria-labelledby="features-title" className="flex max-w-2xl flex-col gap-4">
+    <section aria-labelledby="features-title" className="max-w-form flex flex-col gap-4">
       <h2 id="features-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>

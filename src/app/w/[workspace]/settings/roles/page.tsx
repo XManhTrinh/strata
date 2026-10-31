@@ -1,13 +1,16 @@
-import { requireSettingsSection } from "@/features/settings/require-section";
-import { RolesList } from "@/features/roles/components/roles-list";
-import { listRoles } from "@/features/roles/queries";
+import { getTranslations } from "next-intl/server";
+import { EmptyState } from "@windmorph/react-pro";
+import { Icon } from "@/components/ui/icon";
 
-export default async function RolesSettingsPage({
-  params,
-}: {
-  params: Promise<{ workspace: string }>;
-}) {
-  const { workspace: slug } = await params;
-  const workspaceId = await requireSettingsSection(slug, "roles");
-  return <RolesList roles={await listRoles(workspaceId)} />;
+/** Beside the roles on large screens, before one is chosen (smaller screens show the list). */
+export default async function RolesSettingsPage() {
+  const t = await getTranslations("roles");
+  return (
+    <EmptyState
+      titleAs="h2"
+      icon={<Icon name="admin_panel_settings" />}
+      title={t("chooseTitle")}
+      description={t("chooseBody")}
+    />
+  );
 }

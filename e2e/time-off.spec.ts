@@ -39,6 +39,8 @@ test("people book time off, see their balance, cancel, and see who's away", asyn
   await expectNoA11yViolations(page);
   await dialog.getByRole("button", { name: "Book time off" }).click();
   await expect(page.getByText("Requested: waiting for approval")).toBeVisible();
+  // Time off opens on the calendar; your bookings are under My time off.
+  await page.getByRole("tab", { name: "My time off" }).click();
   const bookings = page.getByRole("list", { name: "My bookings" });
   await expect(bookings).toContainText("Waiting");
 

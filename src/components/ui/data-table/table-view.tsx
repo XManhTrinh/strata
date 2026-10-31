@@ -116,7 +116,10 @@ export function TableView<Row>({
                 allowsSorting={column.sortable !== false}
                 defaultWidth={last ? "1fr" : width}
                 minWidth={last ? Math.max(width, column.minWidth ?? 80) : (column.minWidth ?? 80)}
-                className="border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset"
+                className={cn(
+                  "border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
+                  column.sortable !== false && "cursor-pointer"
+                )}
               >
                 {({ sortDirection, allowsSorting }) => (
                   <div

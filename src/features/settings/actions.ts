@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { type FormState, fieldErrorsFrom } from "@/lib/form-state";
+import { type ErrorKey, type FormState, fieldErrorsFrom } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
 import { workspaceSettingsSchema } from "./schemas";
 
@@ -81,4 +81,31 @@ export async function toggleFeature(
   }
   revalidatePath("/w/[workspace]", "layout");
   return { ok: true, changed: data ?? [] };
+}
+
+/** Points the workspace at a newly uploaded logo (or none) and deletes the previous file. */
+export async function setWorkspaceLogo(
+  workspaceId: string,
+  path: string | null
+): Promise<{ ok: true } | { ok: false; error: ErrorKey }> {
+  const supabase = await createClient();
+  const { data: before } = await supabase
+    .from("workspaces")
+    .select("logo_path")
+    .eq("id", workspaceId)
+    .single();
+  // The database refuses paths outside the workspace's folder, and people without settings rights.
+  const { data, error } = await supabase
+    .from("workspaces")
+    .update({ logo_path: path })
+    .eq("id", workspaceId)
+    .select("id");
+  if (error) return { ok: false, error: "generic" };
+  if (!data?.length) return { ok: false, error: "notAllowed" };
+
+  if (before?.logo_path && before.logo_path !== path) {
+    await supabase.storage.from("workspace-logos").remove([before.logo_path]);
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
 }

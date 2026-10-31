@@ -6,20 +6,17 @@ import { useTranslations } from "next-intl";
 import { IconButton, List, ListItem, TopAppBar } from "@windmorph/react";
 import { ListDetailLayout } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
+import { ACCOUNT_SECTIONS, type AccountSectionKey } from "./account-sections";
 
-const SECTIONS = [
-  { key: "profile", icon: "person" },
-  { key: "notifications", icon: "notifications" },
-] as const;
-
-type SectionKey = (typeof SECTIONS)[number]["key"];
-
-/** Personal settings, outside any workspace. Same list-detail pattern as workspace settings. */
+/**
+ * Personal settings for someone in no workspace yet (otherwise they show in a workspace's
+ * frame): a top app bar with a way back and the sections beside the open one.
+ */
 export function AccountShell({ children }: { children: ReactNode }) {
   const t = useTranslations("account");
   const pathname = usePathname();
   const router = useRouter();
-  const current = pathname.split("/")[2] as SectionKey | undefined;
+  const current = pathname.split("/")[2] as AccountSectionKey | undefined;
 
   return (
     <div className="bg-surface text-on-surface min-h-dvh">
@@ -59,7 +56,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
                 if (key && key !== current) router.push(`/account/${String(key)}`);
               }}
             >
-              {SECTIONS.map((section) => (
+              {ACCOUNT_SECTIONS.map((section) => (
                 <ListItem
                   key={section.key}
                   href={`/account/${section.key}`}

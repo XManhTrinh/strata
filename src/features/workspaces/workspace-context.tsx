@@ -5,7 +5,13 @@ import type { Database } from "@/lib/supabase/database.types";
 
 type Reach = Database["public"]["Enums"]["reach"];
 
-type WorkspaceSummary = { id: string; slug: string; name: string };
+type WorkspaceSummary = {
+  id: string;
+  slug: string;
+  name: string;
+  /** A signed link to the workspace's logo, or null for its initials. */
+  logoUrl: string | null;
+};
 
 export type WorkspaceContextValue = {
   workspace: WorkspaceSummary;

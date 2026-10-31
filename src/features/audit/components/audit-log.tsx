@@ -41,7 +41,7 @@ export function AuditLog({
   }
 
   return (
-    <section aria-labelledby="audit-title" className="flex max-w-3xl flex-col gap-4">
+    <section aria-labelledby="audit-title" className="max-w-form flex flex-col gap-4">
       <h2 id="audit-title" className="text-headline-small text-on-surface">
         {t("title")}
       </h2>
