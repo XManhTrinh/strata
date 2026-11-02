@@ -4,7 +4,7 @@ Design and decisions: `design.md` (approved 2026-11-02). Resend and the domain c
 
 ## Tasks
 
-- [ ] 1. Role dashboards on Home: `home_summary` with the cards the caller may see (balances,
+- [x] 1. Role dashboards on Home: `home_summary` with the cards the caller may see (balances,
       upcoming time off, requests waiting; who's away and approvals for managers; headcount,
       starters and leavers, FTE and cost from the live plan for finance and admins)
 - [ ] 2. Personal data: "Export and erase personal data" permission; export (self from Account,

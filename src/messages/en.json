@@ -266,9 +266,39 @@
   "dashboard": {
     "title": "Home",
     "welcome": "Welcome, {name}",
-    "comingTitle": "Your workspace is ready",
-    "comingBody": "People, calendar and planning arrive here as they're built. Start by inviting your team in Settings.",
-    "openSettings": "Open settings"
+    "emptyTitle": "Nothing to show yet",
+    "emptyBody": "Turn on features in Settings, and what's relevant to you will appear here.",
+    "me": {
+      "title": "Your time off",
+      "daysLeft": "{days} days left",
+      "next": "Next",
+      "nothingBooked": "Nothing booked yet.",
+      "busy": "Busy",
+      "waiting": "waiting for approval",
+      "book": "Book time off"
+    },
+    "team": {
+      "title": "Away this week",
+      "approvals": "{count, plural, one {Review # request} other {Review # requests}}",
+      "nobodyAway": "Nobody is away this week.",
+      "more": "{count} more on the calendar",
+      "calendar": "Open the calendar",
+      "detail": " · {type} · {dates}"
+    },
+    "org": {
+      "title": "Organization",
+      "headcount": "People",
+      "starters": "Joining this month",
+      "leavers": "Leaving this month",
+      "byUnit": "People by unit"
+    },
+    "plan": {
+      "title": "Live plan: {name}",
+      "byUnit": "This month by unit",
+      "fte": "{fte} FTE",
+      "fteCost": "{fte} FTE · {cost}",
+      "open": "Open totals"
+    }
   },
   "emails": {
     "invitation": {

@@ -3587,6 +3587,7 @@ export type Database = {
           workspace_name: string;
         }[];
       };
+      home_summary: { Args: { p_workspace_id: string }; Returns: Json };
       import_apply_chunk: { Args: { p_job_id: string; p_max_rows?: number }; Returns: Json };
       import_preview: { Args: { p_job_id: string }; Returns: Json };
       import_stage_rows: {

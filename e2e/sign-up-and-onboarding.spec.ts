@@ -20,6 +20,9 @@ test("a new user signs up, confirms their email and creates a workspace", async 
 
   await expect(page).toHaveURL(new RegExp(`/w/acme-${id}$`, "i"));
   await expect(page.getByRole("heading", { name: "Welcome, Ana Pop" })).toBeVisible();
+  // Home shows the cards for an owner: their time, the team and the organization.
+  await expect(page.getByRole("heading", { name: "Your time off" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Organization" })).toBeVisible();
   await expect(
     page
       .getByRole("navigation", { name: "Main navigation" })
