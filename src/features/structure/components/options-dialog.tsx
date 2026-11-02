@@ -48,7 +48,7 @@ export function OptionsDialog({ field, onClose }: { field: CustomField; onClose:
       classNames={FORM_DIALOG_CLASSES}
     >
       <DialogTitle>{t("optionsTitle", { name: field.name })}</DialogTitle>
-      <DialogContent className="flex flex-col gap-4">
+      <DialogContent className="flex flex-col gap-4 pt-2">
         {field.options.length === 0 ? (
           <p className="text-body-medium text-on-surface-variant">{t("optionsEmpty")}</p>
         ) : (

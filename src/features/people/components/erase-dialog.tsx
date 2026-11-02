@@ -54,7 +54,7 @@ export function EraseDialog({
       classNames={FORM_DIALOG_CLASSES}
     >
       <DialogTitle>{t("title", { name })}</DialogTitle>
-      <DialogContent className="flex flex-col gap-4">
+      <DialogContent className="flex flex-col gap-4 pt-2">
         <p className="text-body-medium text-on-surface-variant">{t("body")}</p>
         <Alert severity="warning">{t("disputes")}</Alert>
         <TextField

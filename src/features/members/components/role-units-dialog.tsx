@@ -56,7 +56,7 @@ export function RoleUnitsDialog({
       classNames={FORM_DIALOG_CLASSES}
     >
       <DialogTitle>{t("unitsTitle", { role: roleName })}</DialogTitle>
-      <DialogContent className="flex flex-col gap-4">
+      <DialogContent className="flex flex-col gap-4 pt-2">
         <p className="text-body-medium text-on-surface-variant">
           {t("unitsBody", { name: personName })}
         </p>

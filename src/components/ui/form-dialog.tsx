@@ -63,7 +63,9 @@ export function FormDialog({
     >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{title}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
+        {/* pt-2: an outlined field first (a date) has its label above its edge; the scrolling
+            content would cut it off. */}
+        <DialogContent className="flex flex-col gap-4 pt-2">
           <FormError error={state.error} />
           {children(fieldError)}
         </DialogContent>

@@ -41,7 +41,7 @@ export function NewRoleDialog({
     >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{copyFrom ? t("duplicate") : t("newRole")}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
+        <DialogContent className="flex flex-col gap-4 pt-2">
           <FormError error={state.error} />
           <TextField
             className="w-full"

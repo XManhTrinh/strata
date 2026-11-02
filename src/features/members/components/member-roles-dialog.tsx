@@ -59,7 +59,7 @@ export function MemberRolesDialog({
       classNames={FORM_DIALOG_CLASSES}
     >
       <DialogTitle>{t("rolesDialogTitle", { name: member.fullName })}</DialogTitle>
-      <DialogContent className="flex flex-col gap-3">
+      <DialogContent className="flex flex-col gap-3 pt-2">
         <p className="text-body-medium text-on-surface-variant">{t("rolesDialogBody")}</p>
         {roles.map((role) => {
           const assigned = assignment(role.id);

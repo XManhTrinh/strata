@@ -28,7 +28,7 @@ export function MakeOwnerDialog({ member, onClose }: { member: MemberRow; onClos
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()} classNames={FORM_DIALOG_CLASSES}>
       <DialogTitle>{t("makeOwnerTitle", { name: member.fullName })}</DialogTitle>
-      <DialogContent className="flex flex-col gap-4">
+      <DialogContent className="flex flex-col gap-4 pt-2">
         <p>{t("makeOwnerBody")}</p>
         <Checkbox checked={keep} onCheckedChange={setKeep}>
           {t("keepOwnership")}

@@ -78,7 +78,7 @@ export function UnitDialog({
     >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{t(unit ? "units.dialogEdit" : "units.dialogAdd")}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
+        <DialogContent className="flex flex-col gap-4 pt-2">
           <FormError error={state.error} />
           <TextField
             className="w-full"

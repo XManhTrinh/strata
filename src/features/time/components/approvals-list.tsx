@@ -42,7 +42,7 @@ export function useApprovalDecisions() {
       classNames={FORM_DIALOG_CLASSES}
     >
       <DialogTitle>{t("approvals.rejectTitle")}</DialogTitle>
-      <DialogContent className="flex flex-col gap-3">
+      <DialogContent className="flex flex-col gap-3 pt-2">
         <p className="text-body-medium">
           {t("approvals.for", { name: declining.memberName, type: declining.typeName })}
         </p>

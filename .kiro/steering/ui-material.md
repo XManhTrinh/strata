@@ -59,6 +59,9 @@ fileMatchPattern: "src/**/*.tsx"
 - Menus open from their button into the page: a button at the end of a row, toolbar or header
   (⋮ actions, views, account) uses `placement="bottom-end"`, so the menu lines up with the
   button's end edge and grows toward the content, not off the screen.
+- Anything that needs a Windmorph change: work around it in Strata, and add an entry to
+  `docs/windmorph-notes.md` (what's wrong, the fix in Windmorph, where the workaround lives) so it
+  can be removed later.
 
 ## Behaviour
 

@@ -74,7 +74,7 @@ export function InviteDialog({
     >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{t("title")}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
+        <DialogContent className="flex flex-col gap-4 pt-2">
           <FormError error={state.error} />
           {failed.length > 0 && (
             <div role="status" className="text-body-medium text-error flex flex-col gap-1">
