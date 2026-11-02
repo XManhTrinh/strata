@@ -326,7 +326,18 @@ All plan changes go to the audit log.
 - **v1: leavers** are marked inactive and keep their history.
 - **v1: retention rules** per workspace (e.g. anonymise leavers 6 years after leaving, delete
   sick-leave reasons after 3 years), applied automatically.
-- **Later:** a log of who viewed sensitive fields (e.g. salary), and legal hold.
+- **Export and erase** need the "Export and erase personal data" permission (Admin and HR by
+  default); anyone can download their own data from Account. Erasing is one step: the person
+  becomes "Former employee", their contact details, key, pay, custom values, notes and photo go,
+  and the audit log keeps that changes happened without the personal values. Who erased whom and
+  when is kept, without personal data.
+- **Retention defaults** (changeable per workspace): leavers anonymised after 6 years, notes on
+  private time off cleared after 3 years, audit log kept 7 years, staged imports 30 days,
+  notifications 1 year.
+- **v1: delete my account.** Anyone can delete their own Strata account from Account (it leaves
+  every workspace); erasing in one workspace doesn't delete the account.
+- **Later:** a log of who viewed sensitive fields (e.g. salary), and legal hold (until then the
+  erase dialog asks to check for disputes first).
 
 ## 13. Reports and exports
 
@@ -334,6 +345,8 @@ All plan changes go to the audit log.
   current filters and columns, applying the user's permissions.
 - **v1: a dashboard per role:** employee (balances, upcoming leave), manager (who's away, pending
   approvals), finance/admin (headcount, FTE and cost by team). Fixed cards, no builder.
+- Dashboards show numbers and simple bars in Windmorph's colours; no chart library until the
+  report builder.
 - **Later:** a report builder (choose fields, group, filter, chart; save, share, schedule),
   alongside Budgets.
 

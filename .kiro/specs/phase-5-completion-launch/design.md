@@ -1,14 +1,20 @@
-# Design Document (outline): Phase 5 completion and launch
+# Design Document: Phase 5 completion and launch
 
-- **Dashboards** are Server Components built from SQL views (headcount, FTE, cost, away today,
-  pending approvals); charts use `@visx` with Windmorph tokens.
-- **GDPR export** and **erasure** run as jobs (`docs/rebuild-plan.md` 1.2); erasure replaces
-  personal fields with "Former employee" placeholders and deletes compensation and free-text
-  notes, keeping aggregate history intact. Retention rules run nightly from `pg_cron`.
+Approved 2026-11-02 (decisions: `docs/product-decisions.md` sections 12, 13 and 15).
+
+- **Dashboards** are Server Components over one RPC, `home_summary(workspace)`, which returns
+  only the cards the caller may see; numbers and simple bars in Windmorph tokens, no chart library.
+- **GDPR export** is one RPC returning everything about a person as JSON (self, or the
+  `people.personal_data` permission). **Erasure** is one transaction (`erase_member`): name to
+  "Former employee", email, key, pay, custom values, notes, comments and photo removed, the
+  person's values scrubbed from the audit log, history kept anonymised, and a row in
+  `member_erasures` (who, when, why; no personal data). **Delete my account** removes the auth
+  user (members keep their history without the link). **Retention** (`data_retention`, one row
+  per workspace) runs nightly from `pg_cron`.
 - **Load tests** use the seed generator from Phase 2 and run nightly in CI.
 - **Security review** checklist: RLS on every table (pgTAP 000), every RPC re-checks permissions,
   no service key in user paths, secrets only in server env, dependency audit clean.
-- **Notification emails** (draft from Phase 3, not yet approved): `notifications` gains
+- **Notification emails** (moved from Phase 3, approved): `notifications` gains
   `emailed_at`, `email_attempts` and `email_error`; `app.claim_notification_emails` and
   `app.mark_notification_emails` (job role only) claim a due batch and record the result, retrying
   up to 5 times. Instant emails wait about 2 minutes and are skipped if already read in the app;
