@@ -139,6 +139,8 @@ export function AllowancesSettings({
                 errorMessage={fieldError("name")}
               />
               <Select
+                searchable={allowanceTypes.length > 7}
+                labels={{ search: t("policies.timeType") }}
                 className="w-full"
                 name="timeTypeId"
                 label={t("policies.timeType")}

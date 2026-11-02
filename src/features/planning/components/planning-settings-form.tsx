@@ -89,6 +89,8 @@ export function PlanningSettingsForm({
           t("basis.help")
         )}
         <Select
+          searchable={fields.length + 1 > 7}
+          labels={{ search: t("costSplitFieldId.label") }}
           className="w-full"
           name="costSplitFieldId"
           label={t("costSplitFieldId.label")}

@@ -127,6 +127,8 @@ export function TotalsPage({
       </header>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Select
+          searchable={view.scenarios.length > 7}
+          labels={{ search: t("scenario") }}
           className="w-full"
           label={t("scenario")}
           value={view.scenario.id}
@@ -137,6 +139,8 @@ export function TotalsPage({
           ))}
         </Select>
         <Select
+          searchable={fields.length + 1 > 7}
+          labels={{ search: t("groupBy") }}
           className="w-full"
           label={t("groupBy")}
           value={query.by}
@@ -159,6 +163,8 @@ export function TotalsPage({
         </Select>
         {(["from", "to"] as const).map((end) => (
           <Select
+            searchable={view.scenarioMonths.length > 7}
+            labels={{ search: t(end) }}
             key={end}
             className="w-full"
             label={t(end)}

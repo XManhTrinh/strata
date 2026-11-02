@@ -150,6 +150,8 @@ export function ComparePage({
       <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
         {(["a", "b"] as const).map((side) => (
           <Select
+            searchable={scenarios.length > 7}
+            labels={{ search: t(side === "a" ? "first" : "second") }}
             key={side}
             className="w-full"
             label={t(side === "a" ? "first" : "second")}

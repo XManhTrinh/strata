@@ -106,6 +106,8 @@ export function InviteDialog({
             errorMessage={state.fieldErrors?.emails && te(state.fieldErrors.emails)}
           />
           <Select
+            searchable={roles.length > 7}
+            labels={{ search: t("role") }}
             className="w-full"
             name="roleId"
             label={t("role")}

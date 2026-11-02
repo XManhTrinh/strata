@@ -273,6 +273,8 @@ export function RateCardsPage({
                 errorMessage={fieldError("name")}
               />
               <Select
+                searchable={sets.length + 1 > 7}
+                labels={{ search: t("set") }}
                 className="w-full"
                 name="setId"
                 label={t("set")}

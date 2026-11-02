@@ -101,15 +101,16 @@ export async function openRow(page: Page, row: Locator, url: RegExp): Promise<vo
   }).toPass({ timeout: 20_000 });
 }
 
-/** Picks an option from a searchable combobox (Windmorph Autocomplete) by typing and choosing. */
+/** Picks an option from a dropdown (a Windmorph Select, searchable or not) by its label. */
 export async function pickOption(
   scope: Page | Locator,
-  label: string | RegExp,
+  label: string,
   option: string
 ): Promise<void> {
   const page = "page" in scope ? scope.page() : scope;
-  const box = scope.getByRole("combobox", { name: label });
-  await box.fill(option);
+  await scope
+    .getByRole("button", { name: new RegExp(`${label}$`) })
+    .last()
+    .click();
   await page.getByRole("option", { name: option, exact: true }).click();
-  await expect(box).toHaveValue(option);
 }

@@ -92,6 +92,8 @@ export function BookDialog({
             />
           )}
           <Select
+            searchable={types.length > 7}
+            labels={{ search: t("type") }}
             className="w-full"
             name="timeTypeId"
             label={t("type")}

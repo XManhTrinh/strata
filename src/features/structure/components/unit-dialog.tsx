@@ -118,6 +118,8 @@ export function UnitDialog({
             <Alert severity="info">{t("units.noLevels", { parent: parentName })}</Alert>
           ) : (
             <Select
+              searchable={levelOptions.length > 7}
+              labels={{ search: t("units.level") }}
               className="w-full"
               name="levelId"
               label={t("units.level")}

@@ -48,6 +48,8 @@ export function AuditLog({
       <p className="text-body-medium text-on-surface-variant">{t("intro")}</p>
       <div className="medium:flex-row flex flex-col gap-4">
         <Select
+          searchable={AUDIT_TABLES.length + 1 > 7}
+          labels={{ search: t("filterThing") }}
           className="medium:w-64 w-full"
           label={t("filterThing")}
           value={params.get("table") ?? "all"}
@@ -60,6 +62,8 @@ export function AuditLog({
           ))}
         </Select>
         <Select
+          searchable={people.length + 1 > 7}
+          labels={{ search: t("filterPerson") }}
           className="medium:w-64 w-full"
           label={t("filterPerson")}
           value={params.get("actor") ?? "all"}

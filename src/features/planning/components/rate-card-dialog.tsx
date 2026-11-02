@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-  IconButton,
-  Select,
-  SelectItem,
-  Switch,
-  TextField,
-} from "@windmorph/react";
+import { Button, IconButton, Select, SelectItem, Switch, TextField } from "@windmorph/react";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Icon } from "@/components/ui/icon";
 import { IsoDateField } from "@/components/ui/iso-date-field";
@@ -119,6 +110,8 @@ export function RateCardDialog({
           />
           <div className="grid grid-cols-2 gap-4">
             <Select
+              searchable={groups.length + 1 > 7}
+              labels={{ search: t("group") }}
               className="w-full"
               name="groupId"
               label={t("group")}
@@ -159,7 +152,9 @@ export function RateCardDialog({
               conditions.map((c, index) => (
                 <div key={c.key} className="grid grid-cols-[1fr_1fr_1fr_auto] items-start gap-2">
                   {/* Searchable: built-in fields plus the workspace's own. */}
-                  <Autocomplete
+                  <Select
+                    searchable={fieldOptions.length > 7}
+                    labels={{ search: t("field") }}
                     className="w-full"
                     label={t("field")}
                     value={c.field}
@@ -168,11 +163,11 @@ export function RateCardDialog({
                     }
                   >
                     {fieldOptions.map(([value, label]) => (
-                      <AutocompleteItem key={value} textValue={label}>
+                      <SelectItem key={value} textValue={label}>
                         {label}
-                      </AutocompleteItem>
+                      </SelectItem>
                     ))}
-                  </Autocomplete>
+                  </Select>
                   <Select
                     className="w-full"
                     label={t("operator")}

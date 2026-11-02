@@ -165,6 +165,10 @@ export function PositionsSection({
               />
               {(["min", "max"] as const).map((end) => (
                 <Select
+                  searchable={levels.length > 7}
+                  labels={{
+                    search: t(end === "min" ? "positions.minLevel" : "positions.maxLevel"),
+                  }}
                   key={end}
                   className="w-full"
                   name={end === "min" ? "minLevelId" : "maxLevelId"}

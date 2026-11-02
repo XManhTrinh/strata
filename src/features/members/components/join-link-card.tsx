@@ -67,6 +67,8 @@ export function JoinLinkCard({ link, roles }: { link: JoinLink | null; roles: Ro
       {shown && <CopyField label={t("link")} value={shown} />}
       <div className="grid gap-3 sm:grid-cols-2">
         <Select
+          searchable={roles.length > 7}
+          labels={{ search: t("role") }}
           className="w-full"
           label={t("role")}
           value={roleId}

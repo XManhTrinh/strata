@@ -256,6 +256,13 @@ export function CalendarsSection({
                   {Object.keys(countries.find((c) => c.code === country)?.regions ?? {}).length >
                     0 && (
                     <Select
+                      searchable={
+                        Object.keys(countries.find((c) => c.code === country)?.regions ?? {})
+                          .length +
+                          1 >
+                        7
+                      }
+                      labels={{ search: t("calendars.region") }}
                       className="w-full"
                       name="region"
                       label={t("calendars.region")}

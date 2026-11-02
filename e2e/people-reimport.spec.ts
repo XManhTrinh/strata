@@ -1,5 +1,5 @@
 import { type Page, expect, test } from "@playwright/test";
-import { chooseFile, completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { chooseFile, completeSignUp, pickOption, createWorkspace, uniqueId } from "./helpers";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "imports need a larger screen");
 
@@ -7,12 +7,7 @@ test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "imports need a larger
 async function chooseAndMap(page: Page, file: Parameters<Page["setInputFiles"]>[1]) {
   await chooseFile(page, file, / rows?, \d+ columns?$/);
   await page.getByRole("button", { name: "Next: columns" }).click();
-  // Search the file's columns and pick one from the keyboard.
-  const team = page.getByRole("combobox", { name: "Team" });
-  await team.fill("Team");
-  await team.press("ArrowDown");
-  await team.press("Enter");
-  await expect(team).toHaveValue("Team");
+  await pickOption(page, "Team", "Team");
 }
 
 test("an Excel import, then a re-import with a move and a leaver, resumed", async ({

@@ -63,6 +63,8 @@ export function JoinRequests({
               trailing={
                 <div className="flex items-center gap-2">
                   <Select
+                    searchable={roles.length > 7}
+                    labels={{ search: t("role", { name: r.fullName }) }}
                     className="w-40"
                     aria-label={t("role", { name: r.fullName })}
                     value={roleFor[r.id] ?? fallback}

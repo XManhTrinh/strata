@@ -93,6 +93,8 @@ export function FieldValueDialog({
           )}
           {field.type === "single_choice" && (
             <Select
+              searchable={options.length + 1 > 7}
+              labels={{ search: field.label }}
               className="w-full"
               name="value"
               label={field.label}

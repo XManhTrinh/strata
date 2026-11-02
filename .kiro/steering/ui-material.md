@@ -53,6 +53,9 @@ fileMatchPattern: "src/**/*.tsx"
 - Dialogs: any dialog with a field (text, choice, checkbox) uses the full Material width, 560px
   (`FORM_DIALOG_CLASSES`, built into `FormDialog`); dialogs that only ask yes or no keep their
   natural width. Phones show them full screen.
+- Dropdowns: a Windmorph `Select`. When its options come from the workspace's data (units,
+  positions, roles, fields, scenarios, a file's columns) it gets `searchable={options.length > 7}`;
+  short fixed lists stay plain. Searching the server as you type (people) uses `Autocomplete`.
 
 ## Behaviour
 
