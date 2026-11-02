@@ -164,7 +164,8 @@
     "cannotEraseOwner": "Owners can't be erased. Make someone else the owner first.",
     "alreadyErased": "This person has already been erased.",
     "erasureReasonRequired": "Give a reason for erasing.",
-    "ownerMustTransfer": "You own a workspace other people use. Make someone else its owner first."
+    "ownerMustTransfer": "You own a workspace other people use. Make someone else its owner first.",
+    "retentionInvalid": "Enter a whole number in the range shown, or leave it empty to keep."
   },
   "auth": {
     "signIn": {
@@ -378,6 +379,10 @@
       "features": {
         "name": "Features",
         "description": "Switch features on and off"
+      },
+      "personal-data": {
+        "name": "Personal data",
+        "description": "How long data is kept, and erasures"
       },
       "audit": {
         "name": "Audit log",
@@ -1650,6 +1655,38 @@
     },
     "save": "Save",
     "saved": "Planning settings saved"
+  },
+  "personalDataSettings": {
+    "title": "Personal data",
+    "intro": "Strata removes personal data on these rules every night. Leave a rule empty to keep that data.",
+    "anonymiseLeaversMonths": {
+      "label": "Anonymise leavers after (months)",
+      "help": "After their last day, a leaver becomes “Former employee”. 1 to 600."
+    },
+    "privateNotesMonths": {
+      "label": "Clear notes on private time off after (months)",
+      "help": "Notes on private time off, such as sick leave, once it ends. 1 to 600."
+    },
+    "auditLogMonths": {
+      "label": "Keep the audit log for (months)",
+      "help": "12 to 600."
+    },
+    "stagedImportsDays": {
+      "label": "Remove imports after (days)",
+      "help": "Uploaded files and their rows, applied or not. 1 to 3650."
+    },
+    "notificationsMonths": {
+      "label": "Remove notifications after (months)",
+      "help": "1 to 600."
+    },
+    "save": "Save changes",
+    "saved": "Retention rules saved",
+    "erasures": "Recent erasures",
+    "noErasures": "No one has been erased",
+    "kind": {
+      "manual": "Erased by hand",
+      "retention": "Erased by the retention rules"
+    }
   },
   "rateCards": {
     "title": "Rate cards",

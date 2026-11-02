@@ -10,6 +10,7 @@ export type SettingsSectionKey =
   | "working-time"
   | "planning"
   | "features"
+  | "personal-data"
   | "audit";
 
 type SettingsSection = { key: SettingsSectionKey; icon: string; permissions: string[] };
@@ -31,6 +32,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   { key: "working-time", icon: "calendar_month", permissions: ["time.manage_settings"] },
   { key: "planning", icon: "insights", permissions: ["planning.manage_settings"] },
   { key: "features", icon: "toggle_on", permissions: ["workspace.manage_features"] },
+  { key: "personal-data", icon: "shield_person", permissions: ["people.personal_data"] },
   { key: "audit", icon: "history", permissions: ["workspace.view_audit"] },
 ];
 

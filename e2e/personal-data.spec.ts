@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId } from "./helpers";
+import { completeSignUp, createWorkspace, settingsSection, uniqueId } from "./helpers";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "managing people needs a larger screen");
 
@@ -34,6 +34,23 @@ test("an owner downloads and erases a person's data", async ({ page }, testInfo)
   await dialog.getByRole("button", { name: "Erase" }).click();
   await expect(page.getByRole("heading", { name: "Former employee", level: 1 })).toBeVisible();
   await expect(page.getByRole("button", { name: "Actions" })).toHaveCount(0);
+
+  // Settings lists the erasure and keeps the retention rules.
+  await page.goto(`${base}/settings`);
+  await settingsSection(page, "Personal data").click();
+  await expect(page.getByRole("list", { name: "Recent erasures" })).toContainText(
+    "Asked to be forgotten"
+  );
+  const notifications = page.getByLabel("Remove notifications after (months)");
+  await notifications.fill("0");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Enter a whole number in the range shown")).toBeVisible();
+  await notifications.fill("");
+  await expectNoA11yViolations(page);
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Retention rules saved")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Remove notifications after (months)")).toHaveValue("");
 });
 
 test("someone downloads their data and deletes their account", async ({ page }, testInfo) => {

@@ -53,3 +53,22 @@ export const paySchema = z.object({
   dayRate: amount,
   currency: z.string().regex(/^[A-Za-z]{3}$/, { error: "currencyRequired" }),
 });
+
+/** A retention period: a whole number in range, or empty to keep forever. */
+const keepFor = (min: number, max: number) =>
+  z
+    .string()
+    .trim()
+    .default("")
+    .transform((v) => (v === "" ? null : Number(v)))
+    .refine((v) => v === null || (Number.isInteger(v) && v >= min && v <= max), {
+      error: "retentionInvalid",
+    });
+
+export const retentionSchema = z.object({
+  anonymiseLeaversMonths: keepFor(1, 600),
+  privateNotesMonths: keepFor(1, 600),
+  auditLogMonths: keepFor(12, 600),
+  stagedImportsDays: keepFor(1, 3650),
+  notificationsMonths: keepFor(1, 600),
+});

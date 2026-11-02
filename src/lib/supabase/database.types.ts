@@ -20,10 +20,12 @@ export type Database = {
         };
       };
       anonymise_member: { Args: { p_member_id: string }; Returns: undefined };
+      apply_all_retention: { Args: Record<PropertyKey, never>; Returns: undefined };
       apply_rate_cards_to: {
         Args: { p_from: string; p_members: string[]; p_roles: boolean; p_scenario_id: string };
         Returns: undefined;
       };
+      apply_retention: { Args: { p_today?: string; p_workspace_id: string }; Returns: Json };
       assignment_on: {
         Args: { p_date: string; p_member_id: string };
         Returns: Database["public"]["Tables"]["member_assignments"]["Row"];
@@ -1034,6 +1036,45 @@ export type Database = {
             foreignKeyName: "custom_fields_workspace_id_fkey";
             columns: ["workspace_id"];
             isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      data_retention: {
+        Row: {
+          anonymise_leavers_months: number | null;
+          audit_log_months: number | null;
+          notifications_months: number | null;
+          private_notes_months: number | null;
+          staged_imports_days: number | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          anonymise_leavers_months?: number | null;
+          audit_log_months?: number | null;
+          notifications_months?: number | null;
+          private_notes_months?: number | null;
+          staged_imports_days?: number | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          anonymise_leavers_months?: number | null;
+          audit_log_months?: number | null;
+          notifications_months?: number | null;
+          private_notes_months?: number | null;
+          staged_imports_days?: number | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "data_retention_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: true;
             referencedRelation: "workspaces";
             referencedColumns: ["id"];
           },
