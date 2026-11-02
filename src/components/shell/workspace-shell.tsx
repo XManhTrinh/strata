@@ -77,8 +77,9 @@ export function WorkspaceShell({
     <div className="bg-surface text-on-surface flex min-h-dvh">
       <SkipLink target="main-content">{t("skipToContent")}</SkipLink>
 
+      {/* Above the page's sticky layer (its header), so the rail's panel opens over it. */}
       <div
-        className="medium:flex sticky top-0 z-30 hidden h-dvh shrink-0"
+        className="medium:flex sticky top-0 z-[calc(var(--md-sys-z-sticky)+1)] hidden h-dvh shrink-0"
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) panel.close();
         }}
