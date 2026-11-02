@@ -16,6 +16,7 @@ import { useRunAction } from "@/features/structure/use-run-action";
 import { decideBooking } from "../time-off-actions";
 import type { PendingApproval } from "../types";
 import { useBookingDates } from "./date-range";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 
 /**
  * Approving straight away, or declining with a reason (in a dialog the caller renders). Shared by
@@ -35,7 +36,11 @@ export function useApprovalDecisions() {
     setDeclining(a);
   };
   const dialog = declining && (
-    <Dialog open onOpenChange={(open) => !open && setDeclining(null)}>
+    <Dialog
+      open
+      onOpenChange={(open) => !open && setDeclining(null)}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{t("approvals.rejectTitle")}</DialogTitle>
       <DialogContent className="flex flex-col gap-3">
         <p className="text-body-medium">

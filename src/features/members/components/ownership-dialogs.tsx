@@ -15,6 +15,7 @@ import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { useSnackbar } from "@/lib/snackbar";
 import { leaveWorkspace, transferOwnership } from "../actions";
 import type { MemberRow } from "../types";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 
 export function MakeOwnerDialog({ member, onClose }: { member: MemberRow; onClose: () => void }) {
   const t = useTranslations("members");
@@ -25,7 +26,7 @@ export function MakeOwnerDialog({ member, onClose }: { member: MemberRow; onClos
   const [pending, startTransition] = useTransition();
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && onClose()} classNames={FORM_DIALOG_CLASSES}>
       <DialogTitle>{t("makeOwnerTitle", { name: member.fullName })}</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <p>{t("makeOwnerBody")}</p>

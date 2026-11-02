@@ -9,8 +9,8 @@ import { useSnackbar } from "@/lib/snackbar";
 import { useFormAction } from "@/lib/use-form-action";
 
 /**
- * Dialogs that hold a form use Material's full dialog width (560px), so fields don't wrap; dialogs
- * that only confirm keep their natural width. On phones they fill the screen either way.
+ * Any dialog with a field (text, choice, checkbox) uses Material's full dialog width (560px), so
+ * fields and their labels have room; dialogs that only ask yes or no keep their natural width.
  */
 export const FORM_DIALOG_CLASSES = { panel: "w-[560px]" };
 

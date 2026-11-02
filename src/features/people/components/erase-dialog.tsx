@@ -14,6 +14,7 @@ import {
 import { Alert } from "@windmorph/react-pro";
 import { useSnackbar } from "@/lib/snackbar";
 import { erasePerson } from "../personal-data-actions";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 
 /** Erasing a person can't be undone: it asks for the reason, and to check for disputes first. */
 export function EraseDialog({
@@ -46,7 +47,12 @@ export function EraseDialog({
   }
 
   return (
-    <Dialog role="alertdialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="alertdialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{t("title", { name })}</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <p className="text-body-medium text-on-surface-variant">{t("body")}</p>

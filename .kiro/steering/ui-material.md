@@ -50,6 +50,9 @@ fileMatchPattern: "src/**/*.tsx"
   `max-w-form`, beside the list rather than centred.
 - Lists whose rows carry actions on the right (approve, cancel, menus) also use `max-w-form`, so
   the buttons stay next to what they act on on wide screens. Tables keep the full width.
+- Dialogs: any dialog with a field (text, choice, checkbox) uses the full Material width, 560px
+  (`FORM_DIALOG_CLASSES`, built into `FormDialog`); dialogs that only ask yes or no keep their
+  natural width. Phones show them full screen.
 
 ## Behaviour
 

@@ -18,6 +18,7 @@ import { Icon } from "@/components/ui/icon";
 import { SelectionCheckbox } from "./selection-checkbox";
 import { moveColumn } from "./table-state";
 import type { ColumnDef, DataTableLabels, TableState } from "./types";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 
 /**
  * Show, hide and reorder columns. The list's selection is "shown columns" (Space toggles), rows
@@ -60,7 +61,13 @@ export function ColumnSettings<Row>({
 
   return (
     // Changes here re-render the table underneath; close only on Escape or Done.
-    <Dialog role="dialog" closedBy="closerequest" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      closedBy="closerequest"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{labels.columnSettingsTitle}</DialogTitle>
       <DialogContent>
         <GridList
