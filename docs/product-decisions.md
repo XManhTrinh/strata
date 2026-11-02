@@ -12,9 +12,16 @@ Answers from the product owner that shape the rebuild. See `architecture/0001-te
 - **Every workspace has a hierarchy**, even team and personal ones, so one workspace can hold
   several teams (e.g. Squad A and Squad B) instead of needing a workspace per team.
 - **One user can belong to many workspaces** and switches between them.
-- **Joining is by email invite only in v1:** an admin names each person and their role. Shareable
-  join links come later, with expiry, a usage limit, a fixed starting role and an optional
-  email-domain restriction.
+- **Joining (decided 2026-11-02):** two ways, both ending with an admin's say.
+  - **Email invite:** an admin names the person and their role; they get a link by email. With no
+    email provider set, the admin copies the invitation link and shares it themselves.
+  - **Join link with approval:** an admin switches on the workspace's join link, picks the role
+    new people start with, and can set an expiry or switch it off (a new link replaces the old).
+    Anyone who opens it signs in and asks to join; people who may invite approve (with that role
+    or another they may give) or decline, and are told in the bell. Requests can't be made twice
+    while one is open, and the person hears the outcome.
+  - **Next:** a workspace's email domains (e.g. `acme.com`, verified emails only) let matching
+    people find and ask to join without the link, and optionally be approved automatically.
 
 ### Merging workspaces
 
@@ -60,7 +67,7 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 | ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------- |
 | Local       | `http://localhost:3000`                                                                            | `supabase start`             | By the developer                 |
 | Staging     | **`https://strata-web-xi.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging`    | Automatically on merge to `main` |
-| Production  | Custom domain (to be decided)                                                                      | Supabase `strata-production` | Only by an approved release      |
+| Production  | Its own `vercel.app` address for the MVP; a custom domain later                                    | Supabase `strata-production` | Only by an approved release      |
 
 Preview and staging deployments never use the production database.
 
@@ -366,10 +373,12 @@ All plan changes go to the audit log.
 - Email goes through **Resend** (SMTP, EU region) on staging and production, for both the app's
   emails (invitations, notifications) and Supabase Auth's (confirmations, password resets). Locally
   everything goes to Mailpit.
-- **Until Strata has a domain**, staging uses Supabase's built-in email for sign-up confirmation
-  and password reset (delivered only to members of the Supabase organization, about 2 an hour);
-  app emails such as invitations are not sent on staging. Buying a domain and setting up Resend is
-  required before other people use staging, and before launch.
+- **MVP without a domain (decided 2026-11-02):** Strata launches on a `vercel.app` address. Resend
+  needs a domain and Supabase's built-in email reaches only its own team, so sign-in is **Google
+  only** (Google has verified the email), joining uses join links with approval or copied
+  invitation links, and notifications are in the app only. Email and password sign-up, password
+  reset and notification emails come back as soon as an email provider is set (`SMTP_URL`, and
+  Supabase Auth's SMTP), with no code change.
 - **Later:** Microsoft Teams and Slack, connected per workspace (e.g. approve leave from a Teams
   message).
 
