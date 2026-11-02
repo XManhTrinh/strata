@@ -16,7 +16,8 @@ import {
 } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { SelectionCheckbox } from "./selection-checkbox";
-import { moveColumn } from "./table-state";
+import { ItemMenu } from "@/components/ui/item-menu";
+import { moveColumn, pinColumn } from "./table-state";
 import type { ColumnDef, DataTableLabels, TableState } from "./types";
 import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 
@@ -34,7 +35,7 @@ export function ColumnSettings<Row>({
 }: {
   columns: ColumnDef<Row>[];
   state: TableState;
-  onChange: (next: Pick<TableState, "columnOrder" | "hidden">) => void;
+  onChange: (next: Pick<TableState, "columnOrder" | "hidden" | "pinned">) => void;
   onReset: () => void;
   onClose: () => void;
   labels: DataTableLabels;
@@ -44,6 +45,9 @@ export function ColumnSettings<Row>({
     ...state.columnOrder.filter((id) => byId.has(id)),
     ...columns.map((c) => c.id).filter((id) => !state.columnOrder.includes(id)),
   ];
+
+  const pinnedSide = (id: string) =>
+    state.pinned.start.includes(id) ? "start" : state.pinned.end.includes(id) ? "end" : null;
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: (keys) => [...keys].map((key) => ({ "text/plain": String(key) })),
@@ -55,6 +59,7 @@ export function ColumnSettings<Row>({
       onChange({
         columnOrder: [...rest.slice(0, at), ...moving, ...rest.slice(at)],
         hidden: state.hidden,
+        pinned: state.pinned,
       });
     },
   });
@@ -85,6 +90,7 @@ export function ColumnSettings<Row>({
               columnOrder: order,
               // Columns that can't be hidden stay shown.
               hidden: order.filter((id) => !shown.includes(id) && byId.get(id)?.hideable !== false),
+              pinned: state.pinned,
             });
           }}
           className="flex flex-col"
@@ -102,13 +108,58 @@ export function ColumnSettings<Row>({
                 <Icon name="drag_indicator" />
               </AriaButton>
               <SelectionCheckbox />
-              <span className="flex-1">{column.header}</span>
+              <span className="flex flex-1 items-center gap-2">
+                {column.header}
+                {pinnedSide(column.id) && (
+                  <span
+                    className="text-on-surface-variant flex"
+                    aria-label={
+                      pinnedSide(column.id) === "start" ? labels.pinnedStart : labels.pinnedEnd
+                    }
+                  >
+                    <Icon name="keep" size={18} />
+                  </span>
+                )}
+              </span>
+              {column.pinnable !== false && (
+                <ItemMenu
+                  label={labels.pinMenu(column.header)}
+                  actions={[
+                    pinnedSide(column.id) !== "start" && {
+                      key: "start",
+                      label: labels.pinStart,
+                      icon: "keep",
+                    },
+                    pinnedSide(column.id) !== "end" && {
+                      key: "end",
+                      label: labels.pinEnd,
+                      icon: "keep",
+                    },
+                    pinnedSide(column.id) && { key: "none", label: labels.unpin, icon: "keep_off" },
+                  ]}
+                  onAction={(key) =>
+                    onChange({
+                      columnOrder: order,
+                      hidden: state.hidden,
+                      pinned: pinColumn(
+                        state.pinned,
+                        column.id,
+                        key === "none" ? null : (key as "start" | "end")
+                      ),
+                    })
+                  }
+                />
+              )}
               <IconButton
                 variant="standard"
                 aria-label={labels.moveUp(column.header)}
                 icon={<Icon name="arrow_upward" />}
                 onPress={() =>
-                  onChange({ columnOrder: moveColumn(order, column.id, -1), hidden: state.hidden })
+                  onChange({
+                    columnOrder: moveColumn(order, column.id, -1),
+                    hidden: state.hidden,
+                    pinned: state.pinned,
+                  })
                 }
               />
               <IconButton
@@ -116,7 +167,11 @@ export function ColumnSettings<Row>({
                 aria-label={labels.moveDown(column.header)}
                 icon={<Icon name="arrow_downward" />}
                 onPress={() =>
-                  onChange({ columnOrder: moveColumn(order, column.id, 1), hidden: state.hidden })
+                  onChange({
+                    columnOrder: moveColumn(order, column.id, 1),
+                    hidden: state.hidden,
+                    pinned: state.pinned,
+                  })
                 }
               />
             </GridListItem>

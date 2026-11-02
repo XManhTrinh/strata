@@ -19,6 +19,7 @@ import { ViewsMenu } from "@/features/table-views/components/views-menu";
 import type { TableView } from "@/features/table-views/types";
 import {
   DEFAULT_DIRECTORY_PARAMS,
+  DEFAULT_DIRECTORY_PINNED,
   DIRECTORY_SORTS,
   type DirectoryParams,
   type DirectorySort,
@@ -137,6 +138,7 @@ export function PeopleDirectory({
         hidden: saved.columns.hidden.filter((id) => known.has(id)),
         widths: saved.columns.widths,
       }),
+      pinned: saved?.columns.pinned ?? DEFAULT_DIRECTORY_PINNED,
       search: params.search,
       sort: params.sorts.map((s) => ({
         column: s.key,
@@ -161,7 +163,12 @@ export function PeopleDirectory({
   const { page: _page, ...currentParams } = { ...filters, search: state.search };
   const current: DirectoryView = {
     params: currentParams,
-    columns: { columnOrder: state.columnOrder, hidden: state.hidden, widths: state.widths },
+    columns: {
+      columnOrder: state.columnOrder,
+      hidden: state.hidden,
+      widths: state.widths,
+      pinned: state.pinned,
+    },
   };
   const dirty =
     saved !== null && JSON.stringify(saved) !== JSON.stringify(parseDirectoryView(current));
@@ -204,6 +211,7 @@ export function PeopleDirectory({
       totalRows={total}
       getRowId={(p) => p.id}
       state={state}
+      defaultState={{ pinned: DEFAULT_DIRECTORY_PINNED }}
       onStateChange={onStateChange}
       loading={pending}
       rowHref={(p) => `/w/${workspace.slug}/people/${p.id}`}

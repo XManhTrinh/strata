@@ -14,9 +14,9 @@ import {
 } from "react-aria-components";
 import { cn } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
-import { useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { SelectionCheckbox } from "./selection-checkbox";
-import { nextSort } from "./table-state";
+import { type PinPlace, nextSort, pinPlaces } from "./table-state";
 import type { ColumnDef, DataTableLabels, TableState } from "./types";
 
 type Props<Row> = {
@@ -35,6 +35,26 @@ type Props<Row> = {
 };
 
 const SELECT_COLUMN = "__select";
+const SELECT_WIDTH = 56;
+const SHADOW = "color-mix(in srgb, var(--md-sys-color-shadow) 25%, transparent)";
+
+/** A pinned cell sticks to its edge and, innermost and with content under it, casts a shadow. */
+function pinStyle(place: PinPlace | undefined, scrolled: { start: boolean; end: boolean }) {
+  if (!place) return undefined;
+  const style: CSSProperties = { position: "sticky" };
+  if (place.side === "start") style.insetInlineStart = place.offset;
+  else style.insetInlineEnd = place.offset;
+  if (place.edge && scrolled[place.side]) {
+    style.boxShadow =
+      place.side === "start" ? `4px 0 4px -2px ${SHADOW}` : `-4px 0 4px -2px ${SHADOW}`;
+  }
+  return style;
+}
+
+/** Pinned body cells cover what scrolls under them, in the row's own colour (hover, selected). */
+const PINNED_CELL =
+  "z-[1] bg-surface group-hover/row:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface)_8%,var(--md-sys-color-surface))] group-data-[selected]/row:bg-secondary-container";
+const PINNED_HEADER = "z-[2] bg-surface-container";
 
 function display<Row>(column: ColumnDef<Row>, row: Row) {
   if (column.cell) return column.cell(row);
@@ -57,6 +77,33 @@ export function TableView<Row>({
   labels,
 }: Props<Row>) {
   const selectedKeys: Selection = new Set(state.selection.ids);
+  const places = pinPlaces(columns, state, selectable ? SELECT_WIDTH : 0);
+  // With columns pinned at the start, the selection column sticks too, at the very edge.
+  const selectPlace: PinPlace | undefined =
+    selectable && state.pinned.start.length > 0
+      ? { side: "start", offset: 0, edge: false }
+      : undefined;
+  // Whether content has scrolled under the pinned columns, for their shadow.
+  const container = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState({ start: false, end: false });
+  useEffect(() => {
+    const element = container.current;
+    if (!element) return;
+    const measure = () => {
+      const left = Math.abs(element.scrollLeft);
+      setScrolled({
+        start: left > 0,
+        end: left + element.clientWidth < element.scrollWidth - 1,
+      });
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [columns]);
   // Shift held while pressing a header adds that column to the sort (read when the press starts).
   const adding = useRef(false);
   useEffect(() => {
@@ -74,6 +121,7 @@ export function TableView<Row>({
 
   return (
     <ResizableTableContainer
+      ref={container}
       className="relative w-full overflow-auto"
       onResizeEnd={(widths: Map<Key, number | string>) =>
         onResize(
@@ -110,9 +158,10 @@ export function TableView<Row>({
           {selectable && (
             <Column
               id={SELECT_COLUMN}
-              width={56}
-              minWidth={56}
-              className="border-outline-variant border-b px-2"
+              width={SELECT_WIDTH}
+              minWidth={SELECT_WIDTH}
+              className={cn("border-outline-variant border-b px-2", selectPlace && PINNED_HEADER)}
+              style={pinStyle(selectPlace, scrolled)}
             >
               <SelectionCheckbox aria-label={labels.selectAll} />
             </Column>
@@ -124,8 +173,11 @@ export function TableView<Row>({
             const last = index === columns.length - 1;
             const resized = state.widths[column.id];
             const width = resized ?? column.width ?? 180;
-            const grows = resized === undefined && column.grow === true;
-            const fills = last && !columns.some((c) => c.grow && state.widths[c.id] === undefined);
+            // A pinned column keeps its width, so the columns after it know where to stick.
+            const place = places.get(column.id);
+            const grows = !place && resized === undefined && column.grow === true;
+            const fills =
+              !place && last && !columns.some((c) => c.grow && state.widths[c.id] === undefined);
             return (
               <Column
                 key={column.id}
@@ -138,8 +190,10 @@ export function TableView<Row>({
                 }
                 className={cn(
                   "border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
-                  column.sortable !== false && "cursor-pointer"
+                  column.sortable !== false && "cursor-pointer",
+                  place && PINNED_HEADER
                 )}
+                style={pinStyle(place, scrolled)}
               >
                 {({ allowsSorting }) => {
                   const level = state.sort.findIndex((s) => s.column === column.id);
@@ -188,13 +242,19 @@ export function TableView<Row>({
                 id={id}
                 href={rowHref?.(row) || undefined}
                 className={cn(
-                  "border-outline-variant outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
+                  "group/row border-outline-variant outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
                   "hover:bg-on-surface/8 data-[selected]:bg-secondary-container data-[selected]:text-on-secondary-container",
                   (onRowAction || rowHref) && "cursor-pointer"
                 )}
               >
                 {selectable && (
-                  <Cell className="border-outline-variant border-b px-2">
+                  <Cell
+                    className={cn(
+                      "border-outline-variant border-b px-2",
+                      selectPlace && PINNED_CELL
+                    )}
+                    style={pinStyle(selectPlace, scrolled)}
+                  >
                     <SelectionCheckbox aria-label={labels.selectRow} />
                   </Cell>
                 )}
@@ -206,8 +266,10 @@ export function TableView<Row>({
                       (column.align === "end" ||
                         column.type === "number" ||
                         column.type === "currency") &&
-                        "text-end tabular-nums"
+                        "text-end tabular-nums",
+                      places.has(column.id) && PINNED_CELL
                     )}
+                    style={pinStyle(places.get(column.id), scrolled)}
                   >
                     {rowHref && column.isRowHeader ? (
                       // A real link, so a click works before the script loads; once it has, the

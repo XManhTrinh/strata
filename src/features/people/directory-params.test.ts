@@ -65,9 +65,19 @@ describe("saved directory views", () => {
         status: "all",
         size: 25,
       },
-      columns: { columnOrder: ["name"], hidden: ["email"], widths: { name: 300 } },
+      columns: {
+        columnOrder: ["name"],
+        hidden: ["email"],
+        widths: { name: 300 },
+        pinned: { start: ["name"], end: [] },
+      },
     });
-    expect(parseDirectoryView(null).columns).toEqual({ columnOrder: [], hidden: [], widths: {} });
+    expect(parseDirectoryView(null).columns).toEqual({
+      columnOrder: [],
+      hidden: [],
+      widths: {},
+      pinned: { start: ["name"], end: [] },
+    });
     // Saved before sorting by several columns: one sort and a direction.
     expect(parseDirectoryView({ params: { sort: "unit", descending: true } }).params.sorts).toEqual(
       [{ key: "unit", descending: true }]

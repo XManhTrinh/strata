@@ -5,6 +5,8 @@ import {
   moveColumn,
   nextSort,
   normalizeSort,
+  pinColumn,
+  pinPlaces,
   visibleColumns,
 } from "./table-state";
 import type { ColumnDef } from "./types";
@@ -115,5 +117,31 @@ describe("sorting by several columns", () => {
     expect(normalizeSort(asc("name"))).toEqual([asc("name")]);
     expect(normalizeSort(null)).toEqual([]);
     expect(normalizeSort([asc("a"), { column: 1 }, desc("b")])).toEqual([asc("a"), desc("b")]);
+  });
+});
+
+describe("pinned columns", () => {
+  const cols = ["a", "b", "c", "d"].map((id) => ({
+    id,
+    header: id,
+    accessor: () => null,
+    width: 100,
+  }));
+
+  it("moves pinned columns to their edge and works out where each sticks", () => {
+    const state = initialTableState(cols, { pinned: { start: ["c"], end: ["a"] } });
+    const shown = visibleColumns(cols, state);
+    expect(shown.map((c) => c.id)).toEqual(["c", "b", "d", "a"]);
+    const places = pinPlaces(shown, { ...state, pinned: { start: ["c", "b"], end: ["a"] } }, 56);
+    expect(places.get("c")).toEqual({ side: "start", offset: 56, edge: false });
+    expect(places.get("b")).toEqual({ side: "start", offset: 156, edge: true });
+    expect(places.get("a")).toEqual({ side: "end", offset: 0, edge: true });
+    expect(places.has("d")).toBe(false);
+  });
+
+  it("pins to one edge at a time", () => {
+    const pinned = pinColumn({ start: ["a"], end: [] }, "a", "end");
+    expect(pinned).toEqual({ start: [], end: ["a"] });
+    expect(pinColumn(pinned, "a", null)).toEqual({ start: [], end: [] });
   });
 });

@@ -118,8 +118,16 @@ export function directorySearch(params: DirectoryParams): string {
 /** A saved directory view: what's searched and filtered, and how the columns are laid out. */
 export type DirectoryView = {
   params: Omit<DirectoryParams, "page">;
-  columns: { columnOrder: string[]; hidden: string[]; widths: Record<string, number> };
+  columns: {
+    columnOrder: string[];
+    hidden: string[];
+    widths: Record<string, number>;
+    pinned: { start: string[]; end: string[] };
+  };
 };
+
+/** The directory pins people's names, so they stay in view while wide tables scroll. */
+export const DEFAULT_DIRECTORY_PINNED = { start: ["name"], end: [] as string[] };
 
 /** Reads a saved view's state, keeping only what's valid (views outlive column changes). */
 export function parseDirectoryView(state: unknown): DirectoryView {
@@ -156,6 +164,18 @@ export function parseDirectoryView(state: unknown): DirectoryView {
   const { page: _page, ...rest } = parsed;
   return {
     params: rest,
-    columns: { columnOrder: strings(columns.columnOrder), hidden: strings(columns.hidden), widths },
+    columns: {
+      columnOrder: strings(columns.columnOrder),
+      hidden: strings(columns.hidden),
+      widths,
+      // Views saved before pinning have none: they get the default.
+      pinned:
+        typeof columns.pinned === "object" && columns.pinned !== null
+          ? {
+              start: strings((columns.pinned as Record<string, unknown>).start),
+              end: strings((columns.pinned as Record<string, unknown>).end),
+            }
+          : DEFAULT_DIRECTORY_PINNED,
+    },
   };
 }

@@ -63,15 +63,19 @@ test("DataTable: sort, search, select, columns and pages", async ({ page, viewpo
   );
   await expect(page.getByRole("columnheader", { name: "Email" })).toHaveCount(0);
   await settings.getByRole("button", { name: "Move Salary up" }).click();
+  // Pinning keeps a column at the start, whatever the order.
+  await settings.getByRole("button", { name: "Pin Position" }).click();
+  await page.getByRole("menuitem", { name: "Pin to start" }).click();
+  await expect(settings.getByLabel("Pinned to start")).toBeVisible();
   await settings.getByRole("button", { name: "Done" }).click();
   await expect(page.getByRole("columnheader", { name: "Email" })).toHaveCount(0);
   const headers = await page.getByRole("columnheader").allInnerTexts();
   // The first line is the label; the rest is the sort icon's ligature.
   expect(headers.map((h) => h.split("\n")[0]?.trim()).filter(Boolean)).toEqual([
+    "Position",
     "Name",
     "Team",
     "Salary",
-    "Position",
   ]);
   await expectNoA11yViolations(page);
 });

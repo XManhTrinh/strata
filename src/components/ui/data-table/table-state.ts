@@ -15,10 +15,17 @@ export function initialTableState<Row>(
     selection: { ids: [], allMatching: false },
     ...overrides,
     sort: normalizeSort(overrides.sort ?? []),
+    pinned: {
+      start: overrides.pinned?.start ?? [],
+      end: (overrides.pinned?.end ?? []).filter((id) => !overrides.pinned?.start?.includes(id)),
+    },
   };
 }
 
-/** Visible columns in the user's order; columns added later (not in a saved order) go last. */
+/**
+ * Visible columns in the user's order (columns added later, not in a saved order, go last), with
+ * pinned ones moved to the start or end.
+ */
 export function visibleColumns<Row>(
   columns: ColumnDef<Row>[],
   state: TableState
@@ -28,10 +35,23 @@ export function visibleColumns<Row>(
     ...state.columnOrder.filter((id) => byId.has(id)),
     ...columns.map((c) => c.id).filter((id) => !state.columnOrder.includes(id)),
   ];
-  return ordered.flatMap((id) => {
+  const shown = ordered.flatMap((id) => {
     const column = byId.get(id)!;
     return state.hidden.includes(id) && column.hideable !== false ? [] : [column];
   });
+  const at = (c: ColumnDef<Row>) =>
+    c.pinnable === false
+      ? "none"
+      : state.pinned.start.includes(c.id)
+        ? "start"
+        : state.pinned.end.includes(c.id)
+          ? "end"
+          : "none";
+  return [
+    ...shown.filter((c) => at(c) === "start"),
+    ...shown.filter((c) => at(c) === "none"),
+    ...shown.filter((c) => at(c) === "end"),
+  ];
 }
 
 /** Moves a column one place within the full order (keyboard alternative to dragging). */
@@ -130,4 +150,48 @@ export function normalizeSort(value: unknown): SortLevel[] {
         ((l as SortLevel).direction === "ascending" || (l as SortLevel).direction === "descending")
     )
     .slice(0, MAX_SORT_LEVELS);
+}
+
+/** A pinned column's place: which edge it sticks to and how far from it, in px. */
+export type PinPlace = { side: "start" | "end"; offset: number; edge: boolean };
+
+/**
+ * Where each pinned column sticks: its distance from the table's edge is the width of the pinned
+ * columns before it (and the selection column at the start). `edge` marks the innermost one,
+ * which casts the shadow over what scrolls under it.
+ */
+export function pinPlaces<Row>(
+  columns: ColumnDef<Row>[],
+  state: TableState,
+  leading: number
+): Map<string, PinPlace> {
+  const places = new Map<string, PinPlace>();
+  const width = (c: ColumnDef<Row>) => state.widths[c.id] ?? c.width ?? 180;
+  const start = columns.filter((c) => c.pinnable !== false && state.pinned.start.includes(c.id));
+  const end = columns.filter((c) => c.pinnable !== false && state.pinned.end.includes(c.id));
+  let offset = leading;
+  start.forEach((c, i) => {
+    places.set(c.id, { side: "start", offset, edge: i === start.length - 1 });
+    offset += width(c);
+  });
+  offset = 0;
+  [...end].reverse().forEach((c, i) => {
+    places.set(c.id, { side: "end", offset, edge: i === end.length - 1 });
+    offset += width(c);
+  });
+  return places;
+}
+
+/** Pins a column to an edge (moving it from the other), or unpins it. */
+export function pinColumn(
+  pinned: TableState["pinned"],
+  id: string,
+  side: "start" | "end" | null
+): TableState["pinned"] {
+  const start = pinned.start.filter((x) => x !== id);
+  const end = pinned.end.filter((x) => x !== id);
+  return {
+    start: side === "start" ? [...start, id] : start,
+    end: side === "end" ? [id, ...end] : end,
+  };
 }

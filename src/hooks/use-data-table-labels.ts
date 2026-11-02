@@ -25,6 +25,12 @@ export function useDataTableLabels(): DataTableLabels {
       selectAllMatching: (count) => t("selectAllMatching", { count: format.number(count) }),
       clearSelection: t("clearSelection"),
       rowsPerPage: t("rowsPerPage"),
+      pinMenu: (column: string) => t("pinMenu", { column }),
+      pinStart: t("pinStart"),
+      pinEnd: t("pinEnd"),
+      unpin: t("unpin"),
+      pinnedStart: t("pinnedStart"),
+      pinnedEnd: t("pinnedEnd"),
       sortLevel: (level: number) => t("sortLevel", { level }),
       range: (from, to, total) =>
         t("range", {

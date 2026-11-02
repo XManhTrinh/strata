@@ -1002,7 +1002,13 @@
     "nextPage": "Next page",
     "loading": "Loading",
     "retry": "Try again",
-    "sortLevel": "Sort level {level}"
+    "sortLevel": "Sort level {level}",
+    "pinMenu": "Pin {column}",
+    "pinStart": "Pin to start",
+    "pinEnd": "Pin to end",
+    "unpin": "Unpin",
+    "pinnedStart": "Pinned to start",
+    "pinnedEnd": "Pinned to end"
   },
   "hierarchy": {
     "title": "Hierarchy",

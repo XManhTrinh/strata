@@ -170,7 +170,14 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
           columns={columns}
           state={state}
           onChange={update}
-          onReset={() => update({ columnOrder: columns.map((c) => c.id), hidden: [], widths: {} })}
+          onReset={() =>
+            update({
+              columnOrder: columns.map((c) => c.id),
+              hidden: [],
+              widths: {},
+              pinned: props.defaultState?.pinned ?? { start: [], end: [] },
+            })
+          }
           onClose={() => setColumnsOpen(false)}
           labels={labels}
         />

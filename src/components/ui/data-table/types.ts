@@ -21,6 +21,8 @@ export type ColumnDef<Row> = {
   grow?: boolean;
   sortable?: boolean;
   hideable?: boolean;
+  /** Whether people may pin it to the start or end. @default true */
+  pinnable?: boolean;
   /** The row header (usually the name), announced with each row. */
   isRowHeader?: boolean;
 };
@@ -32,6 +34,8 @@ export type TableState = {
   columnOrder: string[];
   hidden: string[];
   widths: Record<string, number>;
+  /** Columns kept in view while the rest scroll sideways, at the start and at the end. */
+  pinned: { start: string[]; end: string[] };
   /** Sort levels in order (at most three); empty for the rows as given. */
   sort: SortLevel[];
   search: string;
@@ -48,6 +52,12 @@ export type DataTableLabels = {
   showColumn: (column: string) => string;
   moveUp: (column: string) => string;
   moveDown: (column: string) => string;
+  pinMenu: (column: string) => string;
+  pinStart: string;
+  pinEnd: string;
+  unpin: string;
+  pinnedStart: string;
+  pinnedEnd: string;
   reset: string;
   done: string;
   selectAll: string;
