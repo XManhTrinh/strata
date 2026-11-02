@@ -176,7 +176,7 @@ export function MonthCalendar({
                     {more > 0 && (
                       <a
                         href={teamHref(day)}
-                        className="text-label-small text-primary absolute start-2 bottom-1 z-20 hover:underline"
+                        className="text-label-small text-primary absolute start-1 bottom-0 z-20 inline-flex min-h-6 items-center px-1 hover:underline"
                       >
                         {t("more", { count: more })}
                       </a>

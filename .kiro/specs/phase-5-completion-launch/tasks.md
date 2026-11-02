@@ -13,7 +13,7 @@ Design and decisions: `design.md` (approved 2026-11-02). Resend and the domain c
 - [x] 4. Notification emails against Mailpit: instant and daily summary per preference, approval
       reminders, the every-minute job with a secret (sends once an email provider is set)
 - [x] 5. Help for each module and legal pages (privacy, terms, DPA, sub-processors)
-- [ ] 6. Accessibility audit of every screen at three widths; fixes
+- [x] 6. Accessibility audit of every screen at three widths; fixes
 - [ ] 7. Security review of every policy and RPC; dependency audit
 - [ ] 8. Monitoring (Sentry, off until a DSN is set), backups and point-in-time recovery, runbook
 - [ ] 9. Domain, Resend (app and Auth email), production project, launch checklist; the

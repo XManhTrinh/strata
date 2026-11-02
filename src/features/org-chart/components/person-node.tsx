@@ -71,7 +71,7 @@ export function PersonCard({ data, handles = false }: { data: PersonNodeData; ha
             name: person.name,
             count: person.directReports,
           })}
-          className="nodrag bg-secondary-container text-on-secondary-container text-label-medium absolute -bottom-3 left-1/2 flex h-6 min-w-10 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full px-2"
+          className="nodrag bg-secondary-container text-on-secondary-container text-label-medium absolute -bottom-3.5 left-1/2 flex h-7 min-w-11 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full px-2"
         >
           {open ? <Icon name="expand_less" size={18} /> : person.directReports}
         </button>

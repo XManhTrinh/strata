@@ -25,4 +25,13 @@ Approved 2026-11-02 (decisions: `docs/product-decisions.md` sections 12, 13 and 
   pg_cron calls `/api/jobs/notification-emails` every minute through `pg_net` with the secret
   (Vault `app_url` and `jobs_secret`; `JOBS_SECRET` in the app); the route sends with React Email and does nothing where no email provider is set.
 
+- **Accessibility audit (2026-11-02):** axe (WCAG 2.2 AA) on every screen at 390, 834 and
+  1440 px, with the demo data (10k people) and with a new workspace. Found and fixed: the
+  calendar's "+N more" link and the org chart's reports button were under 24 px; seven audited
+  tables had no name in the audit log. `e2e/accessibility.spec.ts` now sweeps every screen at
+  each width in CI, and pgTAP `035` keeps the audit log's table names in step with the
+  triggers. Known: on the pannable org chart a card can sit under the zoom buttons until it is
+  moved; dialogs are checked in each feature's own e2e. A manual screen reader pass (VoiceOver,
+  NVDA) is still worth doing before launch.
+
 Full design is written when the phase starts.
