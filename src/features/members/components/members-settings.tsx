@@ -77,7 +77,7 @@ export function MembersSettings({
   }
 
   return (
-    <section className="flex flex-col gap-8" aria-labelledby="members-title">
+    <section className="max-w-form flex flex-col gap-8" aria-labelledby="members-title">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h2 id="members-title" className="text-headline-small text-on-surface">
           {t("title")}
@@ -127,6 +127,7 @@ export function MembersSettings({
                         icon={<Icon name="more_vert" />}
                       />
                       <Menu
+                        placement="bottom-end"
                         aria-label={t("actions", { name: member.fullName })}
                         onAction={(key) => {
                           if (key === "roles") setRolesFor(member);

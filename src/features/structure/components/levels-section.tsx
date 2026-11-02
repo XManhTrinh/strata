@@ -71,6 +71,7 @@ export function LevelsSection({ levels, units }: { levels: OrgLevel[]; units: Or
                       icon={<Icon name="more_vert" />}
                     />
                     <Menu
+                      placement="bottom-end"
                       aria-label={t("actions", { name: level.name })}
                       onAction={(key) => onAction(level, index, String(key))}
                     >

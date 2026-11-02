@@ -19,7 +19,7 @@ export function ItemMenu({
   return (
     <MenuTrigger>
       <IconButton variant="standard" aria-label={label} icon={<Icon name="more_vert" />} />
-      <Menu aria-label={label} onAction={(key) => onAction(String(key))}>
+      <Menu placement="bottom-end" aria-label={label} onAction={(key) => onAction(String(key))}>
         {shown.map((action) => (
           <MenuItem key={action.key} leadingIcon={<Icon name={action.icon} />}>
             {action.label}

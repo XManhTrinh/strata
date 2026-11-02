@@ -180,6 +180,7 @@ export function NotificationBell() {
               icon={<Icon name="more_vert" />}
             />
             <Menu
+              placement="bottom-end"
               aria-label={t("more")}
               onAction={(key) => {
                 if (key === "read") void markAllRead();

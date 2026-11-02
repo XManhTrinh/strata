@@ -42,7 +42,11 @@ export function UserMenu() {
           <Avatar name={user.fullName} src={user.avatarUrl ?? undefined} decorative size="sm" />
         }
       />
-      <Menu aria-label={t("label")} onAction={(key) => onAction(String(key))}>
+      <Menu
+        placement="bottom-end"
+        aria-label={t("label")}
+        onAction={(key) => onAction(String(key))}
+      >
         <MenuGroup>
           <MenuItem key="profile" leadingIcon={<Icon name="person" />}>
             {t("profile")}

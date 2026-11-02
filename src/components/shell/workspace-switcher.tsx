@@ -34,6 +34,7 @@ export function WorkspaceSwitcher() {
         icon={elsewhere > 0 ? <BadgedBox badge={<Badge />}>{icon}</BadgedBox> : icon}
       />
       <Menu
+        placement="bottom-end"
         aria-label={t("label")}
         onAction={(key) => router.push(key === CREATE_KEY ? "/onboarding" : `/w/${String(key)}`)}
       >

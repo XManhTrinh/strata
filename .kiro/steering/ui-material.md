@@ -56,6 +56,9 @@ fileMatchPattern: "src/**/*.tsx"
 - Dropdowns: a Windmorph `Select`. When its options come from the workspace's data (units,
   positions, roles, fields, scenarios, a file's columns) it gets `searchable={options.length > 7}`;
   short fixed lists stay plain. Searching the server as you type (people) uses `Autocomplete`.
+- Menus open from their button into the page: a button at the end of a row, toolbar or header
+  (⋮ actions, views, account) uses `placement="bottom-end"`, so the menu lines up with the
+  button's end edge and grows toward the content, not off the screen.
 
 ## Behaviour
 

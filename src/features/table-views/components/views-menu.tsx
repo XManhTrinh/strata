@@ -103,7 +103,11 @@ export function ViewsMenu({
         <Button variant="outlined" leadingIcon={<Icon name="view_list" />}>
           {label}
         </Button>
-        <Menu aria-label={t("button")} onAction={(key) => onAction(String(key))}>
+        <Menu
+          placement="bottom-end"
+          aria-label={t("button")}
+          onAction={(key) => onAction(String(key))}
+        >
           <MenuGroup>
             <MenuItem key="all" leadingIcon={<Icon name={currentId ? "group" : "check"} />}>
               {t("allPeople")}
