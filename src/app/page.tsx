@@ -1,10 +1,8 @@
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Button } from "@windmorph/react";
-import { Link } from "@windmorph/react-pro";
+import { LandingPage } from "@/features/home/landing-page";
 import { createClient } from "@/lib/supabase/server";
 
-/** Signed in: the last workspace (or onboarding). Signed out: a short landing page. */
+/** Signed in: the last workspace (or onboarding). Signed out: the homepage. */
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
@@ -26,28 +24,5 @@ export default async function HomePage() {
     redirect(target ? `/w/${target.slug}` : "/onboarding");
   }
 
-  const t = await getTranslations("home");
-  const tDocs = await getTranslations("docs.nav");
-
-  return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-display-medium text-on-surface">{t("title")}</h1>
-      <p className="text-body-large text-on-surface-variant max-w-prose text-center">
-        {t("subtitle")}
-      </p>
-      <div className="flex flex-wrap justify-center gap-3">
-        <Button variant="filled" href="/sign-up">
-          {t("getStarted")}
-        </Button>
-        <Button variant="outlined" href="/sign-in">
-          {t("signIn")}
-        </Button>
-      </div>
-      <nav aria-label={tDocs("label")} className="flex gap-4">
-        <Link href="/help">{tDocs("help")}</Link>
-        <Link href="/legal/privacy">{tDocs("privacy")}</Link>
-        <Link href="/legal/terms">{tDocs("terms")}</Link>
-      </nav>
-    </main>
-  );
+  return <LandingPage />;
 }

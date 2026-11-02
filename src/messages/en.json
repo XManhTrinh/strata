@@ -5,9 +5,57 @@
   },
   "home": {
     "title": "Strata",
-    "subtitle": "People, time and capacity planning for organizations of every size.",
+    "headline": "People, time off and planning, in one place",
+    "subtitle": "Strata keeps your organization's people, leave and capacity plans together, for a team of five or a company of a hundred thousand.",
     "getStarted": "Get started",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "seeFeatures": "See what's inside",
+    "featuresTitle": "Everything a growing organization needs",
+    "featuresIntro": "Start with what you need today; switch on more as you grow.",
+    "features": {
+      "people": {
+        "title": "People",
+        "body": "One directory with jobs, managers, pay history and your own fields, dated so history stays right. Import thousands from a spreadsheet."
+      },
+      "time": {
+        "title": "Time off",
+        "body": "Book leave from a calendar, see balances before you ask, and approve from one list. Holidays and working time per country."
+      },
+      "orgChart": {
+        "title": "Org chart",
+        "body": "Reporting lines and units that stay readable at any size, from one team to many divisions."
+      },
+      "planning": {
+        "title": "Capacity and cost planning",
+        "body": "Plan people and open roles over time, cost them with rate cards, and compare scenarios before you commit."
+      },
+      "roles": {
+        "title": "Roles and permissions",
+        "body": "Decide who sees and changes what: themselves, their team, their units or everyone."
+      },
+      "privacy": {
+        "title": "Private by design",
+        "body": "Hosted in the EU. Export, erase and retention rules built in, and an audit log of every change."
+      }
+    },
+    "sizesTitle": "One product for every size",
+    "sizes": {
+      "personal": {
+        "title": "Personal",
+        "body": "Your own calendar and leave."
+      },
+      "team": {
+        "title": "Team",
+        "body": "A manager and their team, with approvals and a shared calendar."
+      },
+      "company": {
+        "title": "Company",
+        "body": "The whole organization, its structure, roles and plans."
+      }
+    },
+    "ctaTitle": "Ready to try it?",
+    "ctaBody": "Create a workspace in a minute. Invite your team when you're ready.",
+    "footer": "© {year} Strata"
   },
   "states": {
     "loading": "Loading",
@@ -1989,7 +2037,8 @@
       "help": "Help",
       "privacy": "Privacy",
       "terms": "Terms",
-      "label": "Help and legal"
+      "label": "Help and legal",
+      "subProcessors": "Sub-processors"
     },
     "help": {
       "title": "Help",

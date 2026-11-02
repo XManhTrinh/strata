@@ -3,8 +3,10 @@ import { expect, test } from "@playwright/test";
 
 test("home page renders and has no accessibility violations", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "Strata" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Get started" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "People, time off and planning, in one place" })
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Get started" }).first()).toBeVisible();
 
   await expectNoA11yViolations(page);
 });
