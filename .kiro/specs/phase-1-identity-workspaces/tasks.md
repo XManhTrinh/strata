@@ -53,12 +53,13 @@ settings, and notifications. Every migration lands with its pgTAP tests.
   - [x] 5.2 pgTAP: entries written; no updates or deletes possible
     - _Requirements: 10.1, 10.2_
 
-- [ ] 6. Notifications
+- [x] 6. Notifications
   - [x] 6.1 Migration: `notifications`, `notification_preferences`, email queue trigger,
         Realtime publication
         (email queue trigger moves to 6.2)
     - _Requirements: 11.1, 11.2, 11.3_
-  - [ ] 6.2 Edge Function: email worker (Resend + React Email templates) and daily digest schedule
+  - [x] 6.2 Edge Function: email worker (Resend + React Email templates) and daily digest schedule
+        (done in Phase 5 as `/api/jobs/notification-emails`, called by pg_cron with a secret)
         (waiting for a domain and Resend; preferences are stored already)
     - _Requirements: 11.2, 11.3, 11.5_
   - [x] 6.3 pgTAP: users see only their own notifications

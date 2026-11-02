@@ -38,7 +38,7 @@ environments. Each task leaves the repository building.
     - _Requirements: 3.2_
   - [x] 3.3 `Icon` (Material Symbols Rounded)
     - _Requirements: 3.3_
-  - [ ] 3.4 Snackbar host + `useSnackbar` and the motion helper, with the Phase 1 shell
+  - [x] 3.4 Snackbar host + `useSnackbar` and the motion helper, with the Phase 1 shell
     - _Requirements: 3.4_
   - [x] 3.5 Placeholder home page using Windmorph components only
     - _Requirements: 3.5_
@@ -101,7 +101,8 @@ environments. Each task leaves the repository building.
         repository root with server code in Dublin (`dub1`) and staging variables for Production and
         Preview. The production Vercel project is created later
     - _Requirements: 9.2_
-  - [ ] 9.3 Sentry (EU) for browser, server and Edge Functions, with personal data scrubbing
+  - [x] 9.3 Sentry (EU) for browser, server and Edge Functions, with personal data scrubbing
+        (done in Phase 5: browser, server and edge; there are no Edge Functions; off until a DSN is set)
         (wired once the Sentry project exists)
     - _Requirements: 9.3_
 
