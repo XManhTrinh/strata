@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { Button, Select, SelectItem, Tab, Tabs } from "@windmorph/react";
+import { Button, ButtonGroup, Tab, Tabs } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { type CalendarView, shiftDate, viewRange } from "../calendar-range";
 import type {
@@ -130,18 +130,24 @@ export function TimeOffPage(props: {
         <div className="large:grid large:grid-cols-[minmax(0,1fr)_18rem] large:items-start large:gap-6">
           <TeamCalendar
             controls={
-              <Select
-                className="w-40"
-                label={t("views.label")}
-                value={props.view}
-                onChange={(key) =>
-                  key != null && router.push(href("calendar", key as CalendarView))
-                }
+              <ButtonGroup
+                variant="connected"
+                // A connected group fills its container by default; here it sits beside other controls.
+                className="w-auto"
+                selectionMode="single"
+                aria-label={t("views.label")}
+                selectedKeys={[props.view]}
+                onSelectionChange={(keys) => {
+                  const [key] = keys;
+                  if (key) router.push(href("calendar", key as CalendarView));
+                }}
               >
                 {(["calendar", "month", "week", "list"] as const).map((v) => (
-                  <SelectItem key={v}>{t(`views.${v}`)}</SelectItem>
+                  <Button key={v} toggle value={v}>
+                    {t(`views.${v}`)}
+                  </Button>
                 ))}
-              </Select>
+              </ButtonGroup>
             }
             todayHref={href("calendar", props.view, new Date().toISOString().slice(0, 10))}
             view={props.view}

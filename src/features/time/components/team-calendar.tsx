@@ -36,7 +36,7 @@ export function TeamCalendar({
   nextHref: string;
   /** The same view around today. */
   todayHref: string;
-  /** The page's own controls (the view picker), first in the header row. */
+  /** The page's view switcher, at the end of the header row with the other display options. */
   controls?: ReactNode;
   /** Books chosen days from the calendar, when the user may book. */
   onBook?: (start: string, end: string) => void;
@@ -78,9 +78,8 @@ export function TeamCalendar({
 
   return (
     <section aria-labelledby="calendar-title" className="flex flex-col gap-3">
-      {/* One row: the view, where you are and how to move; the weekends switch on the right. */}
+      {/* One row: where you are and how to move on the left; how it looks on the right. */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {controls}
         <div className="flex items-center gap-1">
           <IconButton
             variant="standard"
@@ -101,15 +100,19 @@ export function TeamCalendar({
         <Button variant="outlined" href={todayHref}>
           {t("calendar.today")}
         </Button>
-        {view === "calendar" && (
-          <Button
-            variant={weekends ? "tonal" : "outlined"}
-            className="medium:inline-flex ms-auto hidden"
-            onPress={() => setWeekends((w) => !w)}
-          >
-            {t(weekends ? "calendar.hideWeekends" : "calendar.showWeekends")}
-          </Button>
-        )}
+        <div className="ms-auto flex items-center gap-2">
+          {/* The views first, so they stay put when the Calendar view adds its weekends switch. */}
+          {controls}
+          {view === "calendar" && (
+            <Button
+              variant={weekends ? "tonal" : "outlined"}
+              className="medium:inline-flex hidden"
+              onPress={() => setWeekends((w) => !w)}
+            >
+              {t(weekends ? "calendar.hideWeekends" : "calendar.showWeekends")}
+            </Button>
+          )}
+        </div>
       </div>
 
       {view === "calendar" ? (
