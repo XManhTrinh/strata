@@ -45,6 +45,8 @@ language sql
 stable
 set search_path = ''
 as $$ select coalesce(current_setting('app.deleting_workspace', true), '') = 'on' $$;
+-- Guards run as the caller, so everyone may ask.
+grant execute on function app.deleting_workspace() to authenticated;
 
 create or replace function app.protect_root_unit()
 returns trigger
