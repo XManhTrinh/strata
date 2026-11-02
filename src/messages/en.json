@@ -183,7 +183,8 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "checkEmailTitle": "Check your email",
-      "checkEmailBody": "We sent a confirmation link to {email}. Open it to finish creating your account."
+      "checkEmailBody": "We sent a confirmation link to {email}. Open it to finish creating your account.",
+      "agree": "By creating an account you accept the <terms>terms</terms> and the <privacy>privacy notice</privacy>."
     },
     "forgot": {
       "title": "Reset your password",
@@ -265,7 +266,8 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "help": "Help"
     }
   },
   "dashboard": {
@@ -1968,5 +1970,420 @@
     "tableLabel": "{scenario} totals",
     "noScenarioTitle": "No scenarios yet",
     "noScenario": "Create a scenario to see its totals."
+  },
+  "docs": {
+    "nav": {
+      "home": "Strata",
+      "help": "Help",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "label": "Help and legal"
+    },
+    "help": {
+      "title": "Help",
+      "intro": "How to use each part of Strata.",
+      "topics": {
+        "getting-started": {
+          "title": "Getting started",
+          "summary": "Create a workspace, invite people and find your way around.",
+          "sections": [
+            {
+              "heading": "Workspaces",
+              "body": [
+                "A workspace holds one organization: its people, structure, time off and plans. Choose Personal, Team or Company when you create it; the choice only sets sensible defaults, and everything stays editable in Settings.",
+                "You can belong to several workspaces. Switch between them from the workspace button at the top of the navigation."
+              ]
+            },
+            {
+              "heading": "Inviting people",
+              "body": [
+                "Open Settings, then Members, and choose Invite people. Each person gets an email with a link that is valid for 7 days, and joins with the role you picked.",
+                "People don't need an account to be listed in the directory: add them in People and invite them later, or never."
+              ]
+            },
+            {
+              "heading": "Finding your way",
+              "body": [
+                "Home shows what matters to you: your time off and balances, approvals waiting for you, and, if you run the workspace, its headcount and plans.",
+                "The bell shows notifications. Choose how you get them by email in your account, under Notifications."
+              ]
+            }
+          ]
+        },
+        "people": {
+          "title": "People",
+          "summary": "The directory, profiles, imports and custom fields.",
+          "sections": [
+            {
+              "heading": "The directory",
+              "body": [
+                "People lists everyone you may see. Search, filter and sort the table, choose its columns, and save the result as a view for later.",
+                "What you see depends on your role: some roles see everyone, others only their team or themselves. Sensitive fields such as pay show only to roles allowed to see them."
+              ]
+            },
+            {
+              "heading": "Profiles",
+              "body": [
+                "A profile holds a person's job, unit, manager, dates, pay history and custom fields. Changes can take effect from a date, so history stays correct.",
+                "Use the Actions menu on a profile for less common tasks, such as downloading or erasing a person's data."
+              ]
+            },
+            {
+              "heading": "Importing",
+              "body": [
+                "Import adds or updates many people from a CSV or Excel file. You map columns to fields, review every change before it is applied, and can undo an import afterwards."
+              ]
+            },
+            {
+              "heading": "Custom fields",
+              "body": [
+                "Settings, Custom fields adds your own fields (text, numbers, dates, choices). Mark a field as sensitive to show it only to roles allowed to see sensitive data."
+              ]
+            }
+          ]
+        },
+        "time-off": {
+          "title": "Time off",
+          "summary": "Booking, approvals, balances and calendars.",
+          "sections": [
+            {
+              "heading": "Booking time off",
+              "body": [
+                "Choose Book time off, or select days in the calendar. Strata counts working days from each person's working time and public holidays, and shows the balance left before you send the request."
+              ]
+            },
+            {
+              "heading": "Approvals",
+              "body": [
+                "Each type of time off says who approves it: the line manager, a person, a role or nobody. Approvers see requests under Approvals and get a notification, and a reminder if a request waits two working days."
+              ]
+            },
+            {
+              "heading": "Allowances",
+              "body": [
+                "Allowances set how many days each person gets per leave year, with carry-over and accrual rules. Managers with the permission can adjust a balance and give a reason."
+              ]
+            },
+            {
+              "heading": "Calendars",
+              "body": [
+                "The calendar shows who is away. Subscribe to it from your calendar app with a private link; you can revoke the link at any time."
+              ]
+            }
+          ]
+        },
+        "org-chart": {
+          "title": "Org chart",
+          "summary": "Reporting lines and units.",
+          "sections": [
+            {
+              "heading": "Reading the chart",
+              "body": [
+                "The org chart follows managers. Large teams are grouped so the chart stays readable; open a group to see everyone in it.",
+                "Switch to the unit view to see the hierarchy of divisions, departments and teams set up in Settings."
+              ]
+            },
+            {
+              "heading": "Changing the structure",
+              "body": [
+                "Managers and units are set on each profile, from a date. Units, their levels and their order are managed in Settings, Hierarchy."
+              ]
+            }
+          ]
+        },
+        "planning": {
+          "title": "Planning",
+          "summary": "Capacity and cost plans, rate cards and scenarios.",
+          "sections": [
+            {
+              "heading": "Scenarios",
+              "body": [
+                "A scenario is a plan: people and open positions, their allocation over time, and what they cost. Copy the live plan to try changes without affecting it.",
+                "When a scenario is ready, submit it for approval. Once approved, it becomes the live plan."
+              ]
+            },
+            {
+              "heading": "Rate cards",
+              "body": [
+                "Rate cards turn people into costs: a day rate or salary per level, location or any field you choose. The first card that matches a person applies."
+              ]
+            },
+            {
+              "heading": "Totals and comparing",
+              "body": [
+                "Totals show capacity and cost by period, team or custom field. Compare puts two scenarios side by side, so you can see what a change does."
+              ]
+            },
+            {
+              "heading": "Settings",
+              "body": [
+                "Settings, Planning sets the period (months or quarters), the horizon, the unit for allocation and what happens when someone is over-allocated."
+              ]
+            }
+          ]
+        },
+        "settings": {
+          "title": "Settings and roles",
+          "summary": "Roles, members, structure and workspace rules.",
+          "sections": [
+            {
+              "heading": "Roles",
+              "body": [
+                "A role is a set of permissions, each with a reach: the person themselves, their team, their unit or everyone. Strata starts with roles such as Admin, HR, Manager and Member; change them or add your own.",
+                "Every workspace keeps at least one owner. Owners can do everything and pass ownership on."
+              ]
+            },
+            {
+              "heading": "Members and invitations",
+              "body": [
+                "Members lists who has access to the workspace. Invite people, change their roles, or remove their access; their history stays."
+              ]
+            },
+            {
+              "heading": "Features",
+              "body": [
+                "Switch modules such as Planning on or off for the whole workspace. Switching off hides a module without deleting its data."
+              ]
+            },
+            {
+              "heading": "Audit log",
+              "body": [
+                "The audit log records who changed what and when, for people, pay, roles and settings. It is kept for the period set under Personal data."
+              ]
+            }
+          ]
+        },
+        "your-data": {
+          "title": "Your account and data",
+          "summary": "Your profile, notifications and personal data.",
+          "sections": [
+            {
+              "heading": "Your account",
+              "body": [
+                "Your profile holds your name, photo and time zone. Under Notifications, choose for each kind whether you get an email at once, a daily summary at 08:00, or none."
+              ]
+            },
+            {
+              "heading": "Downloading your data",
+              "body": [
+                "Under Profile, Your data, download everything Strata holds about you in every workspace, as a file."
+              ]
+            },
+            {
+              "heading": "Deleting your account",
+              "body": [
+                "Delete my account removes your sign-in and any workspace only you use. In shared workspaces your history stays, without your account. If you own a workspace others use, make someone else its owner first."
+              ]
+            },
+            {
+              "heading": "For organizations",
+              "body": [
+                "People with the Export and erase personal data permission can download or erase anyone's data. Settings, Personal data sets how long data is kept: leavers are anonymised, private notes cleared and old records removed on the schedule you choose."
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "legal": {
+      "updated": "Last updated {date}",
+      "pages": {
+        "privacy": {
+          "title": "Privacy notice",
+          "summary": "How we handle personal data.",
+          "sections": [
+            {
+              "heading": "Who we are",
+              "body": [
+                "Strata is operated by {company} ({companyCountry}). For any privacy question, write to {email}."
+              ]
+            },
+            {
+              "heading": "Two roles",
+              "body": [
+                "For the data organizations put into Strata (their people, time off, plans), the organization is the controller and we process it on their behalf, under our data processing agreement. Ask your organization about that data first.",
+                "For your account (your sign-in, email and settings) and for running our service, we are the controller."
+              ]
+            },
+            {
+              "heading": "What we collect",
+              "body": [
+                "Account details: name, email, password (stored hashed) or Google sign-in, photo, time zone and preferences.",
+                "Usage and technical data needed to run and secure the service: sign-in times, IP addresses in server logs, and error reports."
+              ]
+            },
+            {
+              "heading": "Why, and on what basis",
+              "body": [
+                "To provide the service you signed up for (contract), to keep it secure and fix faults (legitimate interests), and to meet legal obligations such as accounting."
+              ]
+            },
+            {
+              "heading": "Where it is stored",
+              "body": [
+                "Data is stored in the European Union (Ireland). The companies that help us run Strata are listed on the sub-processors page."
+              ]
+            },
+            {
+              "heading": "How long",
+              "body": [
+                "We keep account data while your account exists. Organizations set how long their data is kept. Server logs are kept for a short time; backups roll over within weeks."
+              ]
+            },
+            {
+              "heading": "Your rights",
+              "body": [
+                "You can access, correct, download or delete your data, object to or restrict processing, and complain to a supervisory authority (in Romania, ANSPDCP, or the authority where you live). Most of this you can do yourself in your account; otherwise write to us."
+              ]
+            },
+            {
+              "heading": "Cookies",
+              "body": [
+                "Strata uses only the cookies it needs to keep you signed in and remember your preferences. No advertising or tracking cookies."
+              ]
+            }
+          ]
+        },
+        "terms": {
+          "title": "Terms of service",
+          "summary": "The agreement for using Strata.",
+          "sections": [
+            {
+              "heading": "The agreement",
+              "body": [
+                "These terms are between you (or the organization you act for) and {company}. By creating an account or a workspace you accept them."
+              ]
+            },
+            {
+              "heading": "Your account",
+              "body": [
+                "Keep your sign-in safe and tell us at {email} if you think someone else is using it. You are responsible for what happens in workspaces you own."
+              ]
+            },
+            {
+              "heading": "Your data",
+              "body": [
+                "Your organization owns the data it puts into Strata. We process it only to provide the service, as set out in the data processing agreement. You can export it at any time."
+              ]
+            },
+            {
+              "heading": "Acceptable use",
+              "body": [
+                "Don't use Strata to break the law, to store data you have no right to process, or to attack, overload or probe the service."
+              ]
+            },
+            {
+              "heading": "Availability and changes",
+              "body": [
+                "We work to keep Strata available and secure, but cannot promise it will never be interrupted. We may change features; we will tell workspace owners in advance about changes that reduce what they rely on."
+              ]
+            },
+            {
+              "heading": "Liability",
+              "body": [
+                "To the extent the law allows, we are not liable for indirect losses, and our total liability is limited to what you paid us in the 12 months before the claim. Nothing limits liability that cannot be limited by law."
+              ]
+            },
+            {
+              "heading": "Ending",
+              "body": [
+                "You can delete your account or workspace at any time. We may suspend accounts that break these terms."
+              ]
+            },
+            {
+              "heading": "Law",
+              "body": [
+                "These terms are governed by the law of {companyCountry}. Consumers keep the protection of the law where they live."
+              ]
+            }
+          ]
+        },
+        "dpa": {
+          "title": "Data processing agreement",
+          "summary": "Our commitments when we process your organization's data (GDPR article 28).",
+          "sections": [
+            {
+              "heading": "Scope",
+              "body": [
+                "This agreement forms part of the terms. It applies when {company} processes personal data on behalf of an organization (the controller) using Strata."
+              ]
+            },
+            {
+              "heading": "Instructions",
+              "body": [
+                "We process personal data only on the controller's documented instructions, which are the terms, this agreement and the controller's use of Strata, unless the law requires otherwise."
+              ]
+            },
+            {
+              "heading": "Confidentiality and security",
+              "body": [
+                "People who can access the data are bound by confidentiality. We apply appropriate technical and organizational measures, including encryption in transit and at rest, access control enforced in the database for every request, least-privilege access for staff, backups and monitoring."
+              ]
+            },
+            {
+              "heading": "Sub-processors",
+              "body": [
+                "The controller authorizes the sub-processors listed on the sub-processors page. We give notice of new sub-processors in advance, and the controller may object. We impose the same data protection obligations on them."
+              ]
+            },
+            {
+              "heading": "Assisting the controller",
+              "body": [
+                "Strata gives the controller tools to answer data subject requests (export, correction, erasure, retention). We help with security, breach notification, impact assessments and consultations as article 28 requires."
+              ]
+            },
+            {
+              "heading": "Breaches",
+              "body": [
+                "We notify the controller without undue delay after becoming aware of a personal data breach, with the information we have."
+              ]
+            },
+            {
+              "heading": "Transfers",
+              "body": [
+                "Data is hosted in the European Union. Any transfer outside the EEA is covered by an adequacy decision or the EU standard contractual clauses."
+              ]
+            },
+            {
+              "heading": "End of service",
+              "body": [
+                "When the service ends, the controller can export its data; we then delete it, including from backups as they roll over, unless the law requires us to keep it."
+              ]
+            },
+            {
+              "heading": "Audits",
+              "body": [
+                "We make available the information needed to show compliance, and allow audits by the controller or an auditor it appoints, with reasonable notice."
+              ]
+            }
+          ]
+        },
+        "sub-processors": {
+          "title": "Sub-processors",
+          "summary": "Companies that process personal data for us to run Strata.",
+          "sections": [
+            {
+              "heading": "Supabase",
+              "body": ["Database, sign-in and file storage. Data stored in the EU (Ireland)."]
+            },
+            {
+              "heading": "Vercel",
+              "body": [
+                "Hosting of the application. Requests are processed in the EU (Ireland); static files are served from a global network."
+              ]
+            },
+            {
+              "heading": "Resend",
+              "body": ["Sending emails such as invitations and notifications."]
+            },
+            {
+              "heading": "Sentry",
+              "body": ["Error reports, when enabled, stored in the EU."]
+            }
+          ]
+        }
+      }
+    },
+    "backToHelp": "All help topics"
   }
 }

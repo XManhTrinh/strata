@@ -90,6 +90,13 @@ export function SignUpForm({ next }: { next?: string }) {
 
       <GoogleButton next={next ?? "/"} mode="signUp" />
 
+      <p className="text-body-small text-on-surface-variant text-center">
+        {t.rich("signUp.agree", {
+          terms: (chunks) => <Link href="/legal/terms">{chunks}</Link>,
+          privacy: (chunks) => <Link href="/legal/privacy">{chunks}</Link>,
+        })}
+      </p>
+
       <p className="text-body-medium text-on-surface-variant flex flex-wrap justify-center gap-x-1">
         <span>{t("signUp.haveAccount")}</span>
         <Link href={next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in"}>

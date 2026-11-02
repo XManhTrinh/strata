@@ -29,6 +29,7 @@ export function UserMenu() {
   function onAction(key: string) {
     if (key === "profile") router.push("/account/profile");
     else if (key === "notifications") router.push("/account/notifications");
+    else if (key === "help") router.push("/help");
     else if (key === "sign-out") startTransition(() => signOut());
   }
 
@@ -76,6 +77,9 @@ export function UserMenu() {
           </SubmenuTrigger>
         </MenuGroup>
         <MenuGroup>
+          <MenuItem key="help" leadingIcon={<Icon name="help" />}>
+            {t("help")}
+          </MenuItem>
           <MenuItem key="sign-out" leadingIcon={<Icon name="logout" />}>
             {t("signOut")}
           </MenuItem>

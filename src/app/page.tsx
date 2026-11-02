@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@windmorph/react";
+import { Link } from "@windmorph/react-pro";
 import { createClient } from "@/lib/supabase/server";
 
 /** Signed in: the last workspace (or onboarding). Signed out: a short landing page. */
@@ -26,6 +27,7 @@ export default async function HomePage() {
   }
 
   const t = await getTranslations("home");
+  const tDocs = await getTranslations("docs.nav");
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 p-6">
@@ -41,6 +43,11 @@ export default async function HomePage() {
           {t("signIn")}
         </Button>
       </div>
+      <nav aria-label={tDocs("label")} className="flex gap-4">
+        <Link href="/help">{tDocs("help")}</Link>
+        <Link href="/legal/privacy">{tDocs("privacy")}</Link>
+        <Link href="/legal/terms">{tDocs("terms")}</Link>
+      </nav>
     </main>
   );
 }
