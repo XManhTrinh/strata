@@ -63,7 +63,8 @@ export function OrgChartPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
+      {/* pt-2: room for the outlined fields' labels under the sticky page header. */}
+      <div className="flex flex-wrap items-center gap-3 pt-2">
         <Tabs
           variant="secondary"
           align="start"
@@ -78,6 +79,8 @@ export function OrgChartPage({
           <IsoDateField
             name="asOf"
             label={t("asOf")}
+            // A filter: the date already shows its format, and a hint would make it taller.
+            supportingText=""
             defaultValue={query.asOf}
             onChange={(date) => date && router.push(href({ asOf: date }))}
           />
@@ -93,22 +96,24 @@ export function OrgChartPage({
                 onSelect={(person) => router.push(href({ personId: person.id }))}
               />
             </div>
-            {meId && (
+            <div className="ms-auto flex items-center gap-2">
+              {meId && (
+                <Button
+                  variant="text"
+                  leadingIcon={<Icon name="person" />}
+                  href={href({ personId: meId })}
+                >
+                  {t("me")}
+                </Button>
+              )}
               <Button
                 variant="text"
-                leadingIcon={<Icon name="person" />}
-                href={href({ personId: meId })}
+                leadingIcon={<Icon name="vertical_align_top" />}
+                href={href({ personId: null })}
               >
-                {t("me")}
+                {t("top")}
               </Button>
-            )}
-            <Button
-              variant="text"
-              leadingIcon={<Icon name="vertical_align_top" />}
-              href={href({ personId: null })}
-            >
-              {t("top")}
-            </Button>
+            </div>
           </>
         )}
       </div>

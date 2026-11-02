@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { Badge, BadgedBox, Button, IconButton, List, ListItem, SideSheet } from "@windmorph/react";
 import { EmptyState } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
@@ -21,6 +21,8 @@ const LIMIT = 30;
 export function NotificationBell() {
   const t = useTranslations("notifications");
   const format = useFormatter();
+  // "5 minutes ago" moves on while the sheet is open.
+  const now = useNow({ updateInterval: 60_000 });
   const { user } = useWorkspace();
   const [items, setItems] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
@@ -92,14 +94,15 @@ export function NotificationBell() {
         onOpenChange={setOpen}
         title={t("title")}
         labels={{ close: t("close") }}
-        actions={
-          unread > 0 ? (
+      >
+        {unread > 0 && (
+          // In the list, not the sheet's header, where it would crowd the title.
+          <div className="flex justify-end pb-2">
             <Button variant="text" onPress={() => void markAllRead()}>
               {t("markAllRead")}
             </Button>
-          ) : undefined
-        }
-      >
+          </div>
+        )}
         {items.length === 0 ? (
           <EmptyState titleAs="h3" icon={<Icon name="notifications_off" />} title={t("empty")} />
         ) : (
@@ -111,7 +114,7 @@ export function NotificationBell() {
                 leading={
                   <Icon name={n.read_at ? "drafts" : "mark_email_unread"} filled={!n.read_at} />
                 }
-                supportingText={format.relativeTime(new Date(n.created_at))}
+                supportingText={format.relativeTime(new Date(n.created_at), now)}
               >
                 {text(n)}
               </ListItem>

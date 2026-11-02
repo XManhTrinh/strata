@@ -197,7 +197,8 @@ export function PeopleDirectory({
       onStateChange={onStateChange}
       loading={pending}
       rowHref={(p) => `/w/${workspace.slug}/people/${p.id}`}
-      filters={
+      filters={<DirectoryFilters params={filters} options={options} onChange={onFilterChange} />}
+      actions={
         <>
           <ViewsMenu
             tableKey="people"
@@ -216,7 +217,6 @@ export function PeopleDirectory({
                   `${pathname}?status=current`
             }
           />
-          <DirectoryFilters params={filters} options={options} onChange={onFilterChange} />
           {canExport && (
             <Button
               variant="text"

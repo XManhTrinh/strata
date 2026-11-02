@@ -6,13 +6,17 @@ import { Icon } from "@/components/ui/icon";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { DataTableLabels, TableState } from "./types";
 
-/** Search, page-specific filters and column settings; replaced by the bulk bar while rows are selected. */
+/**
+ * Search and page-specific filters on the left; the page's actions and column settings on the
+ * right. Replaced by the bulk bar while rows are selected.
+ */
 export function Toolbar({
   state,
   total,
   pageCount,
   serverMode,
   filters,
+  actions,
   bulkActions,
   onSearch,
   onSelectAllMatching,
@@ -25,6 +29,7 @@ export function Toolbar({
   pageCount: number;
   serverMode: boolean;
   filters?: ReactNode;
+  actions?: ReactNode;
   bulkActions?: ReactNode;
   onSearch: (search: string) => void;
   onSelectAllMatching: () => void;
@@ -88,14 +93,18 @@ export function Toolbar({
       {filters && (!phone || filtersOpen) && (
         <div className="medium:contents flex w-full flex-wrap gap-3">{filters}</div>
       )}
-      {!phone && (
-        <IconButton
-          variant="standard"
-          className="ms-auto"
-          aria-label={labels.columns}
-          icon={<Icon name="view_column" />}
-          onPress={onOpenColumns}
-        />
+      {(actions || !phone) && (
+        <div className="ms-auto flex items-center gap-2">
+          {actions}
+          {!phone && (
+            <IconButton
+              variant="standard"
+              aria-label={labels.columns}
+              icon={<Icon name="view_column" />}
+              onPress={onOpenColumns}
+            />
+          )}
+        </div>
       )}
     </div>
   );

@@ -31,6 +31,8 @@ export type DataTableProps<Row> = {
   bulkActions?: (selection: TableState["selection"]) => ReactNode;
   /** Page-specific filters, shown next to the search. */
   filters?: ReactNode;
+  /** Page-specific actions on the table (saved views, export), on the right. */
+  actions?: ReactNode;
   onRowAction?: (row: Row) => void;
   /** Each row as a link (works before the page's script loads, opens in a new tab); "" for none. */
   rowHref?: (row: Row) => string;
@@ -134,6 +136,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
         pageCount={pageRows.length}
         serverMode={mode === "server"}
         filters={props.filters}
+        actions={props.actions}
         bulkActions={props.bulkActions?.(state.selection)}
         onSearch={(search) =>
           update({ search, page: { ...state.page, index: 0 }, ...clearSelection })
