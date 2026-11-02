@@ -549,6 +549,10 @@
       "manage_structure": {
         "name": "Manage structure",
         "description": "Edit hierarchy, positions, career levels, employment types and custom fields."
+      },
+      "personal_data": {
+        "name": "Export and erase personal data",
+        "description": "Download everything about a person, and erase a person."
       }
     },
     "planning": {
