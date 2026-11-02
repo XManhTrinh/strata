@@ -14,6 +14,11 @@ export type ColumnDef<Row> = {
   align?: "start" | "end";
   width?: number;
   minWidth?: number;
+  /**
+   * Text that benefits from room (names, emails): the column shares the table's spare width in
+   * proportion to its width, never going below it. Short values (dates, levels) keep their width.
+   */
+  grow?: boolean;
   sortable?: boolean;
   hideable?: boolean;
   /** The row header (usually the name), announced with each row. */

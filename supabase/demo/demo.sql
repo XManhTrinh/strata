@@ -63,16 +63,32 @@ on conflict do nothing;
 -- Shared helpers ----------------------------------------------------------------------------------
 
 create temporary table demo_names (n integer primary key, first text, last text);
+-- 120 first names by 100 last names: every person up to 12,000 has their own full name. The
+-- first name steps by a number coprime to 120, so neighbours in a list don't share one.
 insert into demo_names
 select n,
-  (array['Ana','Ben','Chloe','Daniel','Elena','Felix','Grace','Hugo','Ivy','Jack','Kira','Leo','Maya','Noah',
-    'Olivia','Paul','Quinn','Rosa','Sam','Tara','Uma','Victor','Wendy','Xavier','Yara','Zane','Linh','Minh',
-    'Huong','Duc','Lan','Tuan','Mai','Khoa','Thao','Priya','Arjun','Sofia','Mateo','Lucia','Omar','Fatima',
-    'Kenji','Aiko','Lars','Ingrid','Diego','Camila','Ethan','Nora'])[1 + (n * 7) % 50],
-  (array['Smith','Nguyen','Tran','Le','Pham','Johnson','Garcia','Martinez','Brown','Davis','Wilson','Anderson',
-    'Thomas','Lee','Kim','Patel','Shah','Rossi','Muller','Silva','Costa','Novak','Kowalski','Ivanova','Sato',
-    'Tanaka','Hoang','Vu','Dang','Bui','Murphy','Kelly','Walsh','Clarke','Lopez','Gonzalez','Perez','Sanchez',
-    'Romero','Okafor'])[1 + (n * 11 + n / 50) % 40]
+  (array[
+    'Ana','Ben','Chloe','Daniel','Elena','Felix','Grace','Hugo','Ivy','Jack','Kira','Leo','Maya',
+    'Noah','Olivia','Paul','Quinn','Rosa','Sam','Tara','Uma','Victor','Wendy','Xavier','Yara',
+    'Zane','Linh','Minh','Huong','Duc','Lan','Tuan','Mai','Khoa','Thao','Priya','Arjun','Sofia',
+    'Mateo','Lucia','Omar','Fatima','Kenji','Aiko','Lars','Ingrid','Diego','Camila','Ethan','Nora',
+    'Adele','Bruno','Clara','Dmitri','Esther','Farid','Gemma','Hana','Isaac','Julia','Kofi','Leila',
+    'Marco','Nadia','Oscar','Petra','Rafael','Selin','Tomas','Ursula','Valentina','Wei','Xenia',
+    'Yusuf','Zoe','Amara','Bilal','Carmen','Dario','Eva','Finn','Giulia','Hassan','Iris','Jonas',
+    'Keiko','Luca','Mila','Nikolai','Opal','Pablo','Rania','Stefan','Tess','Ugo','Vera','William',
+    'Yuki','Zara','Aaron','Bianca','Caleb','Dalia','Emil','Freya','Gabriel','Helena','Ian','Jasmin',
+    'Karim','Lena','Mohammed','Nina','Owen','Pia','Ravi','Sara','Theo','Ada','Rui'])[1 + (n * 7) % 120],
+  (array[
+    'Smith','Nguyen','Tran','Le','Pham','Johnson','Garcia','Martinez','Brown','Davis','Wilson',
+    'Anderson','Thomas','Lee','Kim','Patel','Shah','Rossi','Muller','Silva','Costa','Novak',
+    'Kowalski','Ivanova','Sato','Tanaka','Hoang','Vu','Dang','Bui','Murphy','Kelly','Walsh',
+    'Clarke','Lopez','Gonzalez','Perez','Sanchez','Romero','Okafor','Adeyemi','Bauer','Castillo',
+    'Dubois','Eriksson','Fischer','Haddad','Ibrahim','Jensen','Kaur','Lindqvist','Moreau',
+    'Nakamura','Olsen','Popescu','Quintero','Rahman','Schmidt','Torres','Ueda','Vasquez','Weber',
+    'Xu','Yilmaz','Zhang','Ahmed','Berg','Chen','Dimitrov','Evans','Ferreira','Gruber','Hansen',
+    'Ito','Jovanovic','Kowalczyk','Larsen','Mendes','Nowak','Ortiz','Petrov','Rocha','Santos',
+    'Tanaka-Ruiz','Varga','Wagner','Yamamoto','Zimmermann','Abara','Bianchi','Cruz','Dalton',
+    'Edwards','Fontaine','Greco','Horvat','Ionescu','Jung','Keller','Lambert'])[1 + (n / 120) % 100]
 from generate_series(1, 10100) n;
 
 /** The Monday on or after a date. */

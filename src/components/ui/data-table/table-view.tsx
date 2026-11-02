@@ -104,18 +104,24 @@ export function TableView<Row>({
             </Column>
           )}
           {columns.map((column, index) => {
-            // The last column fills the rest of the row (at least its own width), so the table
-            // spans the page; with nothing after it, it has no resize handle or separator.
+            // The table spans the page: growing columns share the spare width (a width someone
+            // set by hand stays as set); with none, the last column fills the rest. The last
+            // column has no resize handle or separator, with nothing after it.
             const last = index === columns.length - 1;
-            const width = state.widths[column.id] ?? column.width ?? 180;
+            const resized = state.widths[column.id];
+            const width = resized ?? column.width ?? 180;
+            const grows = resized === undefined && column.grow === true;
+            const fills = last && !columns.some((c) => c.grow && state.widths[c.id] === undefined);
             return (
               <Column
                 key={column.id}
                 id={column.id}
                 isRowHeader={column.isRowHeader}
                 allowsSorting={column.sortable !== false}
-                defaultWidth={last ? "1fr" : width}
-                minWidth={last ? Math.max(width, column.minWidth ?? 80) : (column.minWidth ?? 80)}
+                defaultWidth={grows ? `${width}fr` : fills ? "1fr" : width}
+                minWidth={
+                  grows || fills ? Math.max(width, column.minWidth ?? 80) : (column.minWidth ?? 80)
+                }
                 className={cn(
                   "border-outline-variant group relative h-14 border-b px-4 text-start outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-secondary data-[focus-visible]:ring-inset",
                   column.sortable !== false && "cursor-pointer"

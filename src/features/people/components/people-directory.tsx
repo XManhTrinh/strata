@@ -77,9 +77,16 @@ export function PeopleDirectory({
       isRowHeader: true,
       hideable: false,
       width: 240,
+      grow: true,
     },
-    { id: "unit", header: t("columns.unit"), accessor: (p) => p.unitName, width: 180 },
-    { id: "position", header: t("columns.position"), accessor: (p) => p.positionName, width: 180 },
+    { id: "unit", header: t("columns.unit"), accessor: (p) => p.unitName, width: 180, grow: true },
+    {
+      id: "position",
+      header: t("columns.position"),
+      accessor: (p) => p.positionName,
+      width: 180,
+      grow: true,
+    },
     {
       id: "level",
       header: t("columns.level"),
@@ -100,6 +107,7 @@ export function PeopleDirectory({
       accessor: (p) => p.managerName,
       sortable: false,
       width: 180,
+      grow: true,
     },
     {
       id: "email",
@@ -107,6 +115,7 @@ export function PeopleDirectory({
       accessor: (p) => p.email,
       sortable: false,
       width: 240,
+      grow: true,
     },
     {
       id: "start_date",
