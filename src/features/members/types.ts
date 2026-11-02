@@ -29,3 +29,14 @@ export type PendingInvitation = {
   roleId: string;
   expiresAt: string;
 };
+
+/** The workspace's join link, as people who may invite see it (never the token). */
+export type JoinLink = { roleId: string; expiresAt: string | null; createdAt: string };
+
+export type JoinRequest = {
+  id: string;
+  fullName: string;
+  email: string;
+  message: string | null;
+  createdAt: string;
+};

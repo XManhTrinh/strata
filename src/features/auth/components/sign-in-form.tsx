@@ -10,7 +10,16 @@ import { signIn } from "../actions";
 import { FormError } from "./form-error";
 import { GoogleButton } from "./google-button";
 
-export function SignInForm({ next, initialError }: { next: string; initialError?: ErrorKey }) {
+export function SignInForm({
+  next,
+  initialError,
+  canReset,
+}: {
+  next: string;
+  initialError?: ErrorKey;
+  /** Whether a password can be reset by email (it needs an email provider). */
+  canReset: boolean;
+}) {
   const t = useTranslations("auth");
   const te = useTranslations("errors");
   const tc = useTranslations("common");
@@ -47,9 +56,11 @@ export function SignInForm({ next, initialError }: { next: string; initialError?
           invalid={Boolean(fieldErrors.password)}
           errorMessage={fieldErrors.password && te(fieldErrors.password)}
         />
-        <Link href="/forgot-password" className="self-end">
-          {t("signIn.forgot")}
-        </Link>
+        {canReset && (
+          <Link href="/forgot-password" className="self-end">
+            {t("signIn.forgot")}
+          </Link>
+        )}
         <Button type="submit" variant="filled" pending={pending}>
           {t("signIn.submit")}
         </Button>

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { redirectWithSession, updateSession } from "@/lib/supabase/proxy";
 
-const PROTECTED_PREFIXES = ["/w/", "/onboarding", "/account"];
+const PROTECTED_PREFIXES = ["/w/", "/onboarding", "/account", "/join/"];
 const SIGNED_OUT_ONLY = ["/sign-in", "/sign-up", "/forgot-password"];
 
 function matches(pathname: string, prefixes: string[]): boolean {

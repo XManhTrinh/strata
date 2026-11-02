@@ -16,6 +16,7 @@ function pathFor(kind: string): string {
   if (kind.startsWith("time.")) return "/time-off?tab=mine";
   if (kind.startsWith("scenario.")) return "/planning/scenarios";
   if (kind === "import.finished") return "/people";
+  if (kind === "join.requested") return "/settings/members";
   return "";
 }
 

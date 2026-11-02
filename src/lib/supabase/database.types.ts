@@ -131,6 +131,16 @@ export type Database = {
       is_member: { Args: { p_workspace_id: string }; Returns: boolean };
       is_owner: { Args: { p_workspace_id: string }; Returns: boolean };
       is_reserved_slug: { Args: { p_slug: string }; Returns: boolean };
+      join_link_for: {
+        Args: { p_token: string };
+        Returns: Database["public"]["Tables"]["workspace_join_links"]["Row"];
+        SetofOptions: {
+          from: "*";
+          to: "workspace_join_links";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       leave_year_start: { Args: { p_date: string; p_start_month: number }; Returns: string };
       load_import_job: {
         Args: { p_job_id: string; p_statuses: Database["public"]["Enums"]["import_status"][] };
@@ -281,6 +291,10 @@ export type Database = {
         Returns: number;
       };
       workspace_approvers: { Args: { p_workspace_id: string }; Returns: string[] };
+      workspace_holders: {
+        Args: { p_permission_key: string; p_workspace_id: string };
+        Returns: string[];
+      };
       workspaces_with: {
         Args: { p_permission_key: string; p_reach?: Database["public"]["Enums"]["reach"] };
         Returns: string[];
@@ -1484,6 +1498,64 @@ export type Database = {
           },
           {
             foreignKeyName: "invitations_workspace_id_role_id_fkey";
+            columns: ["workspace_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
+      join_requests: {
+        Row: {
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          email: string;
+          full_name: string;
+          id: string;
+          message: string | null;
+          role_id: string | null;
+          status: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email: string;
+          full_name: string;
+          id?: string;
+          message?: string | null;
+          role_id?: string | null;
+          status?: string;
+          user_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          email?: string;
+          full_name?: string;
+          id?: string;
+          message?: string | null;
+          role_id?: string | null;
+          status?: string;
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "join_requests_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "join_requests_workspace_id_role_id_fkey";
             columns: ["workspace_id", "role_id"];
             isOneToOne: false;
             referencedRelation: "roles";
@@ -3353,6 +3425,49 @@ export type Database = {
           },
         ];
       };
+      workspace_join_links: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          expires_at: string | null;
+          role_id: string;
+          token_hash: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          expires_at?: string | null;
+          role_id: string;
+          token_hash: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          expires_at?: string | null;
+          role_id?: string;
+          token_hash?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workspace_join_links_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: true;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workspace_join_links_workspace_id_role_id_fkey";
+            columns: ["workspace_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "roles";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       workspace_templates: {
         Row: {
           description: string;
@@ -3706,7 +3821,12 @@ export type Database = {
         Args: { p_approve: boolean; p_booking_id: string; p_comment?: string };
         Returns: undefined;
       };
+      decide_join_request: {
+        Args: { p_approve: boolean; p_request_id: string; p_role_id?: string };
+        Returns: undefined;
+      };
       delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
+      disable_join_link: { Args: { p_workspace_id: string }; Returns: undefined };
       erase_member: { Args: { p_member_id: string; p_reason: string }; Returns: undefined };
       fill_planned_role: {
         Args: { p_from: string; p_member_id: string; p_planned_role_id: string };
@@ -3728,6 +3848,16 @@ export type Database = {
       import_stage_rows: {
         Args: { p_first_row: number; p_job_id: string; p_rows: Json };
         Returns: number;
+      };
+      join_link_info: {
+        Args: { p_token: string };
+        Returns: {
+          is_member: boolean;
+          logo_path: string;
+          request_status: string;
+          workspace_name: string;
+          workspace_slug: string;
+        }[];
       };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
@@ -3861,6 +3991,7 @@ export type Database = {
         Args: { p_level_ids: string[]; p_workspace_id: string };
         Returns: undefined;
       };
+      request_to_join: { Args: { p_message?: string; p_token: string }; Returns: string };
       resend_invitation: { Args: { p_invitation_id: string }; Returns: string };
       revoke_invitation: { Args: { p_invitation_id: string }; Returns: undefined };
       roles_with_unit_reach: { Args: { p_workspace_id: string }; Returns: string[] };
@@ -3892,6 +4023,10 @@ export type Database = {
         Args: { p_field_id: string; p_member_id: string; p_valid_from: string; p_value: Json };
         Returns: undefined;
       };
+      set_join_link: {
+        Args: { p_expires_at?: string; p_role_id: string; p_workspace_id: string };
+        Returns: string;
+      };
       set_live_scenario: { Args: { p_scenario_id: string }; Returns: undefined };
       set_member_status: {
         Args: {
@@ -3921,6 +4056,7 @@ export type Database = {
           unit_id: string;
         }[];
       };
+      withdraw_join_request: { Args: { p_request_id: string }; Returns: undefined };
     };
     Enums: {
       allowance_accrual: "upfront" | "monthly";

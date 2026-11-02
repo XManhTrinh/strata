@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { InvitationEmail } from "@/emails/invitation-email";
-import { sendEmail } from "@/lib/email/send";
+import { emailConfigured, sendEmail } from "@/lib/email/send";
 import { getPublicEnv } from "@/lib/env";
 import { type ErrorKey, type FormState, fieldErrorsFrom } from "@/lib/form-state";
 import { createClient } from "@/lib/supabase/server";
 import { inviteSchema } from "./schemas";
 
-type InviteResult = { email: string; error?: ErrorKey };
+/** One address: sent, failed, or (with no email provider) a link to share. */
+type InviteResult = { email: string; error?: ErrorKey; link?: string };
 export type InviteState = FormState<"emails" | "roleId"> & { results?: InviteResult[] };
 
 type ActionResult = { ok: true } | { ok: false; error: ErrorKey };
@@ -28,6 +29,10 @@ function errorKeyFor(error: { code?: string; message: string; hint?: string | nu
   return "generic";
 }
 
+function invitationUrl(token: string): string {
+  return new URL(`/invite/${token}`, getPublicEnv().NEXT_PUBLIC_SITE_URL).toString();
+}
+
 /** Emails the invitation link. The token only exists here, right after it was created. */
 async function sendInvitationEmail(token: string, email: string): Promise<boolean> {
   const supabase = await createClient();
@@ -40,7 +45,7 @@ async function sendInvitationEmail(token: string, email: string): Promise<boolea
     inviter: data.inviter_name ?? data.workspace_name,
     role: data.role_name,
   };
-  const acceptUrl = new URL(`/invite/${token}`, getPublicEnv().NEXT_PUBLIC_SITE_URL).toString();
+  const acceptUrl = invitationUrl(token);
 
   try {
     await sendEmail({
@@ -89,6 +94,10 @@ export async function inviteMembers(
       results.push({ email, error: error ? errorKeyFor(error) : "generic" });
       continue;
     }
+    if (!emailConfigured()) {
+      results.push({ email, link: invitationUrl(data.token) });
+      continue;
+    }
     const sent = await sendInvitationEmail(data.token, email);
     results.push(sent ? { email } : { email, error: "emailNotSent" });
   }
@@ -107,6 +116,19 @@ export async function resendInvitation(invitationId: string, email: string): Pro
   const sent = await sendInvitationEmail(token, email);
   revalidatePath("/w/[workspace]/settings/members", "page");
   return sent ? { ok: true } : { ok: false, error: "emailNotSent" };
+}
+
+/** A fresh link for an open invitation, to share by hand (the old link stops working). */
+export async function invitationLink(
+  invitationId: string
+): Promise<{ ok: true; link: string } | { ok: false; error: ErrorKey }> {
+  const supabase = await createClient();
+  const { data: token, error } = await supabase.rpc("resend_invitation", {
+    p_invitation_id: invitationId,
+  });
+  if (error || !token) return { ok: false, error: error ? errorKeyFor(error) : "generic" };
+  revalidatePath("/w/[workspace]/settings/members", "page");
+  return { ok: true, link: invitationUrl(token) };
 }
 
 export async function revokeInvitation(invitationId: string): Promise<ActionResult> {

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
+import { emailConfigured } from "@/lib/email/send";
 import { getPublicEnv } from "@/lib/env";
 import { type ErrorKey, type FormState, fieldErrorsFrom } from "@/lib/form-state";
 import { safeNextPath } from "@/lib/safe-next-path";
@@ -58,6 +59,8 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
 }
 
 export async function signUp(_previous: FormState, formData: FormData): Promise<FormState> {
+  // Without an email provider the address can't be confirmed: sign up with Google instead.
+  if (!emailConfigured()) return { status: "error", error: "emailSignUpOff" };
   const parsed = signUpSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error) };
 

@@ -6,6 +6,11 @@ import { getServerEnv } from "@/lib/env.server";
 
 let transport: Transporter | undefined;
 
+/** Whether an email provider is set up; without one, people share links themselves. */
+export function emailConfigured(): boolean {
+  return Boolean(process.env.SMTP_URL);
+}
+
 /** Sends one email with HTML and plain-text bodies rendered from a React Email template. */
 export async function sendEmail({
   to,

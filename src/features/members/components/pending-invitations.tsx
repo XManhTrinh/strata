@@ -4,15 +4,18 @@ import { useTransition } from "react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { Button, List, ListItem } from "@windmorph/react";
 import { useSnackbar } from "@/lib/snackbar";
-import { resendInvitation, revokeInvitation } from "../actions";
+import { invitationLink, resendInvitation, revokeInvitation } from "../actions";
 import type { PendingInvitation, RoleOption } from "../types";
 
 export function PendingInvitations({
   invitations,
   roles,
+  emailOn,
 }: {
   invitations: PendingInvitation[];
   roles: RoleOption[];
+  /** Whether invitations can be emailed again. */
+  emailOn: boolean;
 }) {
   const t = useTranslations("members.pending");
   const te = useTranslations("errors");
@@ -57,14 +60,31 @@ export function PendingInvitations({
                   variant="text"
                   disabled={pending}
                   onPress={() =>
-                    run(
-                      () => resendInvitation(invitation.id, invitation.email),
-                      t("resent", { email: invitation.email })
+                    void invitationLink(invitation.id).then((result) =>
+                      result.ok
+                        ? navigator.clipboard
+                            .writeText(result.link)
+                            .then(() => snackbar.showSnackbar(t("linkCopied")))
+                        : snackbar.showSnackbar(te(result.error))
                     )
                   }
                 >
-                  {t("resend")}
+                  {t("copyLink")}
                 </Button>
+                {emailOn && (
+                  <Button
+                    variant="text"
+                    disabled={pending}
+                    onPress={() =>
+                      run(
+                        () => resendInvitation(invitation.id, invitation.email),
+                        t("resent", { email: invitation.email })
+                      )
+                    }
+                  >
+                    {t("resend")}
+                  </Button>
+                )}
                 <Button
                   variant="text"
                   disabled={pending}

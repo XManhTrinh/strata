@@ -375,12 +375,13 @@ All plan changes go to the audit log.
 - Email goes through **Resend** (SMTP, EU region) on staging and production, for both the app's
   emails (invitations, notifications) and Supabase Auth's (confirmations, password resets). Locally
   everything goes to Mailpit.
-- **MVP without a domain (decided 2026-11-02):** Strata runs on staging's `vercel.app` address. Resend
-  needs a domain and Supabase's built-in email reaches only its own team, so sign-in is **Google
-  only** (Google has verified the email), joining uses join links with approval or copied
-  invitation links, and notifications are in the app only. Email and password sign-up, password
-  reset and notification emails come back as soon as an email provider is set (`SMTP_URL`, and
-  Supabase Auth's SMTP), with no code change.
+- **MVP without a domain (decided 2026-11-02):** Strata runs on staging's `vercel.app` address.
+  Resend needs a domain and Supabase's built-in email reaches only its own team, so while no email
+  provider is set: new people sign up with **Google only** (Google has verified the email);
+  existing accounts still sign in with their password, but can't reset it by email; joining uses
+  join links with approval, or invitation links the inviter copies; notifications are in the app
+  only. Email sign-up, password reset, invitation emails and notification emails come back as
+  soon as an email provider is set (`SMTP_URL`, and Supabase Auth's SMTP), with no code change.
 - **Later:** Microsoft Teams and Slack, connected per workspace (e.g. approve leave from a Teams
   message).
 

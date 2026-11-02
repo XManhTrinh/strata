@@ -4,6 +4,7 @@ import { SignInForm } from "@/features/auth/components/sign-in-form";
 import { isErrorKey } from "@/lib/form-state";
 import { safeNextPath } from "@/lib/safe-next-path";
 import messages from "@/messages/en.json";
+import { emailConfigured } from "@/lib/email/send";
 
 export default async function SignInPage({
   searchParams,
@@ -18,6 +19,7 @@ export default async function SignInPage({
       <SignInForm
         next={safeNextPath(next)}
         initialError={isErrorKey(error, Object.keys(messages.errors)) ? error : undefined}
+        canReset={emailConfigured()}
       />
     </AuthPanel>
   );

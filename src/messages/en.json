@@ -70,7 +70,9 @@
     "appName": "Strata",
     "or": "or",
     "cancel": "Cancel",
-    "clearField": "Clear {field}"
+    "clearField": "Clear {field}",
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "errors": {
     "required": "Required.",
@@ -214,7 +216,13 @@
     "erasureReasonRequired": "Give a reason for erasing.",
     "ownerMustTransfer": "You own a workspace other people use. Make someone else its owner first.",
     "retentionInvalid": "Enter a whole number in the range shown, or leave it empty to keep.",
-    "reactivateRolesNotHeld": "You can only reactivate someone whose roles you could give yourself. Ask an owner."
+    "reactivateRolesNotHeld": "You can only reactivate someone whose roles you could give yourself. Ask an owner.",
+    "joinLinkExpiry": "The link must expire in the future.",
+    "joinLinkInvalid": "This join link doesn't work any more.",
+    "joinRequestOpen": "You've already asked to join; wait for an answer.",
+    "joinRequestsFull": "Too many people are waiting to join this workspace. Try again later.",
+    "joinRequestDecided": "This request was already answered.",
+    "emailSignUpOff": "Sign up with Google for now; email sign-up isn't available yet."
   },
   "auth": {
     "signIn": {
@@ -536,7 +544,9 @@
       "role": "Role",
       "send": "Send invitations",
       "sent": "{count, plural, one {Invitation sent} other {# invitations sent}}",
-      "failedFor": "Not invited:"
+      "failedFor": "Not invited:",
+      "create": "Create invitations",
+      "shareLinks": "Email isn't set up yet, so share each link with its person. Each works once, for 7 days."
     },
     "pending": {
       "title": "Pending invitations",
@@ -546,7 +556,9 @@
       "resend": "Resend",
       "revoke": "Withdraw",
       "resent": "Invitation resent to {email}",
-      "revoked": "Invitation to {email} withdrawn"
+      "revoked": "Invitation to {email} withdrawn",
+      "copyLink": "Copy link",
+      "linkCopied": "New invitation link copied; the old one no longer works"
     },
     "makeOwner": "Make owner",
     "makeOwnerTitle": "Make {name} an owner?",
@@ -563,7 +575,35 @@
     "unitsBody": "{name} gets this role's access in these units and everything under them.",
     "unitsLabel": "Units",
     "unitsSaved": "Units saved",
-    "save": "Save"
+    "save": "Save",
+    "joinLink": {
+      "title": "Join link",
+      "intro": "Share a link instead of inviting people one by one. Anyone who opens it can ask to join; you approve each request.",
+      "on": "On: people start as {role}; the link expires {expires}.",
+      "noExpiry": "never",
+      "link": "Join link",
+      "role": "New people start as",
+      "expires": "Link expires",
+      "expiry": {
+        "never": "Never",
+        "7": "In 7 days",
+        "30": "In 30 days",
+        "90": "In 90 days"
+      },
+      "create": "Create join link",
+      "replace": "Make a new link",
+      "switchOff": "Switch off",
+      "switchedOff": "Join link switched off"
+    },
+    "joinRequests": {
+      "title": "{count, plural, =0 {Requests to join} other {Requests to join (#)}}",
+      "empty": "No one is waiting to join.",
+      "role": "Role for {name}",
+      "approve": "Approve",
+      "decline": "Decline",
+      "approved": "{name} joined",
+      "declined": "Declined {name}'s request"
+    }
   },
   "permissions": {
     "members": {
@@ -808,7 +848,9 @@
       "rate_cards": "a rate card",
       "rate_card_conditions": "a rate card condition",
       "rate_card_rates": "a rate",
-      "data_retention": "retention rules"
+      "data_retention": "retention rules",
+      "workspace_join_links": "the join link",
+      "join_requests": "a join request"
     },
     "fields": "Changed: {fields}",
     "older": "Older entries",
@@ -915,6 +957,11 @@
         "submitted": "{by} submitted {scenario} for approval",
         "approved": "{by} approved {scenario}",
         "returned": "{by} returned {scenario} to draft"
+      },
+      "join": {
+        "requested": "{name} asked to join",
+        "approved": "You've joined {workspace}",
+        "declined": "Your request to join {workspace} was declined"
       }
     }
   },
@@ -2458,5 +2505,21 @@
       }
     },
     "backToHelp": "All help topics"
+  },
+  "join": {
+    "title": "Join {workspace}",
+    "subtitle": "Ask to join; someone who manages {workspace} approves it.",
+    "message": "Message (optional)",
+    "messageHint": "For example, your team or why you're joining.",
+    "ask": "Ask to join",
+    "asked": "Request sent",
+    "waiting": "Your request is waiting for someone at {workspace} to approve it.",
+    "withdraw": "Withdraw request",
+    "withdrawn": "Request withdrawn",
+    "declinedBefore": "Your last request was declined. You can ask again.",
+    "member": "You're already a member of {workspace}.",
+    "open": "Open {workspace}",
+    "invalid": "This join link doesn't work. It may have expired or been switched off; ask for a new one.",
+    "goHome": "Go to Strata"
   }
 }

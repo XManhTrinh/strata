@@ -20,8 +20,10 @@ import { Icon } from "@/components/ui/icon";
 import { useCan, useWorkspace } from "@/features/workspaces/workspace-context";
 import { useSnackbar } from "@/lib/snackbar";
 import { setMemberStatus } from "../actions";
-import type { MemberRow, PendingInvitation, RoleOption } from "../types";
+import type { JoinLink, JoinRequest, MemberRow, PendingInvitation, RoleOption } from "../types";
 import { InviteDialog } from "./invite-dialog";
+import { JoinLinkCard } from "./join-link-card";
+import { JoinRequests } from "./join-requests";
 import { LeaveWorkspaceDialog, MakeOwnerDialog } from "./ownership-dialogs";
 import { MemberRolesDialog } from "./member-roles-dialog";
 import { PendingInvitations } from "./pending-invitations";
@@ -31,11 +33,18 @@ export function MembersSettings({
   roles,
   invitations,
   units,
+  emailOn,
+  joinLink,
+  joinRequests,
 }: {
   members: MemberRow[];
   roles: RoleOption[];
   invitations: PendingInvitation[];
   units: { id: string; label: string }[];
+  /** Whether an email provider is set up (otherwise invitations are links to share). */
+  emailOn: boolean;
+  joinLink: JoinLink | null;
+  joinRequests: JoinRequest[];
 }) {
   const t = useTranslations("members");
   const te = useTranslations("errors");
@@ -176,15 +185,32 @@ export function MembersSettings({
       </List>
 
       {canInvite && (
+        <JoinRequests
+          requests={joinRequests}
+          roles={roles}
+          defaultRoleId={joinLink?.roleId ?? null}
+        />
+      )}
+
+      {canInvite && <JoinLinkCard link={joinLink} roles={roles} />}
+
+      {canInvite && (
         <section className="flex flex-col gap-3" aria-labelledby="pending-title">
           <h3 id="pending-title" className="text-title-large text-on-surface">
             {t("pending.title")}
           </h3>
-          <PendingInvitations invitations={invitations} roles={roles} />
+          <PendingInvitations invitations={invitations} roles={roles} emailOn={emailOn} />
         </section>
       )}
 
-      {canInvite && <InviteDialog roles={roles} open={inviteOpen} onOpenChange={setInviteOpen} />}
+      {canInvite && (
+        <InviteDialog
+          roles={roles}
+          emailOn={emailOn}
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+        />
+      )}
       {rolesFor && (
         <MemberRolesDialog
           // The fresh row, so roles assigned in the dialog can take units straight away.

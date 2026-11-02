@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyField } from "@/components/ui/copy-field";
 import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useFormAction } from "@/lib/use-form-action";
 import { useEffect, useState } from "react";
@@ -24,10 +25,13 @@ const initialState: InviteState = { status: "idle" };
 
 export function InviteDialog({
   roles,
+  emailOn,
   open,
   onOpenChange,
 }: {
   roles: RoleOption[];
+  /** Whether invitations go by email; otherwise the dialog gives links to share. */
+  emailOn: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -51,12 +55,14 @@ export function InviteDialog({
       )?.id ?? ""
   );
 
-  const sentCount = state.results?.filter((r) => !r.error).length ?? 0;
+  const sentCount = state.results?.filter((r) => !r.error && !r.link).length ?? 0;
   const failed = state.results?.filter((r) => r.error) ?? [];
+  const links = state.results?.filter((r) => r.link) ?? [];
 
   useEffect(() => {
     if (state.results && sentCount > 0) void snackbar.showSnackbar(t("sent", { count: sentCount }));
-    if (state.status === "success") onOpenChange(false);
+    // With links to share, the dialog stays open to show them.
+    if (state.status === "success" && !state.results?.some((r) => r.link)) onOpenChange(false);
   }, [state, sentCount, snackbar, t, onOpenChange]);
 
   return (
@@ -75,6 +81,14 @@ export function InviteDialog({
               <span>{t("failedFor")}</span>
               {failed.map((r) => (
                 <span key={r.email}>{`${r.email}: ${r.error ? te(r.error) : ""}`}</span>
+              ))}
+            </div>
+          )}
+          {links.length > 0 && (
+            <div role="status" className="flex flex-col gap-3">
+              <p className="text-body-medium text-on-surface">{t("shareLinks")}</p>
+              {links.map((r) => (
+                <CopyField key={r.email} label={r.email} value={r.link!} />
               ))}
             </div>
           )}
@@ -109,7 +123,7 @@ export function InviteDialog({
             {tc("cancel")}
           </Button>
           <Button type="submit" variant="text" pending={pending}>
-            {t("send")}
+            {t(emailOn ? "send" : "create")}
           </Button>
         </DialogActions>
       </form>

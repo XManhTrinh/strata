@@ -4,6 +4,7 @@ import { MembersSettings } from "@/features/members/components/members-settings"
 import { unitChoices } from "@/features/structure/queries";
 import type { MemberRow, PendingInvitation, RoleOption } from "@/features/members/types";
 import { signedAvatarUrls } from "@/lib/avatars";
+import { emailConfigured } from "@/lib/email/send";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function MembersSettingsPage({
@@ -28,6 +29,8 @@ export default async function MembersSettingsPage({
     { data: invitations },
     { data: unitRoleIds },
     units,
+    { data: joinLink },
+    { data: joinRequests },
   ] = await Promise.all([
     supabase.auth.getClaims(),
     supabase
@@ -53,6 +56,18 @@ export default async function MembersSettingsPage({
       .order("created_at", { ascending: false }),
     supabase.rpc("roles_with_unit_reach", { p_workspace_id: workspace.id }),
     unitChoices(workspace.id),
+    // Both are readable only by people holding members.invite.
+    supabase
+      .from("workspace_join_links")
+      .select("role_id, expires_at, created_at")
+      .eq("workspace_id", workspace.id)
+      .maybeSingle(),
+    supabase
+      .from("join_requests")
+      .select("id, full_name, email, message, created_at")
+      .eq("workspace_id", workspace.id)
+      .eq("status", "pending")
+      .order("created_at"),
   ]);
 
   const userId = auth?.claims.sub;
@@ -93,6 +108,28 @@ export default async function MembersSettingsPage({
   }));
 
   return (
-    <MembersSettings members={memberRows} roles={roleOptions} invitations={pending} units={units} />
+    <MembersSettings
+      members={memberRows}
+      roles={roleOptions}
+      invitations={pending}
+      units={units}
+      emailOn={emailConfigured()}
+      joinLink={
+        joinLink
+          ? {
+              roleId: joinLink.role_id,
+              expiresAt: joinLink.expires_at,
+              createdAt: joinLink.created_at,
+            }
+          : null
+      }
+      joinRequests={(joinRequests ?? []).map((r) => ({
+        id: r.id,
+        fullName: r.full_name,
+        email: r.email,
+        message: r.message,
+        createdAt: r.created_at,
+      }))}
+    />
   );
 }

@@ -16,7 +16,8 @@ select set_eq(
     'member_field_values', 'member_role_units', 'import_jobs', 'work_schedules', 'holiday_calendars',
     'holidays', 'time_types', 'allowance_policies', 'member_allowance_policies', 'bookings',
     'booking_approvals', 'planning_settings', 'scenarios', 'planned_roles', 'rate_card_sets',
-    'rate_card_groups', 'rate_cards', 'rate_card_conditions', 'rate_card_rates', 'data_retention'],
+    'rate_card_groups', 'rate_cards', 'rate_card_conditions', 'rate_card_rates', 'data_retention',
+    'workspace_join_links', 'join_requests'],
   'the audit log screen knows every audited table'
 );
 

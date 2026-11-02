@@ -36,6 +36,8 @@ export const AUDIT_TABLES = [
   "rate_card_conditions",
   "rate_card_rates",
   "data_retention",
+  "workspace_join_links",
+  "join_requests",
 ] as const;
 
 export type AuditTable = (typeof AUDIT_TABLES)[number];
