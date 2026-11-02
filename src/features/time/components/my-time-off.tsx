@@ -74,7 +74,7 @@ export function MyTimeOff({ balances, bookings }: { balances: Balance[]; booking
         {bookings.length === 0 ? (
           <p className="text-body-medium text-on-surface-variant">{t("mine.empty")}</p>
         ) : (
-          <List aria-label={t("mine.title")}>
+          <List aria-label={t("mine.title")} className="max-w-form">
             {bookings.map((b) => {
               const when = dates(b);
               return (

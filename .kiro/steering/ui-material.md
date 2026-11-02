@@ -48,6 +48,8 @@ fileMatchPattern: "src/**/*.tsx"
   their controls stay close; tables, grids and calendars use the full width. In list-detail
   layouts (e.g. roles from 1200px) the detail pane takes the rest of the row and its form keeps
   `max-w-form`, beside the list rather than centred.
+- Lists whose rows carry actions on the right (approve, cancel, menus) also use `max-w-form`, so
+  the buttons stay next to what they act on on wide screens. Tables keep the full width.
 
 ## Behaviour
 

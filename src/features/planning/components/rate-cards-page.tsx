@@ -79,7 +79,7 @@ export function RateCardsPage({
     list.length === 0 ? (
       <p className="text-body-medium text-on-surface-variant px-4">{t("noCards")}</p>
     ) : (
-      <List aria-label={label} aria-busy={pending || undefined}>
+      <List aria-label={label} aria-busy={pending || undefined} className="max-w-form">
         {list.map((card) => (
           <ListItem
             key={card.id}

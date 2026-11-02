@@ -32,7 +32,7 @@ export function ApprovalsList({ approvals }: { approvals: PendingApproval[] }) {
   }
   return (
     <>
-      <List aria-label={t("tabs.approvals")}>
+      <List aria-label={t("tabs.approvals")} className="max-w-form">
         {approvals.map((a) => (
           <ListItem
             key={a.bookingId}
