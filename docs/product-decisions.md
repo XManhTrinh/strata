@@ -63,13 +63,15 @@ Strata may launch as a Romanian (EU) company selling worldwide (EU, UK, Americas
 
 ### Environments
 
-| Environment | Web                                                                                                | Database                     | Updated                          |
-| ----------- | -------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------- |
-| Local       | `http://localhost:3000`                                                                            | `supabase start`             | By the developer                 |
-| Staging     | **`https://strata-web-xi.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging`    | Automatically on merge to `main` |
-| Production  | Its own `vercel.app` address for the MVP; a custom domain later                                    | Supabase `strata-production` | Only by an approved release      |
+| Environment | Web                                                                                                | Database                  | Updated                          |
+| ----------- | -------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------- |
+| Local       | `http://localhost:3000`                                                                            | `supabase start`          | By the developer                 |
+| Staging     | **`https://strata-web-xi.vercel.app`** (Vercel project `strata-web`), plus its preview deployments | Supabase `strata-staging` | Automatically on merge to `main` |
+| Production  | **Not for now (decided 2026-11-02):** staging is the MVP that people use                           | `strata-production` later | Only by an approved release      |
 
-Preview and staging deployments never use the production database.
+Preview and staging deployments never use the production database. While staging is the MVP, its
+data is real: no test data on staging, and a backup before risky migrations. A production project
+with a custom domain comes before a wider launch.
 
 ## 2. Billing
 
@@ -373,7 +375,7 @@ All plan changes go to the audit log.
 - Email goes through **Resend** (SMTP, EU region) on staging and production, for both the app's
   emails (invitations, notifications) and Supabase Auth's (confirmations, password resets). Locally
   everything goes to Mailpit.
-- **MVP without a domain (decided 2026-11-02):** Strata launches on a `vercel.app` address. Resend
+- **MVP without a domain (decided 2026-11-02):** Strata runs on staging's `vercel.app` address. Resend
   needs a domain and Supabase's built-in email reaches only its own team, so sign-in is **Google
   only** (Google has verified the email), joining uses join links with approval or copied
   invitation links, and notifications are in the app only. Email and password sign-up, password

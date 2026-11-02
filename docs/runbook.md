@@ -1,6 +1,8 @@
 # Runbook
 
-How Strata runs in staging and production, and what to do when something goes wrong.
+How Strata runs in staging and production, and what to do when something goes wrong. For now
+there is no production: staging is the MVP people use, so the production steps below apply to
+staging until a production project exists.
 
 ## Environments
 
@@ -8,7 +10,7 @@ How Strata runs in staging and production, and what to do when something goes wr
 | ----------- | ------------------------------ | ----------------------------- | ------- |
 | Local       | `pnpm dev` (port 3000)         | `supabase start` (Docker)     | Mailpit |
 | Staging     | Vercel preview/staging, `dub1` | Supabase project, `eu-west-1` | Resend  |
-| Production  | Vercel production, `dub1`      | Supabase project, `eu-west-1` | Resend  |
+| Production  | Not yet (staging is the MVP)   | Later                         | Resend  |
 
 ## Deploying
 
