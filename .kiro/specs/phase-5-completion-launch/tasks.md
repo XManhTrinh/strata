@@ -7,7 +7,7 @@ Design and decisions: `design.md` (approved 2026-11-02). Resend and the domain c
 - [x] 1. Role dashboards on Home: `home_summary` with the cards the caller may see (balances,
       upcoming time off, requests waiting; who's away and approvals for managers; headcount,
       starters and leavers, FTE and cost from the live plan for finance and admins)
-- [ ] 2. Personal data: "Export and erase personal data" permission; export (self from Account,
+- [x] 2. Personal data: "Export and erase personal data" permission; export (self from Account,
       anyone with the permission); erase in one step with `member_erasures`; delete my account
 - [ ] 3. Retention: `data_retention` per workspace with defaults, settings screen, nightly job
 - [ ] 4. Notification emails against Mailpit: instant and daily summary per preference, approval

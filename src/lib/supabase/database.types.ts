@@ -19,6 +19,7 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      anonymise_member: { Args: { p_member_id: string }; Returns: undefined };
       apply_rate_cards_to: {
         Args: { p_from: string; p_members: string[]; p_roles: boolean; p_scenario_id: string };
         Returns: undefined;
@@ -78,6 +79,8 @@ export type Database = {
         Returns: boolean;
       };
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
+      delete_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
+      deleting_workspace: { Args: Record<PropertyKey, never>; Returns: boolean };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
         Returns: string[];
@@ -1663,6 +1666,52 @@ export type Database = {
           },
         ];
       };
+      member_erasures: {
+        Row: {
+          erased_at: string;
+          erased_by: string | null;
+          id: string;
+          kind: string;
+          member_id: string;
+          reason: string;
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          erased_at?: string;
+          erased_by?: string | null;
+          id?: string;
+          kind?: string;
+          member_id: string;
+          reason: string;
+          workspace_id: string;
+        };
+        Update: {
+          erased_at?: string;
+          erased_by?: string | null;
+          id?: string;
+          kind?: string;
+          member_id?: string;
+          reason?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "member_erasures_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "member_erasures_workspace_id_member_id_fkey";
+            columns: ["workspace_id", "member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["workspace_id", "id"];
+          },
+        ];
+      };
       member_field_values: {
         Row: {
           created_at: string;
@@ -1798,6 +1847,7 @@ export type Database = {
           created_at: string;
           email: string | null;
           end_date: string | null;
+          erased_at: string | null;
           full_name: string;
           id: string;
           is_owner: boolean;
@@ -1815,6 +1865,7 @@ export type Database = {
           created_at?: string;
           email?: string | null;
           end_date?: string | null;
+          erased_at?: string | null;
           full_name: string;
           id?: string;
           is_owner?: boolean;
@@ -1831,6 +1882,7 @@ export type Database = {
           created_at?: string;
           email?: string | null;
           end_date?: string | null;
+          erased_at?: string | null;
           full_name?: string;
           id?: string;
           is_owner?: boolean;
@@ -3573,6 +3625,8 @@ export type Database = {
         Args: { p_approve: boolean; p_booking_id: string; p_comment?: string };
         Returns: undefined;
       };
+      delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
+      erase_member: { Args: { p_member_id: string; p_reason: string }; Returns: undefined };
       fill_planned_role: {
         Args: { p_from: string; p_member_id: string; p_planned_role_id: string };
         Returns: Json;
@@ -3597,6 +3651,8 @@ export type Database = {
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       my_access_to_member: { Args: { p_member_id: string }; Returns: string[] };
+      my_account_deletion: { Args: Record<PropertyKey, never>; Returns: Json };
+      my_data: { Args: Record<PropertyKey, never>; Returns: Json };
       my_pending_approvals: {
         Args: { p_workspace_id: string };
         Returns: {
@@ -3685,6 +3741,7 @@ export type Database = {
           unit_name: string;
         }[];
       };
+      person_data: { Args: { p_member_id: string }; Returns: Json };
       preview_working_days: {
         Args: {
           p_end: string;

@@ -160,7 +160,11 @@
     "personRequired": "Choose a person.",
     "planningJobRunning": "This plan is still being built. Try again when it's done.",
     "logoWrongType": "Choose a PNG, JPEG or WebP image.",
-    "logoTooLarge": "Choose an image under 10 MB."
+    "logoTooLarge": "Choose an image under 10 MB.",
+    "cannotEraseOwner": "Owners can't be erased. Make someone else the owner first.",
+    "alreadyErased": "This person has already been erased.",
+    "erasureReasonRequired": "Give a reason for erasing.",
+    "ownerMustTransfer": "You own a workspace other people use. Make someone else its owner first."
   },
   "auth": {
     "signIn": {
@@ -780,7 +784,20 @@
       "deliveryLabel": "Email for {category}",
       "saved": "Saved"
     },
-    "backToAccount": "Back to account"
+    "backToAccount": "Back to account",
+    "data": {
+      "title": "Your data",
+      "intro": "Download everything Strata holds about you, or delete your account.",
+      "download": "Download my data",
+      "delete": "Delete my account",
+      "confirmTitle": "Delete your account?",
+      "confirmBody": "You'll be signed out and can't sign in again. In workspaces you leave, your history stays without your name being linked to an account.",
+      "deletes": "{count, plural, one {This workspace is deleted with your account, as nobody else has an account in it: {names}.} other {These workspaces are deleted with your account, as nobody else has an account in them: {names}.}}",
+      "leaves": "You leave: {names}.",
+      "blocked": "You own workspaces other people use: {names}. Make someone else their owner first.",
+      "cancel": "Cancel",
+      "confirm": "Delete my account"
+    }
   },
   "notifications": {
     "label": "Notifications",
@@ -1109,7 +1126,20 @@
     },
     "cancel": "Cancel",
     "save": "Save",
-    "actions": "Actions"
+    "actions": "Actions",
+    "data": {
+      "download": "Download data"
+    },
+    "erase": {
+      "action": "Erase person…",
+      "title": "Erase {name}?",
+      "body": "This can't be undone. Their name becomes \"Former employee\"; their contact details, key, pay, custom fields, notes and photo are removed. Their time off, plans and history stay, without anything personal.",
+      "disputes": "Check first that nothing needs their data kept, such as a dispute or legal claim.",
+      "reason": "Reason",
+      "cancel": "Cancel",
+      "confirm": "Erase",
+      "done": "{name} erased"
+    }
   },
   "views": {
     "button": "Views",

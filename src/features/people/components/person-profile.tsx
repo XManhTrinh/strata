@@ -8,15 +8,17 @@ import { Icon } from "@/components/ui/icon";
 import { ItemMenu } from "@/components/ui/item-menu";
 import { useRunAction } from "@/features/structure/use-run-action";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
+import { downloadFile } from "@/lib/download";
 import { setEndDate } from "../actions";
 import type { FieldValue, JobChoices, PersonProfile } from "../types";
 import { PersonTimeOff } from "@/features/time/components/person-time-off";
+import { EraseDialog } from "./erase-dialog";
 import { JobHistory } from "./job-history";
 import { DetailsDialog, JobDialog, PayDialog } from "./person-dialogs";
 import { PersonOverview } from "./person-overview";
 import { EndDateDialog, FieldValueDialog } from "./value-dialogs";
 
-type Open = "details" | "job" | "pay" | "end" | { field: FieldValue } | null;
+type Open = "details" | "job" | "pay" | "end" | "erase" | { field: FieldValue } | null;
 
 export function PersonProfileView({
   person,
@@ -27,7 +29,7 @@ export function PersonProfileView({
 }) {
   const t = useTranslations("person");
   const format = useFormatter();
-  const { workspace } = useWorkspace();
+  const { workspace, permissions } = useWorkspace();
   const [open, setOpen] = useState<Open>(null);
   const [run] = useRunAction();
   const today = new Date().toISOString().slice(0, 10);
@@ -40,6 +42,7 @@ export function PersonProfileView({
   );
   const canEdit = person.access.includes("people.edit");
   const canEditPay = person.access.includes("people.edit_compensation");
+  const canManageData = (permissions["people.personal_data"]?.length ?? 0) > 0;
   const close = () => setOpen(null);
 
   return (
@@ -69,15 +72,17 @@ export function PersonProfileView({
             {!person.hasAccount && <Tag color="neutral">{t("noAccount")}</Tag>}
           </div>
         </div>
-        {canEdit && (
+        {(canEdit || canManageData) && !person.erased && (
           <div className="flex items-center gap-2">
-            <Button
-              variant="filled"
-              leadingIcon={<Icon name="swap_horiz" />}
-              onPress={() => setOpen("job")}
-            >
-              {t("jobRecord.change")}
-            </Button>
+            {canEdit && (
+              <Button
+                variant="filled"
+                leadingIcon={<Icon name="swap_horiz" />}
+                onPress={() => setOpen("job")}
+              >
+                {t("jobRecord.change")}
+              </Button>
+            )}
             <ItemMenu
               label={t("actions")}
               onAction={(key) => {
@@ -85,19 +90,24 @@ export function PersonProfileView({
                 if (key === "end") setOpen("end");
                 if (key === "remove-end")
                   run(() => setEndDate(person.id, null), t("leaving.removed"));
+                if (key === "data") downloadFile(`/w/${workspace.slug}/people/${person.id}/data`);
+                if (key === "erase") setOpen("erase");
               }}
               actions={[
-                { key: "details", label: t("details.edit"), icon: "edit" },
-                {
+                canEdit && { key: "details", label: t("details.edit"), icon: "edit" },
+                canEdit && {
                   key: "end",
                   label: t(person.endDate ? "leaving.change" : "leaving.set"),
                   icon: "event_busy",
                 },
-                Boolean(person.endDate) && {
-                  key: "remove-end",
-                  label: t("leaving.remove"),
-                  icon: "event_available",
-                },
+                canEdit &&
+                  Boolean(person.endDate) && {
+                    key: "remove-end",
+                    label: t("leaving.remove"),
+                    icon: "event_available",
+                  },
+                canManageData && { key: "data", label: t("data.download"), icon: "download" },
+                canManageData && { key: "erase", label: t("erase.action"), icon: "person_remove" },
               ]}
             />
           </div>
@@ -173,6 +183,9 @@ export function PersonProfileView({
       {open === "end" && <EndDateDialog person={person} onClose={close} />}
       {open && typeof open === "object" && (
         <FieldValueDialog person={person} field={open.field} onClose={close} />
+      )}
+      {open === "erase" && (
+        <EraseDialog memberId={person.id} name={person.fullName} onClose={close} />
       )}
     </div>
   );

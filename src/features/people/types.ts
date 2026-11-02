@@ -71,6 +71,8 @@ export type PersonProfile = {
   endDate: string | null;
   avatarUrl: string | null;
   hasAccount: boolean;
+  /** Erased: shown as "Former employee", with nothing personal left. */
+  erased: boolean;
   jobs: JobRecord[];
   /** Null when the caller can't see pay. */
   pay: PayRecord[] | null;

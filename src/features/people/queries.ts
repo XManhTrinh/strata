@@ -117,7 +117,7 @@ export async function personProfile(
   const supabase = await createClient();
   const { data: member } = await supabase
     .from("members")
-    .select("id, full_name, email, person_key, start_date, end_date, user_id")
+    .select("id, full_name, email, person_key, start_date, end_date, user_id, erased_at")
     .eq("workspace_id", workspaceId)
     .eq("id", memberId)
     .maybeSingle();
@@ -186,6 +186,7 @@ export async function personProfile(
     endDate: member.end_date,
     avatarUrl: (profile.data?.avatar_path && avatars.get(profile.data.avatar_path)) || null,
     hasAccount: member.user_id !== null,
+    erased: member.erased_at !== null,
     jobs: (jobs.data ?? []).map((j) => ({
       id: j.id,
       validFrom: j.valid_from,

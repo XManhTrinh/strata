@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { type ErrorKey, type FormState, fieldErrorsFrom } from "@/lib/form-state";
+import { errorKey } from "@/features/structure/errors";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -77,4 +79,13 @@ export async function setAvatar(
   }
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/** Deletes your own account (and workspaces only you are in), then signs you out. */
+export async function deleteMyAccount(): Promise<{ ok: false; error: ErrorKey } | never> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { ok: false, error: errorKey(error, "generic") };
+  await supabase.auth.signOut();
+  return redirect("/sign-in?deleted=1");
 }
