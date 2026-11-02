@@ -22,6 +22,11 @@ export async function followEmailLink(page: Page, link: string): Promise<void> {
     await page.goto(link);
     return;
   }
+  // A link to the app itself (an invitation) goes straight to the test server.
+  if (link.startsWith(SITE)) {
+    await page.goto(link.replace(SITE, TEST_SERVER));
+    return;
+  }
   // Redirects during a navigation can't be rerouted, so read where the link sends us first.
   const response = await page.request.get(link, { maxRedirects: 0 });
   const location = response.headers()["location"];
