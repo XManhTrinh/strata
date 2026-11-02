@@ -39,7 +39,7 @@ export function UserMenu() {
         variant="standard"
         aria-label={t("label")}
         icon={
-          <Avatar name={user.fullName} src={user.avatarUrl ?? undefined} decorative size="sm" />
+          <Avatar name={user.fullName} src={user.avatarUrl ?? undefined} decorative size="md" />
         }
       />
       <Menu
