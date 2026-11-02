@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { getBrowserClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/database.types";
+import { notificationMessage } from "./message";
 
 type Notification = Pick<
   Database["public"]["Tables"]["notifications"]["Row"],
@@ -15,23 +16,6 @@ type Notification = Pick<
 >;
 
 const LIMIT = 30;
-const KINDS = [
-  "role.assigned",
-  "role.removed",
-  "ownership.received",
-  "invitation.received",
-  "invitation.accepted",
-  "time.requested",
-  "time.booked_for_you",
-  "time.booked",
-  "time.approved",
-  "time.rejected",
-  "time.cancelled",
-  "import.finished",
-  "scenario.submitted",
-  "scenario.approved",
-  "scenario.returned",
-];
 
 /** The bell: unread count, a side sheet with recent notifications, live updates via Realtime. */
 export function NotificationBell() {
@@ -84,25 +68,10 @@ export function NotificationBell() {
   }
 
   function text(n: Notification): string {
-    const payload = (n.payload ?? {}) as Record<string, string>;
-    const kind = KINDS.includes(n.kind) ? n.kind : "unknown";
-    const day = (iso: string | undefined) =>
-      iso
-        ? format.dateTime(new Date(iso), { day: "numeric", month: "short", timeZone: "UTC" })
-        : "";
-    const dates =
-      payload.start_date === payload.end_date
-        ? day(payload.start_date)
-        : `${day(payload.start_date)} – ${day(payload.end_date)}`;
-    return t(`kinds.${kind}` as Parameters<typeof t>[0], {
-      role: payload.role_name ?? "",
-      workspace: payload.workspace_name ?? "",
-      name: payload.member_name ?? "",
-      by: payload.by_name ?? "",
-      type: payload.time_type ?? "",
-      scenario: payload.scenario_name ?? "",
-      dates,
-    });
+    const { key, values } = notificationMessage(n.kind, n.payload, (iso) =>
+      format.dateTime(new Date(iso), { day: "numeric", month: "short", timeZone: "UTC" })
+    );
+    return t(key as Parameters<typeof t>[0], values);
   }
 
   const icon = <Icon name="notifications" />;

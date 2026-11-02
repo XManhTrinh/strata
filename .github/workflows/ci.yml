@@ -63,6 +63,7 @@ jobs:
             echo "NEXT_PUBLIC_SITE_URL=http://localhost:3000"
             echo "SMTP_URL=smtp://127.0.0.1:54325"
             echo "EMAIL_FROM=Strata <no-reply@strata.local>"
+            echo "JOBS_SECRET=local-jobs-secret"
           } >> "$GITHUB_ENV"
       - run: pnpm db:test
       - name: Generated database types are up to date

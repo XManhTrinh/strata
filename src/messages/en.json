@@ -314,6 +314,15 @@
       "button": "Accept invitation",
       "linkHint": "Or open this link:",
       "footer": "This invitation expires in 7 days. If you weren't expecting it, you can ignore this email."
+    },
+    "notifications": {
+      "heading": "{count, plural, one {Something new in Strata} other {# new things in Strata}}",
+      "headingDaily": "{count, plural, one {One unread notification} other {# unread notifications}}",
+      "subjectMany": "{count} new notifications in Strata",
+      "subjectDaily": "Your Strata summary: {count} unread",
+      "button": "Open Strata",
+      "footer": "You get these emails because of your notification settings.",
+      "manage": "Change what you get by email"
     }
   },
   "invite": {
@@ -830,6 +839,7 @@
       },
       "time": {
         "requested": "{name} asked for {type}, {dates}",
+        "reminder": "{name}'s {type} request, {dates}, is still waiting for you",
         "booked_for_you": "{by} booked {type} for you, {dates}",
         "booked": "{name}: {type}, {dates}",
         "approved": "Your {type} for {dates} was approved",

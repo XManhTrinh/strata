@@ -10,7 +10,7 @@ Design and decisions: `design.md` (approved 2026-11-02). Resend and the domain c
 - [x] 2. Personal data: "Export and erase personal data" permission; export (self from Account,
       anyone with the permission); erase in one step with `member_erasures`; delete my account
 - [x] 3. Retention: `data_retention` per workspace with defaults, settings screen, nightly job
-- [ ] 4. Notification emails against Mailpit: instant and daily summary per preference, approval
+- [x] 4. Notification emails against Mailpit: instant and daily summary per preference, approval
       reminders, the every-minute job with a secret (sends once an email provider is set)
 - [ ] 5. Help for each module and legal pages (privacy, terms, DPA, sub-processors)
 - [ ] 6. Accessibility audit of every screen at three widths; fixes

@@ -50,6 +50,7 @@ export type Database = {
           days: number;
         }[];
       };
+      call_job: { Args: { p_job: string }; Returns: undefined };
       can: {
         Args: { p_permission_key: string; p_target_member_id: string; p_workspace_id: string };
         Returns: boolean;
@@ -126,6 +127,7 @@ export type Database = {
         Args: { p_level_ids: string[]; p_names: string[]; p_workspace_id: string };
         Returns: string;
       };
+      is_jobs_secret: { Args: { p_secret: string }; Returns: boolean };
       is_member: { Args: { p_workspace_id: string }; Returns: boolean };
       is_owner: { Args: { p_workspace_id: string }; Returns: boolean };
       is_reserved_slug: { Args: { p_slug: string }; Returns: boolean };
@@ -204,6 +206,7 @@ export type Database = {
       };
       rebuild_reporting_closure: { Args: { p_workspace_id: string }; Returns: undefined };
       refund_booking: { Args: { p_booking_id: string }; Returns: undefined };
+      remind_pending_approvals: { Args: { p_today?: string }; Returns: number };
       require_member_access: {
         Args: { p_member_id: string; p_permission_key: string };
         Returns: string;
@@ -260,6 +263,7 @@ export type Database = {
       };
       unit_label: { Args: { p_id: string }; Returns: string };
       unit_path_names: { Args: { p_unit_id: string }; Returns: string[] };
+      vault_secret: { Args: { p_name: string }; Returns: string };
       visible_members: {
         Args: { p_permission_key: string; p_workspace_id: string };
         Returns: {
@@ -605,6 +609,7 @@ export type Database = {
           decided_by: string | null;
           decision: Database["public"]["Enums"]["approval_decision"];
           id: string;
+          reminded_at: string | null;
           step: number;
           workspace_id: string;
         };
@@ -619,6 +624,7 @@ export type Database = {
           decided_by?: string | null;
           decision?: Database["public"]["Enums"]["approval_decision"];
           id?: string;
+          reminded_at?: string | null;
           step?: number;
           workspace_id: string;
         };
@@ -632,6 +638,7 @@ export type Database = {
           decided_by?: string | null;
           decision?: Database["public"]["Enums"]["approval_decision"];
           id?: string;
+          reminded_at?: string | null;
           step?: number;
           workspace_id?: string;
         };
@@ -1971,6 +1978,10 @@ export type Database = {
         Row: {
           category: Database["public"]["Enums"]["notification_category"];
           created_at: string;
+          email_attempts: number;
+          email_claimed_at: string | null;
+          email_error: string | null;
+          emailed_at: string | null;
           id: string;
           kind: string;
           payload: NonNullable<Json>;
@@ -1982,6 +1993,10 @@ export type Database = {
         Insert: {
           category: Database["public"]["Enums"]["notification_category"];
           created_at?: string;
+          email_attempts?: number;
+          email_claimed_at?: string | null;
+          email_error?: string | null;
+          emailed_at?: string | null;
           id?: string;
           kind: string;
           payload?: NonNullable<Json>;
@@ -1992,6 +2007,10 @@ export type Database = {
         Update: {
           category?: Database["public"]["Enums"]["notification_category"];
           created_at?: string;
+          email_attempts?: number;
+          email_claimed_at?: string | null;
+          email_error?: string | null;
+          emailed_at?: string | null;
           id?: string;
           kind?: string;
           payload?: NonNullable<Json>;
@@ -3604,6 +3623,23 @@ export type Database = {
         };
         Returns: undefined;
       };
+      claim_notification_emails: {
+        Args: { p_limit?: number; p_secret: string };
+        Returns: {
+          created_at: string;
+          delivery: Database["public"]["Enums"]["email_delivery"];
+          email: string;
+          full_name: string;
+          id: string;
+          kind: string;
+          locale: string;
+          payload: Json;
+          time_zone: string;
+          user_id: string;
+          workspace_name: string;
+          workspace_slug: string;
+        }[];
+      };
       copy_scenario: { Args: { p_name: string; p_scenario_id: string }; Returns: string };
       create_feed_token: {
         Args: { p_scope: Database["public"]["Enums"]["feed_scope"]; p_workspace_id: string };
@@ -3691,6 +3727,10 @@ export type Database = {
       };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
+      mark_notification_emails: {
+        Args: { p_failed?: Json; p_secret: string; p_sent: string[] };
+        Returns: undefined;
+      };
       my_access_to_member: { Args: { p_member_id: string }; Returns: string[] };
       my_account_deletion: { Args: Record<PropertyKey, never>; Returns: Json };
       my_data: { Args: Record<PropertyKey, never>; Returns: Json };

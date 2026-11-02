@@ -15,13 +15,14 @@ Approved 2026-11-02 (decisions: `docs/product-decisions.md` sections 12, 13 and 
 - **Security review** checklist: RLS on every table (pgTAP 000), every RPC re-checks permissions,
   no service key in user paths, secrets only in server env, dependency audit clean.
 - **Notification emails** (moved from Phase 3, approved): `notifications` gains
-  `emailed_at`, `email_attempts` and `email_error`; `app.claim_notification_emails` and
-  `app.mark_notification_emails` (job role only) claim a due batch and record the result, retrying
-  up to 5 times. Instant emails wait about 2 minutes and are skipped if already read in the app;
+  `emailed_at`, `email_attempts`, `email_error` and `email_claimed_at` (a 10-minute lease);
+  `claim_notification_emails` and `mark_notification_emails` claim a due batch and record the
+  result, retrying up to 5 times and never sending anything over 3 days old. They take the jobs
+  secret (checked against Vault), so the app calls them without the service key. Instant emails wait about 2 minutes and are skipped if already read in the app;
   the daily summary goes at 08:00 in the person's time zone with what is still unread.
   Invitations keep their own email. `app.remind_pending_approvals()` runs nightly and notifies an
   approver once (`booking_approvals.reminded_at`) when a request has waited over 2 working days.
-  pg_cron calls `/api/jobs/notification-emails` every minute through `pg_net` with a secret; the
-  route sends with React Email and does nothing where no email provider is set.
+  pg_cron calls `/api/jobs/notification-emails` every minute through `pg_net` with the secret
+  (Vault `app_url` and `jobs_secret`; `JOBS_SECRET` in the app); the route sends with React Email and does nothing where no email provider is set.
 
 Full design is written when the phase starts.
