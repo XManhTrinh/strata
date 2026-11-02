@@ -84,20 +84,6 @@ export type Database = {
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
       delete_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       deleting_workspace: { Args: Record<PropertyKey, never>; Returns: boolean };
-      directory_sort_value: {
-        Args: {
-          p_email: string;
-          p_key: string;
-          p_level: string;
-          p_manager: string;
-          p_name: string;
-          p_position: string;
-          p_start: string;
-          p_type: string;
-          p_unit: string;
-        };
-        Returns: string;
-      };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
         Returns: string[];
