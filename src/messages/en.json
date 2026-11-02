@@ -313,7 +313,9 @@
     "switcher": {
       "label": "Switch workspace",
       "create": "Create workspace",
-      "current": "Current workspace"
+      "current": "Current workspace",
+      "labelUnread": "Switch workspace, {count} unread elsewhere",
+      "unread": "{count} unread"
     },
     "userMenu": {
       "label": "Account",

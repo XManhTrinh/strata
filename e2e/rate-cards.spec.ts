@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoA11yViolations } from "./a11y";
-import { completeSignUp, createWorkspace, uniqueId, openPlanning } from "./helpers";
+import { completeSignUp, pickOption, createWorkspace, uniqueId, openPlanning } from "./helpers";
 
 test.skip(
   ({ viewport }) => (viewport?.width ?? 0) < 600,
@@ -50,8 +50,7 @@ test("finance sets planning rules and rate cards, and previews who gets which ca
   await card.getByRole("button", { name: /Group$/ }).click();
   await page.getByRole("option", { name: "Opex (Digital)" }).click();
   await card.getByRole("button", { name: "Add condition" }).click();
-  await card.getByRole("button", { name: /Field$/ }).click();
-  await page.getByRole("option", { name: "Employment type" }).click();
+  await pickOption(card, "Field", "Employment type");
   await card.getByLabel("Value", { exact: true }).fill("Contractor");
   await card.getByLabel("Day rate").fill("500");
   await expect(card.getByText(/10,000\.00 a month at full time/)).toBeVisible();

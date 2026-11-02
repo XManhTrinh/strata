@@ -3860,7 +3860,7 @@ export type Database = {
         }[];
       };
       leave_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
-      mark_all_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
+      mark_all_notifications_read: { Args: { p_workspace_id?: string }; Returns: undefined };
       mark_notification_emails: {
         Args: { p_failed?: Json; p_secret: string; p_sent: string[] };
         Returns: undefined;

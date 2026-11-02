@@ -2,8 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { IconButton, Menu, MenuGroup, MenuItem, MenuTrigger } from "@windmorph/react";
+import {
+  Badge,
+  BadgedBox,
+  IconButton,
+  Menu,
+  MenuGroup,
+  MenuItem,
+  MenuTrigger,
+} from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
+import { useUnreadElsewhere } from "@/features/notifications/use-unread-elsewhere";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 
 const CREATE_KEY = "__create";
@@ -12,10 +21,18 @@ export function WorkspaceSwitcher() {
   const t = useTranslations("shell.switcher");
   const router = useRouter();
   const { workspace, workspaces } = useWorkspace();
+  // Unread elsewhere: a dot on the button, a count beside each workspace.
+  const unread = useUnreadElsewhere();
+  const elsewhere = [...unread.values()].reduce((sum, n) => sum + n, 0);
+  const icon = <Icon name="swap_horiz" />;
 
   return (
     <MenuTrigger>
-      <IconButton variant="standard" aria-label={t("label")} icon={<Icon name="swap_horiz" />} />
+      <IconButton
+        variant="standard"
+        aria-label={elsewhere > 0 ? t("labelUnread", { count: elsewhere }) : t("label")}
+        icon={elsewhere > 0 ? <BadgedBox badge={<Badge />}>{icon}</BadgedBox> : icon}
+      />
       <Menu
         aria-label={t("label")}
         onAction={(key) => router.push(key === CREATE_KEY ? "/onboarding" : `/w/${String(key)}`)}
@@ -34,6 +51,13 @@ export function WorkspaceSwitcher() {
                 ) : (
                   <Icon name="workspaces" />
                 )
+              }
+              badge={
+                (unread.get(w.id) ?? 0) > 0 ? (
+                  <Badge max={99} label={t("unread", { count: unread.get(w.id) ?? 0 })}>
+                    {unread.get(w.id)}
+                  </Badge>
+                ) : undefined
               }
             >
               {w.name}

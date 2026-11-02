@@ -33,9 +33,16 @@ const PAGE = 30;
 const COLUMNS = "id, kind, payload, read_at, created_at, workspace_id";
 type Group = "today" | "week" | "earlier";
 
+/** Only this workspace's and personal notifications: leaves out the user's other workspaces. */
+function here<Q extends { or: (filter: string) => Q }>(query: Q, othersKey: string): Q {
+  return othersKey ? query.or(`workspace_id.is.null,workspace_id.not.in.(${othersKey})`) : query;
+}
+
 /**
- * The bell: unread count and, under it, the latest notifications (live via Realtime). Each opens
- * what it's about and is marked read; All or Unread, grouped by when. Full screen on phones.
+ * The bell: this workspace's notifications, and personal ones (no workspace, or one you're not in,
+ * such as a declined request to join), live via Realtime. Each opens what it's about and is marked
+ * read; All or Unread, grouped by when. Full screen on phones. Other workspaces' unread show in
+ * the workspace switcher.
  */
 export function NotificationBell() {
   const t = useTranslations("notifications");
@@ -43,7 +50,9 @@ export function NotificationBell() {
   // "5 minutes ago" moves on while it's open.
   const now = useNow({ updateInterval: 60_000 });
   const router = useRouter();
-  const { user, workspaces } = useWorkspace();
+  const { user, workspace, workspaces } = useWorkspace();
+  const others = workspaces.filter((w) => w.id !== workspace.id).map((w) => w.id);
+  const othersKey = others.join(",");
   const [items, setItems] = useState<Notification[]>([]);
   const [more, setMore] = useState(false);
   const [open, setOpen] = useState(false);
@@ -54,9 +63,7 @@ export function NotificationBell() {
     const supabase = getBrowserClient();
     let active = true;
 
-    supabase
-      .from("notifications")
-      .select(COLUMNS)
+    here(supabase.from("notifications").select(COLUMNS), othersKey)
       .order("created_at", { ascending: false })
       .limit(PAGE)
       .then(({ data }) => {
@@ -76,7 +83,13 @@ export function NotificationBell() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        (change) => setItems((current) => [change.new as Notification, ...current])
+        (change) => {
+          const n = change.new as Notification;
+          const elsewhere = othersKey.split(",").filter(Boolean);
+          if (!n.workspace_id || !elsewhere.includes(n.workspace_id)) {
+            setItems((current) => [n, ...current]);
+          }
+        }
       )
       .subscribe();
 
@@ -84,14 +97,12 @@ export function NotificationBell() {
       active = false;
       void supabase.removeChannel(channel);
     };
-  }, [user.id]);
+  }, [user.id, workspace.id, othersKey]);
 
   async function showMore() {
     const last = items.at(-1);
     if (!last) return;
-    const { data } = await getBrowserClient()
-      .from("notifications")
-      .select(COLUMNS)
+    const { data } = await here(getBrowserClient().from("notifications").select(COLUMNS), othersKey)
       .lt("created_at", last.created_at)
       .order("created_at", { ascending: false })
       .limit(PAGE);
@@ -103,7 +114,7 @@ export function NotificationBell() {
     setItems((current) =>
       current.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() }))
     );
-    await getBrowserClient().rpc("mark_all_notifications_read");
+    await getBrowserClient().rpc("mark_all_notifications_read", { p_workspace_id: workspace.id });
   }
 
   function openItem(n: Notification) {

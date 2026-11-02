@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Button, IconButton, Select, SelectItem, Switch, TextField } from "@windmorph/react";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Button,
+  IconButton,
+  Select,
+  SelectItem,
+  Switch,
+  TextField,
+} from "@windmorph/react";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Icon } from "@/components/ui/icon";
 import { IsoDateField } from "@/components/ui/iso-date-field";
@@ -141,7 +150,7 @@ export function RateCardDialog({
           </Switch>
           <input type="hidden" name="isDefault" value={String(isDefault)} />
 
-          <fieldset className="flex flex-col gap-3" disabled={isDefault}>
+          <fieldset className="flex min-w-0 flex-col gap-3" disabled={isDefault}>
             <legend className="text-title-small text-on-surface mb-1">{t("conditions")}</legend>
             <p className="text-body-small text-on-surface-variant">
               {isDefault ? t("defaultHelp") : t("conditionsHelp")}
@@ -149,7 +158,8 @@ export function RateCardDialog({
             {!isDefault &&
               conditions.map((c, index) => (
                 <div key={c.key} className="grid grid-cols-[1fr_1fr_1fr_auto] items-start gap-2">
-                  <Select
+                  {/* Searchable: built-in fields plus the workspace's own. */}
+                  <Autocomplete
                     className="w-full"
                     label={t("field")}
                     value={c.field}
@@ -158,11 +168,11 @@ export function RateCardDialog({
                     }
                   >
                     {fieldOptions.map(([value, label]) => (
-                      <SelectItem key={value} textValue={label}>
+                      <AutocompleteItem key={value} textValue={label}>
                         {label}
-                      </SelectItem>
+                      </AutocompleteItem>
                     ))}
-                  </Select>
+                  </Autocomplete>
                   <Select
                     className="w-full"
                     label={t("operator")}
@@ -225,18 +235,31 @@ export function RateCardDialog({
             )}
           />
 
-          <fieldset className="flex flex-col gap-3">
+          {/* min-w-0: a fieldset is otherwise as wide as its content and overflows the dialog. */}
+          <fieldset className="flex min-w-0 flex-col gap-3">
             <legend className="text-title-small text-on-surface mb-1">{t("rates")}</legend>
             <p className="text-body-small text-on-surface-variant">{t("ratesHelp")}</p>
             {rates.map((r, index) => (
-              <div key={r.key} className="flex flex-col gap-1">
-                <div className="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_auto] items-start gap-2">
-                  <IsoDateField
-                    name={`rate-${r.key}`}
-                    label={t("from")}
-                    defaultValue={r.validFrom}
-                    onChange={(value) => value && updateRate(r.key, { validFrom: value })}
+              <div key={r.key} className="flex flex-col gap-2">
+                {/* When it starts, and removing it; then the amounts on their own row. */}
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <IsoDateField
+                      name={`rate-${r.key}`}
+                      label={t("from")}
+                      defaultValue={r.validFrom}
+                      onChange={(value) => value && updateRate(r.key, { validFrom: value })}
+                    />
+                  </div>
+                  <IconButton
+                    variant="standard"
+                    className="mt-2"
+                    aria-label={t("removeRate", { n: index + 1 })}
+                    icon={<Icon name="delete" />}
+                    onPress={() => setRates((rows) => rows.filter((x) => x.key !== r.key))}
                   />
+                </div>
+                <div className="grid grid-cols-[1fr_1fr_6rem] items-start gap-2">
                   <TextField
                     className="w-full"
                     label={t("dayRate")}
@@ -259,12 +282,6 @@ export function RateCardDialog({
                     value={r.currency}
                     maxLength={3}
                     onChange={(currency) => updateRate(r.key, { currency: currency.toUpperCase() })}
-                  />
-                  <IconButton
-                    variant="standard"
-                    aria-label={t("removeRate", { n: index + 1 })}
-                    icon={<Icon name="delete" />}
-                    onPress={() => setRates((rows) => rows.filter((x) => x.key !== r.key))}
                   />
                 </div>
                 {monthly(r) && (
