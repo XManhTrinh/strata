@@ -11,7 +11,8 @@ export function PageHeader({ title, actions }: { title: ReactNode; actions?: Rea
   return (
     <TopAppBar
       title={title}
-      className="bg-surface sticky top-0 z-10"
+      // Windmorph's sticky layer: above sticky table headers and calendar bars as the page scrolls.
+      className="bg-surface sticky top-0 z-(--md-sys-z-sticky)"
       actions={
         <>
           {actions}

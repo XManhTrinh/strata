@@ -41,9 +41,13 @@ test("an importer maps, previews and applies a people file", async ({ page }, te
   await page.getByRole("button", { name: "Next: columns" }).click();
 
   // Columns were guessed from the headers; the Team column feeds the Team level.
-  await expect(page.getByRole("button", { name: /Employee ID Person key$/ })).toBeVisible();
-  await page.getByRole("button", { name: /Team$/ }).last().click();
-  await page.getByRole("option", { name: "Team", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Person key" })).toHaveValue("Employee ID");
+  // Search the file's columns and pick one from the keyboard.
+  const team = page.getByRole("combobox", { name: "Team" });
+  await team.fill("Team");
+  await team.press("ArrowDown");
+  await team.press("Enter");
+  await expect(team).toHaveValue("Team");
   await expectNoA11yViolations(page);
   await page.getByRole("button", { name: "Next: preview" }).click();
 

@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Radio, RadioGroup, Select, SelectItem, Switch, TextField } from "@windmorph/react";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Button,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectItem,
+  Switch,
+  TextField,
+} from "@windmorph/react";
 import { Alert } from "@windmorph/react-pro";
 import { IsoDateField } from "@/components/ui/iso-date-field";
 import { useSnackbar } from "@/lib/snackbar";
@@ -53,18 +63,19 @@ export function MapStep({
     value: string | undefined,
     set: (column: string | undefined) => void
   ) => (
-    <Select
+    // Searchable: files can have dozens of columns.
+    <Autocomplete
       className="w-full"
       label={label}
       value={value && headers.includes(value) ? value : NONE}
-      onChange={(key) => key != null && set(key === NONE ? undefined : String(key))}
+      onChange={(key) => set(key == null || key === NONE ? undefined : String(key))}
     >
       {[NONE, ...headers].map((h) => (
-        <SelectItem key={h} textValue={h === NONE ? t("map.notInFile") : h}>
+        <AutocompleteItem key={h} textValue={h === NONE ? t("map.notInFile") : h}>
           {h === NONE ? t("map.notInFile") : h}
-        </SelectItem>
+        </AutocompleteItem>
       ))}
-    </Select>
+    </Autocomplete>
   );
   const setField = (field: ImportField) => (value: string | undefined) =>
     onChange({ ...mapping, columns: { ...mapping.columns, [field]: value } });

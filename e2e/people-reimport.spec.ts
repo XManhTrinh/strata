@@ -7,8 +7,12 @@ test.skip(({ viewport }) => (viewport?.width ?? 0) < 600, "imports need a larger
 async function chooseAndMap(page: Page, file: Parameters<Page["setInputFiles"]>[1]) {
   await chooseFile(page, file, / rows?, \d+ columns?$/);
   await page.getByRole("button", { name: "Next: columns" }).click();
-  await page.getByRole("button", { name: /Team$/ }).last().click();
-  await page.getByRole("option", { name: "Team", exact: true }).click();
+  // Search the file's columns and pick one from the keyboard.
+  const team = page.getByRole("combobox", { name: "Team" });
+  await team.fill("Team");
+  await team.press("ArrowDown");
+  await team.press("Enter");
+  await expect(team).toHaveValue("Team");
 }
 
 test("an Excel import, then a re-import with a move and a leaver, resumed", async ({
