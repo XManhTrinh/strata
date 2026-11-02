@@ -10,6 +10,7 @@ import {
   DialogTitle,
   TextField,
 } from "@windmorph/react";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { idleFormState } from "@/lib/form-state";
 import { useFormAction } from "@/lib/use-form-action";
@@ -39,7 +40,13 @@ export function OptionsDialog({ field, onClose }: { field: CustomField; onClose:
   }, [state]);
 
   return (
-    <Dialog role="dialog" closedBy="closerequest" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      closedBy="closerequest"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{t("optionsTitle", { name: field.name })}</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         {field.options.length === 0 ? (

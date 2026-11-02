@@ -2,6 +2,7 @@
 
 import { type PointerEvent, useEffect, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
+import { Icon } from "@/components/ui/icon";
 import { daysBetween } from "../calendar-range";
 import type { CalendarEntry } from "../types";
 
@@ -192,6 +193,14 @@ export function MonthCalendar({
                   }}
                 >
                   <span className="sr-only">{describe(bar.entry)}</span>
+                  {/* The type's icon, so types differ by more than colour. */}
+                  <span
+                    aria-hidden
+                    style={{ color: bar.entry.color }}
+                    className="me-1 align-[-3px]"
+                  >
+                    <Icon name={bar.entry.icon} size={14} />
+                  </span>
                   <span aria-hidden>
                     {t("bar", {
                       name: bar.entry.memberName,

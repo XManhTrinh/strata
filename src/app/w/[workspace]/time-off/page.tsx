@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { listTimeSettings } from "@/features/time/queries";
 import { PageHeader } from "@/components/shell/page-header";
 import { type CalendarView, viewRange } from "@/features/time/calendar-range";
 import { TimeOffPage, type TimeOffTab } from "@/features/time/components/time-off-page";
@@ -60,15 +61,23 @@ export default async function TimeOffRoute({
     : new Date().toISOString().slice(0, 10);
   const range = viewRange(view, date, workspace.week_start);
 
-  const [types, balances, bookings, approvals, entries, feeds, t] = await Promise.all([
-    bookableTypes(workspace.id),
-    myBalances(memberId),
-    tab === "mine" ? myBookings(workspace.id, memberId) : [],
-    canApprove ? pendingApprovals(workspace.id) : [],
-    tab === "calendar" ? calendarEntries(workspace.id, range.from, range.to) : [],
-    tab === "mine" ? myFeeds(workspace.id) : [],
-    getTranslations("timeOff"),
-  ]);
+  const [types, balances, bookings, approvals, entries, feeds, timeSettings, t] = await Promise.all(
+    [
+      bookableTypes(workspace.id),
+      myBalances(memberId),
+      // The calendar's side panel lists your own requests when you don't approve others'.
+      tab === "mine" || (tab === "calendar" && !canApprove)
+        ? myBookings(workspace.id, memberId)
+        : [],
+      canApprove ? pendingApprovals(workspace.id) : [],
+      tab === "calendar" ? calendarEntries(workspace.id, range.from, range.to) : [],
+      tab === "mine" ? myFeeds(workspace.id) : [],
+      tab === "calendar" && held.has("time.manage_settings")
+        ? listTimeSettings(workspace.id)
+        : null,
+      getTranslations("timeOff"),
+    ]
+  );
 
   return (
     <>
@@ -89,6 +98,7 @@ export default async function TimeOffRoute({
           canApprove={canApprove}
           entries={entries}
           feeds={feeds}
+          timeSettings={timeSettings}
         />
       </div>
     </>

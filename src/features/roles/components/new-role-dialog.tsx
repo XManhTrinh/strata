@@ -1,5 +1,6 @@
 "use client";
 
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useFormAction } from "@/lib/use-form-action";
 import { useTranslations } from "next-intl";
 import {
@@ -32,7 +33,12 @@ export function NewRoleDialog({
   );
 
   return (
-    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{copyFrom ? t("duplicate") : t("newRole")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">

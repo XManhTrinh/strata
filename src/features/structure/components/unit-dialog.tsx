@@ -13,6 +13,7 @@ import {
   TextField,
 } from "@windmorph/react";
 import { Alert } from "@windmorph/react-pro";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { FormError } from "@/features/auth/components/form-error";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { idleFormState } from "@/lib/form-state";
@@ -69,7 +70,12 @@ export function UnitDialog({
   }, [state, unit, name, onClose, snackbar, t]);
 
   return (
-    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{t(unit ? "units.dialogEdit" : "units.dialogAdd")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">

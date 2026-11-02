@@ -200,6 +200,23 @@ export function PeopleDirectory({
       filters={<DirectoryFilters params={filters} options={options} onChange={onFilterChange} />}
       actions={
         <>
+          {canExport && (
+            <Button
+              variant="text"
+              leadingIcon={<Icon name="download" />}
+              // A file download, not a page: the browser stays on the directory.
+              onPress={() => {
+                const search = directorySearch({ ...filters, search: state.search, page: 0 });
+                const cols = state.columnOrder.filter((id) => !state.hidden.includes(id));
+                window.location.assign(
+                  `${pathname}/export${search}${search ? "&" : "?"}cols=${cols.join(",")}`
+                );
+              }}
+            >
+              {t("export")}
+            </Button>
+          )}
+          {/* Views next to the column settings: a view saves the columns too. */}
           <ViewsMenu
             tableKey="people"
             views={views}
@@ -217,22 +234,6 @@ export function PeopleDirectory({
                   `${pathname}?status=current`
             }
           />
-          {canExport && (
-            <Button
-              variant="text"
-              leadingIcon={<Icon name="download" />}
-              // A file download, not a page: the browser stays on the directory.
-              onPress={() => {
-                const search = directorySearch({ ...filters, search: state.search, page: 0 });
-                const cols = state.columnOrder.filter((id) => !state.hidden.includes(id));
-                window.location.assign(
-                  `${pathname}/export${search}${search ? "&" : "?"}cols=${cols.join(",")}`
-                );
-              }}
-            >
-              {t("export")}
-            </Button>
-          )}
         </>
       }
       empty={

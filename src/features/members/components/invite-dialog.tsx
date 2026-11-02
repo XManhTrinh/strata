@@ -1,5 +1,6 @@
 "use client";
 
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useFormAction } from "@/lib/use-form-action";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -59,7 +60,12 @@ export function InviteDialog({
   }, [state, sentCount, snackbar, t, onOpenChange]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} fullScreen="compact">
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      fullScreen="compact"
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{t("title")}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">

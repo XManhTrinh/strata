@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@windmorph/react";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useSnackbar } from "@/lib/snackbar";
 import { setRoleUnits } from "../actions";
 
@@ -48,7 +49,12 @@ export function RoleUnitsDialog({
   }
 
   return (
-    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{t("unitsTitle", { role: roleName })}</DialogTitle>
       <DialogContent className="flex flex-col gap-4">
         <p className="text-body-medium text-on-surface-variant">

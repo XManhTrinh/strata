@@ -27,7 +27,12 @@ test("people book time off, see their balance, cancel, and see who's away", asyn
   await createWorkspace(page, "Company", `Acme ${id}`);
   await page.getByRole("link", { name: "Time off" }).first().click();
   await expect(page).toHaveURL(/\/time-off/);
-  await expect(page.getByText(/days left$/).first()).toBeVisible();
+  await expect(
+    page
+      .getByText(/days left$/)
+      .filter({ visible: true })
+      .first()
+  ).toBeVisible();
 
   // Annual leave, Monday to Tuesday: two working days, waiting for approval.
   const monday = nextMonday();

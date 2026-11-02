@@ -8,6 +8,12 @@ import { type ErrorKey, type FormState, idleFormState } from "@/lib/form-state";
 import { useSnackbar } from "@/lib/snackbar";
 import { useFormAction } from "@/lib/use-form-action";
 
+/**
+ * Dialogs that hold a form use Material's full dialog width (560px), so fields don't wrap; dialogs
+ * that only confirm keep their natural width. On phones they fill the screen either way.
+ */
+export const FORM_DIALOG_CLASSES = { panel: "w-[560px]" };
+
 /** A dialog around one form: submits the action, then confirms in a snackbar and closes. */
 export function FormDialog({
   title,
@@ -49,7 +55,12 @@ export function FormDialog({
   };
 
   return (
-    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <form onSubmit={onSubmit} noValidate className="contents">
         <DialogTitle>{title}</DialogTitle>
         <DialogContent className="flex flex-col gap-4">

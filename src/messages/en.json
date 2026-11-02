@@ -1685,7 +1685,19 @@
       "halfDay": "half day",
       "links": "Your links"
     },
-    "balanceLine": "{name}: {days} days left"
+    "balanceLine": "{name}: {days} days left",
+    "panel": {
+      "label": "Time off overview",
+      "balances": "Your balances",
+      "daysLeft": "{days} days left",
+      "waiting": "Waiting for you ({count})",
+      "seeAll": "See all {count}",
+      "requests": "Your requests",
+      "noRequests": "Nothing waiting for approval.",
+      "types": "Time types",
+      "addType": "Add time type",
+      "editType": "Edit {name}"
+    }
   },
   "planningSettings": {
     "title": "Planning",

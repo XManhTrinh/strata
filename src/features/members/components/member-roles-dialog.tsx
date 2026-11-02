@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@windmorph/react";
+import { FORM_DIALOG_CLASSES } from "@/components/ui/form-dialog";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { useSnackbar } from "@/lib/snackbar";
 import { setMemberRole } from "../actions";
@@ -51,7 +52,12 @@ export function MemberRolesDialog({
   }
 
   return (
-    <Dialog role="dialog" open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      role="dialog"
+      open
+      onOpenChange={(open) => !open && onClose()}
+      classNames={FORM_DIALOG_CLASSES}
+    >
       <DialogTitle>{t("rolesDialogTitle", { name: member.fullName })}</DialogTitle>
       <DialogContent className="flex flex-col gap-3">
         <p className="text-body-medium text-on-surface-variant">{t("rolesDialogBody")}</p>
