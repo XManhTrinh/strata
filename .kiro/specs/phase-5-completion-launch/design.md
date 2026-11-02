@@ -34,4 +34,21 @@ Approved 2026-11-02 (decisions: `docs/product-decisions.md` sections 12, 13 and 
   moved; dialogs are checked in each feature's own e2e. A manual screen reader pass (VoiceOver,
   NVDA) is still worth doing before launch.
 
+- **Security review (2026-11-02):** every table has RLS, every function pins `search_path`,
+  only token- or secret-keyed functions are open to anon, and no user path uses the service
+  key. All 56 `security definer` RPCs were read and probed. Fixed (migration
+  `security_review`, pgTAP `310`): headcount per unit answered for other workspaces; re-inviting
+  someone who left restored all their old roles; imports could write sensitive custom fields
+  and their preview confirmed guessed pay or sensitive values; looking at next year fixed its
+  carry-over early; the audit log showed pay and sensitive values to any audit reader (it now
+  needs seeing pay everywhere, checked once per query); importing alone could mark leavers
+  (now needs managing members everywhere) and set a job's progress. The app now sends a CSP,
+  HSTS, `nosniff`, `frame-ancestors 'none'` and a referrer and permissions policy.
+  Dependencies: one low advisory in production (`deepmerge` via html-to-text and date-holidays,
+  no fix released, only merges our own data) and one moderate in development (`minimatch` via
+  ESLint, needs untrusted glob patterns); both accepted. Follow-ups, not exploitable today:
+  rate-card previews can match on sensitive fields; any attendee can cancel a shared event;
+  reactivating someone restores their roles; the directory shows managers' names beyond reach;
+  session flags such as `app.seeding_workspace` are safe only while users can't run SQL.
+
 Full design is written when the phase starts.

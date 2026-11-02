@@ -20,6 +20,7 @@ export function MapStep({
   options,
   levels,
   customFields,
+  canMarkLeavers,
   saved,
   error,
   pending,
@@ -34,6 +35,7 @@ export function MapStep({
   options: ImportOptions;
   levels: { id: string; name: string }[];
   customFields: { key: string; label: string }[];
+  canMarkLeavers: boolean;
   saved: SavedMapping[];
   error: string | null;
   pending: string | null;
@@ -166,17 +168,19 @@ export function MapStep({
           defaultValue={options.effectiveDate}
           onChange={(date) => date && onOptions({ ...options, effectiveDate: date })}
         />
-        <div className="medium:col-span-2 flex flex-col gap-1">
-          <Switch
-            checked={options.markLeavers}
-            onCheckedChange={(on) => onOptions({ ...options, markLeavers: on })}
-          >
-            {t("map.markLeavers")}
-          </Switch>
-          <span className="text-body-small text-on-surface-variant">
-            {t("map.markLeaversHelp")}
-          </span>
-        </div>
+        {canMarkLeavers && (
+          <div className="medium:col-span-2 flex flex-col gap-1">
+            <Switch
+              checked={options.markLeavers}
+              onCheckedChange={(on) => onOptions({ ...options, markLeavers: on })}
+            >
+              {t("map.markLeavers")}
+            </Switch>
+            <span className="text-body-small text-on-surface-variant">
+              {t("map.markLeaversHelp")}
+            </span>
+          </div>
+        )}
       </section>
 
       <div className="flex flex-wrap items-end gap-3">

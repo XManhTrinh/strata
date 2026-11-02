@@ -27,6 +27,8 @@ test("every screen meets WCAG 2.2 AA", async ({ page }, testInfo) => {
   const check = async (url: string) => {
     await page.goto(url);
     await page.waitForLoadState("networkidle");
+    // Next.js streams the title in after the page.
+    await expect(page).not.toHaveTitle("");
     for (const found of await a11yViolations(page)) report.push(`${url} ${found}`);
   };
 

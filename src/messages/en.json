@@ -1329,7 +1329,7 @@
       "emailInvalid": "Email isn't valid",
       "nameRequired": "New people need a name",
       "unknownEmploymentType": "Unknown employment type",
-      "payNotAllowed": "You can't import pay",
+      "payNotAllowed": "You can't import pay or sensitive fields",
       "duplicateKey": "Key appears more than once"
     },
     "apply": {

@@ -19,6 +19,10 @@ export default async function ImportPage({ params }: { params: Promise<{ workspa
     p_workspace_id: workspace.id,
   });
   if (!permissions?.some((p) => p.permission_key === "people.import")) notFound();
+  // Marking leavers deactivates people, so it needs managing members across the workspace.
+  const canMarkLeavers = permissions.some(
+    (p) => p.permission_key === "members.manage" && p.reaches.includes("workspace")
+  );
 
   const [{ data: levels }, { data: fields }, { data: mappings }, { data: jobs }, t] =
     await Promise.all([
@@ -74,6 +78,7 @@ export default async function ImportPage({ params }: { params: Promise<{ workspa
               mapping: m.settings as unknown as ImportMapping,
             }))}
             unfinished={unfinished}
+            canMarkLeavers={canMarkLeavers}
           />
         </div>
       </div>

@@ -96,8 +96,8 @@ select is((select kind from public.notifications where kind like 'import.%' and 
 
 select tests.authenticate_as((select user_id from people where name = 'alice'));
 
-insert into public.import_jobs (workspace_id, created_by, key_field, unit_level_ids, effective_date)
-select ws, auth.uid(), 'person_key', pg_temp.levels(), current_date + 7 from ctx;
+insert into public.import_jobs (workspace_id, created_by, key_field, unit_level_ids, effective_date, mark_leavers)
+select ws, auth.uid(), 'person_key', pg_temp.levels(), current_date + 7, true from ctx;
 insert into jobs select 2, id from public.import_jobs where status = 'staging';
 
 select public.import_stage_rows((select id from jobs where n = 2), 1, jsonb_agg(r.d::jsonb order by r.n))

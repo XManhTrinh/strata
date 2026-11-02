@@ -7,6 +7,8 @@ test("anyone reads the help and the legal pages", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Help", level: 1 })).toBeVisible();
   await page.getByRole("link", { name: /^Time off/ }).click();
   await expect(page.getByRole("heading", { name: "Approvals", level: 2 })).toBeVisible();
+  // Next.js streams the title in after the page.
+  await expect(page).toHaveTitle(/Time off/);
   await expectNoA11yViolations(page);
 
   await page
@@ -15,6 +17,7 @@ test("anyone reads the help and the legal pages", async ({ page }) => {
     .click();
   await expect(page.getByRole("heading", { name: "Privacy notice", level: 1 })).toBeVisible();
   await expect(page.getByText("Data is stored in the European Union (Ireland).")).toBeVisible();
+  await expect(page).toHaveTitle(/Privacy notice/);
   await expectNoA11yViolations(page);
 
   await page.goto("/legal/sub-processors");

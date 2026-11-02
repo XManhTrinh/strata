@@ -31,11 +31,13 @@ export function ImportWizard({
   customFields,
   saved,
   unfinished,
+  canMarkLeavers,
 }: {
   levels: { id: string; name: string }[];
   customFields: { key: string; label: string }[];
   saved: SavedMapping[];
   unfinished: ImportJobSummary[];
+  canMarkLeavers: boolean;
 }) {
   const t = useTranslations("import");
   const format = useFormatter();
@@ -184,6 +186,7 @@ export function ImportWizard({
           options={options}
           levels={levels}
           customFields={customFields}
+          canMarkLeavers={canMarkLeavers}
           saved={saved}
           error={error}
           pending={progress}

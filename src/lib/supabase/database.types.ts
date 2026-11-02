@@ -281,6 +281,10 @@ export type Database = {
         Returns: number;
       };
       workspace_approvers: { Args: { p_workspace_id: string }; Returns: string[] };
+      workspaces_with: {
+        Args: { p_permission_key: string; p_reach?: Database["public"]["Enums"]["reach"] };
+        Returns: string[];
+      };
       would_report_to_self: {
         Args: { p_date: string; p_manager_id: string; p_member_id: string };
         Returns: boolean;
