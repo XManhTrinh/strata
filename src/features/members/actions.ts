@@ -15,7 +15,13 @@ export type InviteState = FormState<"emails" | "roleId"> & { results?: InviteRes
 type ActionResult = { ok: true } | { ok: false; error: ErrorKey };
 
 function errorKeyFor(error: { code?: string; message: string; hint?: string | null }): ErrorKey {
-  if (error.hint === "unitOutsideReach" || error.hint === "roleHasNoUnitReach") return error.hint;
+  if (
+    error.hint === "unitOutsideReach" ||
+    error.hint === "roleHasNoUnitReach" ||
+    error.hint === "reactivateRolesNotHeld"
+  ) {
+    return error.hint;
+  }
   if (error.code === "42501") return "notAllowed";
   if (error.message.includes("already a member")) return "alreadyMember";
   if (error.message.includes("open invitation")) return "alreadyInvited";

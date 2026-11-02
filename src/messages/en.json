@@ -165,7 +165,8 @@
     "alreadyErased": "This person has already been erased.",
     "erasureReasonRequired": "Give a reason for erasing.",
     "ownerMustTransfer": "You own a workspace other people use. Make someone else its owner first.",
-    "retentionInvalid": "Enter a whole number in the range shown, or leave it empty to keep."
+    "retentionInvalid": "Enter a whole number in the range shown, or leave it empty to keep.",
+    "reactivateRolesNotHeld": "You can only reactivate someone whose roles you could give yourself. Ask an owner."
   },
   "auth": {
     "signIn": {

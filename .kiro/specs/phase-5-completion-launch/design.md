@@ -46,9 +46,11 @@ Approved 2026-11-02 (decisions: `docs/product-decisions.md` sections 12, 13 and 
   HSTS, `nosniff`, `frame-ancestors 'none'` and a referrer and permissions policy.
   Dependencies: one low advisory in production (`deepmerge` via html-to-text and date-holidays,
   no fix released, only merges our own data) and one moderate in development (`minimatch` via
-  ESLint, needs untrusted glob patterns); both accepted. Follow-ups, not exploitable today:
-  rate-card previews can match on sensitive fields; any attendee can cancel a shared event;
-  reactivating someone restores their roles; the directory shows managers' names beyond reach;
-  session flags such as `app.seeding_workspace` are safe only while users can't run SQL.
+  ESLint, needs untrusted glob patterns); both accepted. Follow-ups (migration `security_follow_ups`, pgTAP `320`): rate-card previews match on
+  sensitive fields and show a salary only for people who may see that person's pay; an attendee
+  who isn't the organiser leaves a shared booking instead of cancelling it for everyone;
+  reactivating someone needs every permission their roles give (or ownership). Accepted: the
+  directory names the manager of people you can see, and session flags such as
+  `app.seeding_workspace` are safe because users can't run SQL.
 
 Full design is written when the phase starts.
