@@ -18,6 +18,7 @@ import { useDataTableLabels } from "@/hooks/use-data-table-labels";
 import { ViewsMenu } from "@/features/table-views/components/views-menu";
 import type { TableView } from "@/features/table-views/types";
 import {
+  DEFAULT_DIRECTORY_PARAMS,
   DIRECTORY_SORTS,
   type DirectoryParams,
   type DirectorySort,
@@ -91,21 +92,18 @@ export function PeopleDirectory({
       id: "level",
       header: t("columns.level"),
       accessor: (p) => p.careerLevelName,
-      sortable: false,
       width: 140,
     },
     {
       id: "type",
       header: t("columns.employmentType"),
       accessor: (p) => p.employmentTypeName,
-      sortable: false,
       width: 150,
     },
     {
       id: "manager",
       header: t("columns.manager"),
       accessor: (p) => p.managerName,
-      sortable: false,
       width: 180,
       grow: true,
     },
@@ -113,7 +111,6 @@ export function PeopleDirectory({
       id: "email",
       header: t("columns.email"),
       accessor: (p) => p.email,
-      sortable: false,
       width: 240,
       grow: true,
     },
@@ -141,7 +138,10 @@ export function PeopleDirectory({
         widths: saved.columns.widths,
       }),
       search: params.search,
-      sort: { column: params.sort, direction: params.descending ? "descending" : "ascending" },
+      sort: params.sorts.map((s) => ({
+        column: s.key,
+        direction: s.descending ? "descending" : "ascending",
+      })),
       page: { index: params.page, size: params.size },
     })
   );
@@ -170,14 +170,15 @@ export function PeopleDirectory({
 
   function onStateChange(next: TableState) {
     setState(next);
-    const sort = (DIRECTORY_SORTS as readonly string[]).includes(next.sort?.column ?? "")
-      ? (next.sort!.column as DirectorySort)
-      : "name";
+    const sorts = next.sort.flatMap((level) =>
+      (DIRECTORY_SORTS as readonly string[]).includes(level.column)
+        ? [{ key: level.column as DirectorySort, descending: level.direction === "descending" }]
+        : []
+    );
     const wanted: DirectoryParams = {
       ...filters,
       search: next.search,
-      sort,
-      descending: next.sort?.direction === "descending",
+      sorts: sorts.length > 0 ? sorts : DEFAULT_DIRECTORY_PARAMS.sorts,
       page: next.page.index,
       size: next.page.size,
     };

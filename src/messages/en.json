@@ -1001,7 +1001,8 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "loading": "Loading",
-    "retry": "Try again"
+    "retry": "Try again",
+    "sortLevel": "Sort level {level}"
   },
   "hierarchy": {
     "title": "Hierarchy",

@@ -211,7 +211,7 @@ export function TotalsPage({
           columns={columns}
           rows={table.rows}
           getRowId={(r) => r.id || "none"}
-          defaultState={{ sort: { column: "group", direction: "ascending" } }}
+          defaultState={{ sort: [{ column: "group", direction: "ascending" }] }}
           rowHref={(r) => (opens(r) ? href({ unitId: r.id }) : "")}
           compactItem={(r) => ({
             headline: r.label || t("noValue"),

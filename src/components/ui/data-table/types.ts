@@ -25,12 +25,15 @@ export type ColumnDef<Row> = {
   isRowHeader?: boolean;
 };
 
+export type SortLevel = { column: string; direction: "ascending" | "descending" };
+
 /** Everything a user can change about a table, serializable so it can be saved as a view. */
 export type TableState = {
   columnOrder: string[];
   hidden: string[];
   widths: Record<string, number>;
-  sort: { column: string; direction: "ascending" | "descending" } | null;
+  /** Sort levels in order (at most three); empty for the rows as given. */
+  sort: SortLevel[];
   search: string;
   page: { index: number; size: number };
   selection: { ids: string[]; allMatching: boolean };
@@ -54,6 +57,8 @@ export type DataTableLabels = {
   selectAllMatching: (count: number) => string;
   clearSelection: string;
   rowsPerPage: string;
+  /** A column's place in a sort by several columns: "Sorted second". */
+  sortLevel: (level: number) => string;
   range: (from: number, to: number, total: number) => string;
   previousPage: string;
   nextPage: string;

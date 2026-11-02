@@ -1,10 +1,21 @@
 /** The directory's search, filters, sort and page, as kept in the URL. Shared by server and client. */
 
-export const DIRECTORY_SORTS = ["name", "unit", "position", "start_date"] as const;
+/** Columns the directory sorts by (the database checks the same list). */
+export const DIRECTORY_SORTS = [
+  "name",
+  "unit",
+  "position",
+  "level",
+  "type",
+  "manager",
+  "email",
+  "start_date",
+] as const;
 export const DIRECTORY_STATUSES = ["current", "leavers", "all"] as const;
 const DIRECTORY_PAGE_SIZES = [25, 50, 100] as const;
 
 export type DirectorySort = (typeof DIRECTORY_SORTS)[number];
+export type DirectorySortLevel = { key: DirectorySort; descending: boolean };
 type DirectoryStatus = (typeof DIRECTORY_STATUSES)[number];
 
 export type DirectoryParams = {
@@ -13,8 +24,8 @@ export type DirectoryParams = {
   positionId: string | null;
   employmentTypeId: string | null;
   status: DirectoryStatus;
-  sort: DirectorySort;
-  descending: boolean;
+  /** Up to three levels, in order. */
+  sorts: DirectorySortLevel[];
   /** Zero-based. */
   page: number;
   size: number;
@@ -26,8 +37,7 @@ export const DEFAULT_DIRECTORY_PARAMS: DirectoryParams = {
   positionId: null,
   employmentTypeId: null,
   status: "current",
-  sort: "name",
-  descending: false,
+  sorts: [{ key: "name", descending: false }],
   page: 0,
   size: 50,
 };
@@ -36,6 +46,30 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function oneOf<T extends string>(values: readonly T[], value: string | undefined, fallback: T): T {
   return values.includes(value as T) ? (value as T) : fallback;
+}
+
+/**
+ * Sorts in the URL: column keys in order, "-" first for descending ("unit,-start_date"). Older
+ * links have one key and `desc=1`. Unknown keys are dropped; none left means by name.
+ */
+function parseSorts(value: string | undefined, legacyDescending: boolean): DirectorySortLevel[] {
+  const levels = (value ?? "")
+    .split(",")
+    .flatMap((part) => {
+      const key = part.replace(/^-/, "");
+      return (DIRECTORY_SORTS as readonly string[]).includes(key)
+        ? [{ key: key as DirectorySort, descending: part.startsWith("-") }]
+        : [];
+    })
+    .filter((level, i, all) => all.findIndex((l) => l.key === level.key) === i)
+    .slice(0, 3);
+  if (levels.length === 1 && legacyDescending) levels[0]!.descending = true;
+  return levels.length > 0 ? levels : DEFAULT_DIRECTORY_PARAMS.sorts;
+}
+
+/** The URL and database form of the sorts: "unit,-start_date". */
+export function sortText(sorts: DirectorySortLevel[]): string {
+  return sorts.map((s) => `${s.descending ? "-" : ""}${s.key}`).join(",");
 }
 
 /** Reads the params, ignoring anything unknown or malformed. */
@@ -58,8 +92,7 @@ export function parseDirectoryParams(
     positionId: id("position"),
     employmentTypeId: id("type"),
     status: oneOf(DIRECTORY_STATUSES, get("status"), "current"),
-    sort: oneOf(DIRECTORY_SORTS, get("sort"), "name"),
-    descending: get("desc") === "1",
+    sorts: parseSorts(get("sort"), get("desc") === "1"),
     page: page > 1 ? page - 1 : 0,
     size: (DIRECTORY_PAGE_SIZES as readonly number[]).includes(size) ? size : 50,
   };
@@ -74,8 +107,8 @@ export function directorySearch(params: DirectoryParams): string {
   if (params.positionId) query.set("position", params.positionId);
   if (params.employmentTypeId) query.set("type", params.employmentTypeId);
   if (params.status !== d.status) query.set("status", params.status);
-  if (params.sort !== d.sort) query.set("sort", params.sort);
-  if (params.descending) query.set("desc", "1");
+  const sort = sortText(params.sorts);
+  if (sort !== sortText(d.sorts)) query.set("sort", sort);
   if (params.page > 0) query.set("page", String(params.page + 1));
   if (params.size !== d.size) query.set("size", String(params.size));
   const text = query.toString();
@@ -100,7 +133,16 @@ export function parseDirectoryView(state: unknown): DirectoryView {
     position: text(params.positionId),
     type: text(params.employmentTypeId),
     status: text(params.status),
-    sort: text(params.sort),
+    // Views saved before sorting by several columns kept one sort and a direction.
+    sort: Array.isArray(params.sorts)
+      ? sortText(
+          (params.sorts as { key?: unknown; descending?: unknown }[]).flatMap((l) =>
+            typeof l?.key === "string"
+              ? [{ key: l.key as DirectorySort, descending: l.descending === true }]
+              : []
+          )
+        )
+      : text(params.sort),
     desc: params.descending === true ? "1" : undefined,
     size: typeof params.size === "number" ? String(params.size) : undefined,
   });

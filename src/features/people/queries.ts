@@ -4,7 +4,7 @@ import type { OrgUnitNode } from "@/features/structure/types";
 import { myBalances, myBookings } from "@/features/time/time-off-queries";
 import { signedAvatarUrls } from "@/lib/avatars";
 import { createClient } from "@/lib/supabase/server";
-import type { DirectoryParams } from "./directory-params";
+import { type DirectoryParams, sortText } from "./directory-params";
 import type {
   DirectoryFilterOptions,
   DirectoryPerson,
@@ -26,8 +26,7 @@ export async function peopleDirectory(
     p_position_id: params.positionId ?? undefined,
     p_employment_type_id: params.employmentTypeId ?? undefined,
     p_status: params.status,
-    p_sort: params.sort,
-    p_descending: params.descending,
+    p_sorts: sortText(params.sorts).split(","),
     p_limit: params.size,
     p_offset: params.page * params.size,
   });

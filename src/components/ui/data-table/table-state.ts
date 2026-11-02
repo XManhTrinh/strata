@@ -1,4 +1,4 @@
-import type { ColumnDef, TableState } from "./types";
+import type { ColumnDef, SortLevel, TableState } from "./types";
 
 export const PAGE_SIZES = [25, 50, 100] as const;
 
@@ -10,11 +10,11 @@ export function initialTableState<Row>(
     columnOrder: columns.map((c) => c.id),
     hidden: [],
     widths: {},
-    sort: null,
     search: "",
     page: { index: 0, size: PAGE_SIZES[1] },
     selection: { ids: [], allMatching: false },
     ...overrides,
+    sort: normalizeSort(overrides.sort ?? []),
   };
 }
 
@@ -62,24 +62,72 @@ export function applyClientModel<Row>(
       )
     : rows;
 
-  const sortColumn = state.sort && columns.find((c) => c.id === state.sort!.column);
-  if (sortColumn && state.sort) {
-    const direction = state.sort.direction === "ascending" ? 1 : -1;
+  const levels = state.sort.flatMap((level) => {
+    const column = columns.find((c) => c.id === level.column);
+    return column ? [{ column, direction: level.direction === "ascending" ? 1 : -1 }] : [];
+  });
+  if (levels.length > 0) {
     const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
     result = [...result].sort((a, b) => {
-      const x = sortColumn.accessor(a);
-      const y = sortColumn.accessor(b);
-      if (x === y) return 0;
-      if (x === null) return 1;
-      if (y === null) return -1;
-      return (
-        (typeof x === "number" && typeof y === "number"
-          ? x - y
-          : collator.compare(String(x), String(y))) * direction
-      );
+      for (const { column, direction } of levels) {
+        const x = column.accessor(a);
+        const y = column.accessor(b);
+        if (x === y) continue;
+        if (x === null) return 1;
+        if (y === null) return -1;
+        const order =
+          typeof x === "number" && typeof y === "number"
+            ? x - y
+            : collator.compare(String(x), String(y));
+        if (order !== 0) return order * direction;
+      }
+      return 0;
     });
   }
 
   const start = state.page.index * state.page.size;
   return { pageRows: result.slice(start, start + state.page.size), total: result.length };
+}
+
+const MAX_SORT_LEVELS = 3;
+
+/**
+ * The sort after pressing a column's header: alone, the column becomes the only sort and cycles
+ * ascending, descending, none; with Shift (adding), it joins the sort as the next level (up to
+ * three) or, already in it, cycles there.
+ */
+export function nextSort(current: SortLevel[], column: string, adding: boolean): SortLevel[] {
+  const index = current.findIndex((level) => level.column === column);
+  const cycled = (level: SortLevel): SortLevel | null =>
+    level.direction === "ascending" ? { column, direction: "descending" } : null;
+  if (!adding) {
+    if (index === 0 && current.length === 1) {
+      const next = cycled(current[0]!);
+      return next ? [next] : [];
+    }
+    return [{ column, direction: "ascending" }];
+  }
+  if (index >= 0) {
+    const next = cycled(current[index]!);
+    return next
+      ? current.map((level, i) => (i === index ? next : level))
+      : current.filter((_, i) => i !== index);
+  }
+  return current.length >= MAX_SORT_LEVELS
+    ? current
+    : [...current, { column, direction: "ascending" }];
+}
+
+/** Reads a saved sort: a list of levels, or (from before multi-column sorting) one level. */
+export function normalizeSort(value: unknown): SortLevel[] {
+  const levels = Array.isArray(value) ? value : value ? [value] : [];
+  return levels
+    .filter(
+      (l): l is SortLevel =>
+        typeof l === "object" &&
+        l !== null &&
+        typeof (l as SortLevel).column === "string" &&
+        ((l as SortLevel).direction === "ascending" || (l as SortLevel).direction === "descending")
+    )
+    .slice(0, MAX_SORT_LEVELS);
 }

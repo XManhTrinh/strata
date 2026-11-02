@@ -14,7 +14,9 @@ import {
 } from "react-aria-components";
 import { cn } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
+import { useEffect, useRef } from "react";
 import { SelectionCheckbox } from "./selection-checkbox";
+import { nextSort } from "./table-state";
 import type { ColumnDef, DataTableLabels, TableState } from "./types";
 
 type Props<Row> = {
@@ -55,6 +57,19 @@ export function TableView<Row>({
   labels,
 }: Props<Row>) {
   const selectedKeys: Selection = new Set(state.selection.ids);
+  // Shift held while pressing a header adds that column to the sort (read when the press starts).
+  const adding = useRef(false);
+  useEffect(() => {
+    const remember = (event: PointerEvent | KeyboardEvent) => {
+      adding.current = event.shiftKey;
+    };
+    document.addEventListener("pointerdown", remember, true);
+    document.addEventListener("keydown", remember, true);
+    return () => {
+      document.removeEventListener("pointerdown", remember, true);
+      document.removeEventListener("keydown", remember, true);
+    };
+  }, []);
   const byId = new Map(rows.map((row) => [getRowId(row), row]));
 
   return (
@@ -79,11 +94,10 @@ export function TableView<Row>({
           const ids = keys === "all" ? rows.map(getRowId) : [...keys].map(String);
           onSelectionChange(ids, keys === "all");
         }}
-        sortDescriptor={
-          state.sort ? { column: state.sort.column, direction: state.sort.direction } : undefined
-        }
+        // React Aria marks the first level (aria-sort); the levels after it show in the headers.
+        sortDescriptor={state.sort[0]}
         onSortChange={(sort) =>
-          onSortChange({ column: String(sort.column), direction: sort.direction })
+          onSortChange(nextSort(state.sort, String(sort.column), adding.current))
         }
         onRowAction={
           onRowAction
@@ -127,28 +141,40 @@ export function TableView<Row>({
                   column.sortable !== false && "cursor-pointer"
                 )}
               >
-                {({ sortDirection, allowsSorting }) => (
-                  <div
-                    className={cn(
-                      "flex items-center gap-1",
-                      column.align === "end" && "justify-end"
-                    )}
-                  >
-                    <span className="truncate">{column.header}</span>
-                    {allowsSorting && (
-                      <Icon
-                        name={sortDirection === "descending" ? "arrow_downward" : "arrow_upward"}
-                        size={18}
-                        className={cn(
-                          sortDirection ? "text-on-surface" : "opacity-0 group-hover:opacity-60"
-                        )}
-                      />
-                    )}
-                    {!last && (
-                      <ColumnResizer className="bg-outline-variant hover:bg-primary data-[resizing]:bg-primary absolute end-0 top-3 bottom-3 w-0.5 cursor-col-resize outline-none" />
-                    )}
-                  </div>
-                )}
+                {({ allowsSorting }) => {
+                  const level = state.sort.findIndex((s) => s.column === column.id);
+                  const sortDirection = level >= 0 ? state.sort[level]!.direction : undefined;
+                  return (
+                    <div
+                      className={cn(
+                        "flex items-center gap-1",
+                        column.align === "end" && "justify-end"
+                      )}
+                    >
+                      <span className="truncate">{column.header}</span>
+                      {allowsSorting && (
+                        <Icon
+                          name={sortDirection === "descending" ? "arrow_downward" : "arrow_upward"}
+                          size={18}
+                          className={cn(
+                            sortDirection ? "text-on-surface" : "opacity-0 group-hover:opacity-60"
+                          )}
+                        />
+                      )}
+                      {sortDirection && state.sort.length > 1 && (
+                        <span
+                          className="text-label-small text-on-surface-variant"
+                          aria-label={labels.sortLevel(level + 1)}
+                        >
+                          {level + 1}
+                        </span>
+                      )}
+                      {!last && (
+                        <ColumnResizer className="bg-outline-variant hover:bg-primary data-[resizing]:bg-primary absolute end-0 top-3 bottom-3 w-0.5 cursor-col-resize outline-none" />
+                      )}
+                    </div>
+                  );
+                }}
               </Column>
             );
           })}

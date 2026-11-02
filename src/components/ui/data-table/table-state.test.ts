@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { applyClientModel, initialTableState, moveColumn, visibleColumns } from "./table-state";
+import {
+  applyClientModel,
+  initialTableState,
+  moveColumn,
+  nextSort,
+  normalizeSort,
+  visibleColumns,
+} from "./table-state";
 import type { ColumnDef } from "./types";
 
 type Person = { name: string; team: string; salary: number | null };
@@ -43,13 +50,13 @@ describe("client model", () => {
     const byName = applyClientModel(
       people,
       columns,
-      initialTableState(columns, { sort: { column: "name", direction: "ascending" } })
+      initialTableState(columns, { sort: [{ column: "name", direction: "ascending" }] })
     );
     expect(byName.pageRows.map((p) => p.name)).toEqual(["Ana", "ben", "Carla"]);
     const bySalary = applyClientModel(
       people,
       columns,
-      initialTableState(columns, { sort: { column: "salary", direction: "descending" } })
+      initialTableState(columns, { sort: [{ column: "salary", direction: "descending" }] })
     );
     expect(bySalary.pageRows.map((p) => p.name)).toEqual(["Carla", "Ana", "ben"]);
   });
@@ -61,5 +68,52 @@ describe("client model", () => {
       initialTableState(columns, { page: { index: 1, size: 2 } })
     );
     expect(result).toEqual({ pageRows: [people[2]], total: 3 });
+  });
+});
+
+describe("sorting by several columns", () => {
+  const asc = (column: string) => ({ column, direction: "ascending" as const });
+  const desc = (column: string) => ({ column, direction: "descending" as const });
+
+  it("cycles one column ascending, descending, none; another column replaces it", () => {
+    expect(nextSort([], "name", false)).toEqual([asc("name")]);
+    expect(nextSort([asc("name")], "name", false)).toEqual([desc("name")]);
+    expect(nextSort([desc("name")], "name", false)).toEqual([]);
+    expect(nextSort([asc("name"), asc("unit")], "unit", false)).toEqual([asc("unit")]);
+  });
+
+  it("adds levels with Shift, cycles them in place, and stops at three", () => {
+    expect(nextSort([asc("unit")], "name", true)).toEqual([asc("unit"), asc("name")]);
+    expect(nextSort([asc("unit"), asc("name")], "name", true)).toEqual([asc("unit"), desc("name")]);
+    expect(nextSort([asc("unit"), desc("name")], "name", true)).toEqual([asc("unit")]);
+    expect(nextSort([asc("a"), asc("b"), asc("c")], "d", true)).toEqual([
+      asc("a"),
+      asc("b"),
+      asc("c"),
+    ]);
+  });
+
+  it("sorts rows by each level in turn", () => {
+    const rows = [
+      { name: "Bo", team: "B" },
+      { name: "Al", team: "B" },
+      { name: "Cy", team: "A" },
+    ];
+    const cols = [
+      { id: "name", header: "Name", accessor: (r: (typeof rows)[number]) => r.name },
+      { id: "team", header: "Team", accessor: (r: (typeof rows)[number]) => r.team },
+    ];
+    const result = applyClientModel(
+      rows,
+      cols,
+      initialTableState(cols, { sort: [desc("team"), asc("name")] })
+    );
+    expect(result.pageRows.map((r) => r.name)).toEqual(["Al", "Bo", "Cy"]);
+  });
+
+  it("reads a sort saved before levels as one level", () => {
+    expect(normalizeSort(asc("name"))).toEqual([asc("name")]);
+    expect(normalizeSort(null)).toEqual([]);
+    expect(normalizeSort([asc("a"), { column: 1 }, desc("b")])).toEqual([asc("a"), desc("b")]);
   });
 });

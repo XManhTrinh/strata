@@ -23,6 +23,15 @@ test("DataTable: sort, search, select, columns and pages", async ({ page, viewpo
     "descending"
   );
 
+  // Shift adds a second level: by team, then salary.
+  await page.getByRole("columnheader", { name: "Team" }).click();
+  await page.getByRole("columnheader", { name: "Salary" }).click({ modifiers: ["Shift"] });
+  await expect(page.getByRole("columnheader", { name: "Team" })).toHaveAttribute(
+    "aria-sort",
+    "ascending"
+  );
+  await expect(page.getByLabel("Sort level 2")).toBeVisible();
+
   // Paging, in the Material 3 footer.
   await expect(page.getByText("1–50 of 300")).toBeVisible();
   await page.getByRole("button", { name: "Next page" }).click();

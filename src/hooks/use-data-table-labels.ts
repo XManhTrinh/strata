@@ -25,6 +25,7 @@ export function useDataTableLabels(): DataTableLabels {
       selectAllMatching: (count) => t("selectAllMatching", { count: format.number(count) }),
       clearSelection: t("clearSelection"),
       rowsPerPage: t("rowsPerPage"),
+      sortLevel: (level: number) => t("sortLevel", { level }),
       range: (from, to, total) =>
         t("range", {
           from: format.number(from),

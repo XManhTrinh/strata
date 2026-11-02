@@ -2,7 +2,7 @@
 begin;
 \ir _helpers.psql
 
-select plan(14);
+select plan(21);
 
 create temporary table people (name text primary key, user_id uuid, member_id uuid) on commit drop;
 grant select on people to authenticated;
@@ -156,7 +156,7 @@ select is(
 );
 select is(
   (select array_agg(full_name || ':' || total_count) from public.people_directory(
-     (select ws from ctx), p_sort => 'name', p_descending => true, p_limit => 2, p_offset => 1)),
+     (select ws from ctx), p_sorts => '{-name}', p_limit => 2, p_offset => 1)),
   array['Tom:5', 'Sam:5'], 'pages carry the total and follow the sort'
 );
 
@@ -165,6 +165,34 @@ select is(
   (select count(*)::int from public.people_directory((select ws from ctx))),
   0, 'people outside the workspace see nobody'
 );
+
+-- Sorting by several columns, and filtering on columns -------------------------------------------
+select tests.authenticate_as((select user_id from people where name = 'alice'));
+update public.members set start_date = d from (values ('Mia', date '2021-03-01'), ('Sam', date '2023-06-01'),
+  ('Tom', date '2022-01-15'), ('Una', date '2023-06-01')) v (n, d)
+where workspace_id = (select ws from ctx) and full_name = v.n;
+select is(
+  (select array_agg(full_name) from public.people_directory((select ws from ctx), p_sorts => '{unit,-start_date}')),
+  array['Sam', 'Mia', 'Una', 'Tom', 'Alice'], 'sorts by unit, then newest first within a unit');
+select is(
+  (select array_agg(full_name) from public.people_directory((select ws from ctx), p_sorts => '{-start_date,name}')),
+  array['Sam', 'Una', 'Tom', 'Mia', 'Alice'], 'a second column breaks ties');
+select is(
+  (select array_agg(full_name order by full_name) from public.people_directory((select ws from ctx),
+     p_filters => '{"manager": {"contains": "mi"}}')),
+  array['Sam'], 'filters on a column''s text');
+select is(
+  (select array_agg(full_name order by full_name) from public.people_directory((select ws from ctx),
+     p_filters => '{"start_date": {"from": "2022-01-01", "to": "2022-12-31"}}')),
+  array['Tom'], 'filters on a date range');
+select is(
+  (select array_agg(full_name order by full_name) from public.people_directory((select ws from ctx),
+     p_filters => jsonb_build_object('unit', jsonb_build_object('in', jsonb_build_array(pg_temp.unit('Engineering')))))),
+  array['Mia', 'Sam', 'Tom', 'Una'], 'a unit filter takes in its sub-units');
+select throws_ok($$ select * from public.people_directory((select ws from ctx), p_sorts => '{salary}') $$, '22023', null,
+  'only known columns sort');
+select throws_ok($$ select * from public.people_directory((select ws from ctx),
+  p_filters => '{"start_date": {"from": "soon"}}') $$, '22023', null, 'and filter values must be valid');
 
 select * from finish();
 rollback;

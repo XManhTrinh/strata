@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getTranslations } from "next-intl/server";
-import { parseDirectoryParams } from "@/features/people/directory-params";
+import { parseDirectoryParams, sortText } from "@/features/people/directory-params";
 import { CSV_BOM, csvRow } from "@/lib/csv";
 import { createClient } from "@/lib/supabase/server";
 
@@ -73,8 +73,7 @@ export async function GET(
           p_position_id: query.positionId ?? undefined,
           p_employment_type_id: query.employmentTypeId ?? undefined,
           p_status: query.status,
-          p_sort: query.sort,
-          p_descending: query.descending,
+          p_sorts: sortText(query.sorts).split(","),
           p_limit: PAGE,
           p_offset: offset,
           p_for_export: true,

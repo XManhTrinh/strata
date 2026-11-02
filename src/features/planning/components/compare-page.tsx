@@ -188,7 +188,7 @@ export function ComparePage({
             columns={columns}
             rows={rows}
             getRowId={(r) => r.id}
-            defaultState={{ sort: { column: "team", direction: "ascending" } }}
+            defaultState={{ sort: [{ column: "team", direction: "ascending" }] }}
             compactItem={(r) => ({
               headline: r.team,
               supporting: `${fte(r.fteA)} → ${fte(r.fteB)} ${t("fte")}`,

@@ -84,6 +84,20 @@ export type Database = {
       current_member_id: { Args: { p_workspace_id: string }; Returns: string };
       delete_workspace: { Args: { p_workspace_id: string }; Returns: undefined };
       deleting_workspace: { Args: Record<PropertyKey, never>; Returns: boolean };
+      directory_sort_value: {
+        Args: {
+          p_email: string;
+          p_key: string;
+          p_level: string;
+          p_manager: string;
+          p_name: string;
+          p_position: string;
+          p_start: string;
+          p_type: string;
+          p_unit: string;
+        };
+        Returns: string;
+      };
       enable_feature_with_dependencies: {
         Args: { p_feature_key: string; p_workspace_id: string };
         Returns: string[];
@@ -142,6 +156,7 @@ export type Database = {
         };
       };
       leave_year_start: { Args: { p_date: string; p_start_month: number }; Returns: string };
+      like_pattern: { Args: { p_text: string }; Returns: string };
       load_import_job: {
         Args: { p_job_id: string; p_statuses: Database["public"]["Enums"]["import_status"][] };
         Returns: Database["public"]["Tables"]["import_jobs"]["Row"];
@@ -3926,14 +3941,14 @@ export type Database = {
       };
       people_directory: {
         Args: {
-          p_descending?: boolean;
           p_employment_type_id?: string;
+          p_filters?: Json;
           p_for_export?: boolean;
           p_limit?: number;
           p_offset?: number;
           p_position_id?: string;
           p_search?: string;
-          p_sort?: string;
+          p_sorts?: string[];
           p_status?: string;
           p_unit_id?: string;
           p_workspace_id: string;
