@@ -6,19 +6,9 @@ import { getPublicEnv } from "@/lib/env";
 import { createJobClient } from "@/lib/supabase/job";
 import type { Database } from "@/lib/supabase/database.types";
 import messages from "@/messages/en.json";
-import { notificationMessage } from "./message";
+import { notificationMessage, notificationPath } from "./message";
 
 type Claimed = Database["public"]["Functions"]["claim_notification_emails"]["Returns"][number];
-
-/** Where a notification leads, inside its workspace. */
-function pathFor(kind: string): string {
-  if (kind === "time.requested" || kind === "time.reminder") return "/time-off?tab=approvals";
-  if (kind.startsWith("time.")) return "/time-off?tab=mine";
-  if (kind.startsWith("scenario.")) return "/planning/scenarios";
-  if (kind === "import.finished") return "/people";
-  if (kind === "join.requested") return "/settings/members";
-  return "";
-}
 
 /**
  * Claims the notifications due by email, sends one email per person and kind of delivery (each
@@ -57,7 +47,7 @@ export async function sendNotificationEmails(secret: string) {
         ]
           .filter(Boolean)
           .join(" · "),
-        href: `${workspace}${pathFor(row.kind)}`,
+        href: `${workspace}${notificationPath(row.kind, row.payload) ?? ""}`,
       };
     });
     const daily = first.delivery === "daily";

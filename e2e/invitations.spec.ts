@@ -53,10 +53,11 @@ test("an owner invites someone, who signs up from the email and joins", async ({
   // The owner's open page hears about it live, through Realtime.
   await expect(owner.getByRole("button", { name: "Notifications, 1 unread" })).toBeVisible();
   await owner.getByRole("button", { name: "Notifications, 1 unread" }).click();
-  await expect(owner.getByText("Ben Ionescu joined the workspace")).toBeVisible();
-  await owner.getByRole("button", { name: "Mark all as read" }).click();
+  await expectNoA11yViolations(owner);
+  // Opening it goes to the members, and it's read.
+  await owner.getByText("Ben Ionescu joined the workspace").click();
+  await expect(owner).toHaveURL(/\/settings\/members$/);
   await expect(owner.getByRole("button", { name: "Notifications", exact: true })).toBeVisible();
-  await owner.keyboard.press("Escape");
 
   await owner.reload();
   await expect(owner.getByRole("list", { name: "Members" }).getByText("Ben Ionescu")).toBeVisible();

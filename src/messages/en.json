@@ -963,7 +963,21 @@
         "approved": "You've joined {workspace}",
         "declined": "Your request to join {workspace} was declined"
       }
-    }
+    },
+    "more": "More options",
+    "settings": "Notification settings",
+    "filter": "Show",
+    "all": "All",
+    "unread": "Unread",
+    "unreadCount": "Unread ({count})",
+    "emptyUnread": "No unread notifications.",
+    "groups": {
+      "today": "Today",
+      "week": "This week",
+      "earlier": "Earlier"
+    },
+    "unreadMark": "Unread",
+    "showMore": "Show older"
   },
   "dataTable": {
     "search": "Search",

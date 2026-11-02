@@ -47,3 +47,32 @@ export function notificationMessage(
     },
   };
 }
+
+/**
+ * Where a notification leads, inside its workspace ("" for the workspace's home), or null when
+ * there's nowhere to go (a declined request to join). Shared by the bell and the emails.
+ */
+export function notificationPath(kind: string, payload: unknown): string | null {
+  const p = (payload ?? {}) as Record<string, string | undefined>;
+  if (kind === "time.requested" || kind === "time.reminder") return "/time-off?tab=approvals";
+  if (kind.startsWith("time.")) return "/time-off?tab=mine";
+  if (kind.startsWith("scenario.")) {
+    return p.scenario_id ? `/planning/scenarios/${p.scenario_id}` : "/planning/scenarios";
+  }
+  if (kind === "import.finished") return "/people";
+  if (kind === "join.requested" || kind === "invitation.accepted") return "/settings/members";
+  if (kind === "join.declined" || kind === "invitation.received") return null;
+  return "";
+}
+
+/** The icon for a notification: what kind of thing happened, at a glance. */
+export function notificationIcon(kind: string): string {
+  if (kind === "time.requested" || kind === "time.reminder") return "pending_actions";
+  if (kind === "time.rejected" || kind === "time.cancelled") return "event_busy";
+  if (kind.startsWith("time.")) return "event_available";
+  if (kind.startsWith("join.") || kind.startsWith("invitation.")) return "person_add";
+  if (kind.startsWith("role.") || kind === "ownership.received") return "admin_panel_settings";
+  if (kind.startsWith("scenario.")) return "insights";
+  if (kind === "import.finished") return "upload_file";
+  return "notifications";
+}
