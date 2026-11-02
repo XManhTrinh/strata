@@ -1,7 +1,8 @@
 "use client";
 
+import { type ReactNode, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { IconButton, List, ListItem } from "@windmorph/react";
+import { Button, IconButton, List, ListItem } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { type CalendarView, daysBetween } from "../calendar-range";
 import type { CalendarEntry } from "../types";
@@ -20,6 +21,8 @@ export function TeamCalendar({
   entries,
   previousHref,
   nextHref,
+  todayHref,
+  controls,
   onBook,
   teamHref,
 }: {
@@ -31,6 +34,10 @@ export function TeamCalendar({
   entries: CalendarEntry[];
   previousHref: string;
   nextHref: string;
+  /** The same view around today. */
+  todayHref: string;
+  /** The page's own controls (the view picker), first in the header row. */
+  controls?: ReactNode;
   /** Books chosen days from the calendar, when the user may book. */
   onBook?: (start: string, end: string) => void;
   /** The team view of a day. */
@@ -38,6 +45,7 @@ export function TeamCalendar({
 }) {
   const t = useTranslations("timeOff");
   const format = useFormatter();
+  const [weekends, setWeekends] = useState(false);
   const dates = useBookingDates();
   const days = daysBetween(from, to);
   const day = (iso: string) =>
@@ -70,22 +78,38 @@ export function TeamCalendar({
 
   return (
     <section aria-labelledby="calendar-title" className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <IconButton
-          variant="standard"
-          href={previousHref}
-          aria-label={arrow("previous")}
-          icon={<Icon name="chevron_left" />}
-        />
-        <h2 id="calendar-title" className="text-title-large text-on-surface min-w-48 text-center">
-          {monthName}
-        </h2>
-        <IconButton
-          variant="standard"
-          href={nextHref}
-          aria-label={arrow("next")}
-          icon={<Icon name="chevron_right" />}
-        />
+      {/* One row: the view, where you are and how to move; the weekends switch on the right. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {controls}
+        <div className="flex items-center gap-1">
+          <IconButton
+            variant="standard"
+            href={previousHref}
+            aria-label={arrow("previous")}
+            icon={<Icon name="chevron_left" />}
+          />
+          <h2 id="calendar-title" className="text-title-large text-on-surface min-w-48 text-center">
+            {monthName}
+          </h2>
+          <IconButton
+            variant="standard"
+            href={nextHref}
+            aria-label={arrow("next")}
+            icon={<Icon name="chevron_right" />}
+          />
+        </div>
+        <Button variant="outlined" href={todayHref}>
+          {t("calendar.today")}
+        </Button>
+        {view === "calendar" && (
+          <Button
+            variant={weekends ? "tonal" : "outlined"}
+            className="medium:inline-flex ms-auto hidden"
+            onPress={() => setWeekends((w) => !w)}
+          >
+            {t(weekends ? "calendar.hideWeekends" : "calendar.showWeekends")}
+          </Button>
+        )}
       </div>
 
       {view === "calendar" ? (
@@ -96,6 +120,7 @@ export function TeamCalendar({
               to={to}
               month={date}
               entries={entries}
+              weekends={weekends}
               onBook={onBook}
               teamHref={teamHref}
             />

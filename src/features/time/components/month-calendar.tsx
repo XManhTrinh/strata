@@ -2,7 +2,6 @@
 
 import { type PointerEvent, useEffect, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Button } from "@windmorph/react";
 import { daysBetween } from "../calendar-range";
 import type { CalendarEntry } from "../types";
 
@@ -39,6 +38,7 @@ export function MonthCalendar({
   to,
   month,
   entries,
+  weekends,
   onBook,
   teamHref,
 }: {
@@ -48,6 +48,8 @@ export function MonthCalendar({
   /** Any day in the month, so days outside it are dimmed. */
   month: string;
   entries: CalendarEntry[];
+  /** Whether Saturday and Sunday are shown. */
+  weekends: boolean;
   /** Books the chosen days, when the user may book. */
   onBook?: (start: string, end: string) => void;
   /** The team view of a day, for days with more than fit. */
@@ -55,7 +57,6 @@ export function MonthCalendar({
 }) {
   const t = useTranslations("timeOff.calendar");
   const format = useFormatter();
-  const [weekends, setWeekends] = useState(false);
   const [drag, setDrag] = useState<{ anchor: string; over: string } | null>(null);
   const today = new Date().toISOString().slice(0, 10);
   const monthKey = month.slice(0, 7);
@@ -107,14 +108,6 @@ export function MonthCalendar({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-body-medium text-on-surface-variant">
-          {onBook ? t("bookHint") : t("calendarHint")}
-        </p>
-        <Button variant={weekends ? "tonal" : "outlined"} onPress={() => setWeekends((w) => !w)}>
-          {t(weekends ? "hideWeekends" : "showWeekends")}
-        </Button>
-      </div>
       <div className="border-outline-variant overflow-hidden rounded-md border">
         <div
           aria-hidden
@@ -211,6 +204,9 @@ export function MonthCalendar({
           );
         })}
       </div>
+      <p className="text-body-small text-on-surface-variant">
+        {onBook ? t("bookHint") : t("calendarHint")}
+      </p>
     </div>
   );
 }

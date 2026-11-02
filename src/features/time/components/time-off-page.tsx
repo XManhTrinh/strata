@@ -100,17 +100,22 @@ export function TimeOffPage(props: {
       {props.tab === "approvals" && <ApprovalsList approvals={props.approvals} />}
       {props.tab === "calendar" && (
         <>
-          <Select
-            className="w-40"
-            label={t("views.label")}
-            value={props.view}
-            onChange={(key) => key != null && router.push(href("calendar", key as CalendarView))}
-          >
-            {(["calendar", "month", "week", "list"] as const).map((v) => (
-              <SelectItem key={v}>{t(`views.${v}`)}</SelectItem>
-            ))}
-          </Select>
           <TeamCalendar
+            controls={
+              <Select
+                className="w-40"
+                label={t("views.label")}
+                value={props.view}
+                onChange={(key) =>
+                  key != null && router.push(href("calendar", key as CalendarView))
+                }
+              >
+                {(["calendar", "month", "week", "list"] as const).map((v) => (
+                  <SelectItem key={v}>{t(`views.${v}`)}</SelectItem>
+                ))}
+              </Select>
+            }
+            todayHref={href("calendar", props.view, new Date().toISOString().slice(0, 10))}
             view={props.view}
             date={props.date}
             onBook={props.types.length > 0 ? (start, end) => setBooking({ start, end }) : undefined}
