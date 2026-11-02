@@ -9,6 +9,7 @@ import { EmptyState } from "@windmorph/react-pro";
 import {
   type ColumnDef,
   DataTable,
+  type ExtraChip,
   type TableState,
   initialTableState,
 } from "@/components/ui/data-table";
@@ -27,7 +28,7 @@ import {
   directorySearch,
   parseDirectoryView,
 } from "../directory-params";
-import type { DirectoryFilterOptions, DirectoryPerson } from "../types";
+import type { DirectoryPerson, JobChoices } from "../types";
 import { DirectoryFilters } from "./directory-filters";
 
 const SEARCH_DELAY_MS = 300;
@@ -47,7 +48,7 @@ export function PeopleDirectory({
   people: DirectoryPerson[];
   total: number;
   params: DirectoryParams;
-  options: DirectoryFilterOptions;
+  options: JobChoices;
   views: TableView[];
   viewId: string | null;
 }) {
@@ -80,26 +81,37 @@ export function PeopleDirectory({
       hideable: false,
       width: 240,
       grow: true,
+      filter: { kind: "text" },
     },
-    { id: "unit", header: t("columns.unit"), accessor: (p) => p.unitName, width: 180, grow: true },
+    {
+      id: "unit",
+      header: t("columns.unit"),
+      accessor: (p) => p.unitName,
+      width: 180,
+      grow: true,
+      filter: { kind: "choice", options: options.units },
+    },
     {
       id: "position",
       header: t("columns.position"),
       accessor: (p) => p.positionName,
       width: 180,
       grow: true,
+      filter: { kind: "text" },
     },
     {
       id: "level",
       header: t("columns.level"),
       accessor: (p) => p.careerLevelName,
       width: 140,
+      filter: { kind: "choice", options: options.careerLevels },
     },
     {
       id: "type",
       header: t("columns.employmentType"),
       accessor: (p) => p.employmentTypeName,
       width: 150,
+      filter: { kind: "choice", options: options.employmentTypes },
     },
     {
       id: "manager",
@@ -107,6 +119,7 @@ export function PeopleDirectory({
       accessor: (p) => p.managerName,
       width: 180,
       grow: true,
+      filter: { kind: "text" },
     },
     {
       id: "email",
@@ -114,6 +127,7 @@ export function PeopleDirectory({
       accessor: (p) => p.email,
       width: 240,
       grow: true,
+      filter: { kind: "text" },
     },
     {
       id: "start_date",
@@ -121,6 +135,7 @@ export function PeopleDirectory({
       accessor: (p) => p.startDate,
       cell: (p) => date(p.startDate),
       width: 140,
+      filter: { kind: "date" },
     },
   ];
 
@@ -140,6 +155,7 @@ export function PeopleDirectory({
       }),
       pinned: saved?.columns.pinned ?? DEFAULT_DIRECTORY_PINNED,
       search: params.search,
+      filters: params.columnFilters,
       sort: params.sorts.map((s) => ({
         column: s.key,
         direction: s.descending ? "descending" : "ascending",
@@ -186,6 +202,7 @@ export function PeopleDirectory({
       ...filters,
       search: next.search,
       sorts: sorts.length > 0 ? sorts : DEFAULT_DIRECTORY_PARAMS.sorts,
+      columnFilters: next.filters,
       page: next.page.index,
       size: next.page.size,
     };
@@ -195,6 +212,45 @@ export function PeopleDirectory({
     } else {
       navigate(wanted);
     }
+  }
+
+  /** The quick filters beside the search, as chips too (removing one resets that filter). */
+  const quickChips: ExtraChip[] = [
+    filters.unitId && {
+      key: "unit",
+      label: `${t("filters.unit")}: ${options.units.find((u) => u.id === filters.unitId)?.label.trim() ?? ""}`,
+      onRemove: () => onFilterChange({ unitId: null }),
+    },
+    filters.positionId && {
+      key: "position",
+      label: `${t("filters.position")}: ${options.positions.find((p) => p.id === filters.positionId)?.label ?? ""}`,
+      onRemove: () => onFilterChange({ positionId: null }),
+    },
+    filters.employmentTypeId && {
+      key: "type",
+      label: `${t("filters.employmentType")}: ${options.employmentTypes.find((e) => e.id === filters.employmentTypeId)?.label ?? ""}`,
+      onRemove: () => onFilterChange({ employmentTypeId: null }),
+    },
+    filters.status !== "current" && {
+      key: "status",
+      label: `${t("filters.status")}: ${t(`filters.statuses.${filters.status}`)}`,
+      onRemove: () => onFilterChange({ status: "current" }),
+    },
+  ].filter((chip): chip is ExtraChip => Boolean(chip));
+
+  /** Clears the quick filters and the column filters in one go. */
+  function clearFilters() {
+    setState((current) => ({ ...current, filters: {}, page: { ...current.page, index: 0 } }));
+    navigate({
+      ...filters,
+      search: state.search,
+      unitId: null,
+      positionId: null,
+      employmentTypeId: null,
+      status: "current",
+      columnFilters: {},
+      page: 0,
+    });
   }
 
   function onFilterChange(patch: Partial<DirectoryParams>) {
@@ -213,6 +269,8 @@ export function PeopleDirectory({
       state={state}
       defaultState={{ pinned: DEFAULT_DIRECTORY_PINNED }}
       onStateChange={onStateChange}
+      chips={quickChips}
+      onClearFilters={clearFilters}
       loading={pending}
       rowHref={(p) => `/w/${workspace.slug}/people/${p.id}`}
       filters={<DirectoryFilters params={filters} options={options} onChange={onFilterChange} />}

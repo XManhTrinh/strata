@@ -27,6 +27,7 @@ export async function peopleDirectory(
     p_employment_type_id: params.employmentTypeId ?? undefined,
     p_status: params.status,
     p_sorts: sortText(params.sorts).split(","),
+    p_filters: params.columnFilters,
     p_limit: params.size,
     p_offset: params.page * params.size,
   });

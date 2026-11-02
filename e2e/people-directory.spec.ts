@@ -34,6 +34,25 @@ test("the people directory searches, filters and opens on every screen", async (
   await expect(page.getByText("No one matches")).toBeVisible();
   await expectNoA11yViolations(page);
 
+  // It shows as a chip; Clear all resets every filter.
+  const chips = page.getByRole("group", { name: "Filters" });
+  await expect(chips).toContainText("Status: Leavers");
+  await chips.getByRole("button", { name: "Clear all" }).click();
+  await expect(ana).toBeVisible();
+
+  // A column filter: email contains, as a chip that can be changed or removed (on phones the
+  // filters are still open from above).
+  await page.getByRole("button", { name: "Filter", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Email" }).click();
+  const dialog = page.getByRole("dialog", { name: "Filter by Email" });
+  await dialog.getByLabel("Contains").fill("nobody");
+  await dialog.getByRole("button", { name: "Apply" }).click();
+  await expect(page).toHaveURL(/f=/);
+  await expect(page.getByText("No one matches")).toBeVisible();
+  await expect(chips).toContainText("Email contains “nobody”");
+  await chips.getByRole("button", { name: /^Remove filter: Email/ }).click();
+  await expect(ana).toBeVisible();
+
   // Opening a person.
   await page.goto(page.url().replace(/\?.*$/, ""));
   await openRow(page, ana, /\/people\/[0-9a-f-]{36}$/);

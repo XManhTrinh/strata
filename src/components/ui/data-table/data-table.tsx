@@ -10,6 +10,8 @@ import { type CompactItem, CompactList } from "./compact-list";
 import { Pagination } from "./pagination";
 import { applyClientModel, initialTableState, visibleColumns } from "./table-state";
 import { TableView } from "./table-view";
+import { type ExtraChip, FilterChips } from "./filter-chips";
+import { FilterDialog } from "./filter-dialog";
 import { Toolbar } from "./toolbar";
 import type { ColumnDef, DataTableLabels, TableState } from "./types";
 
@@ -31,6 +33,10 @@ export type DataTableProps<Row> = {
   bulkActions?: (selection: TableState["selection"]) => ReactNode;
   /** Page-specific filters, shown next to the search. */
   filters?: ReactNode;
+  /** The page's own active filters, shown as chips with the column filters. */
+  chips?: ExtraChip[];
+  /** Clears the page's filters and the column filters at once (otherwise only column filters). */
+  onClearFilters?: () => void;
   /** Page-specific actions on the table (saved views, export), on the right. */
   actions?: ReactNode;
   onRowAction?: (row: Row) => void;
@@ -54,6 +60,7 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
   const { columns, rows, getRowId, mode = "client", labels, selectable = false } = props;
   const [ownState, setOwnState] = useState(() => initialTableState(columns, props.defaultState));
   const [columnsOpen, setColumnsOpen] = useState(false);
+  const [filtering, setFiltering] = useState<string | null>(null);
   const phone = useMediaQuery("(max-width: 599px)");
 
   const state = props.state ?? ownState;
@@ -146,6 +153,24 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
         }
         onClearSelection={() => update(clearSelection)}
         onOpenColumns={() => setColumnsOpen(true)}
+        filterable={columns.filter((c) => c.filter)}
+        onFilter={setFiltering}
+        labels={labels}
+      />
+      <FilterChips
+        columns={columns}
+        filters={state.filters}
+        extra={props.chips}
+        onEdit={setFiltering}
+        onRemove={(id) => {
+          const { [id]: _removed, ...rest } = state.filters;
+          update({ filters: rest, page: { ...state.page, index: 0 }, ...clearSelection });
+        }}
+        onClearAll={() =>
+          props.onClearFilters
+            ? props.onClearFilters()
+            : update({ filters: {}, page: { ...state.page, index: 0 }, ...clearSelection })
+        }
         labels={labels}
       />
       <div className="relative">
@@ -162,6 +187,23 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
           page={state.page}
           total={total}
           onChange={(page) => update({ page, ...clearSelection })}
+          labels={labels}
+        />
+      )}
+      {filtering && columns.find((c) => c.id === filtering) && (
+        <FilterDialog
+          column={columns.find((c) => c.id === filtering)!}
+          value={state.filters[filtering]}
+          onApply={(value) => {
+            const { [filtering]: _old, ...rest } = state.filters;
+            update({
+              filters: value ? { ...rest, [filtering]: value } : rest,
+              page: { ...state.page, index: 0 },
+              ...clearSelection,
+            });
+            setFiltering(null);
+          }}
+          onClose={() => setFiltering(null)}
           labels={labels}
         />
       )}

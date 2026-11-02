@@ -37,6 +37,26 @@ describe("directory params", () => {
     expect(directorySearch(DEFAULT_DIRECTORY_PARAMS)).toBe("");
   });
 
+  it("reads column filters, keeping only known columns and valid values", () => {
+    const f = JSON.stringify({
+      name: { contains: " ana " },
+      unit: { in: [UNIT, "not-an-id"] },
+      start_date: { from: "2024-01-01", to: "soon" },
+      salary: { contains: "1" },
+      email: { contains: "" },
+    });
+    expect(parseDirectoryParams({ f }).columnFilters).toEqual({
+      name: { contains: "ana" },
+      unit: { in: [UNIT] },
+      start_date: { from: "2024-01-01" },
+    });
+    expect(parseDirectoryParams({ f: "{not json" }).columnFilters).toEqual({});
+    const params = { ...DEFAULT_DIRECTORY_PARAMS, columnFilters: { email: { contains: "x" } } };
+    expect(
+      parseDirectoryParams(Object.fromEntries(new URLSearchParams(directorySearch(params))))
+    ).toEqual(params);
+  });
+
   it("reads links from before sorting by several columns", () => {
     expect(parseDirectoryParams({ sort: "unit", desc: "1" }).sorts).toEqual([
       { key: "unit", descending: true },

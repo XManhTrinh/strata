@@ -18,22 +18,6 @@ as $$
   end;
 $$;
 
--- A row's value for a sort key, as text that sorts right (dates as YYYY-MM-DD); null for none.
-create function app.directory_sort_value(
-  p_key text, p_name text, p_unit text, p_position text, p_level text, p_type text,
-  p_manager text, p_email text, p_start date
-)
-returns text
-language sql
-immutable
-set search_path = ''
-as $$
-  select case p_key
-    when 'name' then p_name when 'unit' then p_unit when 'position' then p_position
-    when 'level' then p_level when 'type' then p_type when 'manager' then p_manager
-    when 'email' then p_email when 'start_date' then to_char(p_start, 'YYYY-MM-DD')
-  end;
-$$;
 
 drop function public.people_directory(uuid, text, uuid, uuid, uuid, text, text, boolean, integer, integer, boolean);
 
@@ -119,9 +103,22 @@ begin
   return query
   with rows as (
     select m.id, m.full_name, m.email::text as email, m.person_key, pr.avatar_path,
-      a.org_unit_id, u.name as unit_name, u.path as unit_path, pos.name::text as position_name,
+      a.org_unit_id, u.name as unit_name, pos.name::text as position_name,
       cl.name::text as level_name, et.name::text as type_name, a.manager_member_id,
-      mgr.full_name as manager_name, m.start_date, m.end_date
+      mgr.full_name as manager_name, m.start_date, m.end_date,
+      -- Each sort level's value, worked out once per row (as text; dates as YYYY-MM-DD).
+      case v_sort[1] when 'name' then m.full_name when 'unit' then u.name
+        when 'position' then pos.name::text when 'level' then cl.name::text when 'type' then et.name::text
+        when 'manager' then mgr.full_name when 'email' then m.email::text
+        when 'start_date' then to_char(m.start_date, 'YYYY-MM-DD') end as k1,
+      case v_sort[2] when 'name' then m.full_name when 'unit' then u.name
+        when 'position' then pos.name::text when 'level' then cl.name::text when 'type' then et.name::text
+        when 'manager' then mgr.full_name when 'email' then m.email::text
+        when 'start_date' then to_char(m.start_date, 'YYYY-MM-DD') end as k2,
+      case v_sort[3] when 'name' then m.full_name when 'unit' then u.name
+        when 'position' then pos.name::text when 'level' then cl.name::text when 'type' then et.name::text
+        when 'manager' then mgr.full_name when 'email' then m.email::text
+        when 'start_date' then to_char(m.start_date, 'YYYY-MM-DD') end as k3
     from public.members m
     left join (
       -- Everyone's current job in one pass, joined by hash, rather than a lookup per person.
@@ -165,12 +162,12 @@ begin
     r.start_date, r.end_date, count(*) over ()
   from rows r
   order by
-    case when not coalesce(v_desc[1], false) then app.directory_sort_value(v_sort[1], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end asc nulls last,
-    case when coalesce(v_desc[1], false) then app.directory_sort_value(v_sort[1], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end desc nulls last,
-    case when not coalesce(v_desc[2], false) then app.directory_sort_value(v_sort[2], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end asc nulls last,
-    case when coalesce(v_desc[2], false) then app.directory_sort_value(v_sort[2], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end desc nulls last,
-    case when not coalesce(v_desc[3], false) then app.directory_sort_value(v_sort[3], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end asc nulls last,
-    case when coalesce(v_desc[3], false) then app.directory_sort_value(v_sort[3], r.full_name, r.unit_name, r.position_name, r.level_name, r.type_name, r.manager_name, r.email, r.start_date) end desc nulls last,
+    case when not coalesce(v_desc[1], false) then r.k1 end asc nulls last,
+    case when coalesce(v_desc[1], false) then r.k1 end desc nulls last,
+    case when not coalesce(v_desc[2], false) then r.k2 end asc nulls last,
+    case when coalesce(v_desc[2], false) then r.k2 end desc nulls last,
+    case when not coalesce(v_desc[3], false) then r.k3 end asc nulls last,
+    case when coalesce(v_desc[3], false) then r.k3 end desc nulls last,
     r.full_name, r.id
   limit least(greatest(p_limit, 1), case when p_for_export then 5000 else 500 end)
   offset greatest(p_offset, 0);

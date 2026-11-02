@@ -23,11 +23,19 @@ export type ColumnDef<Row> = {
   hideable?: boolean;
   /** Whether people may pin it to the start or end. @default true */
   pinnable?: boolean;
+  /** How people filter on it, if they can: text it contains, a date range, or chosen values. */
+  filter?: ColumnFilter;
   /** The row header (usually the name), announced with each row. */
   isRowHeader?: boolean;
 };
 
 export type SortLevel = { column: string; direction: "ascending" | "descending" };
+
+type FilterChoice = { id: string; label: string };
+type ColumnFilter =
+  { kind: "text" } | { kind: "date" } | { kind: "choice"; options: FilterChoice[] };
+/** A column's filter, in the shape the database takes it. */
+export type FilterValue = { contains: string } | { from?: string; to?: string } | { in: string[] };
 
 /** Everything a user can change about a table, serializable so it can be saved as a view. */
 export type TableState = {
@@ -36,6 +44,8 @@ export type TableState = {
   widths: Record<string, number>;
   /** Columns kept in view while the rest scroll sideways, at the start and at the end. */
   pinned: { start: string[]; end: string[] };
+  /** Filters by column id. */
+  filters: Record<string, FilterValue>;
   /** Sort levels in order (at most three); empty for the rows as given. */
   sort: SortLevel[];
   search: string;
@@ -53,6 +63,24 @@ export type DataTableLabels = {
   moveUp: (column: string) => string;
   moveDown: (column: string) => string;
   pinMenu: (column: string) => string;
+  filter: string;
+  filterBy: (column: string) => string;
+  contains: string;
+  from: string;
+  to: string;
+  apply: string;
+  clear: string;
+  cancel: string;
+  clearAll: string;
+  activeFilters: string;
+  /** A chip's text: "Name contains ana", "Start date 1 Jan 2024 – 31 Dec 2024", "Unit: Sales, HR". */
+  chipContains: (column: string, text: string) => string;
+  chipRange: (column: string, from: string, to: string) => string;
+  chipFrom: (column: string, from: string) => string;
+  chipUntil: (column: string, to: string) => string;
+  chipChoice: (column: string, values: string) => string;
+  editFilter: (filter: string) => string;
+  removeFilter: (filter: string) => string;
   pinStart: string;
   pinEnd: string;
   unpin: string;

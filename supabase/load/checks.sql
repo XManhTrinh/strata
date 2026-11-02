@@ -58,6 +58,9 @@ select load_checks.time('owner: directory, first page by name',
   format($q$select count(*) from public.people_directory(%L)$q$, :'ws'));
 select load_checks.time('owner: directory, sorted by unit, descending',
   format($q$select count(*) from public.people_directory(%L, p_sorts => '{-unit}')$q$, :'ws'));
+select load_checks.time('owner: directory, two sorts and two column filters',
+  format($q$select count(*) from public.people_directory(%L, p_sorts => '{unit,-start_date}',
+    p_filters => '{"email": {"contains": "9"}, "start_date": {"from": "2015-01-01"}}')$q$, :'ws'));
 select load_checks.time('owner: directory, search by name',
   format($q$select count(*) from public.people_directory(%L, p_search => 'Person 0999')$q$, :'ws'));
 select load_checks.time('owner: directory, division filter (~20k)',

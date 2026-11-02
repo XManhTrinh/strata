@@ -1,5 +1,7 @@
 /** The directory's search, filters, sort and page, as kept in the URL. Shared by server and client. */
 
+import type { FilterValue } from "@/components/ui/data-table";
+
 /** Columns the directory sorts by (the database checks the same list). */
 export const DIRECTORY_SORTS = [
   "name",
@@ -26,6 +28,8 @@ export type DirectoryParams = {
   status: DirectoryStatus;
   /** Up to three levels, in order. */
   sorts: DirectorySortLevel[];
+  /** Filters on columns, as the database takes them (see people_directory). */
+  columnFilters: Record<string, FilterValue>;
   /** Zero-based. */
   page: number;
   size: number;
@@ -38,6 +42,7 @@ export const DEFAULT_DIRECTORY_PARAMS: DirectoryParams = {
   employmentTypeId: null,
   status: "current",
   sorts: [{ key: "name", descending: false }],
+  columnFilters: {},
   page: 0,
   size: 50,
 };
@@ -67,6 +72,36 @@ function parseSorts(value: string | undefined, legacyDescending: boolean): Direc
   return levels.length > 0 ? levels : DEFAULT_DIRECTORY_PARAMS.sorts;
 }
 
+const TEXT_FILTERS = ["name", "email", "position", "manager"];
+const CHOICE_FILTERS = ["unit", "level", "type"];
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Column filters from the URL (JSON), keeping only known columns and well-formed values. */
+function parseColumnFilters(value: string | undefined): Record<string, FilterValue> {
+  let raw: unknown;
+  try {
+    raw = value ? JSON.parse(value) : {};
+  } catch {
+    return {};
+  }
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return {};
+  const out: Record<string, FilterValue> = {};
+  for (const [key, v] of Object.entries(raw as Record<string, Record<string, unknown>>)) {
+    if (typeof v !== "object" || v === null) continue;
+    if (TEXT_FILTERS.includes(key) && typeof v.contains === "string" && v.contains.trim()) {
+      out[key] = { contains: v.contains.trim().slice(0, 200) };
+    } else if (CHOICE_FILTERS.includes(key) && Array.isArray(v.in)) {
+      const ids = v.in.filter((id): id is string => typeof id === "string" && UUID.test(id));
+      if (ids.length > 0) out[key] = { in: ids.slice(0, 50) };
+    } else if (key === "start_date") {
+      const from = typeof v.from === "string" && ISO_DATE.test(v.from) ? v.from : undefined;
+      const to = typeof v.to === "string" && ISO_DATE.test(v.to) ? v.to : undefined;
+      if (from || to) out[key] = { ...(from && { from }), ...(to && { to }) };
+    }
+  }
+  return out;
+}
+
 /** The URL and database form of the sorts: "unit,-start_date". */
 export function sortText(sorts: DirectorySortLevel[]): string {
   return sorts.map((s) => `${s.descending ? "-" : ""}${s.key}`).join(",");
@@ -93,6 +128,7 @@ export function parseDirectoryParams(
     employmentTypeId: id("type"),
     status: oneOf(DIRECTORY_STATUSES, get("status"), "current"),
     sorts: parseSorts(get("sort"), get("desc") === "1"),
+    columnFilters: parseColumnFilters(get("f")),
     page: page > 1 ? page - 1 : 0,
     size: (DIRECTORY_PAGE_SIZES as readonly number[]).includes(size) ? size : 50,
   };
@@ -109,6 +145,9 @@ export function directorySearch(params: DirectoryParams): string {
   if (params.status !== d.status) query.set("status", params.status);
   const sort = sortText(params.sorts);
   if (sort !== sortText(d.sorts)) query.set("sort", sort);
+  if (Object.keys(params.columnFilters).length > 0) {
+    query.set("f", JSON.stringify(params.columnFilters));
+  }
   if (params.page > 0) query.set("page", String(params.page + 1));
   if (params.size !== d.size) query.set("size", String(params.size));
   const text = query.toString();
@@ -152,6 +191,7 @@ export function parseDirectoryView(state: unknown): DirectoryView {
         )
       : text(params.sort),
     desc: params.descending === true ? "1" : undefined,
+    f: params.columnFilters ? JSON.stringify(params.columnFilters) : undefined,
     size: typeof params.size === "number" ? String(params.size) : undefined,
   });
   const strings = (v: unknown) =>

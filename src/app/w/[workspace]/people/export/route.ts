@@ -74,6 +74,7 @@ export async function GET(
           p_employment_type_id: query.employmentTypeId ?? undefined,
           p_status: query.status,
           p_sorts: sortText(query.sorts).split(","),
+          p_filters: query.columnFilters,
           p_limit: PAGE,
           p_offset: offset,
           p_for_export: true,

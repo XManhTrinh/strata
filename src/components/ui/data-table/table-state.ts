@@ -1,4 +1,4 @@
-import type { ColumnDef, SortLevel, TableState } from "./types";
+import type { ColumnDef, FilterValue, SortLevel, TableState } from "./types";
 
 export const PAGE_SIZES = [25, 50, 100] as const;
 
@@ -10,6 +10,7 @@ export function initialTableState<Row>(
     columnOrder: columns.map((c) => c.id),
     hidden: [],
     widths: {},
+    filters: {},
     search: "",
     page: { index: 0, size: PAGE_SIZES[1] },
     selection: { ids: [], allMatching: false },
@@ -81,6 +82,13 @@ export function applyClientModel<Row>(
         )
       )
     : rows;
+
+  result = result.filter((row) =>
+    Object.entries(state.filters).every(([id, value]) => {
+      const column = columns.find((c) => c.id === id);
+      return !column || matchesFilter(column, column.accessor(row), value);
+    })
+  );
 
   const levels = state.sort.flatMap((level) => {
     const column = columns.find((c) => c.id === level.column);
@@ -194,4 +202,28 @@ export function pinColumn(
     start: side === "start" ? [...start, id] : start,
     end: side === "end" ? [id, ...end] : end,
   };
+}
+
+/** Client mode's filter test, matching what the database does in server mode. */
+function matchesFilter<Row>(
+  column: ColumnDef<Row>,
+  raw: string | number | null,
+  value: FilterValue
+): boolean {
+  const text = raw === null ? "" : String(raw);
+  if ("contains" in value) return text.toLowerCase().includes(value.contains.trim().toLowerCase());
+  if ("in" in value) {
+    const labels = column.filter?.kind === "choice" ? column.filter.options : [];
+    const chosen = value.in.map((id) => labels.find((o) => o.id === id)?.label ?? id);
+    return value.in.length === 0 || chosen.includes(text);
+  }
+  return (!value.from || text >= value.from) && (!value.to || (text !== "" && text <= value.to));
+}
+
+/** Whether a filter holds anything (an empty one is the same as none). */
+export function isActiveFilter(value: FilterValue | undefined): value is FilterValue {
+  if (!value) return false;
+  if ("contains" in value) return value.contains.trim() !== "";
+  if ("in" in value) return value.in.length > 0;
+  return Boolean(value.from || value.to);
 }

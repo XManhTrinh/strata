@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
-import { Button, IconButton, TextField } from "@windmorph/react";
+import { Button, IconButton, Menu, MenuItem, MenuTrigger, TextField } from "@windmorph/react";
 import { Icon } from "@/components/ui/icon";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { DataTableLabels, TableState } from "./types";
@@ -22,6 +22,8 @@ export function Toolbar({
   onSelectAllMatching,
   onClearSelection,
   onOpenColumns,
+  filterable = [],
+  onFilter,
   labels,
 }: {
   state: TableState;
@@ -35,6 +37,9 @@ export function Toolbar({
   onSelectAllMatching: () => void;
   onClearSelection: () => void;
   onOpenColumns: () => void;
+  /** Columns people can filter on, offered by the Filter button. */
+  filterable?: { id: string; header: string }[];
+  onFilter?: (columnId: string) => void;
   labels: DataTableLabels;
 }) {
   const selected = state.selection.allMatching ? total : state.selection.ids.length;
@@ -92,6 +97,18 @@ export function Toolbar({
       )}
       {filters && (!phone || filtersOpen) && (
         <div className="medium:contents flex w-full flex-wrap gap-3">{filters}</div>
+      )}
+      {filterable.length > 0 && onFilter && (!phone || filtersOpen || !filters) && (
+        <MenuTrigger>
+          <Button variant="outlined" leadingIcon={<Icon name="filter_list" />}>
+            {labels.filter}
+          </Button>
+          <Menu aria-label={labels.filter} onAction={(key) => onFilter(String(key))}>
+            {filterable.map((column) => (
+              <MenuItem key={column.id}>{column.header}</MenuItem>
+            ))}
+          </Menu>
+        </MenuTrigger>
       )}
       {(actions || !phone) && (
         <div className="ms-auto flex items-center gap-2">
