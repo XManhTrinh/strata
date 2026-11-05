@@ -47,6 +47,29 @@ How to run and operate it, including the secrets and variables, is in `docs/runb
   and Google-only sign-up.
 - **Cleanup on 2026-11-05:** the Phase 2 spike prototype was removed. The DataTable demo and its
   test data moved to `src/features/dev-demos`.
+- **Docs corrected on 2026-11-05** to match the code. A review by Kiro found the stack docs
+  listing libraries that were never installed, plus a few wrong paths. `docs/architecture/0001-tech-stack.md`
+  (see its "As built" note), `tech.md`, `ui-material.md`, `structure.md`, `testing.md`,
+  `database.md`, `README.md` and `docs/rebuild-plan.md` (1.1, 1.2, layout) now describe what is
+  built. Unused libraries are listed as "add when needed". If a doc and the code disagree, check
+  the code, then fix the doc.
+
+## Open decision for the product owner: exports
+
+`docs/product-decisions.md` (section 13, Reports and exports) promises, for v1, export from every table
+(people, leave, capacity, rate cards) to CSV or Excel, and Phase 2 requirement 11 says the same.
+What is built is CSV only, from two places: the people directory
+(`src/app/w/[workspace]/people/export/route.ts`) and plan totals
+(`src/app/w/[workspace]/planning/totals/export/route.ts`), both through `src/lib/csv.ts`. Leave
+and rate cards have no export, and nothing exports to Excel. The spec tasks for these were
+ticked anyway.
+
+There are two options. Either build the rest (Excel through `exceljs` beside CSV, plus leave and
+rate-card exports, within each table's export permission), or change the decision to CSV for v1
+and Excel later. Ask the product owner first, record the answer in `docs/product-decisions.md`,
+then add the work as a task in `.kiro/specs/phase-5-completion-launch/tasks.md`. Claude Code's
+recommendation is to build it before the MVP: v1 promises it, the export path already exists,
+and finance teams will ask for Excel.
 
 ## Next: MVP on staging (Phase 5, task 9)
 

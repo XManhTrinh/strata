@@ -47,7 +47,7 @@ public.create_workspace(...) to authenticated;`) next to its policies. `anon` ge
 - Functions: `security definer` only when required, always `set search_path = ''` and fully
   qualified names; `stable` where possible. Wrap `auth.uid()` as `(select auth.uid())` in policies.
 - Multi-step changes are RPCs that check permissions themselves and run in one transaction.
-- The service key bypasses RLS: only jobs/Edge Functions may use it, and they must filter by
+- The service key bypasses RLS: only scheduled jobs and admin tasks may use it, and they must filter by
   workspace explicitly.
 
 ## Performance

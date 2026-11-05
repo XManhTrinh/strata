@@ -20,9 +20,9 @@ What is left and what comes next is in `.kiro/steering/status.md`.
 | Layer                                                                  | Does                                                                                                                                                                   | Does not                                                           |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | **Postgres (Supabase)**                                                | Owns the schema, enforces tenancy and permissions with RLS, runs multi-step changes as transactional functions (RPC), runs schedules (`pg_cron`), queues jobs (`pgmq`) | Render anything; call external services                            |
-| **Edge Functions**                                                     | Long-running or batch jobs: people import, rate-card apply, retention runs, email sending                                                                              | Hold business rules that must also run elsewhere                   |
+| **Edge Functions**                                                     | Not used so far: batch work runs as SQL functions and `pg_cron` (see 1.2)                                                                                              | —                                                                  |
 | **Next.js server** (Server Components, Server Actions, route handlers) | Reads with the user's session, validates input with zod, calls RPCs, serves the calendar feed and file exports                                                         | Bypass RLS (the service key is never used for user requests)       |
-| **Browser**                                                            | Interactive UI with Windmorph; TanStack Query only for live, highly interactive screens                                                                                | Decide permissions (it only hides what the server already refuses) |
+| **Browser**                                                            | Interactive UI with Windmorph; no client cache library yet (TanStack Query if a live screen needs it)                                                                  | Decide permissions (it only hides what the server already refuses) |
 
 Rules that apply everywhere:
 
@@ -36,10 +36,12 @@ Rules that apply everywhere:
 
 ### 1.2 Jobs
 
-One generic `jobs` table (type, workspace, status, progress, result, errors) and a `pgmq` queue.
-An Edge Function picks up jobs, works in batches, and writes progress; the UI follows progress
-through Realtime. Used by people import, rate-card apply, GDPR export and erasure, and retention
-runs.
+As built (2026-11-05): there is no generic `jobs` table, worker or Edge Function. Large work runs
+as SQL functions called in batches by the screen that started it (people import through
+`import_*` staging, rate-card apply in chunks), and scheduled work runs in `pg_cron` (see
+`docs/runbook.md`). Jobs that send email call the app's `/api/jobs/*` routes with a shared
+secret. `pgmq` is installed but unused. Add a jobs table and worker only when work must outlive
+the browser tab.
 
 ### 1.3 Request flow
 
@@ -77,7 +79,6 @@ strata/
 │   └── messages/en.json              all UI text
 ├── supabase/
 │   ├── migrations/                   the only source of the schema
-│   ├── functions/                    Edge Functions (jobs worker, email)
 │   ├── tests/                        pgTAP tests for RLS and RPCs
 │   └── seed.sql                      demo workspaces (personal, team, company)
 ├── e2e/                              Playwright

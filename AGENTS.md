@@ -1,6 +1,7 @@
 # Strata
 
-Project rules for every AI tool are in `CLAUDE.md`, `docs/` and `.kiro/steering/`. Read them first.
+Project rules for every AI tool are in `CLAUDE.md`, `docs/` and `.kiro/steering/`. Read them first,
+starting with `.kiro/steering/status.md` (what is done, what is next, open decisions).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -29,7 +29,7 @@ Install packages only inside this checkout (never in `/tmp` or another temporary
 | Script                                         | Does                                                              |
 | ---------------------------------------------- | ----------------------------------------------------------------- |
 | `pnpm dev` / `pnpm build` / `pnpm start`       | Run, build and serve the app                                      |
-| `pnpm lint` / `pnpm typecheck` / `pnpm format` | ESLint, TypeScript 7 type check, Prettier                         |
+| `pnpm lint` / `pnpm typecheck` / `pnpm format` | ESLint, TypeScript 6 type check, Prettier                         |
 | `pnpm knip`                                    | Unused dependencies, files and exports                            |
 | `pnpm test`                                    | Unit tests (Vitest)                                               |
 | `pnpm test:e2e`                                | End-to-end tests (Playwright) at phone, tablet and desktop widths |

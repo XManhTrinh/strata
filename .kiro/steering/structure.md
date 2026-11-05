@@ -31,7 +31,7 @@ strata/
 │   └── proxy.ts                      session refresh and verification
 ├── supabase/
 │   ├── migrations/                   the only source of the schema
-│   ├── functions/                    Edge Functions
+│   ├── load/                         100k load seed and checks (nightly)
 │   ├── tests/                        pgTAP
 │   └── seed.sql                      demo personal, team and company workspaces
 ├── e2e/                              Playwright

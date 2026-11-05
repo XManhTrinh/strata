@@ -17,7 +17,7 @@ fileMatchPattern: "src/**/*.tsx"
 3. **`src/components/ui`** for what neither has (DataTable, DataGrid, tree view, calendar grid,
    condition builder, colour/icon picker, breadcrumbs). Build them as future windmorph-pro
    components: full API, controlled and uncontrolled, Windmorph tokens, accessible.
-4. Logic-only libraries (React Aria, TanStack Virtual, xyflow + ELK, visx) underneath. Never a
+4. Logic-only libraries (React Aria, TanStack Virtual, xyflow + ELK; visx once charts exist) underneath. Never a
    library's own look.
 
 ## Theming and styling
@@ -68,8 +68,8 @@ fileMatchPattern: "src/**/*.tsx"
 - Every route has `loading.tsx` (Skeleton) and `error.tsx` (EmptyState with retry); empty lists
   use EmptyState.
 - Forms: zod schema in `features/<module>/schemas.ts`, Server Action, field errors on inputs via
-  `errorText`, Snackbar for success. Complex forms use `react-hook-form` through the shared
-  Windmorph input adapters.
+  `errorText`, Snackbar for success. No form library yet; add `react-hook-form` with Windmorph
+  input adapters only if a form needs it.
 - Feedback through the shared Snackbar host; never `window.alert`.
 - `IconButton` defaults to `filled` in Windmorph; pass `variant="standard"` for overflow menus,
   back arrows and row or toolbar actions (M3), and choose filled or tonal only for emphasis.

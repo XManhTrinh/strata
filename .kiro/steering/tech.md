@@ -13,16 +13,19 @@ The stack decision, with the reasons, is in:
 - **Next.js 16** (App Router), React 19, TypeScript strict, Node 24 LTS, pnpm 12. A single app, no
   monorepo tooling.
 - **Supabase** is the whole backend: Postgres with RLS, SQL migrations, Auth, RPC (Postgres
-  functions), `pg_cron`, `pgmq`, Edge Functions, Realtime, Storage.
+  functions), `pg_cron`, Realtime (notifications), Storage (avatars,
+  logos). `pgmq` is installed but unused; there are no Edge Functions yet.
 - **UI:** `@windmorph/react` (Material Design 3 Expressive, built on React Aria) and
-  `@windmorph/react-pro` (non-M3 components). Tailwind CSS v4 with Windmorph tokens, `cn()`
-  (`clsx` + `tailwind-merge`), `tailwind-variants` for variants, `motion` (`motion/react`),
-  Material Symbols.
-- **Libraries (logic only):** `react-aria-components` (table, virtualizer, drag and drop),
-  `@tanstack/react-virtual`, `@tanstack/react-query` (interactive screens only),
-  `@internationalized/date`, `rrule`, `date-holidays`, `@xyflow/react` + `elkjs`, `@visx`,
-  `react-hook-form` (complex forms only), `zod`, `next-intl`, `papaparse`, SheetJS, `exceljs`,
-  Resend + React Email, Sentry.
+  `@windmorph/react-pro` (non-M3 components). Tailwind CSS v4 with Windmorph tokens, `cn()` from
+  `@windmorph/react`, `motion` (`motion/react`), Material Symbols.
+- **Libraries in use (logic only):** `react-aria-components` (table, virtualizer, drag and
+  drop), `@tanstack/react-virtual`, `@internationalized/date`, `rrule`, `date-holidays`,
+  `@xyflow/react` + `elkjs`, `zod`, `next-intl`, `papaparse` and `read-excel-file` (import, in
+  the browser), `@react-email/render` + `nodemailer` (email over SMTP: Mailpit locally, Resend
+  later), `@sentry/nextjs`.
+- **Add when needed, not before:** `@tanstack/react-query` (a live, highly interactive screen),
+  `react-hook-form` (a form too complex for Server Action + zod), `tailwind-variants`, `@visx`
+  (charts), `exceljs` (Excel export, see the open decision in `status.md`).
 - **Tests:** Vitest, Playwright, pgTAP (`supabase test db`). **CI:** GitHub Actions.
 - **Hosting:** Vercel + Supabase Cloud, one EU region: Ireland (Supabase `eu-west-1`, Vercel `dub1`).
 
@@ -57,12 +60,12 @@ The stack decision, with the reasons, is in:
 
 ## Where code runs
 
-| Layer          | Responsibility                                                                 |
-| -------------- | ------------------------------------------------------------------------------ |
-| Postgres       | Schema, RLS, permission functions, transactional RPCs, schedules, job queue    |
-| Edge Functions | Batch jobs (import, rate-card apply, GDPR export/erase, retention), email      |
-| Next.js server | Reads with the user's session, Server Actions with zod, calendar feed, exports |
-| Browser        | Windmorph UI; TanStack Query only for live, interactive screens                |
+| Layer          | Responsibility                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| Postgres       | Schema, RLS, permission functions, transactional RPCs, schedules, job queue                |
+| Jobs           | `pg_cron` and batched SQL functions; email jobs call `/api/jobs/*` (no Edge Functions yet) |
+| Next.js server | Reads with the user's session, Server Actions with zod, calendar feed, exports             |
+| Browser        | Windmorph UI; import files parsed here; no client cache library yet                        |
 
 Business logic lives in exactly one place (SQL **or** TypeScript), never duplicated.
 

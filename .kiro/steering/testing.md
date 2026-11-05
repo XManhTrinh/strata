@@ -10,7 +10,7 @@ fileMatchPattern: "{e2e/**,supabase/tests/**,**/*.test.ts,**/*.test.tsx}"
 | Database   | pgTAP (`supabase test db`)        | `supabase/tests`               | Every RLS policy per role, every RPC including failures, working-day calculation, closure maintenance       |
 | Unit       | Vitest                            | next to the code (`*.test.ts`) | Rate-card engine, cost maths, import mapping and change detection, formatting, zod schemas, component logic |
 | End to end | Playwright                        | `e2e/`                         | Main journeys at phone (390px), tablet (834px) and desktop (1440px) widths                                  |
-| Load       | Seed generator + scripted queries | `supabase/tests/load`          | 100k-member workspace (nightly)                                                                             |
+| Load       | Seed generator + scripted queries | `supabase/load`                | 100k-member workspace (nightly)                                                                             |
 
 ## Rules
 
