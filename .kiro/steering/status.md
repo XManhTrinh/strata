@@ -107,10 +107,14 @@ Everything under "Later" in `docs/rebuild-plan.md` section 4 stays out until v1 
   `data-grid.tsx`. None is an error.
 - `parseSorts` in `src/features/people/directory-params.ts` still accepts the old `desc=1`
   directory links from before multi-column sort. Remove it once old links no longer matter.
-- **The nightly load checks have never passed** (every run since 2026-10-31). The 100k data loads,
-  but almost every check misses its target on the GitHub runner: the directory, the calendar
-  week, plan totals, the plan grid and applying rate cards. Because so many checks miss, the
-  runner is more likely too small for targets measured locally than one query having slowed.
-  Investigate before launch: compare against a local run (`docs/runbook.md`) and either fix the
-  slow queries or set targets per environment. The logs also show Docker Hub rate limits
-  (`toomanyrequests`) while Supabase starts.
+- **The nightly load checks fail on CI but pass locally** (nightly red since 2026-10-31). Measured
+  on 2026-11-05: a full local `pnpm db:load` (14-CPU / 24 GB Mac) passed **all 34 checks** with
+  margin (re-run `pnpm db:load` to reproduce). The queries are not
+  slow; the targets are simply too tight for GitHub's shared `ubuntu-latest` runner (2–4 vCPU).
+  The checks closest to their target even locally, and so the first to tip over on CI, are plan
+  totals by a custom field (2537 ms / 3000), the team-and-below plan grid first page
+  (279 ms / 300) and the whole-workspace calendar week (231 ms / 300). EXPLAIN was not needed: no
+  check regressed. Decision still open (product owner): either set per-environment targets (looser
+  on CI) in `supabase/load/checks.sql`, or run the nightly on a larger runner. The Docker Hub
+  `toomanyrequests` noise affects Supabase startup, not query timing. Until this is decided the
+  nightly stays red; it is a target/runner mismatch, not a product bug.
