@@ -81,3 +81,10 @@ Everything under "Later" in `docs/rebuild-plan.md` section 4 stays out until v1 
   `data-grid.tsx`. None is an error.
 - `parseSorts` in `src/features/people/directory-params.ts` still accepts the old `desc=1`
   directory links from before multi-column sort. Remove it once old links no longer matter.
+- **The nightly load checks have never passed** (every run since 2026-10-31). The 100k data loads,
+  but almost every check misses its target on the GitHub runner: the directory, the calendar
+  week, plan totals, the plan grid and applying rate cards. Because so many checks miss, the
+  runner is more likely too small for targets measured locally than one query having slowed.
+  Investigate before launch: compare against a local run (`docs/runbook.md`) and either fix the
+  slow queries or set targets per environment. The logs also show Docker Hub rate limits
+  (`toomanyrequests`) while Supabase starts.
