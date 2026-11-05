@@ -2,13 +2,13 @@
 
 ## Foundations
 
-| Part                           | DataTable                                          | DataGrid                                                   |
-| ------------------------------ | -------------------------------------------------- | ---------------------------------------------------------- |
-| Structure and accessibility    | `react-aria-components` Table                      | Own ARIA grid keyboard model with React Aria focus helpers |
-| Virtualization                 | React Aria `Virtualizer`                           | `@tanstack/react-virtual` (rows and columns)               |
-| Drag and drop (column reorder) | React Aria drag and drop                           | Same                                                       |
-| Styling                        | `tailwind-variants` + Windmorph tokens             | Same                                                       |
-| Inputs                         | Windmorph Checkbox, Menu, SearchBar, chips, Select | Windmorph TextField/Select as editors                      |
+| Part                           | DataTable                                           | DataGrid                                                   |
+| ------------------------------ | --------------------------------------------------- | ---------------------------------------------------------- |
+| Structure and accessibility    | `react-aria-components` Table                       | Own ARIA grid keyboard model with React Aria focus helpers |
+| Virtualization                 | React Aria `Virtualizer`                            | `@tanstack/react-virtual` (rows and columns)               |
+| Drag and drop (column reorder) | React Aria drag and drop                            | Same                                                       |
+| Styling                        | Windmorph tokens and `cn()` from `@windmorph/react` | Same                                                       |
+| Inputs                         | Windmorph Checkbox, Menu, SearchBar, chips, Select  | Windmorph TextField/Select as editors                      |
 
 ## API sketch
 

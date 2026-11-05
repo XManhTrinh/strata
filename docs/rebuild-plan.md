@@ -17,12 +17,12 @@ What is left and what comes next is in `.kiro/steering/status.md`.
 
 ### 1.1 Responsibilities
 
-| Layer                                                                  | Does                                                                                                                                                                   | Does not                                                           |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| **Postgres (Supabase)**                                                | Owns the schema, enforces tenancy and permissions with RLS, runs multi-step changes as transactional functions (RPC), runs schedules (`pg_cron`), queues jobs (`pgmq`) | Render anything; call external services                            |
-| **Edge Functions**                                                     | Not used so far: batch work runs as SQL functions and `pg_cron` (see 1.2)                                                                                              | —                                                                  |
-| **Next.js server** (Server Components, Server Actions, route handlers) | Reads with the user's session, validates input with zod, calls RPCs, serves the calendar feed and file exports                                                         | Bypass RLS (the service key is never used for user requests)       |
-| **Browser**                                                            | Interactive UI with Windmorph; no client cache library yet (TanStack Query if a live screen needs it)                                                                  | Decide permissions (it only hides what the server already refuses) |
+| Layer                                                                  | Does                                                                                                                                             | Does not                                                           |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| **Postgres (Supabase)**                                                | Owns the schema, enforces tenancy and permissions with RLS, runs multi-step changes as transactional functions (RPC), runs schedules (`pg_cron`) | Render anything; call external services                            |
+| **Edge Functions**                                                     | Not used so far: batch work runs as SQL functions and `pg_cron` (see 1.2)                                                                        | —                                                                  |
+| **Next.js server** (Server Components, Server Actions, route handlers) | Reads with the user's session, validates input with zod, calls RPCs, serves the calendar feed and file exports                                   | Bypass RLS (the service key is never used for user requests)       |
+| **Browser**                                                            | Interactive UI with Windmorph; no client cache library yet (TanStack Query if a live screen needs it)                                            | Decide permissions (it only hides what the server already refuses) |
 
 Rules that apply everywhere:
 

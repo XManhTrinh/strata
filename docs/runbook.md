@@ -6,11 +6,11 @@ staging until a production project exists.
 
 ## Environments
 
-| Environment | Web                            | Database                      | Email   |
-| ----------- | ------------------------------ | ----------------------------- | ------- |
-| Local       | `pnpm dev` (port 3000)         | `supabase start` (Docker)     | Mailpit |
-| Staging     | Vercel preview/staging, `dub1` | Supabase project, `eu-west-1` | Resend  |
-| Production  | Not yet (staging is the MVP)   | Later                         | Resend  |
+| Environment | Web                            | Database                      | Email                                  |
+| ----------- | ------------------------------ | ----------------------------- | -------------------------------------- |
+| Local       | `pnpm dev` (port 3000)         | `supabase start` (Docker)     | Mailpit                                |
+| Staging     | Vercel preview/staging, `dub1` | Supabase project, `eu-west-1` | None yet (Resend once a domain exists) |
+| Production  | Not yet (staging is the MVP)   | Later                         | Resend                                 |
 
 ## Deploying
 

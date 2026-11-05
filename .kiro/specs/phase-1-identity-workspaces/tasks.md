@@ -54,11 +54,10 @@ settings, and notifications. Every migration lands with its pgTAP tests.
     - _Requirements: 10.1, 10.2_
 
 - [x] 6. Notifications
-  - [x] 6.1 Migration: `notifications`, `notification_preferences`, email queue trigger,
-        Realtime publication
-        (email queue trigger moves to 6.2)
+  - [x] 6.1 Migration: `notifications`, `notification_preferences`, Realtime publication
+        (no email queue trigger: emails are picked up by the job in 6.2)
     - _Requirements: 11.1, 11.2, 11.3_
-  - [x] 6.2 Edge Function: email worker (Resend + React Email templates) and daily digest schedule
+  - [x] 6.2 Email sending (React Email templates over SMTP) and daily digest schedule
         (done in Phase 5 as `/api/jobs/notification-emails`, called by pg_cron with a secret)
         (waiting for a domain and Resend; preferences are stored already)
     - _Requirements: 11.2, 11.3, 11.5_

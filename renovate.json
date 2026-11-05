@@ -37,7 +37,7 @@
       "groupName": "test tooling"
     },
     {
-      "description": "typescript 6.x is the API copy for typescript-eslint, Next.js and editors; type checking uses typescript-native (TypeScript 7). Drop the pin once typescript-eslint supports 7.",
+      "description": "TypeScript stays on 6.x, type checking included: TypeScript 7 failed on next-intl's typed messages and typescript-eslint needs the 6.x API. Drop the pin once 7 checks this code base cleanly and typescript-eslint supports it.",
       "matchPackageNames": ["typescript"],
       "allowedVersions": "<7"
     },

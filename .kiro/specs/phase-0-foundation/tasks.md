@@ -26,8 +26,8 @@ environments. Each task leaves the repository building.
         `test`, `test:e2e`, `db:test`, `db:types`
     - _Requirements: 2.4_
   - [x] 2.4 Install each dependency fresh at its latest stable version; Node 24 LTS (`.nvmrc`, the newest Vercel offers),
-        pnpm 12.16.1 (`packageManager`), TypeScript 7 for type checking with TypeScript 6 for
-        tools that need its API; build permissions only for installed packages
+        pnpm 12.16.1 (`packageManager`), TypeScript 6 for type checking and tools (TypeScript 7
+        failed on next-intl's typed messages, see `tech.md`); build permissions only for installed packages
     - _Requirements: 2.6, 2.7_
 
 - [x] 3. Windmorph theme and base UI
@@ -67,7 +67,7 @@ environments. Each task leaves the repository building.
   - [x] 6.1 ESLint flat config (Next, TypeScript with `no-explicit-any` as error, full `jsx-a11y`
         recommended set) and Prettier
     - _Requirements: 6.1, 6.2_
-  - [x] 6.2 `typecheck` with TypeScript 7 (`tsc --noEmit`)
+  - [x] 6.2 `typecheck` with TypeScript 6 (`tsc --noEmit`)
     - _Requirements: 6.3_
   - [x] 6.3 `knip` config and script
     - _Requirements: 6.4_

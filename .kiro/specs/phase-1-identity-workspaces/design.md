@@ -75,13 +75,16 @@ RLS-protected updates from Server Actions.
 - `on auth.users insert` → create `profiles` row.
 - Audit triggers on `members`, `roles`, `role_permissions`, `member_roles`, `invitations`,
   `workspace_features`, `workspaces`.
-- `notifications insert` → enqueue an email job in `pgmq` when preferences allow.
+- Notification emails are not queued by a trigger: the every-minute `notification-emails` job
+  finds notifications due for email under each person's preferences (as built in Phase 5).
 
 ## Email
 
-An Edge Function consumes the email queue and sends through Resend with React Email templates
-(invite, role changed, ownership changed, daily digest). The digest runs from `pg_cron` each
-morning in each user's time zone.
+As built (Phase 5): `pg_cron` calls the app's `/api/jobs/notification-emails` route every minute
+with a shared secret. The route renders React Email templates (invite, role changed, ownership
+changed, daily digest) and sends over SMTP with `nodemailer` (`SMTP_URL`): Mailpit locally,
+Resend's SMTP once a domain exists. The daily digest goes out each morning in each user's time
+zone. There is no Edge Function and no `pgmq` queue.
 
 ## Screens
 

@@ -61,7 +61,7 @@ decision named but nothing needed yet are marked "add when needed"; add them the
 | Long-running jobs         | SQL functions run in batches (import apply, rate-card apply) and `pg_cron` schedules; jobs that send email call the app's `/api/jobs/*` routes with a shared secret. No Edge Functions so far |
 | Realtime                  | Notifications                                                                                                                                                                                 |
 | Files                     | Supabase Storage (avatars, workspace logos). Import files are parsed in the browser and never uploaded                                                                                        |
-| Server-only secrets       | AI assistant runs in a Next.js route handler or Edge Function, querying with the caller's JWT so RLS applies                                                                                  |
+| Server-only secrets       | Later: the AI assistant runs in a Next.js route handler, querying with the caller's JWT so RLS applies                                                                                        |
 
 ### UI
 
