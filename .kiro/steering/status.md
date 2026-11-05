@@ -11,7 +11,7 @@ the next step changes.
 
 - **One branch: `main`.** The `rebuild` branch was merged into `main` and deleted on 2026-11-05.
   For larger changes, branch from `main` and merge back.
-- **The old NestJS/Prisma system** is at the `legacy` git tag (`git show legacy:<path>`), as
+- **The old NestJS/Prisma system** is at the `pre-rebuild` git tag (`git show pre-rebuild:<path>`, commit `79127e9` from 2026-10-28), as
   reference material only: port business rules from it, never copy files.
 - **Pushing to `main` deploys.** `.github/workflows/deploy-db.yml` applies new
   `supabase/migrations` to staging. Production is a manual, approved run of the same workflow

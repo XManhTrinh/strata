@@ -2,7 +2,7 @@
 
 Strata was rebuilt from scratch (Next.js 16 + Supabase + `@windmorph/react` /
 `@windmorph/react-pro`, Material Design 3) and lives on `main`. The old NestJS/Prisma system is
-kept at the `legacy` tag as reference material only: port business rules from it, never copy files.
+kept at the `pre-rebuild` tag as reference material only: port business rules from it, never copy files.
 
 Claude Code and Kiro share one source of truth. Read these before planning or changing anything:
 
