@@ -6,7 +6,8 @@
 `src/components/ui` as future `@windmorph/react-pro` components: a full, Windmorph-style API,
 Material Design 3 visuals with Windmorph tokens, accessible, and fast at 100k rows. They are
 built at the start of Phase 2, after a spike that measures them against the performance targets.
-Tasks are written when Phase 2 starts.
+Both are built (`src/components/ui/data-table`, `src/components/ui/data-grid`); their
+tasks are tracked as task 5 in `.kiro/specs/phase-2-organization-people/tasks.md`.
 
 Sources: `docs/product-decisions.md` (Components Windmorph doesn't have),
 `docs/architecture/0001-tech-stack.md` (Data table, Data grid).

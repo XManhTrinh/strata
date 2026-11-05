@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { DataTableDemo } from "@/features/spike/data-table-demo";
+import { DataTableDemo } from "@/features/dev-demos/data-table-demo";
 
 /** `?count=` sets the rows (up to the 5,000 a client-mode table holds), for the benchmark. */
 export default async function DataTableDemoPage({

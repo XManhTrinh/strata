@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import { Button } from "@windmorph/react";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { useDataTableLabels } from "@/hooks/use-data-table-labels";
-import { type SpikePerson, generatePeople } from "./data";
+import { type DemoPerson, generatePeople } from "./data";
 
-const COLUMNS: ColumnDef<SpikePerson>[] = [
+const COLUMNS: ColumnDef<DemoPerson>[] = [
   {
     id: "name",
     header: "Name",

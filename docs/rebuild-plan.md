@@ -4,8 +4,12 @@ Built from `architecture/0001-tech-stack.md` (the stack) and `product-decisions.
 product does). Where this plan and those documents disagree, those documents win and this plan is
 corrected.
 
-The rebuild happens on the `rebuild` branch. `main` is reference material only: business rules
-are ported from it and re-tested; no file is copied across.
+The rebuild was done on a `rebuild` branch, merged into `main` and deleted (2026-11-05); work now
+happens on `main`. The old NestJS/Prisma system is kept at the `legacy` git tag as reference
+material only: business rules are ported from it and re-tested; no file is copied across.
+
+**Status (2026-11-05):** Phases 0–4 are complete and Phase 5 is complete up to the MVP on staging.
+What is left and what comes next is in `.kiro/steering/status.md`.
 
 ---
 

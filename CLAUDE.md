@@ -1,11 +1,12 @@
 # Strata
 
-Strata is being rebuilt from scratch on the `rebuild` branch (Next.js 16 + Supabase +
-`@windmorph/react` / `@windmorph/react-pro`, Material Design 3). `main` holds the old
-NestJS/Prisma system and is reference material only: port business rules from it, never copy files.
+Strata was rebuilt from scratch (Next.js 16 + Supabase + `@windmorph/react` /
+`@windmorph/react-pro`, Material Design 3) and lives on `main`. The old NestJS/Prisma system is
+kept at the `legacy` tag as reference material only: port business rules from it, never copy files.
 
 Claude Code and Kiro share one source of truth. Read these before planning or changing anything:
 
+- `.kiro/steering/status.md`: what is done and what is next (start here)
 - `docs/product-decisions.md`: what the product does (authoritative)
 - `docs/architecture/0001-tech-stack.md`: the stack and libraries
 - `docs/rebuild-plan.md`: architecture, database design, screens, phases

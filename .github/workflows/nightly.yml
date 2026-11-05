@@ -20,8 +20,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: rebuild
       - name: Allow installing Windmorph Pro
         run: git config --global url."https://x-access-token:${WINDMORPH_PRO_TOKEN}@github.com/XManhTrinh/windmorph-pro".insteadOf "https://github.com/XManhTrinh/windmorph-pro"
       - uses: pnpm/action-setup@v6

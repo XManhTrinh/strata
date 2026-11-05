@@ -1,5 +1,5 @@
-/** Deterministic fake people for the spike, so every run measures the same data. */
-export type SpikePerson = {
+/** Deterministic fake people for the dev demos, so every run measures the same data. */
+export type DemoPerson = {
   id: string;
   name: string;
   email: string;
@@ -38,7 +38,7 @@ const LAST = [
 const TEAMS = ["Squad A", "Squad B", "Squad C", "Platform", "Payments", "Mobile", "Data", "Design"];
 const POSITIONS = ["Engineer", "Senior engineer", "Lead", "Designer", "Product manager", "Analyst"];
 
-export function generatePeople(count: number): SpikePerson[] {
+export function generatePeople(count: number): DemoPerson[] {
   return Array.from({ length: count }, (_, i) => {
     const first = FIRST[i % FIRST.length]!;
     const last = LAST[Math.floor(i / FIRST.length) % LAST.length]!;

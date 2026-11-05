@@ -32,9 +32,9 @@ const eslintConfig = [
     rules: { "@next/next/no-head-element": "off" },
   },
   {
-    // All UI text comes from src/messages through next-intl (the dev-only spike is exempt).
+    // All UI text comes from src/messages through next-intl (dev-only demos are exempt).
     files: ["src/**/*.tsx"],
-    ignores: ["src/features/spike/**", "src/app/(dev)/**"],
+    ignores: ["src/features/dev-demos/**", "src/app/(dev)/**"],
     rules: {
       "react/jsx-no-literals": ["error", { noStrings: false, ignoreProps: true }],
     },

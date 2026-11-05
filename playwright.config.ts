@@ -34,7 +34,7 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    // Development-only pages (component demos, the table spike) exist only with this set.
+    // Development-only pages (component demos) exist only with this set.
     env: { STRATA_DEV_PAGES: "1" },
   },
 });

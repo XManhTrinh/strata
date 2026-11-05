@@ -95,6 +95,8 @@ document before building the full components.
 
 Measured on a production build in headless Chrome (desktop, 1440 × 900) with
 `e2e/perf/spike.spec.ts` (`STRATA_DEV_PAGES=1 pnpm start`, then `PERF=1 pnpm test:e2e e2e/perf`).
+The spike page and its test were removed on 2026-11-05 once the real components existed (they are
+in git history); the nightly benchmark is now `e2e/perf/data-table.spec.ts`.
 
 **DataTable: React Aria Table + Virtualizer, rows held in the browser**
 

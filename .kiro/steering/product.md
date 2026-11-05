@@ -5,9 +5,9 @@ inclusion: always
 # Strata: product
 
 Strata is a **multi-tenant workforce platform**: people and organization structure, calendar and
-leave, capacity planning and rate-card costing. It is being **rebuilt from scratch** on the
-`rebuild` branch; `main` holds the old NestJS/Prisma system and is reference material only
-(port business rules from it, never copy files).
+leave, capacity planning and rate-card costing. It was **rebuilt from scratch** and
+lives on `main`; the old NestJS/Prisma system is kept at the `legacy` tag as reference material
+only (port business rules from it, never copy files).
 
 The full, authoritative product decisions are in:
 
