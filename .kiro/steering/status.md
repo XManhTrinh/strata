@@ -92,8 +92,11 @@ When all five are done, tick task 9 in `.kiro/specs/phase-5-completion-launch/ta
 ## After that (Phase 5, task 10, and Phase 0, task 9)
 
 A domain; Resend for app and Auth email; a `strata-production` Supabase project with
-point-in-time recovery and a production Vercel project; moving the MVP's data there. Write a
-spec for this in `.kiro/specs/` before starting it.
+point-in-time recovery and a production Vercel project; moving the MVP's data there. The spec for
+this is written: `.kiro/specs/production-launch/` (requirements, design, tasks). It is almost all
+configuration and operations needing the product owner's accounts, and it carries three open
+decisions (the domain, staging's future after launch, and the data-move method) to settle before
+the matching tasks start.
 
 Everything under "Later" in `docs/rebuild-plan.md` section 4 stays out until v1 launches.
 
