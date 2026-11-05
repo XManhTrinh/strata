@@ -224,6 +224,8 @@ export async function personProfile(
           .filter((o) => o.field_id === f.id)
           .map((o) => ({ id: o.id, label: o.label, archived: o.archived_at !== null })),
         value: valueByField.get(f.id) ?? null,
+        personName:
+          f.type === "person" ? (nameOf.get(valueByField.get(f.id) as string) ?? null) : null,
       })),
     access: accessKeys,
     currency: workspace.data?.currency ?? "EUR",
