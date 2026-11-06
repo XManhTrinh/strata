@@ -4,6 +4,9 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.url(),
+  // Staging-only opt-in: offer email + password sign-up even without an email provider, when
+  // Supabase Auth's email confirmation is turned off. Never set in production (see decision 15).
+  NEXT_PUBLIC_EMAIL_SIGNUP: z.enum(["on", "off"]).optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
@@ -27,6 +30,7 @@ export function getPublicEnv(): PublicEnv {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_EMAIL_SIGNUP: process.env.NEXT_PUBLIC_EMAIL_SIGNUP,
   });
   return cached;
 }

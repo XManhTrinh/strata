@@ -382,6 +382,15 @@ All plan changes go to the audit log.
   join links with approval, or invitation links the inviter copies; notifications are in the app
   only. Email sign-up, password reset, invitation emails and notification emails come back as
   soon as an email provider is set (`SMTP_URL`, and Supabase Auth's SMTP), with no code change.
+- **Staging exception — email sign-up without a provider (decided 2026-11-05):** while production
+  is still far off and staging has no domain, staging may allow email + password sign-up with
+  Supabase Auth's email confirmation **turned off** (set in the `strata-staging` dashboard), so
+  new people can register without a confirmation email. The app offers email sign-up when an
+  explicit opt-in flag `NEXT_PUBLIC_EMAIL_SIGNUP=on` is set (alongside the existing "SMTP is
+  configured" case). This is a deliberate, staging-only loosening: with confirmations off, an
+  email address is unverified, so it carries a spam/impersonation risk and **must be reverted
+  before production** (confirmations back on, delivered through Resend). Password reset still needs
+  a working email provider. Production never sets the flag; it relies on `SMTP_URL` + Supabase SMTP.
 - **Later:** Microsoft Teams and Slack, connected per workspace (e.g. approve leave from a Teams
   message).
 

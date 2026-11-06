@@ -11,6 +11,15 @@ export function emailConfigured(): boolean {
   return Boolean(process.env.SMTP_URL);
 }
 
+/**
+ * Whether email + password sign-up is offered. True when an email provider is set (so the
+ * confirmation email can be delivered), or when staging explicitly opts in with
+ * `NEXT_PUBLIC_EMAIL_SIGNUP=on` and Supabase Auth's confirmation is turned off (decision 15).
+ */
+export function emailSignUpEnabled(): boolean {
+  return emailConfigured() || process.env.NEXT_PUBLIC_EMAIL_SIGNUP === "on";
+}
+
 /** Sends one email with HTML and plain-text bodies rendered from a React Email template. */
 export async function sendEmail({
   to,

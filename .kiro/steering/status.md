@@ -89,6 +89,15 @@ Most of these steps need the product owner's accounts. Each one is set up as des
 
 When all five are done, tick task 9 in `.kiro/specs/phase-5-completion-launch/tasks.md`.
 
+**Email sign-up on staging without a domain (decided 2026-11-05, decision 15):** staging may allow
+email + password sign-up while production is far off. Supabase Auth's email confirmation is turned
+**off** in the `strata-staging` dashboard, and the app offers email sign-up when
+`NEXT_PUBLIC_EMAIL_SIGNUP=on` is set in the Vercel `strata-web` project (it is a build-time
+`NEXT_PUBLIC_` var, so a redeploy is needed; setting it only in Supabase is not enough). This is a
+deliberate, staging-only loosening — unverified addresses — and **must be reverted before
+production** (confirmations back on, delivered through Resend). Password reset still needs an email
+provider.
+
 ## After that (Phase 5, task 10, and Phase 0, task 9)
 
 A domain; Resend for app and Auth email; a `strata-production` Supabase project with
