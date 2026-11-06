@@ -22,12 +22,20 @@ cp .env.example .env.local           # then fill in from: supabase status -o env
 pnpm dev                             # http://localhost:3000
 ```
 
+Or, after the first `.env.local` is in place, bring up Supabase and the dev server together:
+
+```bash
+pnpm dev:all                         # starts Supabase (if needed), then the dev server
+```
+
 Install packages only inside this checkout (never in `/tmp` or another temporary folder).
 
 ## Scripts
 
 | Script                                         | Does                                                              |
 | ---------------------------------------------- | ----------------------------------------------------------------- |
+| `pnpm dev:all`                                 | Start Supabase (if not up) and the dev server in one command      |
+| `pnpm db:stop`                                 | Stop the local Supabase stack                                     |
 | `pnpm dev` / `pnpm build` / `pnpm start`       | Run, build and serve the app                                      |
 | `pnpm lint` / `pnpm typecheck` / `pnpm format` | ESLint, TypeScript 6 type check, Prettier                         |
 | `pnpm knip`                                    | Unused dependencies, files and exports                            |

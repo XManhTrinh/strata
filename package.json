@@ -9,6 +9,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:all": "sh scripts/dev-all.sh",
+    "db:stop": "supabase stop",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
