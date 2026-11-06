@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   countryFromLocale,
+  countryFromTimeZone,
   isTimeZoneInCountry,
   slugify,
   suggestedCurrency,
@@ -25,6 +26,37 @@ describe("regional suggestions", () => {
   it("reads the country from a locale", () => {
     expect(countryFromLocale("en-GB")).toBe("GB");
     expect(countryFromLocale("ro")).toBeUndefined();
+  });
+});
+
+describe("country from time zone", () => {
+  it("derives GB from Europe/London", () => {
+    expect(countryFromTimeZone("Europe/London")).toBe("GB");
+  });
+
+  it("derives US from America/New_York", () => {
+    expect(countryFromTimeZone("America/New_York")).toBe("US");
+  });
+
+  it("derives US from other US zones like America/Los_Angeles", () => {
+    expect(countryFromTimeZone("America/Los_Angeles")).toBe("US");
+    expect(countryFromTimeZone("America/Chicago")).toBe("US");
+  });
+
+  it("derives country for less common zones by prefix", () => {
+    expect(countryFromTimeZone("America/Indiana/Indianapolis")).toBe("US");
+    expect(countryFromTimeZone("Australia/Queensland")).toBe("AU");
+  });
+
+  it("returns undefined for unknown zones", () => {
+    expect(countryFromTimeZone("Unknown/Zone")).toBeUndefined();
+    expect(countryFromTimeZone("UTC")).toBeUndefined();
+  });
+
+  it("handles multi-zone countries like Australia", () => {
+    expect(countryFromTimeZone("Australia/Sydney")).toBe("AU");
+    expect(countryFromTimeZone("Australia/Melbourne")).toBe("AU");
+    expect(countryFromTimeZone("Australia/Perth")).toBe("AU");
   });
 });
 

@@ -9,6 +9,7 @@ import { FormError } from "@/features/auth/components/form-error";
 import { idleFormState } from "@/lib/form-state";
 import {
   countryFromLocale,
+  countryFromTimeZone,
   slugify,
   suggestedCurrency,
   suggestedFiscalYearStart,
@@ -56,10 +57,13 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
   const [region, setRegion] = useState<RegionValues>(() => {
-    const country = countryFromLocale(browserLocale) ?? "GB";
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // Time zone is the source of truth: derive country from it, fall back to locale
+    const country =
+      countryFromTimeZone(browserTimeZone) ?? countryFromLocale(browserLocale) ?? "GB";
     return {
       country,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: browserTimeZone,
       currency: suggestedCurrency(country),
       fiscalYearStartMonth: String(suggestedFiscalYearStart(country)),
       weekStart: String(suggestedWeekStart(browserLocale)),
