@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Select, SelectItem } from "@windmorph/react";
 import type { ErrorKey } from "@/lib/form-state";
-import { COUNTRY_CODES } from "@/lib/regions";
+import { COUNTRY_CODES, isTimeZoneInCountry, suggestedTimeZone } from "@/lib/regions";
 
 export type RegionValues = {
   country: string;
@@ -73,6 +73,21 @@ export function RegionFields({
     errorMessage: fieldErrors[field] && te(fieldErrors[field]),
   });
 
+  // Soft hint: time zone doesn't belong to the selected country
+  const timeZoneInCountry = value.country
+    ? isTimeZoneInCountry(value.country, value.timeZone)
+    : true;
+  const countryName = useMemo(() => {
+    if (!value.country) return "";
+    const names = new Intl.DisplayNames([locale], { type: "region" });
+    return names.of(value.country) ?? value.country;
+  }, [value.country, locale]);
+  const suggestedZone = value.country ? suggestedTimeZone(value.country) : "";
+  const timeZoneHint =
+    !timeZoneInCountry && countryName && suggestedZone
+      ? t("fields.timeZoneMismatch", { country: countryName, suggested: suggestedZone })
+      : undefined;
+
   return (
     <fieldset className="flex flex-col gap-4">
       <legend className="text-title-medium text-on-surface mb-2">{t("regionSection")}</legend>
@@ -92,6 +107,7 @@ export function RegionFields({
           label={t("fields.timeZone")}
           searchable
           labels={{ search: t("search") }}
+          supportingText={timeZoneHint}
         >
           {timeZones.map((zone) => (
             <SelectItem key={zone}>{zone.replaceAll("_", " ")}</SelectItem>

@@ -97,3 +97,91 @@ export function slugify(name: string): string {
     .slice(0, 40)
     .replace(/-+$/, "");
 }
+
+/** Returns all time zones for a country using the Intl API. Falls back to empty array. */
+export function timeZonesForCountry(country: string): string[] {
+  try {
+    const locale = new Intl.Locale(`und-${country}`) as Intl.Locale & {
+      getTimeZones?: () => string[];
+    };
+    return locale.getTimeZones?.() ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Checks if a time zone belongs to a country. */
+export function isTimeZoneInCountry(country: string, zone: string): boolean {
+  const zones = timeZonesForCountry(country);
+  return zones.length > 0 && zones.includes(zone);
+}
+
+/** Suggests a primary/representative time zone for a country. */
+export function suggestedTimeZone(country: string): string {
+  const zones = timeZonesForCountry(country);
+  // Return first zone (usually the most populous/primary) or fallback
+  if (zones.length > 0) return zones[0]!;
+  // Fallback: use country code as region hint, prefer capital city zone
+  const fallbackMap: Record<string, string> = {
+    US: "America/New_York",
+    GB: "Europe/London",
+    DE: "Europe/Berlin",
+    FR: "Europe/Paris",
+    JP: "Asia/Tokyo",
+    AU: "Australia/Sydney",
+    CA: "America/Toronto",
+    CN: "Asia/Shanghai",
+    IN: "Asia/Kolkata",
+    BR: "America/Sao_Paulo",
+    MX: "America/Mexico_City",
+    ES: "Europe/Madrid",
+    IT: "Europe/Rome",
+    NL: "Europe/Amsterdam",
+    BE: "Europe/Brussels",
+    CH: "Europe/Zurich",
+    AT: "Europe/Vienna",
+    PT: "Europe/Lisbon",
+    PL: "Europe/Warsaw",
+    SE: "Europe/Stockholm",
+    NO: "Europe/Oslo",
+    DK: "Europe/Copenhagen",
+    FI: "Europe/Helsinki",
+    IE: "Europe/Dublin",
+    NZ: "Pacific/Auckland",
+    SG: "Asia/Singapore",
+    HK: "Asia/Hong_Kong",
+    KR: "Asia/Seoul",
+    TH: "Asia/Bangkok",
+    MY: "Asia/Kuala_Lumpur",
+    PH: "Asia/Manila",
+    ID: "Asia/Jakarta",
+    VN: "Asia/Ho_Chi_Minh",
+    ZA: "Africa/Johannesburg",
+    EG: "Africa/Cairo",
+    NG: "Africa/Lagos",
+    KE: "Africa/Nairobi",
+    RU: "Europe/Moscow",
+    TR: "Europe/Istanbul",
+    SA: "Asia/Riyadh",
+    AE: "Asia/Dubai",
+    IL: "Asia/Jerusalem",
+    AR: "America/Argentina/Buenos_Aires",
+    CL: "America/Santiago",
+    CO: "America/Bogota",
+    PE: "America/Lima",
+    RO: "Europe/Bucharest",
+    HU: "Europe/Budapest",
+    CZ: "Europe/Prague",
+    GR: "Europe/Athens",
+    SK: "Europe/Bratislava",
+    LT: "Europe/Vilnius",
+    LV: "Europe/Riga",
+    EE: "Europe/Tallinn",
+    SI: "Europe/Ljubljana",
+    HR: "Europe/Zagreb",
+    BG: "Europe/Sofia",
+    UA: "Europe/Kyiv",
+    RS: "Europe/Belgrade",
+  };
+  return fallbackMap[country] ?? "UTC";
+}

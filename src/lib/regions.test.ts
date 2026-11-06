@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { countryFromLocale, slugify, suggestedCurrency, suggestedFiscalYearStart } from "./regions";
+import {
+  countryFromLocale,
+  isTimeZoneInCountry,
+  slugify,
+  suggestedCurrency,
+  suggestedFiscalYearStart,
+  suggestedTimeZone,
+  timeZonesForCountry,
+} from "./regions";
 
 describe("regional suggestions", () => {
   it("suggests currencies by country, euro for the eurozone", () => {
@@ -17,6 +25,49 @@ describe("regional suggestions", () => {
   it("reads the country from a locale", () => {
     expect(countryFromLocale("en-GB")).toBe("GB");
     expect(countryFromLocale("ro")).toBeUndefined();
+  });
+});
+
+describe("time zone suggestions", () => {
+  it("returns time zones for a country using Intl API", () => {
+    const usZones = timeZonesForCountry("US");
+    expect(usZones.length).toBeGreaterThan(0);
+    expect(usZones).toContain("America/New_York");
+
+    const gbZones = timeZonesForCountry("GB");
+    expect(gbZones).toContain("Europe/London");
+  });
+
+  it("returns empty array for unknown country", () => {
+    expect(timeZonesForCountry("XX")).toEqual([]);
+  });
+
+  it("checks if a time zone belongs to a country", () => {
+    expect(isTimeZoneInCountry("US", "America/New_York")).toBe(true);
+    expect(isTimeZoneInCountry("US", "Europe/London")).toBe(false);
+    expect(isTimeZoneInCountry("GB", "Europe/London")).toBe(true);
+    expect(isTimeZoneInCountry("GB", "America/New_York")).toBe(false);
+    expect(isTimeZoneInCountry("XX", "UTC")).toBe(false);
+  });
+
+  it("suggests a primary time zone for a country", () => {
+    // The Intl API returns the first zone alphabetically for the region
+    expect(suggestedTimeZone("US")).toBe("America/Adak");
+    expect(suggestedTimeZone("GB")).toBe("Europe/London");
+    expect(suggestedTimeZone("JP")).toBe("Asia/Tokyo");
+    expect(suggestedTimeZone("AU")).toBe("Antarctica/Macquarie");
+  });
+
+  it("falls back to UTC for unknown countries", () => {
+    expect(suggestedTimeZone("XX")).toBe("UTC");
+  });
+
+  it("handles multi-zone countries (US has many zones)", () => {
+    const usZones = timeZonesForCountry("US");
+    expect(usZones.length).toBeGreaterThan(10);
+    // The suggested zone should be one of the valid zones
+    const suggested = suggestedTimeZone("US");
+    expect(usZones).toContain(suggested);
   });
 });
 

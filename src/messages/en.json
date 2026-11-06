@@ -293,7 +293,8 @@
       "timeZone": "Time zone",
       "currency": "Currency",
       "fiscalYearStart": "Fiscal year starts in",
-      "weekStart": "Week starts on"
+      "weekStart": "Week starts on",
+      "timeZoneMismatch": "This time zone is not in {country}. The suggested one for this country is {suggested}."
     },
     "regionSection": "Region and calendar",
     "submit": "Create workspace",

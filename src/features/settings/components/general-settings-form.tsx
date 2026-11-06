@@ -9,6 +9,12 @@ import { type RegionValues, RegionFields } from "@/features/workspaces/component
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { idleFormState } from "@/lib/form-state";
 import { useSnackbar } from "@/lib/snackbar";
+import {
+  suggestedCurrency,
+  suggestedFiscalYearStart,
+  suggestedTimeZone,
+  suggestedWeekStart,
+} from "@/lib/regions";
 import { updateWorkspaceSettings } from "../actions";
 import { LogoEditor } from "./logo-editor";
 
@@ -38,7 +44,18 @@ export function GeneralSettingsForm({
   }, [state, snackbar, t]);
 
   const set = (field: keyof GeneralSettingsValues, next: string) =>
-    setValues((current) => ({ ...current, [field]: next }));
+    setValues((current) =>
+      field === "country"
+        ? {
+            ...current,
+            country: next,
+            timeZone: suggestedTimeZone(next),
+            currency: suggestedCurrency(next),
+            fiscalYearStartMonth: String(suggestedFiscalYearStart(next)),
+            weekStart: String(suggestedWeekStart(navigator.language)),
+          }
+        : { ...current, [field]: next }
+    );
 
   return (
     <section aria-labelledby="general-title" className="max-w-form flex flex-col gap-6">

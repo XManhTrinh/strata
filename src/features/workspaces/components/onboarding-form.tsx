@@ -12,6 +12,7 @@ import {
   slugify,
   suggestedCurrency,
   suggestedFiscalYearStart,
+  suggestedTimeZone,
   suggestedWeekStart,
 } from "@/lib/regions";
 import { createWorkspace } from "../actions";
@@ -76,8 +77,10 @@ function OnboardingFields({ siteHost }: { siteHost: string }) {
         ? {
             ...current,
             country: next,
+            timeZone: suggestedTimeZone(next),
             currency: suggestedCurrency(next),
             fiscalYearStartMonth: String(suggestedFiscalYearStart(next)),
+            weekStart: String(suggestedWeekStart(navigator.language)),
           }
         : { ...current, [field]: next }
     );
