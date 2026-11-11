@@ -110,6 +110,21 @@ function useRailPanel<Id extends string>(current: Id | null, pathname: string) {
   };
 }
 
+/** Pick the longest matching href for aria-current (e.g. /planning beats /planning). */
+function pickCurrentLink(links: RailPanelLink[], pathname: string): string | null {
+  let current: string | null = null;
+  let currentLen = 0;
+  for (const link of links) {
+    if (pathname === link.href || pathname.startsWith(`${link.href}/`)) {
+      if (link.href.length > currentLen) {
+        current = link.href;
+        currentLen = link.href.length;
+      }
+    }
+  }
+  return current;
+}
+
 /**
  * Material 3 adaptive navigation: a navigation bar on phones (< 600px) and a collapsed rail
  * (icons with labels) from 600px. Destinations with pages under them (Settings, Planning) open
@@ -155,6 +170,9 @@ export function WorkspaceShell({
     null;
   const panel = useRailPanel<PanelKey>(current, pathname);
   const openGroup = panel.open ? (groups.get(panel.open) ?? null) : null;
+
+  const isPanelOpen = openGroup !== null;
+  const isPinned = panel.pinned;
 
   return (
     <div className="bg-surface text-on-surface flex min-h-dvh">
@@ -219,34 +237,43 @@ export function WorkspaceShell({
               );
             })}
         </NavigationRail>
-        {openGroup && (
-          <SideSheet
-            id={panelId}
-            variant="standard"
-            open={true}
-            title={openGroup.heading}
-            classNames={{
-              // Standard variant sits in-layout beside the rail - match the RailPanel styling
-              frame: "relative h-full",
-              panel:
-                "h-full rounded-e-corner-large shadow-[2px_0_8px_0_color-mix(in_srgb,var(--md-sys-color-shadow)_20%,transparent)]",
-            }}
-            className="w-68"
-          >
+        <SideSheet
+          id={panelId}
+          variant="standard"
+          // Keep mounted and toggle open to preserve animation
+          open={isPanelOpen}
+          onOpenChange={(open) => {
+            if (!open) panel.close();
+          }}
+          title={openGroup?.heading}
+          // Hide the close button - the panel is pinned or previewed, not user-dismissible
+          classNames={{
+            close: "hidden",
+            // Standard variant sits in-layout when pinned, overlays when previewed
+            frame: isPinned ? "relative h-full" : "absolute start-full top-0 h-full z-50",
+            panel:
+              "h-full rounded-e-corner-large shadow-[2px_0_8px_0_color-mix(in_srgb,var(--md-sys-color-shadow)_20%,transparent)]",
+          }}
+          className={isPinned ? "w-68" : "w-68"}
+          // Move keep-open handlers to the sheet surface
+          onPointerEnter={panel.panel.onPointerEnter}
+          onPointerLeave={panel.panel.onPointerLeave}
+        >
+          {openGroup && (
             <nav
               aria-label={openGroup.label}
               className="flex h-full w-68 flex-col overflow-x-hidden overflow-y-auto py-3"
-              onPointerEnter={panel.panel.onPointerEnter}
-              onPointerLeave={panel.panel.onPointerLeave}
             >
               <ul className="flex flex-col gap-0.5 px-2">
                 {openGroup.links.map((link) => {
-                  const current = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                  // Use longest-match for aria-current
+                  const current =
+                    pickCurrentLink(openGroup.links, pathname) === link.href ? "page" : undefined;
                   return (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        aria-current={current ? "page" : undefined}
+                        aria-current={current}
                         className="text-body-medium text-on-surface-variant hover:bg-on-surface/8 focus-visible:outline-secondary aria-[current=page]:bg-secondary-container aria-[current=page]:text-on-secondary-container rounded-corner-full flex items-center px-3 py-2.5 outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
                       >
                         <span className="min-w-0 flex-1 truncate">{link.label}</span>
@@ -256,8 +283,8 @@ export function WorkspaceShell({
                 })}
               </ul>
             </nav>
-          </SideSheet>
-        )}
+          )}
+        </SideSheet>
       </div>
 
       <main

@@ -151,7 +151,7 @@ export function NotificationBell() {
 
   return (
     <>
-      <SheetTrigger>
+      <SheetTrigger open={open} onOpenChange={setOpen}>
         <IconButton
           variant="standard"
           aria-label={unread > 0 ? t("labelUnread", { count: unread }) : t("label")}
@@ -165,11 +165,11 @@ export function NotificationBell() {
         />
         <SideSheet
           variant="modal"
-          open={open}
-          onOpenChange={setOpen}
           title={t("title")}
           classNames={{
-            panel: "medium:w-[400px] medium:max-h-[min(70dvh,640px)] p-0",
+            // Full-screen on compact (phones), 400px on medium+
+            panel:
+              "w-full compact:max-w-none compact:h-dvh compact:top-0 compact:translate-y-0 rounded-none medium:rounded-s-medium medium:w-[400px] medium:h-auto medium:max-h-[min(70dvh,640px)] medium:top-auto medium:translate-y-auto p-0",
           }}
           actions={
             <MenuTrigger>

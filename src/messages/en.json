@@ -303,6 +303,7 @@
   "shell": {
     "skipToContent": "Skip to content",
     "navigation": "Main navigation",
+    "close": "Close",
     "nav": {
       "home": "Home",
       "people": "People",

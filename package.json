@@ -33,7 +33,7 @@
     "@sentry/nextjs": "^11.10.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
-    "@tanstack/react-virtual": "^3.14.23",
+    "@tanstack/react-virtual": "^3.14.26",
     "@windmorph/react": "0.2.3",
     "@windmorph/react-pro": "github:XManhTrinh/windmorph-pro#46c316a98ac66d14607fea65644ad5839b742ed7",
     "@xyflow/react": "^12.12.0",

@@ -44,7 +44,7 @@ says what's wrong, where Strata works around it, and what to remove once Windmor
 
 ## Fixed
 
-- **No anchored popover surface (2026-11-11):** Replaced with `SideSheet` (modal variant) in
-  `src/features/notifications/notification-bell.tsx`. The SideSheet is anchored via
-  `SheetTrigger` and provides the correct positioned surface for notifications. The standard
-  variant is used in the workspace shell for the side panel navigation.
+- **No anchored popover surface (2026-11-11):** Worked around using `SideSheet` (modal variant)
+  in `src/features/notifications/notification-bell.tsx`. The SideSheet is triggered via
+  `SheetTrigger` and renders as an edge-docked modal panel (not a true anchored popover). The
+  standard variant is used in the workspace shell for the side panel navigation.
