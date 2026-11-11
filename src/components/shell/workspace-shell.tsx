@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useId } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode, useId } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -9,15 +9,25 @@ import {
   NavigationBarItem,
   NavigationRail,
   NavigationRailItem,
+  SideSheet,
 } from "@windmorph/react";
 import { SkipLink } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
-import { RailPanel, type RailPanelGroup, useRailPanel } from "@/components/ui/rail-panel";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
 import { type Destination, destinationsFor, isCurrent, subPagesFor } from "./destinations";
 
 /** Settings, Planning, or a page group of its own such as Account. */
 type PanelKey = string;
+
+type RailPanelLink = { href: string; label: string };
+
+type RailPanelGroup = {
+  /** Shown as the panel's small heading. */
+  heading: string;
+  /** The panel's accessible name. */
+  label: string;
+  links: RailPanelLink[];
+};
 
 /** Up to two letters from the workspace's name, for its tile. */
 function initials(name: string): string {
@@ -25,6 +35,79 @@ function initials(name: string): string {
   return (
     words.length > 1 ? `${words[0]![0]}${words[1]![0]}` : (words[0] ?? "").slice(0, 2)
   ).toUpperCase();
+}
+
+/**
+ * Hover intent: a short open delay so a pointer crossing the rail doesn't flash other groups,
+ * and a longer close delay to cross the gap into the panel. Focus and clicks are immediate.
+ */
+const OPEN_DELAY = 60;
+const CLOSE_DELAY = 250;
+
+/**
+ * The open group of a rail with secondary panels: the current page's group (pinned), or one
+ * previewed by hover or focus. Returns handlers for each trigger and for the panel.
+ */
+function useRailPanel<Id extends string>(current: Id | null, pathname: string) {
+  const [preview, setPreview] = useState<Id | null>(null);
+  const openTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const clear = useCallback(() => {
+    clearTimeout(openTimer.current);
+    clearTimeout(closeTimer.current);
+  }, []);
+  useEffect(() => clear, [clear]);
+
+  // A new page drops any preview, showing its own group.
+  const [seenPath, setSeenPath] = useState(pathname);
+  if (seenPath !== pathname) {
+    setSeenPath(pathname);
+    setPreview(null);
+  }
+
+  // Escape closes a preview (the current page's group stays).
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPreview(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [preview]);
+
+  const open = preview ?? current;
+  return {
+    /** The group shown in the panel, or null when it is closed. */
+    open,
+    /** Whether the panel sits in the layout (the current page's group) rather than over it. */
+    pinned: current !== null,
+    trigger: (id: Id) => ({
+      onPointerEnter: () => {
+        clear();
+        openTimer.current = setTimeout(() => setPreview(id), OPEN_DELAY);
+      },
+      onPointerLeave: () => {
+        clear();
+        closeTimer.current = setTimeout(() => setPreview(null), CLOSE_DELAY);
+      },
+      onFocus: () => {
+        clear();
+        setPreview(id);
+      },
+    }),
+    panel: {
+      onPointerEnter: () => clearTimeout(closeTimer.current),
+      onPointerLeave: () => {
+        clear();
+        closeTimer.current = setTimeout(() => setPreview(null), CLOSE_DELAY);
+      },
+    },
+    close: () => {
+      clear();
+      setPreview(null);
+    },
+  };
 }
 
 /**
@@ -136,15 +219,45 @@ export function WorkspaceShell({
               );
             })}
         </NavigationRail>
-        <RailPanel
-          id={panelId}
-          groupKey={panel.open}
-          group={openGroup}
-          open={openGroup !== null}
-          pinned={panel.pinned}
-          pathname={pathname}
-          {...panel.panel}
-        />
+        {openGroup && (
+          <SideSheet
+            id={panelId}
+            variant="standard"
+            open={true}
+            title={openGroup.heading}
+            classNames={{
+              // Standard variant sits in-layout beside the rail - match the RailPanel styling
+              frame: "relative h-full",
+              panel:
+                "h-full rounded-e-corner-large shadow-[2px_0_8px_0_color-mix(in_srgb,var(--md-sys-color-shadow)_20%,transparent)]",
+            }}
+            className="w-68"
+          >
+            <nav
+              aria-label={openGroup.label}
+              className="flex h-full w-68 flex-col overflow-x-hidden overflow-y-auto py-3"
+              onPointerEnter={panel.panel.onPointerEnter}
+              onPointerLeave={panel.panel.onPointerLeave}
+            >
+              <ul className="flex flex-col gap-0.5 px-2">
+                {openGroup.links.map((link) => {
+                  const current = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={current ? "page" : undefined}
+                        className="text-body-medium text-on-surface-variant hover:bg-on-surface/8 focus-visible:outline-secondary aria-[current=page]:bg-secondary-container aria-[current=page]:text-on-secondary-container rounded-corner-full flex items-center px-3 py-2.5 outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
+                      >
+                        <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </SideSheet>
+        )}
       </div>
 
       <main

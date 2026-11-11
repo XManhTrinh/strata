@@ -8,14 +8,14 @@ import {
   BadgedBox,
   Button,
   ButtonGroup,
-  Dialog,
-  DialogTitle,
   IconButton,
   List,
   ListItem,
   Menu,
   MenuItem,
   MenuTrigger,
+  SheetTrigger,
+  SideSheet,
 } from "@windmorph/react";
 import { EmptyState } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
@@ -151,135 +151,132 @@ export function NotificationBell() {
 
   return (
     <>
-      <IconButton
-        variant="standard"
-        aria-label={unread > 0 ? t("labelUnread", { count: unread }) : t("label")}
-        icon={
-          unread > 0 ? <BadgedBox badge={<Badge max={99}>{unread}</Badge>}>{bell}</BadgedBox> : bell
-        }
-        onPress={() => setOpen(true)}
-      />
-      <Dialog
-        role="dialog"
-        open={open}
-        onOpenChange={setOpen}
-        fullScreen="compact"
-        // Under the bell, over a page that stays visible.
-        classNames={{
-          scrim: "bg-transparent",
-          positioner: "medium:items-start medium:justify-end medium:pt-16 medium:pe-4",
-          panel: "medium:w-[400px] medium:max-h-[min(70dvh,640px)] gap-2 p-0",
-        }}
-      >
-        <div className="flex items-center gap-1 ps-6 pe-2 pt-3">
-          <DialogTitle className="flex-1 p-0">{t("title")}</DialogTitle>
-          <MenuTrigger>
-            <IconButton
-              variant="standard"
-              aria-label={t("more")}
-              icon={<Icon name="more_vert" />}
-            />
-            <Menu
-              placement="bottom-end"
-              aria-label={t("more")}
-              onAction={(key) => {
-                if (key === "read") void markAllRead();
-                if (key === "settings") {
-                  setOpen(false);
-                  router.push("/account/notifications");
-                }
-              }}
-            >
-              <MenuItem key="read" leadingIcon={<Icon name="done_all" />}>
-                {t("markAllRead")}
-              </MenuItem>
-              <MenuItem key="settings" leadingIcon={<Icon name="settings" />}>
-                {t("settings")}
-              </MenuItem>
-            </Menu>
-          </MenuTrigger>
-          <IconButton
-            variant="standard"
-            aria-label={t("close")}
-            icon={<Icon name="close" />}
-            onPress={() => setOpen(false)}
-          />
-        </div>
-        <div className="px-6">
-          <ButtonGroup
-            variant="connected"
-            selectionMode="single"
-            className="w-auto"
-            aria-label={t("filter")}
-            selectedKeys={[filter]}
-            onSelectionChange={(keys) => {
-              const [key] = keys;
-              if (key) setFilter(key as "all" | "unread");
-            }}
-          >
-            <Button toggle value="all">
-              {t("all")}
-            </Button>
-            <Button toggle value="unread">
-              {unread > 0 ? t("unreadCount", { count: unread }) : t("unread")}
-            </Button>
-          </ButtonGroup>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto pb-2">
-          {groups.length === 0 ? (
-            <EmptyState
-              titleAs="h3"
-              icon={<Icon name="notifications_off" />}
-              title={t(filter === "unread" ? "emptyUnread" : "empty")}
-            />
-          ) : (
-            groups.map(({ group, entries }) => (
-              <section key={group} aria-labelledby={`notifications-${group}`}>
-                <h3
-                  id={`notifications-${group}`}
-                  className="text-title-small text-on-surface-variant px-6 pt-3 pb-1"
-                >
-                  {t(`groups.${group}`)}
-                </h3>
-                <List
-                  aria-label={t(`groups.${group}`)}
-                  onAction={(key) => {
-                    const n = entries.find((x) => x.id === key);
-                    if (n) openItem(n);
-                  }}
-                >
-                  {entries.map((n) => (
-                    <ListItem
-                      key={n.id}
-                      textValue={text(n)}
-                      leading={
-                        <span className="bg-secondary-container text-on-secondary-container flex size-10 items-center justify-center rounded-full">
-                          <Icon name={notificationIcon(n.kind)} size={20} />
-                        </span>
-                      }
-                      trailing={
-                        n.read_at ? undefined : (
-                          <span className="bg-primary block size-2.5 rounded-full">
-                            <span className="sr-only">{t("unreadMark")}</span>
-                          </span>
-                        )
-                      }
-                      supportingText={format.relativeTime(new Date(n.created_at), now)}
+      <SheetTrigger>
+        <IconButton
+          variant="standard"
+          aria-label={unread > 0 ? t("labelUnread", { count: unread }) : t("label")}
+          icon={
+            unread > 0 ? (
+              <BadgedBox badge={<Badge max={99}>{unread}</Badge>}>{bell}</BadgedBox>
+            ) : (
+              bell
+            )
+          }
+        />
+        <SideSheet
+          variant="modal"
+          open={open}
+          onOpenChange={setOpen}
+          title={t("title")}
+          classNames={{
+            panel: "medium:w-[400px] medium:max-h-[min(70dvh,640px)] p-0",
+          }}
+          actions={
+            <MenuTrigger>
+              <IconButton
+                variant="standard"
+                aria-label={t("more")}
+                icon={<Icon name="more_vert" />}
+              />
+              <Menu
+                placement="bottom-end"
+                aria-label={t("more")}
+                onAction={(key) => {
+                  if (key === "read") void markAllRead();
+                  if (key === "settings") {
+                    setOpen(false);
+                    router.push("/account/notifications");
+                  }
+                }}
+              >
+                <MenuItem key="read" leadingIcon={<Icon name="done_all" />}>
+                  {t("markAllRead")}
+                </MenuItem>
+                <MenuItem key="settings" leadingIcon={<Icon name="settings" />}>
+                  {t("settings")}
+                </MenuItem>
+              </Menu>
+            </MenuTrigger>
+          }
+        >
+          <div className="flex flex-col min-h-0">
+            <div className="px-6 pt-3 pb-4">
+              <ButtonGroup
+                variant="connected"
+                selectionMode="single"
+                className="w-auto"
+                aria-label={t("filter")}
+                selectedKeys={[filter]}
+                onSelectionChange={(keys) => {
+                  const [key] = keys;
+                  if (key) setFilter(key as "all" | "unread");
+                }}
+              >
+                <Button toggle value="all">
+                  {t("all")}
+                </Button>
+                <Button toggle value="unread">
+                  {unread > 0 ? t("unreadCount", { count: unread }) : t("unread")}
+                </Button>
+              </ButtonGroup>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+              {groups.length === 0 ? (
+                <EmptyState
+                  titleAs="h3"
+                  icon={<Icon name="notifications_off" />}
+                  title={t(filter === "unread" ? "emptyUnread" : "empty")}
+                />
+              ) : (
+                groups.map(({ group, entries }) => (
+                  <section key={group} aria-labelledby={`notifications-${group}`}>
+                    <h3
+                      id={`notifications-${group}`}
+                      className="text-title-small text-on-surface-variant px-6 pt-3 pb-1"
                     >
-                      <span className={n.read_at ? undefined : "font-medium"}>{text(n)}</span>
-                    </ListItem>
-                  ))}
-                </List>
-              </section>
-            ))
-          )}
-          {more && filter === "all" && (
-            <Button variant="text" className="mx-4 mt-1" onPress={() => void showMore()}>
-              {t("showMore")}
-            </Button>
-          )}
-        </div>
-      </Dialog>
+                      {t(`groups.${group}`)}
+                    </h3>
+                    <List
+                      aria-label={t(`groups.${group}`)}
+                      onAction={(key) => {
+                        const n = entries.find((x) => x.id === key);
+                        if (n) openItem(n);
+                      }}
+                    >
+                      {entries.map((n) => (
+                        <ListItem
+                          key={n.id}
+                          textValue={text(n)}
+                          leading={
+                            <span className="bg-secondary-container text-on-secondary-container flex size-10 items-center justify-center rounded-full">
+                              <Icon name={notificationIcon(n.kind)} size={20} />
+                            </span>
+                          }
+                          trailing={
+                            n.read_at ? undefined : (
+                              <span className="bg-primary block size-2.5 rounded-full">
+                                <span className="sr-only">{t("unreadMark")}</span>
+                              </span>
+                            )
+                          }
+                          supportingText={format.relativeTime(new Date(n.created_at), now)}
+                        >
+                          <span className={n.read_at ? undefined : "font-medium"}>{text(n)}</span>
+                        </ListItem>
+                      ))}
+                    </List>
+                  </section>
+                ))
+              )}
+              {more && filter === "all" && (
+                <Button variant="text" className="mx-4 mt-1" onPress={() => void showMore()}>
+                  {t("showMore")}
+                </Button>
+              )}
+            </div>
+          </div>
+        </SideSheet>
+      </SheetTrigger>
     </>
   );
 }

@@ -18,17 +18,6 @@ says what's wrong, where Strata works around it, and what to remove once Windmor
   `role-units-dialog`, `unit-dialog`, `options-dialog`). Remove them once fixed.
 - **Found:** 2026-11-02 (Change pay).
 
-### No anchored popover surface
-
-- **What:** there's no popover for a panel anchored to a button (a notifications list, an account
-  card). Only `Menu`, `Select`'s option popover, tooltips, dialogs and sheets.
-- **Fix in Windmorph:** a `Popover` (anchored to its trigger, placement like `Menu`, focus
-  managed, light dismiss), full screen on compact windows.
-- **Strata's workaround:** the notifications dropdown is a `Dialog` with a transparent scrim and
-  its positioner pushed to the top end (`src/features/notifications/notification-bell.tsx`). It
-  doesn't follow the bell if the header moves. Switch to `Popover` once there is one.
-- **Found:** 2026-11-02.
-
 ### A connected button group always fills its container
 
 - **What:** `ButtonGroup variant="connected"` is `w-full` with equal columns, which suits a group
@@ -55,4 +44,7 @@ says what's wrong, where Strata works around it, and what to remove once Windmor
 
 ## Fixed
 
-None yet.
+- **No anchored popover surface (2026-11-11):** Replaced with `SideSheet` (modal variant) in
+  `src/features/notifications/notification-bell.tsx`. The SideSheet is anchored via
+  `SheetTrigger` and provides the correct positioned surface for notifications. The standard
+  variant is used in the workspace shell for the side panel navigation.
