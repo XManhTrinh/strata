@@ -166,6 +166,7 @@ export function NotificationBell() {
         <SideSheet
           variant="modal"
           title={t("title")}
+          labels={{ close: t("close") }}
           classNames={{
             // Full-screen on compact (phones), 400px on medium+
             panel:
