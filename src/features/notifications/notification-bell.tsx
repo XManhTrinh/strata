@@ -168,9 +168,9 @@ export function NotificationBell() {
           title={t("title")}
           labels={{ close: t("close") }}
           classNames={{
-            // Full-screen on compact (phones), 400px on medium+
+            // Full-screen on phones; a 400px card docked to the end edge on medium+.
             panel:
-              "w-full compact:max-w-none compact:h-dvh compact:top-0 compact:translate-y-0 rounded-none medium:rounded-s-medium medium:w-[400px] medium:h-auto medium:max-h-[min(70dvh,640px)] medium:top-auto medium:translate-y-auto p-0",
+              "w-full h-dvh rounded-none p-0 medium:w-[400px] medium:h-auto medium:max-h-[min(70dvh,640px)] medium:rounded-s-medium",
           }}
           actions={
             <MenuTrigger>

@@ -10,8 +10,10 @@ import {
   NavigationRail,
   NavigationRailItem,
   SideSheet,
-  useNavigationRail,
 } from "@windmorph/react";
+// Note: Windmorph's useNavigationRail manages a single expand/collapse rail; Strata's rail stays
+// collapsed and drives a separate secondary panel (useRailPanel) with hover/focus preview and a
+// pinned current-page group, which that hook doesn't model. The custom hook is kept deliberately.
 import { SkipLink } from "@windmorph/react-pro";
 import { Icon } from "@/components/ui/icon";
 import { useWorkspace } from "@/features/workspaces/workspace-context";
@@ -155,8 +157,10 @@ export function WorkspaceShell({
             close: "hidden",
             // Standard variant sits in-layout when pinned, overlays when previewed
             frame: isPinned ? "relative h-full" : "absolute start-full top-0 h-full z-50",
+            // Match the nav's width so rows don't clip (the default panel is narrower).
             panel:
-              "h-full rounded-e-corner-large shadow-[2px_0_8px_0_color-mix(in_srgb,var(--md-sys-color-shadow)_20%,transparent)]",
+              "w-68 h-full rounded-e-corner-large shadow-[2px_0_8px_0_color-mix(in_srgb,var(--md-sys-color-shadow)_20%,transparent)]",
+            content: "p-0",
           }}
           // Pinned: reserve 272px in flow; preview: collapse width so frame overlays
           className={isPinned ? "w-68" : "w-0"}
@@ -167,7 +171,7 @@ export function WorkspaceShell({
           {openGroup && (
             <nav
               aria-label={openGroup.label}
-              className="flex h-full w-68 flex-col overflow-x-hidden overflow-y-auto py-3"
+              className="flex h-full w-full flex-col overflow-x-hidden overflow-y-auto py-3"
             >
               <ul className="flex flex-col gap-0.5 px-2">
                 {openGroup.links.map((link) => {

@@ -35,6 +35,19 @@ says what's wrong, where Strata works around it, and what to remove once Windmor
 - **Strata's workaround:** none; the header uses 40px (`md`).
 - **Found:** 2026-11-02.
 
+### No anchored popover surface
+
+- **What:** there's still no popover anchored to a trigger button (a notifications list, an
+  account card). `SideSheet` (0.2.x) is an edge-docked sheet, not a popover anchored under its
+  trigger.
+- **Fix in Windmorph:** a `Popover` anchored to its trigger (placement like `Menu`, focus managed,
+  light dismiss), full screen on compact windows.
+- **Strata's workaround:** the notifications bell uses a modal `SideSheet` via `SheetTrigger`
+  (`src/features/notifications/notification-bell.tsx`) — full screen on phones, a ~400px card
+  docked to the end edge on medium+. It docks to the window edge rather than anchoring under the
+  bell. Switch to `Popover` once one exists.
+- **Found:** 2026-11-02; reworked onto `SideSheet` 2026-11-11.
+
 ## Testing notes (not bugs)
 
 - `Checkbox` draws its box over the native input, so Playwright's click on the input is
@@ -44,7 +57,4 @@ says what's wrong, where Strata works around it, and what to remove once Windmor
 
 ## Fixed
 
-- **No anchored popover surface (2026-11-11):** Worked around using `SideSheet` (modal variant)
-  in `src/features/notifications/notification-bell.tsx`. The SideSheet is triggered via
-  `SheetTrigger` and renders as an edge-docked modal panel (not a true anchored popover). The
-  standard variant is used in the workspace shell for the side panel navigation.
+None yet.
