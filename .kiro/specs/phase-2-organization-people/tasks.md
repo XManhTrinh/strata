@@ -56,6 +56,9 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
           employment type, leavers, sort, paging); URL-kept state; phone list with filters
     - [x] Saved views (personal and shared, a default each, URL-kept; "edited" until saved)
     - [x] Export (CSV of the current view and columns, within people.export reach, streamed)
+          — NB: only CSV. Requirement 11 ("every table, CSV or Excel": people, leave, capacity,
+          rate cards) is NOT fully met — no Excel anywhere, and leave/rate-card have no export.
+          Open product decision: `.kiro/steering/status.md` "Open decision ... exports".
   - [x] 7.2 Profile: details, current job, history timeline, future-dated changes, pay (with
         permission), custom fields
   - [x] 7.3 Add person, edit, set an end date
@@ -72,8 +75,13 @@ schema changes are recorded in `docs/product-decisions.md` (Structure, History).
   - [x] 9.2 Preview with counts and errors; apply with progress; resume an unfinished import
 
 - [x] 10. Load and end to end
-  - [x] 10.1 100k-member seed generator and load checks for the directory, reach and import
-    - [x] `pnpm db:load` (seed and checks); every check within target (results in the design)
+  - [~] 10.1 100k-member seed generator and load checks for the directory, reach and import
+    - [x] `pnpm db:load` (seed and checks); all 34 checks pass **locally** with margin
+          (measured 2026-11-05 on a 14-CPU Mac)
     - [x] Nightly in CI (`.github/workflows/nightly.yml`; a check over its target fails the run)
+    - [ ] **Checks do not pass on the CI runner** (nightly red since 2026-10-31): the targets are
+          too tight for GitHub's shared 2–4 vCPU runner, not a slow query. Open decision (product
+          owner): per-environment targets in `supabase/load/checks.sql` or a larger runner. See
+          `.kiro/steering/status.md` "Known loose ends".
   - [x] 10.2 Playwright: structure, people, profile history, org chart, import and re-import, at
         three widths

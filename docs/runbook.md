@@ -21,6 +21,18 @@ staging until a production project exists.
   first.
 - Migrations are forward only. To undo one, write a new migration.
 
+### Before the first production deploy — revert the staging email-signup loosening
+
+Staging allows email + password sign-up with Supabase Auth email confirmation **turned off**, via
+`NEXT_PUBLIC_EMAIL_SIGNUP=on` in Vercel (decision 15, staging exception). Addresses are therefore
+unverified. Before production goes live:
+
+1. Turn email **confirmation back on** in the production Supabase Auth settings.
+2. Do **not** set `NEXT_PUBLIC_EMAIL_SIGNUP` in the production Vercel project (leave it unset) —
+   with real email (Resend) configured, email sign-up returns through the normal
+   `emailConfigured()` path with no flag.
+3. Confirm password reset works (it needs the email provider).
+
 ## Configuration
 
 App (Vercel environment variables):
