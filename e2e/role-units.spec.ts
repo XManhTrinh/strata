@@ -17,7 +17,7 @@ test("a role on specific units gets its units when assigned", async ({ page }, t
   await page.getByRole("dialog", { name: "Add level" }).getByLabel("Name").fill("Team");
   await page
     .getByRole("dialog", { name: "Add level" })
-    .getByRole("button", { name: "Add" })
+    .getByRole("button", { name: "Add", exact: true })
     .click();
   await expect(page.getByText("Level added")).toBeVisible();
   await page.getByRole("button", { name: `Actions for Acme ${id}` }).click();
@@ -26,7 +26,9 @@ test("a role on specific units gets its units when assigned", async ({ page }, t
   await unit.getByLabel("Name").fill("Squad B");
   await unit.getByRole("button", { name: /Level$/ }).click();
   await page.getByRole("option", { name: "Team" }).click();
-  await unit.getByRole("button", { name: "Add" }).click();
+  // exact: the submit button is exactly "Add"; the level Select trigger's name can contain the
+  // workspace name (e.g. a random id with "add" in it), so a loose match would be ambiguous.
+  await unit.getByRole("button", { name: "Add", exact: true }).click();
   await expect(page.getByText("Squad B added")).toBeVisible();
 
   // A role that views people in specific units.
@@ -46,7 +48,7 @@ test("a role on specific units gets its units when assigned", async ({ page }, t
   await page.getByRole("dialog", { name: "Add person" }).getByLabel("Full name").fill("Bo Ionescu");
   await page
     .getByRole("dialog", { name: "Add person" })
-    .getByRole("button", { name: "Add" })
+    .getByRole("button", { name: "Add", exact: true })
     .click();
   await expect(page.getByRole("heading", { name: "Bo Ionescu", level: 1 })).toBeVisible();
 
