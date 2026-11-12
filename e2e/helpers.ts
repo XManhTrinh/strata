@@ -44,10 +44,24 @@ export async function completeSignUp(page: Page, fullName: string, email: string
 }
 
 /** Creates a workspace from the onboarding form and waits for its home page. */
-export async function createWorkspace(page: Page, template: string, name: string): Promise<void> {
+export async function createWorkspace(
+  page: Page,
+  template: string,
+  name: string,
+  options?: { country?: string }
+): Promise<void> {
   await expect(page.getByRole("heading", { name: "Create a workspace" })).toBeVisible();
   await page.getByText(template, { exact: true }).click();
   await page.getByLabel("Workspace name").fill(name);
+
+  // Pin the country to make the holiday calendar deterministic in tests.
+  // Defaults to Ireland (few holidays) to avoid non-deterministic timeouts
+  // when tests depend on specific holiday list positions.
+  const country = options?.country ?? "Ireland";
+  if (country) {
+    await pickOption(page, "Country", country);
+  }
+
   await page.getByRole("button", { name: "Create workspace" }).click();
   await expect(page.getByRole("heading", { name: /^Welcome, / })).toBeVisible();
 }
